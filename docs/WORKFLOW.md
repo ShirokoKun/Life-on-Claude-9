@@ -85,7 +85,7 @@ Ivan's material: envMapIntensity 0.15, sheen 0.15, albedo × 0.84, double-sided.
 
 ### 2.5 Life (always on)
 
-- **Ivan:** typing bursts, breathing (0.26 Hz), body sway, reading saccades, shoulder rhythm, beat-timed lean, glance and nod.
+- **Ivan:** the per-frame acting system (section 3.4): posture, gaze, real keystrokes, breathing.
 - **Room:** string-light shimmer, monitor flicker, LED blinks, lamp hum, drifting dust (shown as bokeh when out of focus).
 
 ## 3. Step by step
@@ -136,9 +136,50 @@ python -I blender/scenes/export_engine.py engine/assets --samples 40          # 
    - Downsizes 8K maps to 4K.
    - Rigid head weights (so the mouth never tears).
    - Fits the glasses from the face profile.
-   - Seats him and keys the 32 s performance (`BEATS`).
+   - Seats him and solves the performance frame by frame (`blender/characters/acting.py`, below).
 
-### 3.5 Engine and preview
+4. **Acting** (`acting.py`, one script per scene in `SCENES`, written in film seconds):
+
+   | Channel | What it drives |
+   |---|---|
+   | `hunch` | Posture curve: 0 upright, 1 deep hunch, negative leaning back. Forward only, never sideways |
+   | `typing` | Windows `(start, end, keys/s)`; phrases of 6–18 keys with pauses; thumbs on space |
+   | `gaze` | `(start, end, target, mode)`: screen, chat, monitor, away; `read` steps line by line |
+   | `hands_rest`, `hands_behind` | Hands lifted off the keys; the arc up past the ears behind his head |
+   | `rub`, `mouse`, `clicks` | Eye rub under the glasses; hand on the mouse; clicks on the index finger |
+   | `exhale`, `nod` | Shoulders drop; a small nod |
+
+   - Hands are solved by two-bone IK.
+   - Fingers flex on axes measured from the rig in bone space, so they bend correctly in any pose.
+   - `--events file.json` writes the keystroke times; the laptop screen types in sync with them.
+   - `--stand x,y` makes a standing performance instead (scene 2's doorway).
+
+   ```bash
+   python -I blender/characters/prep_tripo.py SRC.glb engine/assets/ivan.glb --events engine/assets/acting.json
+   python -I blender/characters/prep_tripo.py SRC.glb engine/scenes/s02/ivan.glb --scene s02 --seconds 74 --events engine/scenes/s02/acting.json
+   python -I blender/characters/prep_tripo.py SRC.glb engine/scenes/s02/ivan_stand.glb --stand 4.75,5.05 --seconds 10
+   ```
+
+### 3.5 Scenes, screens and times of day
+
+- **Scenes:**
+  - The intro is `engine/src/shots.js`.
+  - Every later scene is a module `engine/scenes/<id>/scene.js`, opened with `?scene=<id>`.
+  - A scene exports its shots and captions, and optionally: `light(t)`, `SCREENS`, `props(t)`, `CAST`, `ivanVisible`, `atmoTime`, `exposureBoost`.
+  - The engine core (`engine/src`) is shared. So the look, lens, materials and rig stay locked for every scene.
+- **Live screens** (`engine/src/screens.js`):
+  - The laptop and monitor are canvas textures drawn every frame, deterministic in time.
+  - A focus target can be a screen pixel (`'lap:x,y'`, `'mon:x,y'`), which is how the reading shot pulls focus line by line.
+- **Times of day** (`engine/src/timeofday.js`):
+  - Each set is a Cycles lightmap bake on the same geometry (`assets/lighting/<set>/`; 3am is `assets/lightmaps/`) plus a live rig (night lights scaled, a sun with shadows, a sky fill).
+  - Blends mix the lightmaps on the GPU and interpolate exposure in stops.
+  - Bake a set:
+
+    ```bash
+    python -I blender/scenes/export_engine.py engine/assets/lighting/day --preset day --lm-only --half --samples 40
+    ```
+
+### 3.6 Engine and preview
 
 ```bash
 npm run serve        # http://localhost:8080; Play runs with the voiceover
@@ -152,7 +193,7 @@ URL flags:
 - `?debug=lm`: show only the lightmaps;
 - `?caps=1`: captions.
 
-### 3.6 Check before rendering
+### 3.7 Check before rendering
 
 ```bash
 node tools/capture.mjs --out /tmp/check --at 2.5,9.4,13.8,19,28 --w 960 --h 540
@@ -162,18 +203,18 @@ python3 tools/frame_design.py /tmp/check/*.png
 - Parity against Cycles: `tools/cycles_ref.py room_lit.blend ivan.blend out --shots S1,S3`.
 - Read every contact sheet against the references before a full render.
 
-### 3.7 Render and encode
+### 3.8 Render and encode
 
 | Machine | Command | Notes |
 |---|---|---|
 | With a GPU | `npm run render` | Writes `renders/claude_nine_intro_1920x1080.mp4` plus a `_voiceover` version; real-time, minutes |
-| No GPU (cloud) | `node tools/capture.mjs --out renders/final_1080 --frames 0-383 --w 1920 --h 1080 --skip-existing`, with a second worker on 384–767 | ~11.5 s/frame on 4 CPU cores. More workers don't add throughput; they only hide load time. Restart with `--skip-existing` after a 2-hour job cap, and delete the last frame first |
+| No GPU (cloud) | `tools/render_loop.sh renders/v2_1080 0 443 --w 1920 --h 1080`, with a second loop on 444–887 | ~11.5 s/frame on 4 CPU cores. More workers don't add throughput. The loop restarts the capture until every frame exists and drops frames cut off mid-write. Don't run Cycles beside it: both slow to a crawl |
 
 Encode:
 
 ```bash
 ffmpeg -framerate 24 -i renders/final_1080/f_%05d.png -c:v libx264 -crf 16 -preset slow -pix_fmt yuv420p -movflags +faststart out.mp4
-ffmpeg -i out.mp4 -itsoffset 1.5 -i engine/assets/voiceover.wav -map 0:v -map 1:a -c:v copy -c:a aac -b:a 256k -af apad -shortest out_vo.mp4
+ffmpeg -i out.mp4 -itsoffset 6.0 -i engine/assets/voiceover.wav -map 0:v -map 1:a -c:v copy -c:a aac -b:a 256k -af apad -shortest out_vo.mp4
 ```
 
 ## 4. Lessons (the expensive ones)
@@ -191,15 +232,20 @@ ffmpeg -i out.mp4 -itsoffset 1.5 -i engine/assets/voiceover.wav -map 0:v -map 1:
 7. **Depth of field is the expensive pass.** Do it at half resolution and recombine.
 8. **Measure.** Every round: metrics plus a contact sheet against the references, then fix the largest gap.
 9. **Background jobs here stop at 2 hours.** Make bakes and renders resumable.
+10. **Parents baked away.** Joining meshes into bake groups orphans their children: the monitor's screen sat at the world origin for the whole first film. Check every emissive at its real position.
+11. **One geometry for every time of day.** Any mesh that exists in one preset but not another changes the lightmap UV layout. The lamp bulb now exists in every preset, and the clock is baked at 3:04.
+12. **`pgrep -f` matches its own shell.** Use a pattern that can't match itself (`capture[.]mjs`) or a pid.
 
 ## 5. File map
 
 ```
 blender/  lib/ (geo, materials, lighting, lightmap, bake, props_*), scenes/ (set_intro, export_engine, apartment_shell),
           characters/ (prep_tripo, ivan_pose), assets/characters/ (source GLBs)
-engine/   index.html, src/ (main, materials, lights, atmosphere, post, shots), assets/ (room.glb, ivan.glb,
-          lightmaps/*.exr, lights.json, tex/<set>/, voiceover.wav), vendor/three (r170)
-tools/    capture.mjs, render_mp4.mjs, serve.mjs, cycles_ref.py, look_metrics.py, frame_design.py
+engine/   index.html, src/ (main, materials, lights, atmosphere, post, shots, screens, timeofday),
+          scenes/<id>/ (scene.js, performances), assets/ (room.glb, ivan.glb, acting.json, lightmaps/*.exr,
+          lighting/<set>/, lights.json, tex/<set>/, voiceover.wav), vendor/three (r170)
+scenes/   <nn-name>/ storyboards and scene notes
+tools/    capture.mjs, render_loop.sh, render_mp4.mjs, serve.mjs, dump_screens.mjs, cycles_ref.py, look_metrics.py, frame_design.py
 docs/     this file + the documents listed at the top
 deliver/  films, contact sheets, the Blender scene zip, backups
 ```
