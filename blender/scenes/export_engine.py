@@ -41,7 +41,7 @@ def light_record(o):
 
 
 if __name__ == "__main__":
-    args = sys.argv[1:]
+    args = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv[1:]   # bpy module, or blender -b -P ... --
     out = Path(args[0]).resolve()
     out.mkdir(parents=True, exist_ok=True)
     small = "--small" in args

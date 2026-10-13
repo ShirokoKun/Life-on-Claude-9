@@ -1,9 +1,11 @@
 {
-  "name": "claude-nine-intro",
+  "name": "claude-nine",
   "private": true,
   "type": "module",
-  "description": "Life on Claude Nine - intro scene: a cinematic three.js film engine (Blender-baked light + PBR + lens).",
+  "description": "Life on Claude Nine: a cinematic three.js film engine (Blender-baked light, PBR, lens) and the Studio that runs it.",
   "scripts": {
+    "studio": "node studio/setup.mjs && node studio/server.mjs --open",
+    "setup": "node studio/setup.mjs",
     "serve": "node tools/serve.mjs",
     "render": "node tools/render_mp4.mjs",
     "render:preview": "node tools/render_mp4.mjs --w 1280 --h 720",
@@ -14,5 +16,8 @@
   },
   "optionalDependencies": {
     "ffmpeg-static": "^5.2.0"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

@@ -8,6 +8,7 @@ import { C, MONO, SANS, rr, wrap, drawCode, smooth, keysIn, drawMonitor as pipel
 export const FPS = 24;
 export const DURATION = 74;
 export const VO_OFFSET = 0.0;
+export const VOICEOVER = null;            // scenes/s02/voiceover.wav when it arrives
 export const IVAN = 'scenes/s02/ivan.glb';
 export const ACTING = 'scenes/s02/acting.json';
 export const CAST = [{ url: 'scenes/s02/ivan_stand.glb', t0: 65, t1: 74 }];   // the doorway

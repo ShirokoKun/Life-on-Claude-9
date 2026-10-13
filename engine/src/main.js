@@ -217,6 +217,7 @@ function pick(what) {
 // ---------------------------------------------------------------- time
 let tNow = 0, playing = false, last = performance.now();
 const audio = $('vo');
+if (audio && SC.VOICEOVER !== undefined) { if (SC.VOICEOVER) audio.src = SC.VOICEOVER; else audio.removeAttribute('src'); }   // a scene's own voiceover
 function setTime(t) {
   tNow = Math.max(0, Math.min(DURATION - 1 / FPS, t));
   if (cast.length || SC.ivanVisible) {
@@ -290,7 +291,7 @@ function render() { if (controls.enabled) controls.update(); post.composer.rende
 window.renderFrame = (n) => { setTime(n / FPS); render(); return true; };
 
 function syncAudio() {
-  if (!audio) return;
+  if (!audio || !audio.getAttribute('src')) return;
   const at = tNow - VO_OFFSET;
   if (!playing || at < 0 || at > audio.duration) { if (!audio.paused) audio.pause(); return; }
   if (Math.abs(audio.currentTime - at) > 0.08) audio.currentTime = at;
@@ -315,6 +316,13 @@ $('caps').addEventListener('change', () => setTime(tNow));
 ['exp', 'lampK', 'scrK'].forEach((id) => $(id).addEventListener('input', () => {
   L.apply({ lamp: +$('lampK').value, screen: +$('scrK').value }); atmo.setLevels(+$('lampK').value); setTime(tNow);
 }));
+// Studio (studio/): the player embedded in the Studio is driven from the parent page through this
+window.studio = {
+  seek(t) { exitFree(); setTime(t); syncAudio(); },
+  play(on = !playing) { if (on !== playing) $('play').click(); },
+  state: () => ({ t: tNow, duration: DURATION, fps: FPS, playing, shot: window.__ready ? shotAt(tNow).id : null, scene: SCENE, ready: !!window.__ready }),
+};
+if (Q.get('panel') === '0') document.body.classList.add('collapsed');
 if (Q.get('caps') === '1') $('caps').checked = true;
 if (Q.get('fx') === '0') { $('fx').checked = false; }
 if (RENDER) $('caps').checked = Q.get('caps') === '1';

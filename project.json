@@ -1,0 +1,25 @@
+{
+  "name": "Life on Claude Nine",
+  "fps": 24,
+  "branch": "claude/wonderful-franklin-gzawe0",
+  "scenes": [
+    {
+      "id": "intro",
+      "number": 1,
+      "title": "3 AM",
+      "module": "engine/src/shots.js",
+      "folder": "scenes/01-intro",
+      "voiceover": "engine/assets/voiceover.wav",
+      "stage": "final"
+    },
+    {
+      "id": "s02",
+      "number": 2,
+      "title": "The cheat code",
+      "module": "engine/scenes/s02/scene.js",
+      "folder": "scenes/02-cheat-code",
+      "voiceover": null,
+      "stage": "draft"
+    }
+  ]
+}
