@@ -12,6 +12,7 @@ import * as MAT from './materials.js';
 import { createLights } from './lights.js';
 import { createAtmosphere } from './atmosphere.js';
 import { createPost, LOOK } from './post.js';
+import { createScreens } from './screens.js';
 import { B, FPS, DURATION, VO_OFFSET, SHOTS, CAPTIONS, cameraAt, shotAt } from './shots.js';
 
 const Q = new URLSearchParams(location.search);
@@ -44,7 +45,7 @@ const loadGLB = (url) => new Promise((res, rej) => gltf.load(url, res, undefined
 const loadEXR = (url) => new Promise((res, rej) => new EXRLoader().load(url, res, undefined, rej));
 
 const named = {};
-let mixer, L, atmo, post, exposureEV = 0;
+let mixer, L, atmo, post, screens, exposureEV = 0;
 const ivan = { head: null, root: null };
 
 async function boot() {
@@ -79,6 +80,25 @@ async function boot() {
   });
   await Promise.all(jobs);
   scene.add(room.scene);
+  // The monitor body was baked into a group, so its children (screen, stickies) lost their parent and sit at
+  // the origin. Put them back: monitor body at (7.36, 3.32, 0.88), tilted -4°, turned -28° toward Ivan.
+  const C = new THREE.Matrix4().set(1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1);   // Blender -> three axes
+  const D = Math.PI / 180;
+  const body = new THREE.Matrix4().compose(new THREE.Vector3(7.36, 3.32, 0.88),
+    new THREE.Quaternion().setFromEuler(new THREE.Euler(-4 * D, 0, -28 * D, 'ZYX')), new THREE.Vector3(1, 1, 1));
+  const toWorld = C.clone().multiply(body).multiply(C.clone().invert());
+  for (const [n, o] of Object.entries(named)) {
+    if (!/^Monitor_(Screen|Sticky)/.test(n)) continue;
+    o.updateWorldMatrix(true, false);
+    if (new THREE.Vector3().setFromMatrixPosition(o.matrixWorld).length() < 0.5) o.applyMatrix4(toWorld);
+  }
+  // the two sticky notes on the monitor's corner baked black (the screen was dark in the bake) and cover the dashboard
+  room.scene.traverse((o) => {
+    if (o.isMesh && /^Sticky (Yellow|Pink)$/.test(o.material.name || '')) {
+      const p = new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3());
+      if (p.distanceTo(B(7.17, 3.42, 1.19)) < 0.12) o.visible = false;
+    }
+  });
 
   if (Q.get('ivan') !== '0') {
     status('Seating Ivan...');
@@ -118,11 +138,12 @@ async function boot() {
   await new Promise((res) => { if (THREE.DefaultLoadingManager.isLoading === false) res(); THREE.DefaultLoadingManager.onLoad = res; setTimeout(res, 60000); });
   await captureEnvironment();
   collectLiving();
+  screens = await createScreens(room.scene);
   resize();
   if (!$('fx').checked) post.setEnabled(false);
   setTime(0);
   $('status').hidden = true;
-  window.__scene = scene; window.__THREE = THREE; window.__post = post; window.__L = L; window.__renderer = renderer; window.__ready = true;
+  window.__scene = scene; window.__THREE = THREE; window.__post = post; window.__L = L; window.__renderer = renderer; window.__screens = screens; window.__ready = true;
 }
 
 // Reflections and Ivan's ambient light: the room itself, rendered once into a cube from the desk.
@@ -148,6 +169,8 @@ function pick(what) {
     return ivan.head.getWorldPosition(tmpV.clone()).add(new THREE.Vector3(0, 0.085, -0.085));
   }
   if (what === 'screen') return B(6.98, 3.22, 0.90);
+  const m = /^(lap|mon):(\d+),(\d+)$/.exec(what);              // a pixel on a screen: 'lap:420,300'
+  if (m && screens) { const p = screens.screenPoint(m[1], +m[2], +m[3]); if (p) return p; }
   return B(6.94, 2.72, 1.18);
 }
 
@@ -157,7 +180,7 @@ const audio = $('vo');
 function setTime(t) {
   tNow = Math.max(0, Math.min(DURATION - 1 / FPS, t));
   if (mixer) { mixer.setTime(tNow); scene.updateMatrixWorld(true); }
-  const fixed = Q.get('cam');
+  const fixed = window.__cam || Q.get('cam');            // window.__cam: set from a script for look-dev
   let c;
   if (fixed) {
     const v = fixed.split(',').map(Number);
@@ -180,6 +203,7 @@ function setTime(t) {
   }
   renderer.toneMappingExposure = Math.pow(2, exposureEV + LOOK.exposure + Number($('exp').value));
   life(tNow);
+  if (screens) screens.update(tNow);
   atmo.setTime(tNow);
   const fade = Math.min(1, tNow / 0.8, (DURATION - tNow) / 1.2);
   post.film.uniforms.fade.value = Math.max(0, fade);
@@ -207,6 +231,12 @@ function life(t) {
   for (const s of living.screens) s.m.emissiveIntensity = s.base * (1 + 0.012 * Math.sin(t * 9.0) + 0.008 * Math.sin(t * 23.0));
   for (const l of living.leds) l.m.emissiveIntensity = l.base * ((Math.sin(t * 2.2 + l.ph) > -0.6) ? 1 : 0.15);
   if (L) L.lamp.intensity = L.lampBase * (+$('lampK').value) * (1 + 0.006 * Math.sin(t * 50.0) + 0.01 * Math.sin(t * 0.9));
+  // the moment it sends: the monitor's light on his face lifts and greens a little, then settles
+  if (L && L.monitor) {
+    const k = t > 31.6 ? Math.exp(-(t - 31.6) / 1.6) * Math.min(1, (t - 31.6) / 0.25) : 0;
+    L.monitor.intensity = 1.9 * (+$('scrK').value) * (1 + 0.22 * k);
+    L.monitor.color.setHex(0x86b8ff).lerp(new THREE.Color(0x9ff0c4), 0.45 * k);
+  }
 }
 function render() { if (controls.enabled) controls.update(); post.composer.render(); stats.update(); }
 window.renderFrame = (n) => { setTime(n / FPS); render(); return true; };

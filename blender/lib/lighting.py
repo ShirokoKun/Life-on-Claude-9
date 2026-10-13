@@ -26,6 +26,14 @@ PRESETS = {
     "sunrise": dict(sky_top=(0.12, 0.16, 0.30), sky_bottom=(0.9, 0.5, 0.25), sky_str=2.0,
                     screen=1.2, screen_light=0.8, sodium=0, city_east=0, city_north=0, bath=0, sun=5.5,
                     exposure=0.2, city_windows=0.05, lamp=0, fairy=0.4, haze=0.02),
+    # Scene 2 ("two days earlier" and the montage across days)
+    "day":     dict(sky_top=(0.30, 0.42, 0.70), sky_bottom=(0.62, 0.62, 0.60), sky_str=1.6,
+                    screen=1.6, screen_light=0.9, sodium=0, city_east=0, city_north=0, bath=0, sun=3.2,
+                    sun_az=150, sun_el=38, sun_color=(1.0, 0.93, 0.84), sky_fill=60,
+                    exposure=-0.9, city_windows=0.0, lamp=0, fairy=0.0, haze=0.006),
+    "evening": dict(sky_top=(0.04, 0.06, 0.15), sky_bottom=(0.55, 0.26, 0.12), sky_str=1.2,
+                    screen=3.0, screen_light=4.0, sodium=700, city_east=20, city_north=20, bath=40, sun=0.0,
+                    exposure=1.0, city_windows=0.8, lamp=24, fairy=1.0, haze=0.010),
 }
 
 
@@ -151,10 +159,11 @@ def apply(preset="3am"):
         sun.color = (1.0, 0.62, 0.36)
         o = bpy.data.objects.new("Sun_Sunrise", sun)
         c.objects.link(o)
-        az, el = math.radians(100), math.radians(9)   # from north, clockwise: just south of east
+        sun.color = p.get("sun_color", (1.0, 0.62, 0.36))
+        az, el = math.radians(p.get("sun_az", 100)), math.radians(p.get("sun_el", 9))   # from north, clockwise
         d = Vector((math.sin(az) * math.cos(el), math.cos(az) * math.cos(el), math.sin(el)))
         o.rotation_euler = (-d).to_track_quat("-Z", "Y").to_euler()
-        _light("Sky_Fill_East", "AREA", (10.6, 3.6, 1.6), 40, (0.55, 0.65, 1.0), c, size=(2.6, 1.6), target=(6, 3.6, 1))
+        _light("Sky_Fill_East", "AREA", (10.6, 3.6, 1.6), p.get("sky_fill", 40), (0.55, 0.65, 1.0), c, size=(2.6, 1.6), target=(6, 3.6, 1))
     bpy.context.scene.view_settings.exposure = p["exposure"]
     return p
 

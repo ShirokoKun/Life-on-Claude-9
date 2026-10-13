@@ -350,6 +350,11 @@ if __name__ == "__main__":
         if "--frames" in a:
             frames = int(a[a.index("--frames") + 1])
         actor.perform(frames)
+        if "--events" in a:                        # keystrokes for the engine's live screens
+            import json
+            with open(a[a.index("--events") + 1], "w") as fh:
+                json.dump({"fps": FPS, "keys": [[round(t, 3), s[0], f[0]] for t, s, f in actor.events],
+                           "typing": acting.SCENE["typing"], "gaze": acting.SCENE["gaze"]}, fh)
     if "--blend" in a:
         bpy.ops.wm.save_as_mainfile(filepath=a[a.index("--blend") + 1])
     export(rig, a[1], frames)

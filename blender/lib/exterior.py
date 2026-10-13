@@ -60,13 +60,13 @@ def facade(name, lit_fraction, seed):
 
 def build(preset="3am"):
     c = geo.coll("Exterior")
-    lit = {"3am": 0.18, "4am": 0.10, "sunrise": 0.02}[preset]
+    lit = {"3am": 0.18, "4am": 0.10, "sunrise": 0.02, "day": 0.0, "evening": 0.14}[preset]
     rnd = random.Random(21)
     facades = [facade(f"Facade_{i}", lit * rnd.uniform(0.7, 1.3), i) for i in range(4)]
     asphalt = M.concrete("Asphalt", (0.05, 0.05, 0.052))
     paint_line = M.paint("Lot Line", (0.6, 0.58, 0.5), 0.6)
-    lamp_head = M.emission("Sodium Lamp", (1.0, 0.55, 0.2), 40.0 if preset != "sunrise" else 0.0)
-    beacon = M.emission("Aviation Red", (1.0, 0.05, 0.03), 60.0 if preset != "sunrise" else 0.0)
+    lamp_head = M.emission("Sodium Lamp", (1.0, 0.55, 0.2), 40.0 if preset not in ("sunrise", "day") else 0.0)
+    beacon = M.emission("Aviation Red", (1.0, 0.05, 0.03), 60.0 if preset not in ("sunrise", "day") else 0.0)
     car_paints = [M.paint(f"Car Paint {i}", col, 0.25, coat=0.8) for i, col in
                   enumerate(((0.02, 0.02, 0.025), (0.25, 0.26, 0.28), (0.18, 0.02, 0.02), (0.55, 0.55, 0.56)))]
     tail = M.emission("Tail Light", (1.0, 0.04, 0.02), 4.0)

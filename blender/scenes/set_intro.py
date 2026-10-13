@@ -70,7 +70,7 @@ def add_shot_cams():
 def build(preset="3am", look=True, ivan_blend=None):
     scene, _ = shell.build()
     materials.restyle_shell()
-    hhmm = {"3am": (3, 4), "4am": (4, 12), "sunrise": (6, 14)}[preset]
+    hhmm = {"3am": (3, 4), "4am": (4, 12), "sunrise": (6, 14), "day": (14, 20), "evening": (19, 40)}[preset]
     props_desk.build(hhmm)
     if props_story:
         props_story.build(preset)

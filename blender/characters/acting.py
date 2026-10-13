@@ -287,7 +287,7 @@ class Actor:
                 w = home + drift - UP * 0.003 * max(pr.values(), default=0.0) + UP * 0.025 * rest - FWD * 0.03 * rest
                 if behind > 0:
                     nape = head + Vector((-0.085 * sg, -0.07, 0.07))
-                    mid = (w + nape) / 2 + UP * 0.22 - Vector((0.18 * sg, 0, 0))
+                    mid = (w + nape) / 2 + UP * 0.30 - Vector((0.32 * sg, 0.10, 0))   # wide and high, past the ears: relief, not head-in-hands
                     b = behind
                     w = (1 - b) ** 2 * w + 2 * (1 - b) * b * mid + b * b * nape     # an arc, not a slide
                 self.arm_to(side, w, behind)
