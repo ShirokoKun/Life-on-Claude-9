@@ -83,11 +83,18 @@ async function boot() {
     const iv = await loadGLB('assets/ivan.glb');
     iv.scene.traverse((o) => {
       if (o.isMesh) {
-        const src = o.material;
-        o.material = new THREE.MeshPhysicalMaterial({ map: src.map, normalMap: src.normalMap, roughness: 0.62, metalness: 0,
-          sheen: 0.25, sheenRoughness: 0.7, sheenColor: new THREE.Color(0x9a8c80), specularIntensity: 0.55, side: THREE.DoubleSide, name: 'Ivan' });
-        if (src.normalMap) o.material.normalScale.set(0.8, 0.8);
-        o.castShadow = o.receiveShadow = true; o.frustumCulled = false;
+        const src = o.material, n = src.name || '';
+        if (/Glasses Frame/.test(n)) o.material = new THREE.MeshPhysicalMaterial({ color: 0x0b0908, roughness: 0.28, clearcoat: 0.6, clearcoatRoughness: 0.1, name: n });
+        else if (/Glasses Lens/.test(n)) o.material = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.02, transparent: true, opacity: 0.06,
+          envMapIntensity: 1.6, specularIntensity: 1, depthWrite: false, name: n });
+        else {
+          // Tripo PBR: colour, roughness (G) and normal maps; a warm sheen gives skin and knit their soft edge glow
+          o.material = new THREE.MeshPhysicalMaterial({ map: src.map, normalMap: src.normalMap, roughnessMap: src.roughnessMap || null,
+            roughness: src.roughnessMap ? 1.0 : 0.62, metalness: 0, sheen: 0.35, sheenRoughness: 0.6, sheenColor: new THREE.Color(0xb08a76),
+            specularIntensity: 0.5, side: THREE.DoubleSide, name: 'Ivan' });
+          if (src.normalMap) o.material.normalScale.set(0.9, 0.9);
+        }
+        o.castShadow = !/Lens/.test(o.material.name); o.receiveShadow = true; o.frustumCulled = false;
       }
       if (o.isBone && /Head$/.test(o.name) && !/Top/.test(o.name)) ivan.head = o;
     });
@@ -106,6 +113,7 @@ async function boot() {
   status('Waiting for textures...');
   await new Promise((res) => { if (THREE.DefaultLoadingManager.isLoading === false) res(); THREE.DefaultLoadingManager.onLoad = res; setTimeout(res, 60000); });
   await captureEnvironment();
+  collectLiving();
   resize();
   if (!$('fx').checked) post.setEnabled(false);
   setTime(0);
@@ -154,7 +162,10 @@ function setTime(t) {
     c = { pos, at, mm: v[6], f: v[7] || 8, focus: pos.distanceTo(fp), roll: 0, shot: shotAt(tNow) };
   } else c = cameraAt(tNow, pick);
   if (!controls.enabled) {
-    camera.position.copy(c.pos); camera.up.set(0, 1, 0); camera.lookAt(c.at);
+    // a slow drift of a few millimetres on top of the move: the camera is never perfectly still
+    const dr = new THREE.Vector3(Math.sin(tNow * 0.31) * 0.004 + Math.sin(tNow * 0.83 + 1.3) * 0.002,
+      Math.sin(tNow * 0.27 + 2.0) * 0.003, Math.sin(tNow * 0.41 + 0.7) * 0.003);
+    camera.position.copy(c.pos).add(dr); camera.up.set(0, 1, 0); camera.lookAt(c.at);
     // operator breathing behind the camera: low-frequency, sub-degree
     const a = c.shot.id === 'S2' ? 0.0010 : 0.0022, tt = tNow;
     camera.rotateX(a * (Math.sin(tt * 0.9) * 0.6 + Math.sin(tt * 2.3 + 1) * 0.25));
@@ -164,6 +175,7 @@ function setTime(t) {
     post.lens.focus = c.focus; post.lens.fstop = c.f; post.lens.mm = c.mm;
   }
   renderer.toneMappingExposure = Math.pow(2, exposureEV + LOOK.exposure + Number($('exp').value));
+  life(tNow);
   atmo.setTime(tNow);
   const fade = Math.min(1, tNow / 0.8, (DURATION - tNow) / 1.2);
   post.film.uniforms.fade.value = Math.max(0, fade);
@@ -173,6 +185,24 @@ function setTime(t) {
   $('slate').textContent = `${c.shot.id} · ${c.shot.name.toUpperCase()} · ${c.mm.toFixed(0)} mm · f/${c.f} · ${tNow.toFixed(2)} s`;
   $('time').value = tNow; $('timeOut').value = tNow.toFixed(1) + ' s';
   document.querySelectorAll('#shotChips button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.id === c.shot.id)));
+}
+// Small signs of life, all deterministic in t (frame-exact capture): string lights breathe a little,
+// the monitor's backlight flickers, LEDs blink, the lamp hums.
+const living = { fairy: [], screens: [], leds: [] };
+function collectLiving() {
+  scene.traverse((o) => {
+    if (!o.isMesh) return;
+    const m = o.material; if (!m || Array.isArray(m)) return;
+    if (/Fairy Bulb/.test(m.name)) living.fairy.push({ m, base: m.emissiveIntensity, ph: o.position.x * 13.1 + o.position.z * 7.7 });
+    else if (/Screen/.test(m.name)) living.screens.push({ m, base: m.emissiveIntensity });
+    else if (/^LED/.test(m.name)) living.leds.push({ m, base: m.emissiveIntensity, ph: o.position.x * 5.3 });
+  });
+}
+function life(t) {
+  for (const f of living.fairy) f.m.emissiveIntensity = f.base * (0.88 + 0.08 * Math.sin(t * 1.7 + f.ph) + 0.04 * Math.sin(t * 5.3 + f.ph * 2.0));
+  for (const s of living.screens) s.m.emissiveIntensity = s.base * (1 + 0.012 * Math.sin(t * 9.0) + 0.008 * Math.sin(t * 23.0));
+  for (const l of living.leds) l.m.emissiveIntensity = l.base * ((Math.sin(t * 2.2 + l.ph) > -0.6) ? 1 : 0.15);
+  if (L) L.lamp.intensity = L.lampBase * (+$('lampK').value) * (1 + 0.006 * Math.sin(t * 50.0) + 0.01 * Math.sin(t * 0.9));
 }
 function render() { if (controls.enabled) controls.update(); post.composer.render(); stats.update(); }
 window.renderFrame = (n) => { setTime(n / FPS); render(); return true; };

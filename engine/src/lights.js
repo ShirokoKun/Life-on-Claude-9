@@ -40,11 +40,21 @@ export function createLights(scene, data, { quality = 'high' } = {}) {
   scene.add(L.screen);
   L.screenBase = L.screen.intensity;
 
-  // Ivan only: a cool rim from behind-left (the window side) to separate his hair and shoulders from the
-  // dark room. Narrow and weak so it barely touches the baked set.
-  L.rim = new THREE.SpotLight(0x8aa6ff, 0.9, 3.2, THREE.MathUtils.degToRad(14), 0.8, 2);
-  L.rim.position.copy(B(6.35, 1.95, 1.75));
-  L.rim.target.position.copy(B(6.95, 2.72, 1.22));
+  // The reference split (the kid at the CRT): a saturated blue screen key on the face, warm tungsten behind.
+  // Face key: from the laptop, narrow, blue; it throws his shadow onto the wall behind him.
+  const lap = v3(key.location);
+  // range 1.05 m: it reaches his face (0.55 m) and fades out before the wall behind him
+  L.faceKey = new THREE.SpotLight(0x4570ff, 2.1, 1.05, THREE.MathUtils.degToRad(26), 1.0, 1.4);
+  L.faceKey.position.copy(lap.clone().add(new THREE.Vector3(0, 0.02, 0)));
+  L.faceKey.target.position.copy(B(6.94, 2.66, 1.20));
+  L.faceKey.castShadow = true; L.faceKey.shadow.mapSize.set(shadowSize, shadowSize);
+  L.faceKey.shadow.bias = -0.0002; L.faceKey.shadow.normalBias = 0.015; L.faceKey.shadow.radius = 5;
+  L.faceKey.shadow.camera.near = 0.1; L.faceKey.shadow.camera.far = 5;
+  scene.add(L.faceKey, L.faceKey.target);
+  // Warm backlight: the bathroom light he left on, behind his right shoulder. Rims hair, ear and shoulders.
+  L.rim = new THREE.SpotLight(0xffa25e, 3.2, 5, THREE.MathUtils.degToRad(15), 0.75, 2);
+  L.rim.position.copy(B(7.75, 1.35, 1.95));
+  L.rim.target.position.copy(B(6.93, 2.70, 1.15));
   scene.add(L.rim, L.rim.target);
 
   // Monitor kicker on his right cheek (the dashboard light) - no shadows, small.
@@ -59,6 +69,7 @@ export function createLights(scene, data, { quality = 'high' } = {}) {
     L.lamp.intensity = L.lampBase * lk;
     L.screen.intensity = L.screenBase * sk;
     if (L.monitor) L.monitor.intensity = 1.6 * sk;
+    L.faceKey.intensity = 2.1 * sk;
   };
   return L;
 }

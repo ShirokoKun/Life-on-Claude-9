@@ -72,8 +72,96 @@ def load(path):
     rig.name = "Ivan_Rig"
     mat = body.material_slots[0].material
     mat.name = "Ivan Tripo"
+    for img in bpy.data.images:                          # 8K maps are wasted in a browser; 4K holds close-ups
+        if img.size[0] > 4096:
+            img.scale(4096, 4096)
     rigid_head(rig, body)
+    add_glasses(rig, body)
     return rig, body
+
+
+def add_glasses(rig, body):
+    """Thin round wire frames (the character sheet), fitted to the generated face and parented to the head."""
+    import bmesh
+    import numpy as np
+    head = rig.data.bones[P + "Head"]
+    hz = (rig.matrix_world @ head.head_local).z
+    top = (rig.matrix_world @ head.tail_local).z if head.children == () else max(
+        (rig.matrix_world @ b.tail_local).z for b in rig.data.bones if "HeadTop" in b.name)
+    co = np.array([body.matrix_world @ v.co for v in body.data.vertices])
+    # eye line from the face profile (model faces -Y): the nose tip is the most forward point of the
+    # centre line; the bridge of the nose (most recessed point above it) sits at eye height.
+    mid = co[(np.abs(co[:, 0]) < 0.006) & (co[:, 2] > hz) & (co[:, 2] < hz + 0.25)]
+    bins = {}
+    for x, y, z in mid:
+        k = round(z / 0.002)
+        bins[k] = min(bins.get(k, 9.0), y)
+    zs = sorted(bins)
+    tip = min(zs, key=lambda k: bins[k] if k * 0.002 < hz + 0.14 else 9.0)
+    above = [k for k in zs if tip < k <= tip + 30]                     # up to 6 cm above the tip
+    bridge = max(above, key=lambda k: bins[k])
+    eye_z = bridge * 0.002 - 0.004
+    print("glasses: nose tip z", tip * 0.002, "bridge z", bridge * 0.002, flush=True)
+    band = co[np.abs(co[:, 2] - eye_z) < 0.012]
+    face_y = band[np.abs(band[:, 0]) < 0.02][:, 1].min()
+    sides = band[(band[:, 1] > face_y) & (band[:, 1] < face_y + 0.12)]
+    half_w = np.abs(sides[:, 0]).max()                    # head half-width at the eyes (temple to temple)
+    f = half_w / 0.075                                    # this head vs an average adult head
+    ipd, lens_r, wire = 0.032 * f, 0.0205 * f, 0.0013 * f
+    frames = []
+    mat_f = bpy.data.materials.new("Glasses Frame")
+    mat_f.use_nodes = True
+    mat_f.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = (0.02, 0.016, 0.014, 1)
+    mat_f.node_tree.nodes["Principled BSDF"].inputs["Roughness"].default_value = 0.3
+    mat_l = bpy.data.materials.new("Glasses Lens")
+    mat_l.use_nodes = True
+    bl = mat_l.node_tree.nodes["Principled BSDF"]
+    bl.inputs["Transmission Weight"].default_value = 1.0
+    bl.inputs["Roughness"].default_value = 0.0
+    bl.inputs["IOR"].default_value = 1.02
+    centres = []
+    for sx in (-1, 1):
+        x = sx * ipd
+        col = band[np.abs(band[:, 0] - x) < 0.01 * f]
+        y = col[:, 1].min() - 0.012 * f                  # model faces -Y: the face is the min-y surface
+        centres.append((x, y, eye_z))
+    for (x, y, z) in centres:
+        bpy.ops.mesh.primitive_torus_add(major_radius=lens_r, minor_radius=wire, major_segments=48, minor_segments=8,
+                                         location=(x, y, z), rotation=(math.pi / 2, 0, 0))
+        frames.append(bpy.context.active_object)
+        bpy.ops.mesh.primitive_cylinder_add(radius=lens_r, depth=0.0008, vertices=48, location=(x, y, z),
+                                            rotation=(math.pi / 2, 0, 0))
+        lens = bpy.context.active_object
+        lens.data.materials.append(mat_l)
+        lens.name = "Ivan_GlassesLens"
+        frames.append(lens)
+    (lx, ly, lz), (rx, ry, rz) = centres
+
+    def tube(p0, p1):
+        d = Vector(p1) - Vector(p0)
+        bpy.ops.mesh.primitive_cylinder_add(radius=wire * 0.85, depth=d.length, vertices=8,
+                                            location=(Vector(p0) + Vector(p1)) / 2,
+                                            rotation=Vector((0, 0, 1)).rotation_difference(d).to_euler())
+        frames.append(bpy.context.active_object)
+    tube((lx + lens_r, ly, lz + 0.15 * lens_r), (rx - lens_r, ry, rz + 0.15 * lens_r))      # bridge
+    for (x, y, z), sx in zip(centres, (-1, 1)):                                             # temples to the ears
+        ear = (sx * (half_w - 0.004), y + 0.014 * f, z + 0.1 * lens_r)
+        tube((x + sx * lens_r, y, z + 0.1 * lens_r), ear)
+        tube(ear, (ear[0], ear[1] + 0.085 * f, z - 0.012 * f))
+    for o in frames:
+        if not o.data.materials:
+            o.data.materials.append(mat_f)
+    for o in frames:
+        if o.name.startswith("Ivan_GlassesLens"):
+            continue
+        o.name = "Ivan_Glasses"
+    mw = {o: o.matrix_world.copy() for o in frames}
+    for o in frames:
+        o.parent = rig
+        o.parent_type = "BONE"
+        o.parent_bone = P + "Head"
+        bpy.context.view_layer.update()
+        o.matrix_world = mw[o]
 
 
 def rigid_head(rig, body):
@@ -191,19 +279,43 @@ def perform(rig, frames):
     sp0 = rig.pose.bones[P + "Spine"]
     neck = rig.pose.bones[P + "Neck"]
     head = rig.pose.bones[P + "Head"]
+    # reading saccades: the head steps a few millimetres between lines of code, every 0.5-1.5 s
+    sac_r = random.Random(23)
+    sac, tt = [], 0.0
+    while tt < FILM_S + 2:
+        sac.append((tt, sac_r.uniform(-0.022, 0.022), sac_r.uniform(-0.012, 0.012)))
+        tt += sac_r.uniform(0.5, 1.5)
+
+    def saccade(t):
+        i = max(j for j, (t0, _, _) in enumerate(sac) if t0 <= t)
+        (t0, y0, p0), (t1, y1, p1) = sac[max(i - 1, 0)], sac[i]
+        w = min(1.0, (t - t1) / 0.12)                        # quick 120 ms move, then hold
+        w = w * w * (3 - 2 * w)
+        return y0 + (y1 - y0) * w, p0 + (p1 - p0) * w
+
+    shoulders = [rig.pose.bones.get(P + n) for n in ("LeftShoulder", "RightShoulder")]
+    for k in range(1, frames + 1, 3):                       # shoulders ride the typing rhythm
+        t = sec(k)
+        for i, sh in enumerate(shoulders):
+            if sh:
+                e = 0.0 if paused(t) else 1.0
+                key(sh, k, base[sh.name] @ Quaternion(Z, e * 0.012 * math.sin(t * 7.3 + i * 2.1) + 0.006 * math.sin(t * 0.7 + i)))
     for k in range(1, frames + 1, 2):
         t = sec(k)
         breath = math.sin(2 * math.pi * 0.26 * t)
+        sway = 0.016 * math.sin(2 * math.pi * t / 6.5) + 0.006 * math.sin(2 * math.pi * t / 2.9 + 1.0)
+        roll = 0.008 * math.sin(2 * math.pi * t / 8.3 + 0.5)
         lean = 0.08 * smooth_pulse(t, *BEATS["lean_in"])
         back = -0.10 * min(1.0, max(0.0, (t - BEATS["sit_back"][0]) / 1.6))
         key(sp0, k, base[sp0.name] @ Quaternion(X, 0.6 * (lean + back)))
         key(sp1, k, base[sp1.name] @ Quaternion(X, lean + back))
-        key(sp2, k, base[sp2.name] @ Quaternion(X, -0.012 * breath + 0.5 * lean))
+        key(sp2, k, base[sp2.name] @ Quaternion(X, -0.012 * breath + 0.5 * lean) @ Quaternion(Y, sway) @ Quaternion(Z, roll))
         yaw = -0.30 * smooth_pulse(t, *BEATS["glance"])           # toward the second screen (his right)
         nod = 0.10 * smooth_pulse(t, *BEATS["nod"]) - 0.06 * smooth_pulse(t, *BEATS["read_pause"])
         drift = 0.012 * math.sin(t * 1.1) + 0.008 * math.sin(t * 2.9)
         key(neck, k, base[neck.name] @ Quaternion(Y, 0.4 * yaw))
-        key(head, k, base[head.name] @ Quaternion(Y, 0.6 * yaw) @ Quaternion(X, nod + drift - 0.6 * back))
+        sy, sp = saccade(t)
+        key(head, k, base[head.name] @ Quaternion(Y, 0.6 * yaw + sy - 0.5 * sway) @ Quaternion(X, nod + drift + sp - 0.6 * back))
 
 
 def export(rig, out, frames):
