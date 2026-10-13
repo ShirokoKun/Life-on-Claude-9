@@ -16,8 +16,8 @@ const TEX_ROOT = 'assets/tex/';
 // strength, coat: clearcoat (lacquer), sheen: fabrics, mapAlbedo:false keeps only normal+rough detail.
 export const LIB = {
   // architecture
-  'Plaster':        { key: 'plaster_wall', color: '#968a7c', rough: 0.92, nrm: 0.55, lm: 0.65 },   // warm limewash, a stop under white
-  'Ceiling':        { key: 'plaster_wall', color: '#9a958c', rough: 0.95, nrm: 0.35, lm: 0.65 },
+  'Plaster':        { key: 'plaster_wall', color: '#968a7c', rough: 0.92, nrm: 0.55, lm: 0.45 },   // warm limewash, a stop under white
+  'Ceiling':        { key: 'plaster_wall', color: '#9a958c', rough: 0.95, nrm: 0.35, lm: 0.45 },
   'Floor':          { key: 'oak_floor', color: '#6a4b33', rough: 0.55, nrm: 0.5, coat: 0.35, coatRough: 0.28 },
   'Trim':           { key: 'painted_wood', color: '#d6d2ca', rough: 0.45, nrm: 0.4 },
   'Door':           { key: 'painted_wood', color: '#cdc8bf', rough: 0.42, nrm: 0.4 },

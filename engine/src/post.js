@@ -19,58 +19,80 @@ export const LOOK = {
 };
 
 class LensPass extends Pass {
+  // Depth of field at half resolution (the gather is the costliest step), recombined at full resolution:
+  // in-focus pixels keep full detail, out-of-focus ones (and blurred foreground spilling over them) take the blur.
   constructor(scene, camera, atmo) {
     super();
     this.scene = scene; this.camera = camera; this.atmo = atmo;
     this.focus = 1; this.fstop = 2.8; this.mm = 35; this.on = true;
     this.rt = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, samples: 4,
       depthTexture: new THREE.DepthTexture(1, 1, THREE.FloatType) });
-    this.mat = new THREE.ShaderMaterial({
-      uniforms: { tColor: { value: null }, tDepth: { value: null }, texel: { value: new THREE.Vector2() },
-        near: { value: 0.02 }, far: { value: 400 }, k: { value: 0 }, focus: { value: 1 }, maxR: { value: 16 },
-        haze: { value: LOOK.haze }, hazeCol: { value: new THREE.Vector3(...LOOK.hazeColor) } },
-      vertexShader: VS,
-      fragmentShader: `#include <packing>
-        uniform sampler2D tColor, tDepth; uniform vec2 texel; uniform float near, far, k, focus, maxR, haze; uniform vec3 hazeCol;
+    this.half = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType });
+    const common = `#include <packing>
+        uniform sampler2D tColor, tDepth; uniform vec2 texel; uniform float near, far, k, focus, maxR;
         varying vec2 vUv;
         float dist(vec2 uv) { return -perspectiveDepthToViewZ(texture2D(tDepth, uv).x, near, far); }
-        float coc(float d) { return min(maxR, k * abs(d - focus) / max(d, 1e-3)); }
+        float coc(float d) { return min(maxR, k * abs(d - focus) / max(d, 1e-3)); }`;
+    const uniforms = () => ({ tColor: { value: null }, tDepth: { value: null }, texel: { value: new THREE.Vector2() },
+      near: { value: 0.02 }, far: { value: 400 }, k: { value: 0 }, focus: { value: 1 }, maxR: { value: 16 } });
+    this.blur = new THREE.ShaderMaterial({
+      uniforms: uniforms(), vertexShader: VS,
+      fragmentShader: `${common}
         void main() {
           vec3 col = texture2D(tColor, vUv).rgb; float dc = dist(vUv), rc = coc(dc);
-          if (maxR > 0.5) {
-            float tot = 1.0, r = 0.7, a = 0.0;
-            for (int i = 0; i < 200; i++) {
-              if (r >= maxR) break;
-              vec2 uv = vUv + vec2(cos(a), sin(a)) * texel * r;
-              vec3 sc = texture2D(tColor, uv).rgb; float ds = dist(uv), rs = coc(ds);
-              if (ds > dc) rs = clamp(rs, 0.0, rc * 2.0);
-              float m = smoothstep(r - 0.5, r + 0.5, rs);
-              col += mix(col / tot, sc, m); tot += 1.0;
-              a += 2.39996323; r += 1.0 / r;
-            }
-            col /= tot;
+          float tot = 1.0, fg = 0.0, r = 0.7, a = 0.0;
+          for (int i = 0; i < 200; i++) {
+            if (r >= maxR) break;
+            vec2 uv = vUv + vec2(cos(a), sin(a)) * texel * r;
+            vec3 sc = texture2D(tColor, uv).rgb; float ds = dist(uv), rs = coc(ds);
+            if (ds > dc) rs = clamp(rs, 0.0, rc * 2.0);
+            float m = smoothstep(r - 0.5, r + 0.5, rs);
+            col += mix(col / tot, sc, m); tot += 1.0;
+            fg += m * step(ds + 0.02, dc) * step(1.5, rs);          // blurred foreground covering this pixel
+            a += 2.39996323; r += 1.0 / r;
           }
-          float hz = 1.0 - exp(-min(dc, 14.0) * haze);
-          col = col * (1.0 - 0.3 * hz) + hazeCol * hz;
-          gl_FragColor = vec4(col, 1.0);
+          gl_FragColor = vec4(col / tot, clamp(fg / tot * 4.0, 0.0, 1.0));
         }`,
     });
-    this.quad = new FullScreenQuad(this.mat);
+    this.comp = new THREE.ShaderMaterial({
+      uniforms: { ...uniforms(), tBlur: { value: null }, haze: { value: LOOK.haze }, hazeCol: { value: new THREE.Vector3(...LOOK.hazeColor) } },
+      vertexShader: VS,
+      fragmentShader: `${common}
+        uniform sampler2D tBlur; uniform float haze; uniform vec3 hazeCol;
+        void main() {
+          vec3 sharp = texture2D(tColor, vUv).rgb; float dc = dist(vUv);
+          vec4 b = texture2D(tBlur, vUv);
+          float w = maxR > 0.5 ? max(smoothstep(0.6, 2.2, coc(dc)), b.a) : 0.0;
+          vec3 col = mix(sharp, b.rgb, w);
+          float hz = 1.0 - exp(-min(dc, 14.0) * haze);
+          gl_FragColor = vec4(col * (1.0 - 0.3 * hz) + hazeCol * hz, 1.0);
+        }`,
+    });
+    this.mat = this.comp;                              // the atmosphere reads k/focus from here
+    this.qBlur = new FullScreenQuad(this.blur); this.qComp = new FullScreenQuad(this.comp);
   }
   // thin lens on a 36 mm sensor: blur diameter = f^2 / (N (S - f)) * |d - S| / d; radius in pixels
   cocScale() {
     const f = this.mm / 1000, S = Math.max(this.focus, f * 1.5);
     return this.on ? LOOK.dof * 0.5 * (f * f / (this.fstop * (S - f))) / 0.036 * this.w : 0;
   }
-  setSize(w, h) { this.rt.setSize(w, h); this.mat.uniforms.texel.value.set(1 / w, 1 / h); this.w = w; this.h = h; }
+  setSize(w, h) {
+    this.rt.setSize(w, h); this.half.setSize(Math.ceil(w / 2), Math.ceil(h / 2));
+    for (const m of [this.blur, this.comp]) m.uniforms.texel.value.set(1 / w, 1 / h);
+    this.w = w; this.h = h;
+  }
   render(renderer, writeBuffer) {
     renderer.setRenderTarget(this.rt); renderer.clear(); renderer.render(this.scene, this.camera);
-    const u = this.mat.uniforms;
-    u.k.value = this.cocScale(); u.focus.value = Math.max(this.focus, this.mm / 1000 * 1.5);
-    u.near.value = this.camera.near; u.far.value = this.camera.far;
-    u.maxR.value = this.on ? Math.max(4, this.w / 64) : 0;
-    u.tColor.value = this.rt.texture; u.tDepth.value = this.rt.depthTexture;
-    renderer.setRenderTarget(this.renderToScreen ? null : writeBuffer); this.quad.render(renderer);
+    for (const m of [this.blur, this.comp]) {
+      const u = m.uniforms;
+      u.k.value = this.cocScale(); u.focus.value = Math.max(this.focus, this.mm / 1000 * 1.5);
+      u.near.value = this.camera.near; u.far.value = this.camera.far;
+      u.maxR.value = this.on ? Math.max(4, this.w / 64) : 0;
+      u.tColor.value = this.rt.texture; u.tDepth.value = this.rt.depthTexture;
+    }
+    if (this.on) { renderer.setRenderTarget(this.half); this.qBlur.render(renderer); }
+    this.comp.uniforms.tBlur.value = this.half.texture;
+    renderer.setRenderTarget(this.renderToScreen ? null : writeBuffer); this.qComp.render(renderer);
     if (this.atmo) {                        // dust and light cones on top, occluded by the scene depth
       this.atmo.prepare(this, renderer);
       const ac = renderer.autoClear; renderer.autoClear = false;

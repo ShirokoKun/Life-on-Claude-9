@@ -92,10 +92,11 @@ async function boot() {
         else {
           // Tripo PBR: colour, roughness (G) and normal maps; a warm sheen gives skin and knit their soft edge glow
           o.material = new THREE.MeshPhysicalMaterial({ map: src.map, normalMap: src.normalMap, roughnessMap: src.roughnessMap || null,
-            roughness: src.roughnessMap ? 1.0 : 0.62, metalness: 0, sheen: 0.35, sheenRoughness: 0.6, sheenColor: new THREE.Color(0xb08a76),
+            roughness: src.roughnessMap ? 1.0 : 0.62, metalness: 0, sheen: 0.15, sheenRoughness: 0.6, sheenColor: new THREE.Color(0xb08a76),
             specularIntensity: 0.5, side: THREE.DoubleSide, name: 'Ivan' });
           if (src.normalMap) o.material.normalScale.set(0.9, 0.9);
-          o.material.envMapIntensity = 0.45;          // let the keys shape him; the room fill must not flatten the face
+          o.material.color.setScalar(0.84);            // off-white stays off-white instead of clipping under the keys
+          o.material.envMapIntensity = 0.15;          // key-to-fill ~8:1 like the references: the shadow side falls off
         }
         o.castShadow = !/Lens/.test(o.material.name); o.receiveShadow = true; o.frustumCulled = false;
       }
@@ -121,7 +122,7 @@ async function boot() {
   if (!$('fx').checked) post.setEnabled(false);
   setTime(0);
   $('status').hidden = true;
-  window.__scene = scene; window.__THREE = THREE; window.__ready = true;
+  window.__scene = scene; window.__THREE = THREE; window.__post = post; window.__L = L; window.__renderer = renderer; window.__ready = true;
 }
 
 // Reflections and Ivan's ambient light: the room itself, rendered once into a cube from the desk.

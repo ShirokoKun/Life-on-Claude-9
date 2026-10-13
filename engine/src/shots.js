@@ -12,7 +12,7 @@ const GLASS = [6.66, 3.10, 0.84];
 
 export const SHOTS = [
   { id: 'S1', name: 'The zone', t0: 0, t1: 5.6, mm: [20, 24], f: 2.8,
-    from: [8.80, 2.32, 2.02], to: [8.62, 2.38, 1.86], at0: [6.80, 3.40, 0.98], at1: [6.85, 3.35, 1.00], focus: 'eyes', roll: [-1.4, -0.6],
+    from: [8.80, 2.32, 2.02], to: [8.62, 2.38, 1.86], at0: [6.98, 3.22, 0.78], at1: [7.00, 3.20, 0.82], focus: 'eyes', roll: [-1.4, -0.6],
     why: 'High in the corner behind his right shoulder, drifting down: the dark flat, the city in the window, and the one glowing corner where he works. He is small inside his world.' },
   { id: 'S2', name: 'Still full', t0: 5.6, t1: 11.4, mm: [28, 30], f: 4.0,
     from: [6.452, 3.223, 0.80], to: [6.47, 3.21, 0.803], at0: [7.22, 2.58, 1.07], at1: [7.22, 2.57, 1.08],
@@ -25,7 +25,7 @@ export const SHOTS = [
     from: [7.25, 2.60, 1.24], to: [7.06, 2.93, 1.03], at0: [6.96, 3.22, 0.89], at1: [6.95, 3.22, 0.88], focus: 'screen', roll: [0.8, 0.2],
     why: 'Over his right shoulder into the screens: terminal, the Claude chat, scripts piling up; his eyes flick to the dashboard climbing on the second monitor.' },
   { id: 'S5', name: 'Because he could', t0: 22.2, t1: 32, mm: [40, 46], f: 2.4,
-    from: [7.95, 3.10, 1.40], to: [7.70, 2.86, 1.30], at0: [6.94, 2.70, 1.17], at1: [6.94, 2.70, 1.18], focus: 'eyes', roll: [0.4, -0.2],
+    from: [7.95, 3.10, 1.40], to: [7.70, 2.86, 1.30], at0: [6.94, 2.98, 1.15], at1: [6.94, 2.96, 1.16], focus: 'eyes', roll: [0.4, -0.2],   // aim ahead of him: look room
     why: 'His right three-quarter profile (storyboard panel 6), the screen light raking across his face and glasses, the room dark behind. A small nod on the last line. Fade.' },
 ];
 
