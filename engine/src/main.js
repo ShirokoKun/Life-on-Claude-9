@@ -1,4 +1,5 @@
-// Life on Claude Nine - intro scene. Boot, load, light, shoot.
+// Life on Claude Nine - the engine. Boot, load, light, shoot. The intro by default; other scenes by ?scene=.
+//   ?scene=s02     load engine/scenes/s02/scene.js (shots, times of day, screens, props, performance)
 //   ?render=1      headless film capture (window.renderFrame(n), window.__ready)
 //   ?cam=px,py,pz,tx,ty,tz,mm,f   fixed camera in Blender coords (look-dev / parity checks)
 //   ?q=med         lighter shadows and lens for slower machines
@@ -13,9 +14,13 @@ import { createLights } from './lights.js';
 import { createAtmosphere } from './atmosphere.js';
 import { createPost, LOOK } from './post.js';
 import { createScreens } from './screens.js';
-import { B, FPS, DURATION, VO_OFFSET, SHOTS, CAPTIONS, cameraAt, shotAt } from './shots.js';
+import * as TOD from './timeofday.js';
+import { B } from './shots.js';
 
 const Q = new URLSearchParams(location.search);
+const SCENE = Q.get('scene') || 'intro';
+const SC = SCENE === 'intro' ? await import('./shots.js') : await import(`../scenes/${SCENE}/scene.js`);
+const { FPS, DURATION, VO_OFFSET, SHOTS, CAPTIONS, cameraAt, shotAt } = SC;
 const RENDER = Q.get('render') === '1';
 const QUALITY = Q.get('q') || 'high';
 const $ = (id) => document.getElementById(id);
@@ -46,6 +51,8 @@ const loadEXR = (url) => new Promise((res, rej) => new EXRLoader().load(url, res
 
 const named = {};
 let mixer, L, atmo, post, screens, exposureEV = 0;
+let tod = null;                 // times of day (scenes that declare light(t))
+let roomRoot = null;
 const ivan = { head: null, root: null };
 
 async function boot() {
@@ -102,7 +109,7 @@ async function boot() {
 
   if (Q.get('ivan') !== '0') {
     status('Seating Ivan...');
-    const iv = await loadGLB('assets/ivan.glb');
+    const iv = await loadGLB(SC.IVAN || 'assets/ivan.glb');
     iv.scene.traverse((o) => {
       if (o.isMesh) {
         const src = o.material, n = src.name || '';
@@ -133,12 +140,20 @@ async function boot() {
   atmo = createAtmosphere({ lamp: lampPos, lampTarget: lampPos.clone().add(new THREE.Vector3(lampShade.forward[0], lampShade.forward[2], -lampShade.forward[1]).multiplyScalar(0.55)),
     screen: B(...(data.marks.Laptop_Screen || [6.95, 3.22, 0.87])), count: QUALITY === 'high' ? 900 : 500 });
   post = createPost(renderer, scene, camera, atmo);
+  roomRoot = room.scene;
+  if (SC.light) {
+    status('Loading the other times of day...');
+    const sets = await TOD.loadSets(SC.SETS, loadEXR, { LM, exposure: data.exposure || 0 });
+    tod = { sets, mixer: TOD.createMixer(renderer, room.scene, sets), day: TOD.createDayRig(scene), env: {}, envOn: null, lamp: 1 };
+  }
 
   status('Waiting for textures...');
   await new Promise((res) => { if (THREE.DefaultLoadingManager.isLoading === false) res(); THREE.DefaultLoadingManager.onLoad = res; setTimeout(res, 60000); });
-  await captureEnvironment();
   collectLiving();
-  screens = await createScreens(room.scene);
+  if (tod) {                                   // one environment per time of day: Ivan's ambient follows the light
+    for (const n of SC.SETS) { applyTOD({ [n]: 1 }); tod.env[n] = await captureEnvironment(); }
+  } else await captureEnvironment();
+  screens = await createScreens(room.scene, SC.ACTING || 'assets/acting.json', SC.SCREENS);
   resize();
   if (!$('fx').checked) post.setEnabled(false);
   setTime(0);
@@ -159,6 +174,21 @@ async function captureEnvironment() {
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene.environment = pmrem.fromCubemap(crt.texture).texture;
   scene.environmentIntensity = 1.0;
+  return scene.environment;
+}
+
+// times of day: lightmaps, live rig, exposure, sky, practicals, environment
+function applyTOD(w) {
+  tod.mixer.set(w);
+  TOD.applyRig(L, tod.day, w, { lamp: +$('lampK').value, screen: +$('scrK').value });
+  tod.lamp = TOD.weigh(w, 'lamp'); tod.fairy = TOD.weigh(w, 'fairy');
+  exposureEV = TOD.exposureFor(tod.sets, w);
+  const dayness = TOD.weigh(w, 'sky');
+  scene.background.setRGB(0.55 * dayness, 0.66 * dayness, 0.85 * dayness);
+  for (const f of living.facades) { f.m.emissiveIntensity = f.base * (1 - dayness); f.m.color.setRGB(0.043 + 0.5 * dayness, 0.047 + 0.52 * dayness, 0.059 + 0.55 * dayness); }
+  atmo.setLevels(+$('lampK').value * tod.lamp);
+  const dom = Object.entries(w).sort((a, b) => b[1] - a[1])[0][0];
+  if (tod.env[dom] && tod.envOn !== dom) { scene.environment = tod.env[dom]; tod.envOn = dom; }
 }
 
 // ---------------------------------------------------------------- picks for focus pulls
@@ -202,7 +232,9 @@ function setTime(t) {
     post.lens.focus = c.focus; post.lens.fstop = c.f; post.lens.mm = c.mm;
   }
   renderer.toneMappingExposure = Math.pow(2, exposureEV + LOOK.exposure + Number($('exp').value));
+  if (tod) applyTOD(SC.light(tNow));
   life(tNow);
+  if (SC.props) SC.props(tNow, { named, root: roomRoot, scene, THREE });
   if (screens) screens.update(tNow);
   atmo.setTime(tNow);
   const fade = Math.min(1, tNow / 0.8, (DURATION - tNow) / 1.2);
@@ -216,7 +248,7 @@ function setTime(t) {
 }
 // Small signs of life, all deterministic in t (frame-exact capture): string lights breathe a little,
 // the monitor's backlight flickers, LEDs blink, the lamp hums.
-const living = { fairy: [], screens: [], leds: [] };
+const living = { fairy: [], screens: [], leds: [], facades: [] };
 function collectLiving() {
   scene.traverse((o) => {
     if (!o.isMesh) return;
@@ -224,15 +256,17 @@ function collectLiving() {
     if (/Fairy Bulb/.test(m.name)) living.fairy.push({ m, base: m.emissiveIntensity, ph: o.position.x * 13.1 + o.position.z * 7.7 });
     else if (/Screen/.test(m.name)) living.screens.push({ m, base: m.emissiveIntensity });
     else if (/^LED/.test(m.name)) living.leds.push({ m, base: m.emissiveIntensity, ph: o.position.x * 5.3 });
+    else if (/^Facade/.test(m.name) && !living.facades.some((f) => f.m === m)) living.facades.push({ m, base: m.emissiveIntensity });
   });
 }
 function life(t) {
-  for (const f of living.fairy) f.m.emissiveIntensity = f.base * (0.88 + 0.08 * Math.sin(t * 1.7 + f.ph) + 0.04 * Math.sin(t * 5.3 + f.ph * 2.0));
+  const fairyK = tod ? tod.fairy : 1, lampTod = tod ? tod.lamp : 1;
+  for (const f of living.fairy) f.m.emissiveIntensity = fairyK * f.base * (0.88 + 0.08 * Math.sin(t * 1.7 + f.ph) + 0.04 * Math.sin(t * 5.3 + f.ph * 2.0));
   for (const s of living.screens) s.m.emissiveIntensity = s.base * (1 + 0.012 * Math.sin(t * 9.0) + 0.008 * Math.sin(t * 23.0));
   for (const l of living.leds) l.m.emissiveIntensity = l.base * ((Math.sin(t * 2.2 + l.ph) > -0.6) ? 1 : 0.15);
-  if (L) L.lamp.intensity = L.lampBase * (+$('lampK').value) * (1 + 0.006 * Math.sin(t * 50.0) + 0.01 * Math.sin(t * 0.9));
+  if (L) L.lamp.intensity = L.lampBase * (+$('lampK').value) * lampTod * (1 + 0.006 * Math.sin(t * 50.0) + 0.01 * Math.sin(t * 0.9));
   // the moment it sends: the monitor's light on his face lifts and greens a little, then settles
-  if (L && L.monitor) {
+  if (L && L.monitor && SCENE === 'intro') {
     const k = t > 31.6 ? Math.exp(-(t - 31.6) / 1.6) * Math.min(1, (t - 31.6) / 0.25) : 0;
     L.monitor.intensity = 1.9 * (+$('scrK').value) * (1 + 0.22 * k);
     L.monitor.color.setHex(0x86b8ff).lerp(new THREE.Color(0x9ff0c4), 0.45 * k);

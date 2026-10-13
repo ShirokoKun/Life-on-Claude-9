@@ -28,9 +28,9 @@ PRESETS = {
                     exposure=0.2, city_windows=0.05, lamp=0, fairy=0.4, haze=0.02),
     # Scene 2 ("two days earlier" and the montage across days)
     "day":     dict(sky_top=(0.30, 0.42, 0.70), sky_bottom=(0.62, 0.62, 0.60), sky_str=1.6,
-                    screen=1.6, screen_light=0.9, sodium=0, city_east=0, city_north=0, bath=0, sun=3.2,
-                    sun_az=150, sun_el=38, sun_color=(1.0, 0.93, 0.84), sky_fill=60,
-                    exposure=-0.9, city_windows=0.0, lamp=0, fairy=0.0, haze=0.006),
+                    screen=1.6, screen_light=0.9, sodium=0, city_east=0, city_north=0, bath=0, sun=4.0,
+                    sun_az=118, sun_el=40, sun_color=(1.0, 0.91, 0.80), sky_fill=600, sky_fill_north=400,
+                    exposure=1.6, city_windows=0.0, lamp=0, fairy=0.0, haze=0.006),
     "evening": dict(sky_top=(0.04, 0.06, 0.15), sky_bottom=(0.55, 0.26, 0.12), sky_str=1.2,
                     screen=3.0, screen_light=4.0, sodium=700, city_east=20, city_north=20, bath=40, sun=0.0,
                     exposure=1.0, city_windows=0.8, lamp=24, fairy=1.0, haze=0.010),
@@ -130,17 +130,16 @@ def apply(preset="3am"):
             if o.name == "Fixture_CeilingLight_Bath_E":
                 _glow(o, (1.0, 0.8, 0.6), 12.0)
     # Desk lamp ON: the warm pool on the desk against the cold screens (Birdcage ref).
+    # (the bulb mesh exists in every preset, so all presets share one geometry and one lightmap UV layout)
+    from props_desk import LAMP_SHADE
+    shade = Vector(LAMP_SHADE) - Vector((0, 0, 0.02))
     if p.get("lamp"):
-        from props_desk import LAMP_SHADE
-        shade = Vector(LAMP_SHADE) - Vector((0, 0, 0.02))
         lamp = _light("Desk_Lamp", "SPOT", shade, p["lamp"], (1.0, 0.60, 0.30), c, spot=(85, 0.75),
                       target=(6.85, 3.05, 0.75), shadow_soft=0.02)
         lamp.visible_glossy = True
-        bulb = bpy.data.materials.get("Fairy Bulb")
-        geo_bulb = bpy.data.objects.get("Lamp_Shade")
-        if geo_bulb and bulb:
-            import geo as _g
-            _g.cyl("Lamp_Bulb", 0.018, 0.02, tuple(shade - Vector((0, 0, 0.015))), bulb, c, seg=16)
+    bulb = bpy.data.materials.get("Fairy Bulb")
+    if bpy.data.objects.get("Lamp_Shade") and bulb:
+        geo.cyl("Lamp_Bulb", 0.018, 0.02, tuple(shade - Vector((0, 0, 0.015))), bulb, c, seg=16)
     # Fairy lights: emissive bulbs + a few soft fills so the wall actually catches their warmth.
     fb = bpy.data.materials.get("Fairy Bulb")
     if fb:
@@ -164,6 +163,9 @@ def apply(preset="3am"):
         d = Vector((math.sin(az) * math.cos(el), math.cos(az) * math.cos(el), math.sin(el)))
         o.rotation_euler = (-d).to_track_quat("-Z", "Y").to_euler()
         _light("Sky_Fill_East", "AREA", (10.6, 3.6, 1.6), p.get("sky_fill", 40), (0.55, 0.65, 1.0), c, size=(2.6, 1.6), target=(6, 3.6, 1))
+        if p.get("sky_fill_north"):           # daylight through the balcony door and the bedroom window
+            _light("Sky_Fill_North", "AREA", (4.75, 6.2, 1.5), p["sky_fill_north"], (0.62, 0.70, 0.95), c, size=(2.4, 2.0),
+                   target=(4.75, 3.0, 0.8))
     bpy.context.scene.view_settings.exposure = p["exposure"]
     return p
 

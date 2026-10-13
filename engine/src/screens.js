@@ -5,11 +5,12 @@
 //   laptop  1600 x 1000 px  = 0.288 x 0.180 m
 //   monitor 1600 x  900 px  = 0.596 x 0.336 m
 // screenPoint(which, px, py) returns the world position of a pixel, for focus pulls that read line by line.
+// Other scenes pass their own draw functions: createScreens(root, acting, { laptop(g, t, keys), monitor(g, t) }).
 import * as THREE from 'three';
 
-const MONO = '"DejaVu Sans Mono", "JetBrains Mono", Menlo, Consolas, monospace';
-const SANS = 'Inter, "DejaVu Sans", "Segoe UI", Helvetica, Arial, sans-serif';
-const C = {
+export const MONO = '"DejaVu Sans Mono", "JetBrains Mono", Menlo, Consolas, monospace';
+export const SANS = 'Inter, "DejaVu Sans", "Segoe UI", Helvetica, Arial, sans-serif';
+export const C = {
   bar: '#0f1117', ed: '#161922', side: '#12141b', gutter: '#4b5263', txt: '#d7dae0', kw: '#c678dd', str: '#98c379',
   com: '#5c6370', fn: '#61afef', num: '#d19a66', term: '#0b0c10', ok: '#8fdc9a', warn: '#e5c07b', chat: '#f0eee6',
   bubble: '#e4e0d4', ink: '#2b2a27', claude: '#d97757', blue: '#7fb2ff', grey: '#8a8f99',
@@ -67,13 +68,13 @@ const TERM = [
 ];
 const DEPLOY = './deploy.sh --auto-send';
 
-// ------------------------------------------------------------------ helpers
-const clamp01 = (x) => Math.min(1, Math.max(0, x));
-const smooth = (x) => { x = clamp01(x); return x * x * (3 - 2 * x); };
-function keysIn(keys, t0, t1, t) { let n = 0; for (const k of keys) if (k >= t0 && k < t1 && k <= t) n++; return n; }
+// ------------------------------------------------------------------ helpers (shared with other scenes)
+export const clamp01 = (x) => Math.min(1, Math.max(0, x));
+export const smooth = (x) => { x = clamp01(x); return x * x * (3 - 2 * x); };
+export function keysIn(keys, t0, t1, t) { let n = 0; for (const k of keys) if (k >= t0 && k < t1 && k <= t) n++; return n; }
 
 const KW = /^(def|return|if|for|in|import|from|is|None|assert|not|and|or|True|False)\b/;
-function drawCode(g, line, x, y, cw) {
+export function drawCode(g, line, x, y, cw) {
   // a small tokenizer: keywords, strings, comments, calls, numbers
   let i = 0;
   while (i < line.length) {
@@ -88,7 +89,7 @@ function drawCode(g, line, x, y, cw) {
     g.fillStyle = col; g.fillText(tok, x + i * cw, y); i += tok.length;
   }
 }
-function wrap(g, text, maxW) {
+export function wrap(g, text, maxW) {
   const out = [];
   for (const para of text.split('\n')) {
     if (/^ {4}/.test(para) || para === '') { out.push(para); continue; }
@@ -101,7 +102,7 @@ function wrap(g, text, maxW) {
   }
   return out;
 }
-function rr(g, x, y, w, h, r) { g.beginPath(); g.roundRect(x, y, w, h, r); }
+export function rr(g, x, y, w, h, r) { g.beginPath(); g.roundRect(x, y, w, h, r); }
 
 // ------------------------------------------------------------------ laptop
 function drawLaptop(g, t, keys) {
@@ -351,7 +352,8 @@ function drawMonitor(g, t) {
 }
 
 // ------------------------------------------------------------------ setup
-export async function createScreens(root, actingURL = 'assets/acting.json') {
+export async function createScreens(root, actingURL = 'assets/acting.json', custom = {}) {
+  const laptop = custom.laptop || drawLaptop, monitor = custom.monitor || drawMonitor;
   let keys = [];
   try { keys = (await (await fetch(actingURL)).json()).keys.map((k) => k[0]); } catch (e) { console.warn('no acting.json', e); }
   try { await Promise.all([document.fonts.load(`18px ${MONO}`), document.fonts.load(`16px ${SANS}`), document.fonts.load(`600 16px ${SANS}`)]); } catch (e) { /* fall back */ }
@@ -372,8 +374,8 @@ export async function createScreens(root, actingURL = 'assets/acting.json') {
   let lastT = -1;
   function update(t) {
     if (t === lastT) return; lastT = t;
-    drawLaptop(lap.g, t, keys); lap.tex.needsUpdate = true;
-    drawMonitor(mon.g, t); mon.tex.needsUpdate = true;
+    laptop(lap.g, t, keys); lap.tex.needsUpdate = true;
+    monitor(mon.g, t); mon.tex.needsUpdate = true;
   }
   // world position of a pixel: bilinear over the plane's four UV corners
   const corners = {};
