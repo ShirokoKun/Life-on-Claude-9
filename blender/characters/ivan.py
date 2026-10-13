@@ -24,7 +24,7 @@ import materials as M  # noqa: E402
 
 MH_DATA = Path("/tmp/claude-0/-home-user-Ivan-3dScenes/da3f3960-1c51-545b-b8d1-75f12f48771a/scratchpad/ext/mh/makehuman/data")
 
-MACROS = {"gender": 1.0, "age": 0.54, "muscle": 0.42, "weight": 0.30, "height": 0.62, "proportions": 0.55,
+MACROS = {"gender": 1.0, "age": 0.54, "muscle": 0.42, "weight": 0.30, "height": 0.50, "proportions": 0.55,
           "cupsize": 0.5, "firmness": 0.5, "race": {"caucasian": 1.0, "asian": 0.0, "african": 0.0}}
 
 # Face shaped against the character sheet (values 0..1 on MakeHuman targets).
@@ -62,7 +62,7 @@ def skin_material():
     k = M.NodeKit(mat)
     uv = k.node("ShaderNodeTexCoord")
     p, po = k.pos()
-    base = (0.62, 0.43, 0.34)
+    base = (0.36, 0.215, 0.155)
     # Low-frequency mottling.
     n1 = k.node("ShaderNodeTexNoise", Scale=60.0, Detail=6.0, Roughness=0.55)
     k.link(p, po, n1, "Vector")
@@ -95,7 +95,7 @@ def skin_material():
     k.bump(add, 0, strength=0.12, distance=0.0004)
     rough = k.ramp(n1, "Fac", [(0.3, (0.38,) * 3), (0.7, (0.52,) * 3)])
     k.link(rough, "Color", k.bsdf, "Roughness")
-    k.set(**{"Subsurface Weight": 1.0, "Subsurface Radius": (1.0, 0.35, 0.18), "Subsurface Scale": 0.012,
+    k.set(**{"Subsurface Weight": 1.0, "Subsurface Radius": (1.0, 0.35, 0.18), "Subsurface Scale": 0.004,
              "Specular IOR Level": 0.45, "Coat Weight": 0.08, "Coat Roughness": 0.35})
     mat.node_tree.nodes["Principled BSDF"].subsurface_method = "RANDOM_WALK_SKIN"
     return mat
@@ -129,13 +129,17 @@ def build_body():
     eyes = HumanService.add_mhclo_asset(str(MH_DATA / "eyes" / "high-poly" / "high-poly.mhclo"), body,
                                         asset_type="Eyes", subdiv_levels=0, material_type="PROCEDURAL_EYES")
     eyes.name = "Ivan_Eyes"
+    eyes.data.materials.clear()
+    eyes.data.materials.append(eye_material())
     skin = skin_material()
     body.data.materials.clear()
     body.data.materials.append(skin)
+    for poly in body.data.polygons:
+        poly.material_index = 0
     return body, rig, eyes
 
 
-def turnaround(out_dir, res=(1600, 900), samples=64):
+def turnaround(out_dir, res=(1600, 900), samples=64, only=None):
     """Character-sheet style stills: front, 3/4, side, back + face close-up, neutral grey studio."""
     scene = bpy.context.scene
     scene.render.engine = "CYCLES"
@@ -152,21 +156,24 @@ def turnaround(out_dir, res=(1600, 900), samples=64):
     c = geo.coll("Studio")
     floor = M.paint("Studio Floor", (0.03, 0.03, 0.032), 0.6)
     geo.box("Studio_Floor", (20, 20, 0.01), (0, 0, -0.01), floor, c, bev=0)
-    for name, loc, energy, color, size in (("Key", (-1.6, -2.2, 2.6), 900, (1.0, 0.93, 0.85), 1.2),
-                                           ("Rim", (1.8, 1.8, 2.4), 700, (0.8, 0.88, 1.0), 0.8),
-                                           ("Fill", (2.2, -2.0, 1.2), 140, (0.9, 0.92, 1.0), 2.0)):
+    for name, loc, energy, color, size in (("Key", (-1.6, -2.2, 2.6), 320, (1.0, 0.93, 0.85), 1.2),
+                                           ("Rim", (1.8, 1.8, 2.4), 260, (0.8, 0.88, 1.0), 0.8),
+                                           ("Fill", (2.2, -2.0, 1.2), 50, (0.9, 0.92, 1.0), 2.0)):
         d = bpy.data.lights.new(name, "AREA")
         d.energy, d.color, d.size = energy, color, size
         o = bpy.data.objects.new(name, d)
         c.objects.link(o)
         o.location = loc
         o.rotation_euler = (Vector((0, 0, 1.2)) - Vector(loc)).to_track_quat("-Z", "Y").to_euler()
-    head_z = 1.64
+    eyes_obj = bpy.data.objects.get("Ivan_Eyes")
+    head_z = (eyes_obj.matrix_world @ (sum((v.co for v in eyes_obj.data.vertices), Vector()) / len(eyes_obj.data.vertices))).z if eyes_obj else 1.7
     shots = {"front": (0, -4.2, 1.0, 0, 0.95, 55), "q34": (-2.9, -3.0, 1.0, 0, 0.95, 55),
              "side": (-4.2, 0, 1.0, 0, 0.95, 55), "back": (0, 4.2, 1.0, 0, 0.95, 55),
              "face": (-0.25, -0.75, head_z + 0.02, 0, head_z, 85), "face_side": (-0.78, -0.05, head_z + 0.02, 0, head_z, 85)}
     paths = []
     for name, (x, y, z, tx, tz, mm) in shots.items():
+        if only and name not in only:
+            continue
         cam = bpy.data.cameras.new(name)
         cam.lens = mm
         o = bpy.data.objects.new(f"Cam_{name}", cam)
@@ -196,4 +203,7 @@ if __name__ == "__main__":
     if "--blend" in sys.argv:
         bpy.ops.wm.save_as_mainfile(filepath=str(out / "ivan.blend"))
     if "--turnaround" in sys.argv:
-        print("rendered", turnaround(out))
+        args = sys.argv
+        samples = int(args[args.index("--samples") + 1]) if "--samples" in args else 64
+        only = args[args.index("--shots") + 1].split(",") if "--shots" in args else None
+        print("rendered", turnaround(out, samples=samples, only=only))

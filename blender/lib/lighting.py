@@ -45,6 +45,8 @@ def _light(name, kind, loc, energy, color, coll, size=None, spot=None, target=No
     coll.objects.link(obj)
     obj.location = loc
     obj.visible_camera = False          # light panels must never show up through the windows
+    obj.visible_transmission = False    # ...or through the glass
+    obj.visible_glossy = name.startswith(("Key_", "Bath_"))
     if target is not None:
         d = Vector(target) - Vector(loc)
         obj.rotation_euler = d.to_track_quat("-Z", "Y").to_euler()
