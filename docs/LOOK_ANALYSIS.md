@@ -91,3 +91,28 @@
 4. **Curves skipped by the bake.** Cables, wires and the lamp arm were exported unbaked and glowed white. *Now:* they are converted to meshes before the bake.
 5. **Lens streaks the width of the frame.** They read as scan lines. *Now:* shorter and fainter.
 6. **Frames carried page margins.** *Now:* the render-mode stage fills the frame.
+
+## Round 5: the engine, reference frames, the new Ivan
+
+**References:** the OpenKnight film; the night precinct frame (a cool key, deep blacks, foreground silhouettes); and the kid at the CRT (a saturated blue screen key on the face, warm tungsten behind, a warm background, haze).
+
+**Lighting setup** (`engine/src/lights.js`):
+
+| Light | Role | Notes |
+|---|---|---|
+| Cycles lightmaps | everything static: city, sodium, string lights, bathroom spill, bounce | baked as irradiance; three.js adds textures and reflections |
+| Desk lamp (spot, shadows) | the warm pool on the desk; hands and keys shadow | live; flickers ±1% (it hums) |
+| Laptop key (area) | soft cool fill from the screen | live; 0.45 × Blender |
+| Face key (blue spot, shadows) | the reference's saturated blue on his face | range 1.05 m, so it dies before the wall (no blue disks on the background) |
+| Warm backlight (spot) | the bathroom light behind his right shoulder rims hair, ear and shoulders | the warm half of the warm/cool split |
+| Wall wash (warm spot, shadows) | a warm pool grazing the wall behind him, falling off to dark; shelf shadows add depth | the reference's warm background |
+| Monitor kicker (area) | dashboard light on his right cheek | small |
+
+**Separation:** the shelf behind him became dark stained wood (it was white and merged with his off-white sweater). The walls are a warm limewash a stop under white.
+
+**Life:**
+- Ivan: typing in bursts; breathing; a slow body sway; reading saccades; shoulders riding the typing; lean-in, glance and nod beats.
+- Room: string-light shimmer, monitor flicker, LED blinks, lamp hum.
+- Camera: a slow drift of a few millimetres plus sub-degree operator breathing.
+
+**Character:** Tripo multiview → Smart Mesh (quad, 27.5k faces, a single piece), PBR on, Mixamo rig. Glasses are modelled in Blender, fitted from the face profile (nose tip → bridge = eye line).
