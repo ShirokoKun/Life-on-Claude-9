@@ -248,7 +248,7 @@ function setTime(t) {
   renderer.toneMappingExposure = Math.pow(2, exposureEV + LOOK.exposure + Number($('exp').value) + (SC.exposureBoost ? SC.exposureBoost(tNow) : 0));
   if (tod) applyTOD(SC.light(tNow));
   life(tNow);
-  if (SC.props) SC.props(tNow, { named, root: roomRoot, scene, THREE });
+  if (SC.props) SC.props(tNow, { named, root: roomRoot, scene, THREE, ivan: ivan.root });
   if (screens) screens.update(tNow);
   atmo.setTime(SC.atmoTime ? SC.atmoTime(tNow) : tNow);          // a scene can freeze the air
   const fade = Math.min(1, tNow / 0.8, SC.FADE_OUT === false ? 1 : (DURATION - tNow) / 1.2);

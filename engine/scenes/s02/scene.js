@@ -160,8 +160,43 @@ export function props(t, { root, scene, THREE }) {
     if (Math.abs(mins - clock.last) > 0.05) { drawClock(clock.g, mins); clock.tex.needsUpdate = true; clock.last = mins; }
   }
   cork.forEach((o, i) => { o.visible = !(t >= 34.55 + i * 0.3 && t < 65); });
+  if (ivan) vibrate(t, ivan, THREE);
   if (curtain) curtain.visible = !(t >= 34.25 && t < 35.5);         // the sheer curtain hangs in front of the board
 }
+// 2.14: "vibrating at a different frequency". Two faint copies of Ivan, sharing his skeleton, shaken a few
+// pixels either side of him at a rate the camera can't hold: a double image only he has, while the air is still.
+let ghosts = null;
+function vibrate(t, ivan, THREE) {
+  if (!ghosts) {
+    ghosts = [];
+    const meshes = []; ivan.traverse((o) => { if (o.isSkinnedMesh && !/Lens/.test(o.material.name || '')) meshes.push(o); });
+    for (const [tint, phase] of [[[0.62, 0.80, 1.0], 0], [[1.0, 0.82, 0.66], Math.PI]]) {
+      const shift = { value: new THREE.Vector2() }, mats = [], objs = [];
+      for (const o of meshes) {
+        const g = o.clone(); const m = o.material.clone();           // a SkinnedMesh clone shares the skeleton
+        m.transparent = true; m.depthWrite = false; m.opacity = 0; m.color.multiply(new THREE.Color(...tint));
+        m.onBeforeCompile = (sh) => {
+          sh.uniforms.uShift = shift;
+          sh.vertexShader = 'uniform vec2 uShift;\n' + sh.vertexShader.replace('#include <project_vertex>',
+            '#include <project_vertex>\n  gl_Position.xy += uShift * gl_Position.w; gl_Position.z -= 0.0008 * gl_Position.w;');
+        };
+        m.customProgramCacheKey = () => 'ghost';
+        g.material = m; g.castShadow = g.receiveShadow = false; g.renderOrder = 3; g.visible = false;
+        o.parent.add(g); mats.push(m); objs.push(g);
+      }
+      ghosts.push({ shift, mats, objs, phase });
+    }
+  }
+  const k = smooth((t - 59.6) / 1.2) * (1 - smooth((t - 63.6) / 1.2)) * (t < 65 ? 1 : 0);
+  for (const g of ghosts) {
+    for (const o of g.objs) o.visible = k > 0.001;
+    if (k <= 0.001) continue;
+    const a = 0.0065 * k;
+    g.shift.value.set(a * Math.sin(t * 46 + g.phase), 0.35 * a * Math.sin(t * 31 + g.phase + 1));
+    for (const m of g.mats) m.opacity = 0.24 * k;
+  }
+}
+
 function drawClock(g, mins) {
   g.fillStyle = '#efe9dc'; g.fillRect(0, 0, 512, 512);
   g.translate(256, 256);
