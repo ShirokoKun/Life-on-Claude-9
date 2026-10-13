@@ -12,7 +12,7 @@ const W = +arg('w', 1280), H = +arg('h', 720);
 fs.mkdirSync(out, { recursive: true });
 let frames = [];
 if (arg('at')) frames = arg('at').split(',').map((s) => Math.round(parseFloat(s) * 24));
-else { const [a, b] = arg('frames', '0-959').split('-').map(Number); for (let i = a; i <= b; i++) frames.push(i); }
+else { const [a, b] = arg('frames', '0-959').split('-').map(Number); const st = +arg('step', 1); for (let i = a; i <= b; i += st) frames.push(i); }
 
 const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] });
 const page = await browser.newPage({ viewport: { width: W, height: H } });
