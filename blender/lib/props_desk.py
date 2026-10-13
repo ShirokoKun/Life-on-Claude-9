@@ -148,7 +148,7 @@ def build_laptop(m, c):
 
 def build_glass(m, c):
     """The untouched glass of water, poured six hours ago: full, with clinging bubbles."""
-    gx, gy = 7.30, 3.02
+    gx, gy = 7.25, 3.15
     prof = [(0.0, 0.0), (0.0335, 0.0), (0.0355, 0.002), (0.0360, 0.006), (0.0395, 0.108), (0.0400, 0.110),
             (0.0385, 0.110), (0.0372, 0.098), (0.0338, 0.009), (0.0, 0.009)]
     geo.lathe("Water_Glass", prof, (gx, gy, TOP), m["glass"], c)
@@ -189,21 +189,21 @@ def _mug(name, loc, mat, m, c, level=None, residue_at=None, turn=0.0):
 
 def build_mugs(m, c):
     """Count the mugs, count the hours: one cold half-full, two drained."""
-    _mug("Mug_Cold", (6.62, 3.02, TOP), m["mug_white"], m, c, level=0.058, turn=200)
-    _mug("Mug_Empty_A", (6.45, 3.36, TOP), m["mug_navy"], m, c, residue_at=0.07, turn=150)
-    _mug("Mug_Empty_B", (7.42, 3.33, TOP), m["mug_sage"], m, c, residue_at=0.052, turn=30)
+    _mug("Mug_Cold", (6.30, 2.97, TOP), m["mug_white"], m, c, level=0.058, turn=200)
+    _mug("Mug_Empty_A", (6.85, 3.45, TOP), m["mug_navy"], m, c, residue_at=0.07, turn=150)
+    _mug("Mug_Empty_B", (7.58, 3.22, TOP), m["mug_sage"], m, c, residue_at=0.052, turn=30)
     for i, (x, y, s) in enumerate(((6.82, 3.40, 0.092), (7.18, 3.43, 0.088), (6.70, 3.18, 0.09))):
         geo.plane(f"Ring_Stain_{i}", (s, s), (x, y, TOP + 0.0003), m["ring"], c, rot=(0, 0, 37 * i))
 
 
 def build_phone(m, c):
-    px, py = 7.17, 2.93
+    px, py = 7.40, 2.93
     geo.rounded_slab("Phone", (0.0715, 0.147, 0.0078), 0.009, (px, py, TOP), m["phone"], c, rot=(0, 0, -14))
     geo.plane("Phone_Screen", (0.066, 0.142), (px, py, TOP + 0.0081), m["phone_screen"], c, rot=(0, 0, -14))
 
 
 def build_notebook(m, c):
-    nx, ny = 6.58, 2.95
+    nx, ny = 6.52, 2.97
     geo.box("Notebook_Cover", (0.30, 0.215, 0.006), (nx, ny, TOP), m["card"], c, rot=(0, 0, 8), bev=0.001)
     geo.plane("Notebook_Page", (0.29, 0.207), (nx, ny, TOP + 0.0062), m["page"], c, rot=(0, 0, 8))
     for i in range(14):   # spiral binding down the middle
@@ -212,11 +212,11 @@ def build_notebook(m, c):
         geo.torus(f"Spiral_{i}", 0.006, 0.0007, (nx - math.sin(a) * off, ny + math.cos(a) * off, TOP + 0.006),
                   m["steel"], c, rot=(0, 90, 8), ring=6, seg=16)
     geo.join([o for o in c.objects if o.name.startswith("Spiral_")], "Notebook_Spiral")
-    geo.cyl("Pen", 0.0045, 0.14, (6.64, 2.90, TOP + 0.011), m["pen"], c, rot=(0, 90, 32), seg=16)
+    geo.cyl("Pen", 0.0045, 0.14, (6.58, 2.92, TOP + 0.011), m["pen"], c, rot=(0, 90, 32), seg=16)
 
 
 def build_mouse_and_cable(m, c):
-    bpy.ops.mesh.primitive_uv_sphere_add(segments=32, ring_count=16, radius=1, location=(7.45, 2.98, TOP))
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=32, ring_count=16, radius=1, location=(7.22, 2.98, TOP))
     mouse = bpy.context.active_object
     mouse.name = "Mouse"
     for col in mouse.users_collection:
@@ -235,20 +235,21 @@ def build_mouse_and_cable(m, c):
 def build_takeaway(m, c):
     """Lunch, fourteen hours ago: lid open, chopsticks laid across, barely touched."""
     tx, ty = 6.40, 3.40
-    geo.cyl("Takeaway_Box", 0.055, 0.065, (tx, ty, TOP), m["kraft"], c, r_top=0.068, seg=4, rot=(0, 0, 45 + 12))
-    geo.box("Takeaway_Noodles", (0.075, 0.075, 0.004), (tx, ty, TOP + 0.052), m["noodle"], c, rot=(0, 0, 12), bev=0.002)
+    lift = 0.012                     # sits on the printout stack
+    geo.cyl("Takeaway_Box", 0.055, 0.065, (tx, ty, TOP + lift), m["kraft"], c, r_top=0.068, seg=4, rot=(0, 0, 45 + 12))
+    geo.box("Takeaway_Noodles", (0.075, 0.075, 0.004), (tx, ty, TOP + lift + 0.052), m["noodle"], c, rot=(0, 0, 12), bev=0.002)
     for i, ang in enumerate((25, 160)):
         geo.box(f"Takeaway_Flap_{i}", (0.09, 0.05, 0.002), (tx + 0.05 * math.cos(math.radians(ang)),
-                                                          ty + 0.05 * math.sin(math.radians(ang)), TOP + 0.064),
+                                                          ty + 0.05 * math.sin(math.radians(ang)), TOP + lift + 0.064),
                 m["kraft"], c, rot=(0, -50 if i == 0 else 50, ang), bev=0)
     for i in range(2):
-        geo.cyl(f"Chopstick_{i}", 0.003, 0.22, (tx - 0.05, ty - 0.03 + i * 0.012, TOP + 0.066), m["wood_stick"], c,
+        geo.cyl(f"Chopstick_{i}", 0.003, 0.22, (tx - 0.05, ty - 0.03 + i * 0.012, TOP + lift + 0.066), m["wood_stick"], c,
                 rot=(0, 88, 15), seg=8, r_top=0.002)
 
 
 def build_lamp(m, c):
     """Architect lamp, switched off: he works by screen light only."""
-    lx, ly = 7.55, 3.47
+    lx, ly = 7.58, 3.48
     geo.cyl("Lamp_Base", 0.07, 0.018, (lx, ly, TOP), m["steel"], c, seg=40, bev=0.003)
     geo.tube("Lamp_Arm", [(lx, ly, TOP + 0.018), (lx - 0.03, ly - 0.02, TOP + 0.24), (lx - 0.16, ly - 0.10, TOP + 0.42)],
              0.006, m["steel"], c, handles="VECTOR")

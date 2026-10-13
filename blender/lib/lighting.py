@@ -19,13 +19,13 @@ import geo
 PRESETS = {
     "3am":     dict(sky_top=(0.002, 0.003, 0.009), sky_bottom=(0.03, 0.018, 0.01), sky_str=1.0,
                     screen=3.0, screen_light=4.0, sodium=1400, city_east=30, city_north=30, bath=55, sun=0.0,
-                    exposure=0.9, city_windows=1.0),
+                    exposure=1.35, city_windows=1.0, lamp=24, fairy=1.0, haze=0.010),
     "4am":     dict(sky_top=(0.006, 0.010, 0.03), sky_bottom=(0.02, 0.02, 0.035), sky_str=1.0,
                     screen=3.4, screen_light=4.6, sodium=1000, city_east=40, city_north=40, bath=55, sun=0.0,
-                    exposure=0.9, city_windows=0.55),
+                    exposure=1.35, city_windows=0.55, lamp=24, fairy=1.0, haze=0.010),
     "sunrise": dict(sky_top=(0.12, 0.16, 0.30), sky_bottom=(0.9, 0.5, 0.25), sky_str=2.0,
                     screen=1.2, screen_light=0.8, sodium=0, city_east=0, city_north=0, bath=0, sun=5.5,
-                    exposure=0.2, city_windows=0.05),
+                    exposure=0.2, city_windows=0.05, lamp=0, fairy=0.4, haze=0.02),
 }
 
 
@@ -121,6 +121,27 @@ def apply(preset="3am"):
         for o in bpy.data.objects:
             if o.name == "Fixture_CeilingLight_Bath_E":
                 _glow(o, (1.0, 0.8, 0.6), 12.0)
+    # Desk lamp ON: the warm pool on the desk against the cold screens (Birdcage ref).
+    if p.get("lamp"):
+        shade = Vector((7.58 - 0.16, 3.48 - 0.10, 0.75 + 0.40))
+        lamp = _light("Desk_Lamp", "SPOT", shade, p["lamp"], (1.0, 0.60, 0.30), c, spot=(85, 0.75),
+                      target=(7.05, 3.10, 0.75), shadow_soft=0.02)
+        lamp.visible_glossy = True
+        bulb = bpy.data.materials.get("Fairy Bulb")
+        geo_bulb = bpy.data.objects.get("Lamp_Shade")
+        if geo_bulb and bulb:
+            import geo as _g
+            _g.cyl("Lamp_Bulb", 0.018, 0.02, tuple(shade - Vector((0, 0, 0.015))), bulb, c, seg=16)
+    # Fairy lights: emissive bulbs + a few soft fills so the wall actually catches their warmth.
+    fb = bpy.data.materials.get("Fairy Bulb")
+    if fb:
+        fb.node_tree.nodes["Principled BSDF"].inputs["Emission Strength"].default_value = 30.0 * p.get("fairy", 1.0)
+        for i, x in enumerate((6.3, 7.3, 8.2)):
+            _light(f"Fairy_Fill_{i}", "POINT", (x, 2.25, 2.08), 2.5 * p.get("fairy", 1.0), (1.0, 0.6, 0.3), c, shadow_soft=0.3)
+    # Haze: a thin scattering volume filling the flat so lights carve shafts and depth falls off.
+    if p.get("haze"):
+        haze(p["haze"])
+        dust_motes(c)
     # Sunrise.
     if p["sun"]:
         sun = bpy.data.lights.new("Sun_Sunrise", "SUN")
@@ -135,6 +156,54 @@ def apply(preset="3am"):
         _light("Sky_Fill_East", "AREA", (10.6, 3.6, 1.6), 40, (0.55, 0.65, 1.0), c, size=(2.6, 1.6), target=(6, 3.6, 1))
     bpy.context.scene.view_settings.exposure = p["exposure"]
     return p
+
+
+def haze(density):
+    import geo as _g
+    mat = bpy.data.materials.get("Room Haze") or bpy.data.materials.new("Room Haze")
+    mat.use_nodes = True
+    nt = mat.node_tree
+    nt.nodes.clear()
+    out = nt.nodes.new("ShaderNodeOutputMaterial")
+    vs = nt.nodes.new("ShaderNodeVolumeScatter")
+    vs.inputs["Density"].default_value = density
+    vs.inputs["Anisotropy"].default_value = 0.45
+    vs.inputs["Color"].default_value = (0.85, 0.9, 1.0, 1)
+    nt.links.new(vs.outputs[0], out.inputs["Volume"])
+    box = _g.box("Room_Haze_Volume", (10.0, 7.7, 2.69), (5.0, 3.85, 0.005), mat, _g.coll("Lighting"), bev=0)
+    box.visible_shadow = False
+    scene = bpy.context.scene
+    scene.cycles.volume_bounces = 1
+    scene.cycles.volume_step_rate = 4.0
+    return box
+
+
+def dust_motes(coll, count=650, seed=4):
+    """Floating dust: tiny specks around the desk light and the lamp pool (bokeh sparkles in DOF)."""
+    import random as _r
+    import geo as _g
+    rr = _r.Random(seed)
+    mat = bpy.data.materials.get("Dust") or bpy.data.materials.new("Dust")
+    mat.use_nodes = True
+    b = mat.node_tree.nodes.get("Principled BSDF")
+    b.inputs["Base Color"].default_value = (0.9, 0.88, 0.82, 1)
+    b.inputs["Roughness"].default_value = 0.6
+    pts = []
+    for _ in range(count):
+        pts.append((rr.uniform(6.2, 7.8), rr.uniform(2.4, 3.9), rr.uniform(0.8, 2.0)))
+    import bmesh as _bm
+    bm = _bm.new()
+    for p in pts:
+        r = rr.uniform(0.0004, 0.0011)
+        _bm.ops.create_icosphere(bm, subdivisions=1, radius=r, matrix=__import__("mathutils").Matrix.Translation(p))
+    me = bpy.data.meshes.new("Dust_Motes")
+    bm.to_mesh(me)
+    bm.free()
+    o = bpy.data.objects.new("Dust_Motes", me)
+    coll.objects.link(o)
+    me.materials.append(mat)
+    o.visible_shadow = False
+    return o
 
 
 def _glow(obj, color, strength):
@@ -187,6 +256,50 @@ def film_look(scene, streaks=True, strength=1.0):
         st.inputs["Tint"].default_value = (0.75, 0.85, 1.0, 1.0)
         tree.links.new(last.outputs["Image"], st.inputs["Image"])
         last = st
+
+    # Halation: a wide, low-threshold glow tinted red-orange, like light bleeding through film layers.
+    hal = N("CompositorNodeGlare")
+    hal.inputs["Type"].default_value = "Bloom"
+    hal.inputs["Quality"].default_value = "Medium"
+    hal.inputs["Threshold"].default_value = 0.35
+    hal.inputs["Strength"].default_value = 0.30 * strength
+    hal.inputs["Size"].default_value = 0.85
+    try:
+        hal.inputs["Tint"].default_value = (1.0, 0.42, 0.22, 1.0)
+        hal.inputs["Saturation"].default_value = 1.0
+    except KeyError:
+        pass
+    tree.links.new(last.outputs["Image"], hal.inputs["Image"])
+    last = hal
+    # Depth haze from the mist pass: far things sink into teal.
+    bpy.context.view_layer.use_pass_mist = True
+    w = scene.world
+    if w:
+        w.mist_settings.start = 1.0
+        w.mist_settings.depth = 14.0
+        w.mist_settings.falloff = "QUADRATIC"
+    fog = N("ShaderNodeMix")
+    fog.data_type = "RGBA"
+    fog.blend_type = "SCREEN"
+    fog.inputs[7].default_value = (0.05, 0.085, 0.12, 1.0)
+    try:
+        tree.links.new(rl.outputs["Mist"], fog.inputs["Factor"])
+    except KeyError:
+        fog.inputs["Factor"].default_value = 0.0
+    tree.links.new(last.outputs["Image"], fog.inputs[6])
+    mistmul = N("ShaderNodeMath")
+    mistmul.operation = "MULTIPLY"
+    mistmul.inputs[1].default_value = 0.6
+    try:
+        tree.links.new(rl.outputs["Mist"], mistmul.inputs[0])
+        tree.links.new(mistmul.outputs[0], fog.inputs["Factor"])
+    except KeyError:
+        pass
+
+    class _Wrap:  # give the mix node an .outputs["Image"] like the glare nodes
+        def __init__(self, n):
+            self.outputs = {"Image": n.outputs[2]}
+    last = _Wrap(fog)
 
     lens = N("CompositorNodeLensdist")
     try:

@@ -26,6 +26,10 @@ try:
 except ImportError:
     props_story = None
 try:
+    import props_clutter  # noqa: E402
+except ImportError:
+    props_clutter = None
+try:
     import exterior  # noqa: E402
 except ImportError:
     exterior = None
@@ -33,10 +37,10 @@ except ImportError:
 # name: (position, look-at, focal mm, f-stop or None, focus target or None)
 SHOTS = {
     "establish": ((4.55, 4.95, 1.55), (6.95, 2.95, 0.95), 24, None, None),
-    "face":      ((6.95, 3.95, 1.12), (6.95, 2.62, 1.18), 50, 2.0, (6.95, 2.62, 1.18)),
+    "face":      ((6.90, 3.98, 1.04), (6.94, 2.74, 1.19), 55, 2.2, (6.94, 2.74, 1.15)),
     "ots":       ((7.32, 2.22, 1.36), (6.95, 3.25, 0.86), 35, 2.8, (6.95, 3.18, 0.86)),
-    "glass":     ((7.66, 2.62, 0.90), (7.25, 3.06, 0.80), 85, 2.8, (7.30, 3.02, 0.81)),
-    "desk34":    ((8.05, 3.80, 1.30), (6.95, 3.02, 0.84), 32, 4.0, (6.95, 3.05, 0.84)),
+    "glass":     ((7.62, 2.70, 0.92), (7.22, 3.18, 0.80), 85, 2.8, (7.25, 3.15, 0.81)),
+    "desk34":    ((5.70, 3.95, 1.38), (6.95, 2.85, 0.98), 35, 3.2, (6.95, 2.80, 1.05)),
     "wide":      ((4.95, 0.55, 1.6), (4.15, 5.3, 1.15), 16, None, None),
 }
 
@@ -63,16 +67,22 @@ def add_shot_cams():
     return cams
 
 
-def build(preset="3am", look=True):
+def build(preset="3am", look=True, ivan_blend=None):
     scene, _ = shell.build()
     materials.restyle_shell()
     hhmm = {"3am": (3, 4), "4am": (4, 12), "sunrise": (6, 14)}[preset]
     props_desk.build(hhmm)
     if props_story:
         props_story.build(preset)
+    if props_clutter:
+        props_clutter.build(preset)
     if exterior:
         exterior.build(preset)
     lighting.apply(preset)
+    if ivan_blend:
+        import cast
+        rig = cast.load_ivan(ivan_blend)
+        cast.seat_ivan_at_desk(rig)
     cams = add_shot_cams()
     if look:
         lighting.film_look(scene)
@@ -116,7 +126,7 @@ if __name__ == "__main__":
     names = opt("--cams", "establish,ots,glass,desk34").split(",")
     res = tuple(int(v) for v in opt("--res", "1600x800").split("x"))
     samples = int(opt("--samples", "128"))
-    scene, cams = build(preset, look="--no-look" not in args)
+    scene, cams = build(preset, look="--no-look" not in args, ivan_blend=opt("--ivan", None))
     if "--blend" in args:
         bpy.ops.wm.save_as_mainfile(filepath=str(out / f"set_intro_{preset}.blend"))
     print("rendered", render(scene, cams, names, out, res, samples, preset))

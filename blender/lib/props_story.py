@@ -241,7 +241,7 @@ def build_kitchen(m, c):
 
 def build_bin(m, c):
     """Bin by the desk: crumpled drafts and energy-drink cans [I] ('too much coffee', two days in)."""
-    bx, by = 7.78, 2.42
+    bx, by = 6.05, 2.75
     geo.lathe("Bin", [(0, 0), (0.12, 0), (0.14, 0.32), (0.135, 0.32), (0.115, 0.005), (0, 0.005)], (bx, by, 0), m["bin"], c, seg=40)
     rnd = random.Random(2)
     for i in range(6):

@@ -326,6 +326,75 @@ def wall_print():
     im.save(OUT / "wall_print.png")
 
 
+def monitor_screen():
+    """Second screen: pipeline dashboard (left), live logs (right), Slack-ish pings he's ignoring."""
+    W, H = 1600, 900
+    im = Image.new("RGB", (W, H), (12, 14, 20))
+    d = ImageDraw.Draw(im)
+    d.rectangle((0, 0, W, 30), fill=(26, 28, 36))
+    d.text((14, 7), "pipeline.local  /  dashboard", font=font(SANS, 15), fill=(200, 204, 214))
+    d.text((W - 160, 7), f"{TIME_3AM} AM", font=font(SANS, 15), fill=(220, 222, 230))
+    cards = [("emails triaged", "1,284", (126, 224, 163)), ("drafts approved", "97%", (120, 180, 255)),
+             ("meetings moved", "14", (240, 200, 120)), ("hours saved", "6.5", (230, 140, 120))]
+    for i, (lab, val, col) in enumerate(cards):
+        x0 = 20 + i * 195
+        d.rounded_rectangle((x0, 50, x0 + 180, 150), 10, fill=(22, 25, 34))
+        d.text((x0 + 14, 62), lab, font=font(SANS, 14), fill=(150, 156, 172))
+        d.text((x0 + 14, 88), val, font=font(SANS_B, 40), fill=col)
+    # throughput chart
+    d.rounded_rectangle((20, 170, 795, 520), 10, fill=(22, 25, 34))
+    d.text((36, 182), "messages processed / hour", font=font(SANS, 14), fill=(150, 156, 172))
+    pts = []
+    for i in range(48):
+        x = 40 + i * 15.5
+        v = 0.15 + 0.7 * (1 / (1 + math.exp(-(i - 26) / 4))) + rnd.uniform(-0.04, 0.04)
+        pts.append((x, 500 - v * 290))
+    for y in range(230, 500, 54):
+        d.line((40, y, 780, y), fill=(34, 38, 50), width=1)
+    d.line(pts, fill=(120, 180, 255), width=3)
+    d.ellipse((pts[-1][0] - 5, pts[-1][1] - 5, pts[-1][0] + 5, pts[-1][1] + 5), fill=(120, 180, 255))
+    # module list
+    d.rounded_rectangle((20, 540, 795, 880), 10, fill=(22, 25, 34))
+    mods = [("email.triage", "running"), ("email.drafter", "running"), ("calendar.sync", "running"),
+            ("docs.drafter", "building..."), ("reading.summaries", "queued"), ("meta.prompt_tuner", "idea")]
+    for i, (n, st) in enumerate(mods):
+        y = 560 + i * 50
+        col = {"running": (126, 224, 163), "building...": (240, 200, 120), "queued": (150, 156, 172), "idea": (190, 140, 230)}[st]
+        d.ellipse((40, y + 8, 52, y + 20), fill=col)
+        d.text((66, y + 2), n, font=font(MONO, 20), fill=(214, 218, 228))
+        d.text((560, y + 2), st, font=font(MONO, 18), fill=col)
+    # logs
+    d.rounded_rectangle((815, 50, W - 20, H - 20), 10, fill=(8, 9, 13))
+    fm = font(MONO, 15)
+    for i in range(36):
+        t = f"03:{(i // 6):02d}:{(i * 7) % 60:02d}"
+        kind = rnd.choice(["INFO", "INFO", "INFO", "OK", "WARN"])
+        msg = rnd.choice(["draft ready -> review queue", "classified 12 msgs", "calendar conflict resolved",
+                          "summary written: q3-planning.pdf", "retry: rate limited (2s)", "approved batch 20/20",
+                          "new module scaffolded", "tests passed (41)"])
+        col = {"INFO": (170, 176, 192), "OK": (126, 224, 163), "WARN": (240, 200, 120)}[kind]
+        d.text((832, 66 + i * 22), f"{t}  {kind:<4}  {msg}", font=fm, fill=col)
+    im.save(OUT / "monitor_screen.png")
+
+
+def printout():
+    W, H = 850, 1200
+    im = Image.new("RGB", (W, H), (238, 236, 230))
+    d = ImageDraw.Draw(im)
+    fm = font(MONO, 18)
+    d.text((60, 50), "classify.py  (printed 11 Mar, 01:12)", font=font(MONO_B, 20), fill=(20, 20, 24))
+    for i in range(44):
+        line = rnd.choice(["def classify(msg):", "    feats = embed(msg.subject + msg.body)", "    if is_newsletter(msg): return 'fyi'",
+                           "    score = model.predict(feats)", "    return LABELS[argmax(score)]", "", "# edge cases:", "#  - replies to threads",
+                           "    for rule in RULES:", "        if rule.match(msg): return rule.label"])
+        d.text((60, 100 + i * 24), line, font=fm, fill=(30, 30, 36))
+    ink = (28, 40, 120)
+    d.ellipse((520, 300, 760, 380), outline=ink, width=4)
+    d.text((540, 390), "why 0.93??", font=font(OBL, 34), fill=ink)
+    d.line((300, 640, 760, 600), fill=ink, width=4)
+    im.save(OUT / "printout.png")
+
+
 if __name__ == "__main__":
     laptop_screen()
     phone_lock()
@@ -338,4 +407,6 @@ if __name__ == "__main__":
     sticky("sticky_ship", ["ship it", "  -> sleep"], (140, 220, 240))
     thermostat_display()
     wall_print()
+    monitor_screen()
+    printout()
     print("textures ->", OUT)

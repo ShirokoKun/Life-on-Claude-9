@@ -24,21 +24,25 @@ import materials as M  # noqa: E402
 
 MH_DATA = Path("/tmp/claude-0/-home-user-Ivan-3dScenes/da3f3960-1c51-545b-b8d1-75f12f48771a/scratchpad/ext/mh/makehuman/data")
 
-MACROS = {"gender": 1.0, "age": 0.54, "muscle": 0.42, "weight": 0.30, "height": 0.50, "proportions": 0.55,
+MACROS = {"gender": 1.0, "age": 0.56, "muscle": 0.46, "weight": 0.33, "height": 0.52, "proportions": 0.62,
           "cupsize": 0.5, "firmness": 0.5, "race": {"caucasian": 1.0, "asian": 0.0, "african": 0.0}}
 
-# Face shaped against the character sheet (values 0..1 on MakeHuman targets).
+# Face shaped against the character sheet + the Ramanujan-style refs: long face, high cheekbones,
+# strong straight nose, defined jaw, thin lips, visible ears, open intelligent eyes.
 FACE = {
-    "head-oval": 0.55, "head-scale-vert-incr": 0.18, "head-scale-horiz-decr": 0.12, "head-age-incr": 0.1,
-    "forehead-scale-vert-incr": 0.35, "forehead-temple-decr": 0.2,
-    "chin-width-decr": 0.3, "chin-prominent-incr": 0.25, "chin-height-incr": 0.15,
-    "l-cheek-volume-decr": 0.35, "r-cheek-volume-decr": 0.35, "l-cheek-bones-incr": 0.25, "r-cheek-bones-incr": 0.25,
-    "nose-scale-vert-incr": 0.3, "nose-point-width-decr": 0.25, "nose-hump-incr": 0.1, "nose-width1-decr": 0.15,
-    "nose-trans-forward": 0.1,
-    "mouth-upperlip-volume-decr": 0.35, "mouth-lowerlip-volume-decr": 0.15, "mouth-scale-horiz-decr": 0.1,
-    "l-ear-flap-incr": 0.35, "r-ear-flap-incr": 0.32, "l-ear-scale-incr": 0.15, "r-ear-scale-incr": 0.15,
-    "l-eye-scale-decr": 0.1, "r-eye-scale-decr": 0.1, "l-eye-bag-incr": 0.35, "r-eye-bag-incr": 0.35,
-    "neck-scale-horiz-decr": 0.25, "neck-scale-vert-incr": 0.2, "eyebrows-trans-down": 0.15,
+    "head-oval": 0.5, "head-scale-vert-incr": 0.15, "head-scale-horiz-decr": 0.10, "head-age-incr": 0.25,
+    "forehead-scale-vert-incr": 0.25,
+    "chin-width-decr": 0.25, "chin-prominent-incr": 0.35, "chin-height-incr": 0.2, "chin-bones-incr": 0.3,
+    "l-cheek-bones-incr": 0.45, "r-cheek-bones-incr": 0.45, "l-cheek-inner-decr": 0.3, "r-cheek-inner-decr": 0.3,
+    "l-cheek-volume-decr": 0.25, "r-cheek-volume-decr": 0.25,
+    "nose-scale-vert-incr": 0.45, "nose-scale-depth-incr": 0.25, "nose-point-width-decr": 0.3,
+    "nose-nostrils-width-decr": 0.2, "nose-hump-incr": 0.12, "nose-trans-forward": 0.12,
+    "mouth-upperlip-volume-decr": 0.3, "mouth-lowerlip-volume-decr": 0.05, "mouth-scale-horiz-decr": 0.08,
+    "mouth-laugh-lines-out": 0.35, "mouth-angles-down": 0.15,
+    "l-ear-flap-incr": 0.2, "r-ear-flap-incr": 0.18,
+    "l-eye-height2-incr": 0.25, "r-eye-height2-incr": 0.25, "l-eye-scale-incr": 0.05, "r-eye-scale-incr": 0.05,
+    "l-eye-bag-incr": 0.15, "r-eye-bag-incr": 0.15,
+    "neck-scale-horiz-decr": 0.2, "neck-scale-vert-incr": 0.18, "eyebrows-trans-down": 0.1,
 }
 
 
@@ -62,7 +66,7 @@ def skin_material():
     k = M.NodeKit(mat)
     uv = k.node("ShaderNodeTexCoord")
     p, po = k.pos()
-    base = (0.36, 0.215, 0.155)
+    base = (0.40, 0.24, 0.16)
     # Low-frequency mottling.
     n1 = k.node("ShaderNodeTexNoise", Scale=60.0, Detail=6.0, Roughness=0.55)
     k.link(p, po, n1, "Vector")
@@ -83,8 +87,43 @@ def skin_material():
         k.link(col, "Color" if col is tone else 2, mix, 6)
         mix.inputs[7].default_value = (*tint, 1)
         col = mix
-    k.link(col, "Color" if col is tone else 2, k.bsdf, "Base Color")
+    # Cavities (nostrils, eye sockets, lips' corners, ear folds) go darker and redder: organic depth.
+    ao = k.node("ShaderNodeAmbientOcclusion", Distance=0.025)
+    ao.samples = 8
+    cav = k.node("ShaderNodeMix", _data_type="RGBA", _blend_type="MULTIPLY")
+    k.link(col, "Color" if col is tone else 2, cav, 6)
+    inv = k.ramp(ao, "AO", [(0.0, (0.66, 0.46, 0.42)), (1.0, (1.0, 1.0, 1.0))])
+    k.link(inv, "Color", cav, 7)
+    cav.inputs["Factor"].default_value = 1.0
+    k.link(cav, 2, k.bsdf, "Base Color")
     # Pores + fine wrinkles as bump; roughness varies (T-zone a little shinier).
+    # Blush: warm, redder zones on cheeks, nose and ears (blood close to the surface).
+    eyes_o = bpy.data.objects.get("Ivan_Eyes")
+    centre = Vector((0, -0.14, 1.70))
+    blush_spots = [(Vector((0.045, -0.115, 1.73)), 0.035), (Vector((-0.045, -0.115, 1.73)), 0.035),
+                   (Vector((0.0, -0.15, 1.735)), 0.022)]
+    acc = None
+    for c_, r_ in blush_spots:
+        sub = k.node("ShaderNodeVectorMath", _operation="DISTANCE")
+        k.link(p, po, sub, 0)
+        sub.inputs[1].default_value = c_
+        fall = k.node("ShaderNodeMapRange", **{"From Min": 0.0, "From Max": r_, "To Min": 1.0, "To Max": 0.0})
+        k.link(sub, "Value", fall, "Value")
+        if acc is None:
+            acc = fall
+        else:
+            mx = k.node("ShaderNodeMath", _operation="MAXIMUM")
+            k.link(acc, 0, mx, 0)
+            k.link(fall, 0, mx, 1)
+            acc = mx
+    blush = k.node("ShaderNodeMix", _data_type="RGBA", _blend_type="MULTIPLY")
+    k.link(cav, 2, blush, 6)
+    blush.inputs[7].default_value = (1.0, 0.72, 0.68, 1.0)
+    fac = k.node("ShaderNodeMath", _operation="MULTIPLY")
+    k.link(acc, 0, fac, 0)
+    fac.inputs[1].default_value = 0.55
+    k.link(fac, 0, blush, "Factor")
+    k.link(blush, 2, k.bsdf, "Base Color")
     pores = k.node("ShaderNodeTexVoronoi", Scale=2600.0)
     k.link(p, po, pores, "Vector")
     fine = k.node("ShaderNodeTexNoise", Scale=900.0, Detail=8.0)
@@ -92,11 +131,12 @@ def skin_material():
     add = k.node("ShaderNodeMath", _operation="ADD")
     k.link(pores, "Distance", add, 0)
     k.link(fine, "Fac", add, 1)
-    k.bump(add, 0, strength=0.12, distance=0.0004)
+    k.bump(add, 0, strength=0.22, distance=0.0005)
     rough = k.ramp(n1, "Fac", [(0.3, (0.38,) * 3), (0.7, (0.52,) * 3)])
     k.link(rough, "Color", k.bsdf, "Roughness")
     k.set(**{"Subsurface Weight": 1.0, "Subsurface Radius": (1.0, 0.35, 0.18), "Subsurface Scale": 0.004,
-             "Specular IOR Level": 0.45, "Coat Weight": 0.08, "Coat Roughness": 0.35})
+             "Specular IOR Level": 0.45, "Coat Weight": 0.08, "Coat Roughness": 0.35,
+             "Sheen Weight": 0.05, "Sheen Roughness": 0.4})
     mat.node_tree.nodes["Principled BSDF"].subsurface_method = "RANDOM_WALK_SKIN"
     return mat
 
@@ -156,9 +196,9 @@ def turnaround(out_dir, res=(1600, 900), samples=64, only=None):
     c = geo.coll("Studio")
     floor = M.paint("Studio Floor", (0.03, 0.03, 0.032), 0.6)
     geo.box("Studio_Floor", (20, 20, 0.01), (0, 0, -0.01), floor, c, bev=0)
-    for name, loc, energy, color, size in (("Key", (-1.6, -2.2, 2.6), 320, (1.0, 0.93, 0.85), 1.2),
-                                           ("Rim", (1.8, 1.8, 2.4), 260, (0.8, 0.88, 1.0), 0.8),
-                                           ("Fill", (2.2, -2.0, 1.2), 50, (0.9, 0.92, 1.0), 2.0)):
+    for name, loc, energy, color, size in (("Key", (-1.6, -2.2, 2.6), 140, (1.0, 0.93, 0.85), 1.2),
+                                           ("Rim", (1.8, 1.8, 2.4), 160, (0.8, 0.88, 1.0), 0.8),
+                                           ("Fill", (2.2, -2.0, 1.2), 25, (0.9, 0.92, 1.0), 2.0)):
         d = bpy.data.lights.new(name, "AREA")
         d.energy, d.color, d.size = energy, color, size
         o = bpy.data.objects.new(name, d)
@@ -196,12 +236,17 @@ if __name__ == "__main__":
     enable_mpfb()
     body, rig, eyes = build_body()
     try:
+        import ivan_pose
         import ivan_wardrobe
+        ivan_pose.reset(rig)          # MPFB leaves the rig slightly posed; garments must be built at rest
         ivan_wardrobe.dress(body, rig)
     except ImportError:
         pass
     if "--blend" in sys.argv:
-        bpy.ops.wm.save_as_mainfile(filepath=str(out / "ivan.blend"))
+        bpy.ops.wm.save_as_mainfile(filepath=str(out / "ivan.blend"))   # saved in rest pose for the set
+    if "--relaxed" in sys.argv:
+        import ivan_pose
+        ivan_pose.pose_relaxed(rig)
     if "--turnaround" in sys.argv:
         args = sys.argv
         samples = int(args[args.index("--samples") + 1]) if "--samples" in args else 64

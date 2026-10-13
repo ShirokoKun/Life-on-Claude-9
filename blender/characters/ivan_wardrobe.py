@@ -1,10 +1,11 @@
 """Ivan's look from the character sheet, built off his own body surface (no downloaded assets).
 
-Garments are body-shell meshes: faces in a region of the body, pushed out along normals,
-thickened and subdivided, then bound to the rig with weights copied from the body. That keeps
-them posable for animation. Hair and brows are strand curves (Cycles now; hair cards for
-three.js later).
+Garments are body-shell meshes: faces in a region of the body, pushed out along normals with a
+per-vertex fit profile (loose torso, bloused hem over a ribbed band, cinched cuffs), drape-smoothed,
+thickened and subdivided, then bound to the rig with weights copied from the body, so they pose.
+Hair and brows are clumped strand curves (Cycles now; hair cards for three.js later).
 """
+import bisect
 import math
 import random
 
@@ -38,27 +39,28 @@ class no_mods:
         bpy.context.view_layer.update()
 
 
-def joint(body, name):
-    """World-space centroid of an MPFB joint vertex group (on the shaped mesh)."""
-    dg = bpy.context.evaluated_depsgraph_get()
-    ev = body.evaluated_get(dg)
-    me = ev.to_mesh()
-    gi = body.vertex_groups[name].index
-    pts = [body.matrix_world @ me.vertices[v.index].co for v in body.data.vertices
-           if any(g.group == gi for g in v.groups) and v.index < len(me.vertices)]
-    ev.to_mesh_clear()
-    return sum(pts, Vector()) / len(pts)
+def shaped_coords(body):
+    with no_mods(body):
+        dg = bpy.context.evaluated_depsgraph_get()
+        ev = body.evaluated_get(dg)
+        me = ev.to_mesh()
+        co = [body.matrix_world @ v.co for v in me.vertices]
+        ev.to_mesh_clear()
+    return co
 
 
 def landmarks(body):
-    with no_mods(body):
-        return _landmarks(body)
-
-
-def _landmarks(body):
-    L = {n: joint(body, f"joint-{n}") for n in (
-        "neck", "head", "pelvis", "l-shoulder", "r-shoulder", "l-hand", "r-hand", "l-elbow", "r-elbow",
-        "l-ankle", "r-ankle", "l-eye", "r-eye", "spine-1", "l-upper-leg", "r-upper-leg", "l-knee", "r-knee")}
+    co = shaped_coords(body)
+    L = {}
+    for n in ("neck", "head", "pelvis", "l-shoulder", "r-shoulder", "l-hand", "r-hand", "l-elbow", "r-elbow",
+              "l-ankle", "r-ankle", "l-eye", "r-eye", "spine-1", "l-upper-leg", "r-upper-leg", "l-knee", "r-knee",
+              "l-foot-1", "r-foot-1", "l-foot-2", "r-foot-2", "l-upperlid", "r-upperlid"):
+        g = body.vertex_groups.get(f"joint-{n}")
+        if not g:
+            continue
+        pts = [co[v.index] for v in body.data.vertices if any(gg.group == g.index for gg in v.groups)]
+        if pts:
+            L[n] = sum(pts, Vector()) / len(pts)
     L["front"] = -1.0 if L["l-eye"].y < L["neck"].y else 1.0       # sign of 'forward' on Y
     return L
 
@@ -66,7 +68,6 @@ def _landmarks(body):
 # ---------------------------------------------------------------------------------------
 # Shell garments
 def body_copy(body, name):
-    """Evaluated body (shape keys + helper mask applied) as an editable mesh object."""
     dg = bpy.context.evaluated_depsgraph_get()
     ev = body.evaluated_get(dg)
     me = bpy.data.meshes.new_from_object(ev, preserve_all_data_layers=True, depsgraph=dg)
@@ -80,20 +81,34 @@ def shell(body, name, keep, offset, mat, thickness=0.004, subdiv=1, smooth_iter=
     o = body_copy(body, name)
     bm = bmesh.new()
     bm.from_mesh(o.data)
-    bm.verts.ensure_lookup_table()
     kill = [f for f in bm.faces if not all(keep(v.co) for v in f.verts)]
     bmesh.ops.delete(bm, geom=kill, context="FACES")
-    loose = [v for v in bm.verts if not v.link_faces]
-    bmesh.ops.delete(bm, geom=loose, context="VERTS")
+    bmesh.ops.delete(bm, geom=[v for v in bm.verts if not v.link_faces], context="VERTS")
     bm.normal_update()
     for v in bm.verts:
         v.co += v.normal * offset(v.co)
+    # Smooth every opening (neck, hem, cuffs): face deletion leaves a stair-stepped edge.
+    edge_verts = [v for v in bm.verts if v.is_boundary]
+    for _ in range(14):
+        new = {}
+        for v in edge_verts:
+            nb = [e.other_vert(v) for e in v.link_edges if e.is_boundary]
+            if len(nb) == 2:
+                new[v] = v.co * 0.4 + (nb[0].co + nb[1].co) * 0.3
+        for v, c in new.items():
+            v.co = c
+    o["openings"] = len(edge_verts)
+    loops = _boundary_loops(bm)
     bm.to_mesh(o.data)
     bm.free()
+    o["_loops"] = [[tuple(p) for p in lp] for lp in loops if len(lp) > 8]
     o.data.materials.clear()
     o.data.materials.append(mat)
     for poly in o.data.polygons:
         poly.material_index = 0
+    lap = o.modifiers.new("Relax", "SMOOTH")         # melt away anatomy (nipples, abs) under the fabric
+    lap.factor = 0.8
+    lap.iterations = max(4, smooth_iter // 2)
     sm = o.modifiers.new("Drape", "CORRECTIVE_SMOOTH")
     sm.factor = 0.9
     sm.iterations = smooth_iter
@@ -101,10 +116,36 @@ def shell(body, name, keep, offset, mat, thickness=0.004, subdiv=1, smooth_iter=
     sol = o.modifiers.new("Thick", "SOLIDIFY")
     sol.thickness = thickness
     sol.offset = -1
-    sol.use_rim = True
     if subdiv:
         geo.subsurf(o, subdiv)
     return geo.smooth(o, 80)
+
+
+def _boundary_loops(bm):
+    """Ordered world positions of each boundary loop (for rib bands)."""
+    seen, loops = set(), []
+    for v in bm.verts:
+        if not v.is_boundary or v in seen:
+            continue
+        loop, cur, prev = [], v, None
+        while cur and cur not in seen:
+            seen.add(cur)
+            loop.append(cur.co.copy())
+            nxt = [e.other_vert(cur) for e in cur.link_edges if e.is_boundary and e.other_vert(cur) is not prev]
+            prev, cur = cur, (nxt[0] if nxt else None)
+        loops.append(loop)
+    return loops
+
+
+def rib_band(name, garment, near, radius, mat, coll):
+    """A rolled rib along the garment opening nearest to `near` (crew neck)."""
+    loops = [[Vector(p) for p in lp] for lp in garment.get("_loops", [])]
+    if not loops:
+        return None
+    loop = min(loops, key=lambda lp: (sum(lp, Vector()) / len(lp) - near).length)
+    pts = [tuple(p) for p in loop[:: max(1, len(loop) // 40)]]
+    pts.append(pts[0])
+    return geo.tube(name, pts, radius, mat, coll)
 
 
 def bind(obj, body, rig):
@@ -117,7 +158,12 @@ def bind(obj, body, rig):
     for g in body.vertex_groups:
         if not obj.vertex_groups.get(g.name):
             obj.vertex_groups.new(name=g.name)
-    arm = obj.modifiers.new("Armature", "ARMATURE")   # after the weight transfer in the stack
+    # Bake the weights once, in the rest pose; a live transfer would resample from the posed body.
+    bpy.context.view_layer.update()
+    with bpy.context.temp_override(object=obj, active_object=obj, selected_objects=[obj]):
+        bpy.ops.object.modifier_move_to_index(modifier="Weights", index=0)
+        bpy.ops.object.modifier_apply(modifier="Weights")
+    arm = obj.modifiers.new("Armature", "ARMATURE")
     arm.object = rig
     mw = obj.matrix_world.copy()
     obj.parent = rig
@@ -125,7 +171,7 @@ def bind(obj, body, rig):
 
 
 def attach_to_bone(obj, rig, bone):
-    """Rigid parts (hair, brows, glasses) ride the head bone, keeping their world placement."""
+    """Rigid parts (hair, brows, glasses, shoes) ride a bone, keeping their world placement."""
     mw = obj.matrix_world.copy()
     obj.parent = rig
     obj.parent_type = "BONE"
@@ -136,25 +182,25 @@ def attach_to_bone(obj, rig, bone):
 
 # ---------------------------------------------------------------------------------------
 # Materials
-def knit(name="Sweater Knit", color=(0.70, 0.69, 0.65)):
+def knit(name="Sweater Knit", color=(0.66, 0.66, 0.63)):
+    """Fine-gauge cotton jersey: columns of V-stitches + soft fuzz (sheen) + slight translucency."""
     mat = M._new(name)
     k = M.NodeKit(mat)
-    p, po = k.pos(scale=(1, 1, 1))
-    # Vertical ribs of a jersey knit: 'V' stitches approximated by two offset wave sets.
-    w = k.node("ShaderNodeTexWave", Scale=260.0, Distortion=0.3, _wave_type="BANDS", _bands_direction="X")
+    p, po = k.pos()
+    w = k.node("ShaderNodeTexWave", Scale=300.0, Distortion=0.3, _wave_type="BANDS", _bands_direction="X")
     k.link(p, po, w, "Vector")
-    w2 = k.node("ShaderNodeTexWave", Scale=420.0, Distortion=0.2, _wave_type="BANDS", _bands_direction="Z")
+    w2 = k.node("ShaderNodeTexWave", Scale=480.0, Distortion=0.2, _wave_type="BANDS", _bands_direction="Z")
     k.link(p, po, w2, "Vector")
     m = k.node("ShaderNodeMath", _operation="MULTIPLY")
     k.link(w, "Fac", m, 0)
     k.link(w2, "Fac", m, 1)
     n = k.node("ShaderNodeTexNoise", Scale=40.0, Detail=4.0)
     k.link(p, po, n, "Vector")
-    tone = k.ramp(n, "Fac", [(0.3, tuple(c * 0.93 for c in color)), (0.7, tuple(min(1, c * 1.03) for c in color))])
+    tone = k.ramp(n, "Fac", [(0.3, tuple(c * 0.94 for c in color)), (0.7, tuple(min(1, c * 1.03) for c in color))])
     k.link(tone, "Color", k.bsdf, "Base Color")
-    k.bump(m, 0, strength=0.45, distance=0.0012)
-    k.set(Roughness=0.92, **{"Sheen Weight": 0.6, "Sheen Roughness": 0.35, "Subsurface Weight": 0.15,
-                             "Subsurface Radius": (0.4, 0.4, 0.4), "Subsurface Scale": 0.003})
+    k.bump(m, 0, strength=0.4, distance=0.001)
+    k.set(Roughness=0.95, **{"Sheen Weight": 0.8, "Sheen Roughness": 0.45, "Subsurface Weight": 0.2,
+                             "Subsurface Radius": (0.5, 0.5, 0.5), "Subsurface Scale": 0.003})
     return mat
 
 
@@ -164,8 +210,12 @@ def wool_trousers():
     p, po = k.pos()
     tw = k.node("ShaderNodeTexWave", Scale=900.0, Distortion=0.4, _wave_type="BANDS", _bands_direction="DIAGONAL")
     k.link(p, po, tw, "Vector")
+    n = k.node("ShaderNodeTexNoise", Scale=20.0, Detail=3.0)
+    k.link(p, po, n, "Vector")
+    tone = k.ramp(n, "Fac", [(0.3, (0.016, 0.017, 0.022)), (0.7, (0.026, 0.027, 0.034))])
+    k.link(tone, "Color", k.bsdf, "Base Color")
     k.bump(tw, "Fac", strength=0.12, distance=0.0005)
-    k.set(**{"Base Color": (0.018, 0.019, 0.024, 1), "Roughness": 0.8, "Sheen Weight": 0.08})
+    k.set(Roughness=0.78, **{"Sheen Weight": 0.25, "Sheen Roughness": 0.5})
     return mat
 
 
@@ -175,14 +225,16 @@ def leather_shoes():
     p, po = k.pos()
     n = k.node("ShaderNodeTexNoise", Scale=300.0, Detail=6.0)
     k.link(p, po, n, "Vector")
-    col = k.ramp(n, "Fac", [(0.3, (0.035, 0.016, 0.008)), (0.7, (0.075, 0.035, 0.016))])
+    big = k.node("ShaderNodeTexNoise", Scale=12.0, Detail=2.0)
+    k.link(p, po, big, "Vector")
+    col = k.ramp(big, "Fac", [(0.3, (0.07, 0.033, 0.016)), (0.7, (0.12, 0.058, 0.028))])
     k.link(col, "Color", k.bsdf, "Base Color")
-    k.bump(n, "Fac", strength=0.08)
-    k.set(Roughness=0.35, **{"Coat Weight": 0.5, "Coat Roughness": 0.15})
+    k.bump(n, "Fac", strength=0.06)
+    k.set(Roughness=0.32, **{"Coat Weight": 0.6, "Coat Roughness": 0.12})
     return mat
 
 
-def hair_material(melanin=0.62, name="Ivan Hair"):
+def hair_material(melanin=0.62, redness=0.14, name="Ivan Hair"):
     mat = M._new(name)
     mat.use_nodes = True
     nt = mat.node_tree
@@ -191,12 +243,12 @@ def hair_material(melanin=0.62, name="Ivan Hair"):
     h = nt.nodes.new("ShaderNodeBsdfHairPrincipled")
     h.parametrization = "MELANIN"
     h.inputs["Melanin"].default_value = melanin
-    h.inputs["Melanin Redness"].default_value = 0.22
-    h.inputs["Roughness"].default_value = 0.32
-    h.inputs["Radial Roughness"].default_value = 0.4
-    h.inputs["Random Roughness"].default_value = 0.15
+    h.inputs["Melanin Redness"].default_value = redness
+    h.inputs["Roughness"].default_value = 0.3
+    h.inputs["Radial Roughness"].default_value = 0.35
+    h.inputs["Random Roughness"].default_value = 0.2
     if "Random Color" in h.inputs:
-        h.inputs["Random Color"].default_value = 0.12
+        h.inputs["Random Color"].default_value = 0.18
     nt.links.new(h.outputs[0], out.inputs["Surface"])
     return mat
 
@@ -205,86 +257,169 @@ def hair_material(melanin=0.62, name="Ivan Hair"):
 def dress_sweater_and_shirt(body, L):
     f = L["front"]
     neck, pel = L["neck"], L["pelvis"]
-    hem_z = pel.z - 0.07          # sweater falls over the belt line, like the sheet
+    hem_z = pel.z - 0.09                        # falls over the belt line, like the sheet
+    band_h = 0.055                              # ribbed hem band
     sh = {"l": L["l-shoulder"], "r": L["r-shoulder"]}
     hand = {"l": L["l-hand"], "r": L["r-hand"]}
     sw = abs(sh["l"].x - sh["r"].x) / 2
 
-    def on_arm(co):
+    def arm_t(co):
         side = "l" if (co.x > 0) == (sh["l"].x > 0) else "r"
         a, b = sh[side], hand[side]
-        t = (co - a).dot(b - a) / (b - a).length_squared
-        return t, side
+        return (co - a).dot(b - a) / (b - a).length_squared
+
+    def is_arm(co):
+        return abs(co.x) > sw * 0.78 and co.z > pel.z
 
     def keep(co):
         if co.z < hem_z:
             return False
-        if co.z > neck.z - 0.025:
+        horiz = Vector((co.x - neck.x, co.y - neck.y)).length
+        if co.z > neck.z - 0.022 and horiz < 0.062:
+            return False                         # crew-neck opening: a ring around the neck, shoulders stay covered
+        if co.z > neck.z - 0.04 and (co.y - neck.y) * f > 0.035 and abs(co.x) < 0.045:
+            return False                         # ...dipping a little at the front
+        if co.z > neck.z + 0.04:
             return False
-        # crew neck dips a bit at the front
-        if co.z > neck.z - 0.055 and (co.y - neck.y) * f > 0.02 and abs(co.x) < 0.06:
-            return False
-        t, _ = on_arm(co)
-        if abs(co.x) > sw * 0.75:
-            return t < 0.93
+        if is_arm(co):
+            return arm_t(co) < 0.94
         return True
 
     def off(co):
-        t, _ = on_arm(co)
-        base = 0.008
-        if co.z < hem_z + 0.08:
-            base += 0.012 * (1 - (co.z - hem_z) / 0.08)       # bloused hem
-        if abs(co.x) > sw * 0.75 and t > 0.3:
-            base += 0.006                                        # roomy sleeves
-        return base
+        if is_arm(co):
+            t = arm_t(co)
+            if t > 0.86:
+                return 0.005                     # ribbed cuff, snug at the wrist
+            return 0.016 + 0.016 * math.sin(min(1, t / 0.86) * math.pi)      # roomy sleeve
+        if co.z < hem_z + band_h:
+            return 0.006                         # ribbed band
+        if co.z < hem_z + band_h + 0.09:
+            u = (co.z - hem_z - band_h) / 0.09
+            return 0.042 - 0.020 * u             # bloused just above the band
+        if co.z > neck.z - 0.06 and Vector((co.x - neck.x, co.y - neck.y)).length < 0.095:
+            return 0.006                         # neck rib
+        return 0.022                             # boxy, easy fit through the chest
 
-    sweater = shell(body, "Ivan_Sweater", keep, off, knit(), thickness=0.005)
+    sweater = shell(body, "Ivan_Sweater", keep, off, knit(), thickness=0.006, smooth_iter=16)
+    rib = None                                   # rolled rib: off until it tracks the opening exactly
+    if rib:
+        rib.data.bevel_resolution = 3
+
+    cotton = M.fabric("Shirt Cotton", (0.80, 0.80, 0.78), 0.7, weave=2500.0, sheen=0.2)
 
     def keep_collar(co):
-        return neck.z - 0.06 < co.z < neck.z + 0.012
+        horiz = Vector((co.x - neck.x, co.y - neck.y)).length
+        return neck.z - 0.12 < co.z < neck.z + 0.018 and horiz < 0.098      # collar + the shirt showing in the neckline
 
-    def off_collar(co):
-        return 0.004
+    collar = shell(body, "Ivan_ShirtCollar", keep_collar,
+                   lambda co: 0.0055 if co.z > neck.z - 0.03 else 0.0035, cotton, thickness=0.003, smooth_iter=6)
+    pts = []
+    for sgn in ():                               # collar tips: off until they sit right on the neckline
+        o = collar_point(f"Ivan_CollarPoint_{sgn}", cotton, body.users_collection[0])
+        o.location = (neck.x + sgn * 0.03, neck.y + f * 0.066, neck.z - 0.052)
+        o.rotation_euler = (math.radians(-62 if f < 0 else 62), 0, math.radians(sgn * 22 + (180 if f > 0 else 0)))
+        pts.append(o)
+    return sweater, collar, pts
 
-    collar = shell(body, "Ivan_ShirtCollar", keep_collar, off_collar, M.fabric("Shirt Cotton", (0.82, 0.82, 0.8), 0.7, weave=2500.0, sheen=0.2),
-                   thickness=0.003)
-    return sweater, collar, []
+
+def collar_point(name, mat, coll):
+    """Small curved triangular collar tip (local: tip toward -Z, hugging +Y)."""
+    bm = bmesh.new()
+    rows = []
+    for j in range(7):
+        v = j / 6
+        w = 0.024 * (1 - v) + 0.002
+        rows.append([bm.verts.new((u * w, 0.004 * (u * u) - 0.002 * v, -v * 0.048)) for u in (-1, -0.5, 0, 0.5, 1)])
+    for j in range(6):
+        for i in range(4):
+            bm.faces.new((rows[j][i], rows[j][i + 1], rows[j + 1][i + 1], rows[j + 1][i]))
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    o = bpy.data.objects.new(name, me)
+    coll.objects.link(o)
+    me.materials.append(mat)
+    s = o.modifiers.new("Thick", "SOLIDIFY")
+    s.thickness = 0.0025
+    geo.subsurf(o, 1)
+    return geo.smooth(o, 80)
 
 
-def dress_trousers_and_shoes(body, L):
+def dress_trousers(body, L):
     pel = L["pelvis"]
-    waist_z = pel.z + 0.06
+    waist_z = pel.z + 0.05
     ank = min(L["l-ankle"].z, L["r-ankle"].z)
+    knee = L["l-knee"].z
 
     def keep(co):
-        return ank + 0.015 < co.z < waist_z and abs(co.x) < 0.34
+        return ank + 0.005 < co.z < waist_z and abs(co.x) < 0.34
 
     def off(co):
-        o = 0.009
-        if co.z < L["l-knee"].z:
-            o += 0.014 * (L["l-knee"].z - co.z) / (L["l-knee"].z - ank)   # straight wide leg
-        return o
+        if co.z > pel.z - 0.03:
+            return 0.008                                             # waistband
+        if co.z > knee:
+            return 0.018 + 0.010 * (pel.z - co.z) / (pel.z - knee)   # pleated, easy thigh
+        return 0.028 + 0.016 * (knee - co.z) / (knee - ank)           # straight wide leg to a slight break
 
-    trousers = shell(body, "Ivan_Trousers", keep, off, wool_trousers(), thickness=0.004)
+    return shell(body, "Ivan_Trousers", keep, off, wool_trousers(), thickness=0.004, smooth_iter=14)
 
-    shoes = []
-    leather = leather_shoes()
-    sole = M.plastic("Shoe Sole", (0.03, 0.02, 0.015), 0.6)
+
+def shoe_mesh(name, mat, coll):
+    """Lofted derby: superellipse sections from heel to toe (local +Y = toe, Z up, origin at heel-bottom)."""
+    bm = bmesh.new()
+    n_ring, n_len = 28, 18
+    Lf = 0.285
+    rings = []
+    for j in range(n_len + 1):
+        t = j / n_len
+        y = t * Lf
+        width = 0.034 + 0.020 * math.sin(min(1.0, t / 0.72) * math.pi * 0.5) - (0.030 * ((t - 0.72) / 0.28) ** 2 if t > 0.72 else 0)
+        height = 0.075 - 0.02 * t if t < 0.45 else 0.066 - 0.038 * ((t - 0.45) / 0.55) ** 1.3
+        if t < 0.06:
+            width *= 0.75 + 0.25 * t / 0.06
+        ring = []
+        for i in range(n_ring):
+            a = 2 * math.pi * i / n_ring
+            c, s = math.cos(a), math.sin(a)
+            x = math.copysign(abs(c) ** 0.6, c) * width
+            z = (math.copysign(abs(s) ** 0.8, s) * 0.5 + 0.5) * height
+            ring.append(bm.verts.new((x, y, max(z, 0.0))))
+        rings.append(ring)
+    for j in range(n_len):
+        for i in range(n_ring):
+            bm.faces.new((rings[j][i], rings[j][(i + 1) % n_ring], rings[j + 1][(i + 1) % n_ring], rings[j + 1][i]))
+    bm.faces.new(list(reversed(rings[0])))
+    bm.faces.new(rings[-1])
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    o = bpy.data.objects.new(name, me)
+    coll.objects.link(o)
+    me.materials.append(mat)
+    geo.subsurf(o, 2)
+    return geo.smooth(o, 80)
+
+
+def dress_shoes(body, L, rig):
     f = L["front"]
-    for side in ("l", "r"):
+    leather = leather_shoes()
+    sole_mat = M.plastic("Shoe Sole", (0.025, 0.016, 0.012), 0.6)
+    shoes = []
+    for side, bone in (("l", "LeftFoot"), ("r", "RightFoot")):
         a = L[f"{side}-ankle"]
-        cy = a.y + f * 0.075                      # foot runs forward of the ankle
-        up = geo.rounded_slab(f"Ivan_Shoe_{side}", (0.096, 0.28, 0.07), 0.045, (a.x, cy, 0.008), leather,
-                              body.users_collection[0])
-        tap = up.modifiers.new("Toe", "SIMPLE_DEFORM")
-        tap.deform_method = "TAPER"
-        tap.deform_axis = "Y"
-        tap.factor = 0.0
-        geo.subsurf(up, 2)
-        geo.rounded_slab(f"Ivan_ShoeSole_{side}", (0.104, 0.292, 0.016), 0.046, (a.x, cy, -0.004), sole,
-                         body.users_collection[0])
-        shoes.append(up)
-    return trousers, shoes
+        toe = L.get(f"{side}-foot-2", a + Vector((0, f * 0.2, 0)))
+        heel = Vector((a.x, a.y - f * 0.06, 0.0))
+        dirv = Vector((toe.x - heel.x, toe.y - heel.y, 0)).normalized()
+        o = shoe_mesh(f"Ivan_Shoe_{side}", leather, body.users_collection[0])
+        o.location = heel + Vector((0, 0, 0.012))
+        o.rotation_euler = (0, 0, math.atan2(-dirv.x, dirv.y))
+        sole = geo.rounded_slab(f"Ivan_ShoeSole_{side}", (0.10, 0.29, 0.013), 0.045, (0, 0.14, -0.012), sole_mat,
+                                body.users_collection[0])
+        sole.parent = o
+        bpy.context.view_layer.update()
+        attach_to_bone(o, rig, "mixamorig:" + bone)
+        shoes.append(o)
+    return shoes
 
 
 def hide_covered_skin(body, L):
@@ -292,22 +427,17 @@ def hide_covered_skin(body, L):
     pel, neck = L["pelvis"], L["neck"]
     sh = {"l": L["l-shoulder"], "r": L["r-shoulder"]}
     hand = {"l": L["l-hand"], "r": L["r-hand"]}
-    ank = min(L["l-ankle"].z, L["r-ankle"].z)
+    co_all = shaped_coords(body)
     g = body.vertex_groups.new(name="covered")
     idx = []
-    with no_mods(body):
-        dg = bpy.context.evaluated_depsgraph_get()
-        ev = body.evaluated_get(dg)
-        me = ev.to_mesh()
-        shaped = [body.matrix_world @ v.co for v in me.vertices]
-        ev.to_mesh_clear()
     for v in body.data.vertices:
-        co = shaped[v.index]
-        if co.z < neck.z - 0.07:
+        co = co_all[v.index]
+        horiz = Vector((co.x - neck.x, co.y - neck.y)).length
+        if co.z < neck.z - 0.015 or (co.z < neck.z + 0.04 and horiz > 0.09 and abs(co.x - neck.x) > 0.085):
             side = "l" if (co.x > 0) == (sh["l"].x > 0) else "r"
             a, b = sh[side], hand[side]
             t = (co - a).dot(b - a) / (b - a).length_squared
-            if co.z > pel.z and abs(co.x) > abs(sh[side].x) * 0.75 and t > 0.88:
+            if co.z > pel.z and abs(co.x) > abs(sh[side].x) * 0.75 and t > 0.9:
                 continue
             idx.append(v.index)
     g.add(idx, 1.0, "REPLACE")
@@ -320,46 +450,38 @@ def hide_covered_skin(body, L):
 def _surface_samples(body, group, count):
     """Random points (co, normal) on faces whose verts are all in the vertex group."""
     with no_mods(body):
-        return _surface_samples_raw(body, group, count)
-
-
-def _surface_samples_raw(body, group, count):
-    dg = bpy.context.evaluated_depsgraph_get()
-    ev = body.evaluated_get(dg)
-    me = ev.to_mesh()
-    gi = body.vertex_groups[group].index
-    member = set(v.index for v in body.data.vertices if any(gg.group == gi and gg.weight > 0.5 for gg in v.groups))
-    me.calc_loop_triangles()
-    tris = [t for t in me.loop_triangles if all(i in member for i in t.vertices)]
-    areas = [t.area for t in tris]
-    total = sum(areas)
-    out = []
-    for _ in range(count):
-        r = rnd.random() * total
-        acc = 0
-        for t, a in zip(tris, areas):
-            acc += a
-            if acc >= r:
-                break
-        u, v = rnd.random(), rnd.random()
-        if u + v > 1:
-            u, v = 1 - u, 1 - v
-        a, b, c = (body.matrix_world @ me.vertices[i].co for i in t.vertices)
-        out.append((a + (b - a) * u + (c - a) * v, (body.matrix_world.to_3x3() @ t.normal).normalized()))
-    ev.to_mesh_clear()
+        dg = bpy.context.evaluated_depsgraph_get()
+        ev = body.evaluated_get(dg)
+        me = ev.to_mesh()
+        gi = body.vertex_groups[group].index
+        member = set(v.index for v in body.data.vertices if any(gg.group == gi and gg.weight > 0.5 for gg in v.groups))
+        me.calc_loop_triangles()
+        tris = [t for t in me.loop_triangles if all(i in member for i in t.vertices)]
+        cum, acc = [], 0.0
+        for t in tris:
+            acc += t.area
+            cum.append(acc)
+        out = []
+        for _ in range(count):
+            t = tris[min(len(tris) - 1, bisect.bisect_left(cum, rnd.random() * acc))]
+            u, v = rnd.random(), rnd.random()
+            if u + v > 1:
+                u, v = 1 - u, 1 - v
+            a, b, c = (body.matrix_world @ me.vertices[i].co for i in t.vertices)
+            out.append((a + (b - a) * u + (c - a) * v, (body.matrix_world.to_3x3() @ t.normal).normalized()))
+        ev.to_mesh_clear()
     return out
 
 
-def _curves(name, strands, radius, mat, coll):
+def _curves(name, strands, radius, mat, coll, tip=0.25):
     hc = bpy.data.hair_curves.new(name)
     hc.add_curves([len(s) for s in strands])
-    flat = [c for s in strands for p in s for c in p]
-    hc.points.foreach_set("position", flat)
+    hc.points.foreach_set("position", [c for s in strands for p in s for c in p])
     rad = hc.attributes.get("radius") or hc.attributes.new("radius", "FLOAT", "POINT")
     vals = []
     for s in strands:
         n = len(s)
-        vals += [radius * (1.0 - 0.75 * i / (n - 1)) for i in range(n)]
+        vals += [radius * (1.0 - (1 - tip) * i / (n - 1)) for i in range(n)]
     rad.data.foreach_set("value", vals)
     hc.materials.append(mat)
     o = bpy.data.objects.new(name, hc)
@@ -367,100 +489,130 @@ def _curves(name, strands, radius, mat, coll):
     return o
 
 
-def grow_hair(body, L, count=30000):
-    """Short side-parted cut: part on his left, top swept across, short back and sides."""
+def grow_hair(body, L, guides=1400, per_guide=26):
+    """Short back and sides, longer top combed back and across from a left part, lift at the front.
+    Strands grow in clumps around guide strands so it reads as styled hair, not fur."""
     f = L["front"]
     eye = (L["l-eye"] + L["r-eye"]) / 2
     hc = Vector((eye.x, eye.y - f * 0.10, eye.z + 0.01))          # skull centre
-    part_x = hc.x + 0.03 * (1 if L["l-eye"].x > hc.x else -1)       # his left
+    part_x = hc.x + 0.032 * (1 if L["l-eye"].x > hc.x else -1)      # his left
 
     def in_hairline(co):
-        fwd = (co.y - eye.y) * f          # >0 in front of the eyes plane... (negative = behind)
-        depth = -fwd                      # distance behind the eye plane
+        depth = -(co.y - eye.y) * f            # distance behind the eye plane
         if depth < 0.06:
-            return co.z > eye.z + 0.072 - 0.01 * abs(co.x) / 0.06
+            return co.z > eye.z + 0.074 - 0.012 * min(1.0, abs(co.x) / 0.05)
         if depth < 0.11:
             return co.z > eye.z + 0.035
         return co.z > eye.z - 0.075 + max(0.0, 0.03 - abs(co.x) * 0.2)
 
-    strands = []
-    for co, nrm in _surface_samples(body, "scalp", count * 2):
-        if len(strands) >= count:
-            break
-        if not in_hairline(co):
-            continue
+    def guide_path(co, nrm):
         top = max(0.0, min(1.0, (co.z - (eye.z + 0.03)) / 0.10))
-        length = 0.010 + 0.055 * top ** 1.4 + rnd.uniform(-0.004, 0.004)
+        front = max(0.0, min(1.0, ((co.y - eye.y) * f + 0.10) / 0.06))     # 1 at the hairline
+        small = (co.x - part_x) * (part_x - hc.x) > 0
+        length = (0.012 + 0.065 * top ** 1.3 + 0.015 * front * top) * (0.55 if small else 1.0)
         across = Vector((math.copysign(1.0, co.x - part_x), 0, 0))
+        small = (co.x - part_x) * (part_x - hc.x) > 0
         back = Vector((0, -f, 0))
         down = Vector((0, 0, -1))
-        small_side = (co.x - part_x) * (part_x - hc.x) > 0          # the short side of the part
-        sweep = 0.25 if small_side else (1.0 if top > 0.55 else 0.25)
-        d = across * sweep + back * (0.55 if small_side else (0.4 if top > 0.55 else 0.5)) + down * (0.35 + 0.65 * (1 - top))
-        if (co.y - eye.y) * f > -0.07 and top > 0.4:       # front hairline: lift, then sweep across
-            d += Vector((0, 0, 0.35)) + across * 0.5 + Vector((0, f * 0.3, 0))
+        d = across * (0.25 if small else 0.9 * top) + back * (0.75 - 0.3 * top) + down * (0.3 + 0.7 * (1 - top))
         d.normalize()
         r0 = (co - hc).length
-        pts = []
-        p = co.copy()
-        lift = 0.002 + 0.007 * top
-        seg = 6
+        centre = max(0.0, 1.0 - abs(co.x - hc.x) / 0.065)               # volume only along the crown
+        lift_max = 0.002 + (0.009 * top + 0.012 * front * top) * centre * (0.4 if small else 1.0)
+        pts, p = [], co.copy()
+        seg = 7
         for i in range(seg + 1):
             t = i / seg
-            jitter = Vector((rnd.uniform(-1, 1), rnd.uniform(-1, 1), rnd.uniform(-1, 1))) * 0.0005
-            q = p + (p - hc).normalized() * lift * math.sin(min(1.0, t * 1.4) * math.pi * 0.5) + jitter
-            pts.append(tuple(q))
+            pts.append(p + (p - hc).normalized() * lift_max * math.sin(min(1.0, t * 1.3) * math.pi * 0.5))
             tang = (d - nrm * d.dot(nrm)).normalized()
             p = p + tang * (length / seg)
-            p = hc + (p - hc).normalized() * r0          # stay on the skull sphere
-        strands.append(pts)
-    return _curves("Ivan_Hair", strands, 0.00008, hair_material(), body.users_collection[0])
+            p = hc + (p - hc).normalized() * r0
+        return pts
+
+    roots = [(co, n) for co, n in _surface_samples(body, "scalp", guides * 3) if in_hairline(co)][:guides]
+    strands = []
+    for co, nrm in roots:
+        gp = guide_path(co, nrm)
+        for _ in range(per_guide):
+            off = Vector((rnd.gauss(0, 1), rnd.gauss(0, 1), rnd.gauss(0, 1)))
+            off = (off - nrm * off.dot(nrm)) * 0.0035
+            clump = rnd.uniform(0.55, 0.9)
+            pts = []
+            for i, gpnt in enumerate(gp):
+                t = i / (len(gp) - 1)
+                jitter = Vector((rnd.uniform(-1, 1), rnd.uniform(-1, 1), rnd.uniform(-1, 1))) * 0.00035 * t
+                pts.append(tuple(gpnt + off * (1.0 - clump * t) + jitter))
+            strands.append(pts)
+    return _curves("Ivan_Hair", strands, 0.000075, hair_material(), body.users_collection[0])
 
 
-def grow_brows(body, L, count=1400):
+def grow_brows(body, L, count=1800):
+    f = L["front"]
+    strands = []
+    dg = bpy.context.evaluated_depsgraph_get()
+    ev = body.evaluated_get(dg)
+    inv = body.matrix_world.inverted()
+    for side in ("l", "r"):
+        eye = L[f"{side}-eye"]
+        out_sign = 1 if eye.x > L["head"].x else -1
+        for _ in range(count // 2):
+            u = rnd.uniform(-1, 1)                           # -1 inner .. 1 outer
+            x = eye.x + out_sign * u * 0.026
+            z = eye.z + 0.027 + 0.007 * (1 - u * u) - 0.004 * max(0, u) + rnd.uniform(-0.0032, 0.0032) * (1.2 - 0.5 * u)
+            origin = Vector((x, eye.y + f * 0.08, z))
+            hit, loc, nrm, _ = ev.ray_cast(inv @ origin, Vector((0, -f, 0)))
+            if not hit:
+                continue
+            loc = body.matrix_world @ loc
+            d = Vector((out_sign * (0.9 if u > -0.6 else 0.3), 0, 0.25 if u > -0.6 else 0.9)).normalized()
+            Ls = rnd.uniform(0.006, 0.011)
+            strands.append([tuple(loc + d * Ls * t / 3 + Vector((0, f * 0.0007 * t, 0))) for t in range(4)])
+    return _curves("Ivan_Brows", strands, 0.00005, hair_material(0.62, 0.3, "Ivan Brows"), body.users_collection[0])
+
+
+def grow_lashes(body, L, per_eye=70):
+    """Upper lashes along the lid edge: arc above each eye, curving up and out."""
     f = L["front"]
     strands = []
     for side in ("l", "r"):
         eye = L[f"{side}-eye"]
-        for _ in range(count // 2):
-            x = eye.x + rnd.uniform(-0.024, 0.024)
-            outer = (x - eye.x) * (1 if eye.x > 0 else -1)
-            z = eye.z + 0.028 + 0.006 * (1 - (outer / 0.024) ** 2) + rnd.uniform(-0.0035, 0.0035)
-            # project onto the face: cast along -forward
-            origin = Vector((x, eye.y + f * 0.08, z))
-            hit, loc, nrm, _ = body.ray_cast(body.matrix_world.inverted() @ origin, Vector((0, -f, 0)))
-            if not hit:
-                continue
-            loc = body.matrix_world @ loc
-            d = Vector((math.copysign(1, eye.x - L["head"].x) * 0.9, 0, 0.25)).normalized()
-            L_ = rnd.uniform(0.006, 0.01)
-            pts = [tuple(loc + d * L_ * t / 3 + Vector((0, f * 0.0008 * t, 0))) for t in range(4)]
-            strands.append(pts)
-    return _curves("Ivan_Brows", strands, 0.00006, hair_material(0.72, "Ivan Brows"), body.users_collection[0])
+        lid = L.get(f"{side}-upperlid", eye + Vector((0, f * 0.012, 0.006)))
+        out_sign = 1 if eye.x > L["head"].x else -1
+        for i in range(per_eye):
+            u = i / (per_eye - 1) * 2 - 1
+            base = Vector((eye.x + out_sign * u * 0.0135, lid.y + f * 0.003 * (1 - u * u), lid.z + 0.0035 * (1 - u * u)))
+            d = Vector((out_sign * u * 0.35, f * 0.9, 0.6)).normalized()
+            Ls = 0.007 * (1 - 0.4 * abs(u))
+            strands.append([tuple(base + d * Ls * t / 3 + Vector((0, 0, 0.0015 * (t / 3) ** 2))) for t in range(4)])
+    return _curves("Ivan_Lashes", strands, 0.00004, hair_material(0.9, 0.1, "Ivan Lashes"), body.users_collection[0], tip=0.1)
 
 
 def glasses(body, L):
-    """Round dark acetate frames, 46 mm lenses."""
+    """Round dark frames, 46 mm lenses, slim profile (sheet + refs)."""
     f = L["front"]
     coll = body.users_collection[0]
-    frame = M.plastic("Glasses Acetate", (0.012, 0.009, 0.008), 0.18)
-    lens = M.glass("Glasses Lens", (0.97, 0.98, 0.98))
-    parts = []
+    frame = M.plastic("Glasses Frame", (0.012, 0.010, 0.009), 0.2)
+    lens = M._new("Glasses Lens")
+    k = M.NodeKit(lens)
+    k.set(**{"Base Color": (1, 1, 1, 1), "Roughness": 0.0, "Transmission Weight": 1.0, "IOR": 1.02,
+             "Coat Weight": 1.0, "Coat Roughness": 0.0, "Coat IOR": 1.6})   # clear, barely refracting, still reflective
+    parts, centres = [], {}
     for side in ("l", "r"):
         e = L[f"{side}-eye"]
-        c = Vector((e.x, e.y + f * 0.028, e.z - 0.002))
-        parts.append(geo.torus(f"Glasses_Rim_{side}", 0.0235, 0.0018, c, frame, coll, rot=(90, 0, 0), ring=10, seg=48))
-        parts.append(geo.cyl(f"Glasses_Lens_{side}", 0.0232, 0.0015, c - Vector((0, f * 0.00075, 0)), lens, coll, rot=(90, 0, 0), seg=48))
+        c = Vector((e.x * 1.08, e.y + f * 0.030, e.z - 0.002))
+        centres[side] = c
+        parts.append(geo.torus(f"Glasses_Rim_{side}", 0.0232, 0.0013, c, frame, coll, rot=(90, 0, 0), ring=10, seg=56))
+        parts.append(geo.cyl(f"Glasses_Lens_{side}", 0.0230, 0.0012, c - Vector((0, f * 0.0006, 0)), lens, coll, rot=(90, 0, 0), seg=56))
         sgn = 1 if e.x > L["head"].x else -1
-        hinge = c + Vector((sgn * 0.0245, 0, 0.004))
-        ear = Vector((e.x + sgn * 0.045, e.y - f * 0.10, e.z - 0.01))
-        parts.append(geo.tube(f"Glasses_Temple_{side}", [tuple(hinge), tuple(hinge + Vector((sgn * 0.006, -f * 0.03, 0))),
-                                                         tuple(ear), tuple(ear + Vector((0, -f * 0.012, -0.025)))], 0.0012, frame, coll))
-    lc = Vector((L["l-eye"].x, L["l-eye"].y + f * 0.028, L["l-eye"].z))
-    rc = Vector((L["r-eye"].x, L["r-eye"].y + f * 0.028, L["r-eye"].z))
-    mid = (lc + rc) / 2 + Vector((0, f * 0.004, 0.006))
-    parts.append(geo.tube("Glasses_Bridge", [tuple(lc + (rc - lc).normalized() * 0.0235), tuple(mid),
-                                             tuple(rc + (lc - rc).normalized() * 0.0235)], 0.0016, frame, coll))
+        hinge = c + Vector((sgn * 0.0238, 0, 0.003))
+        ear = Vector((e.x + sgn * 0.047, e.y - f * 0.095, e.z - 0.008))
+        parts.append(geo.tube(f"Glasses_Temple_{side}", [tuple(hinge), tuple(hinge + Vector((sgn * 0.008, -f * 0.03, 0))),
+                                                         tuple(ear), tuple(ear + Vector((-sgn * 0.004, -f * 0.014, -0.026)))],
+                              0.0009, frame, coll))
+    lc, rc = centres["l"], centres["r"]
+    mid = (lc + rc) / 2 + Vector((0, f * 0.003, 0.007))
+    parts.append(geo.tube("Glasses_Bridge", [tuple(lc + (rc - lc).normalized() * 0.0232), tuple(mid),
+                                             tuple(rc + (lc - rc).normalized() * 0.0232)], 0.0011, frame, coll))
     return parts
 
 
@@ -468,15 +620,20 @@ def dress(body, rig):
     bpy.context.view_layer.update()
     L = landmarks(body)
     sweater, collar, points = dress_sweater_and_shirt(body, L)
-    trousers, shoes = dress_trousers_and_shoes(body, L)
+    trousers = dress_trousers(body, L)
+    shoes = dress_shoes(body, L, rig)
     hair = grow_hair(body, L)
     brows = grow_brows(body, L)
+    lashes = grow_lashes(body, L)
     specs = glasses(body, L)
+    for o in (sweater, collar, trousers):
+        bind(o, body, rig)            # weights must come from the full body, before any skin is masked
     hide_covered_skin(body, L)
-    for o in (sweater, collar, trousers, *points):
-        bind(o, body, rig)
-    head_bone = next((b.name for b in rig.data.bones if b.name.lower().endswith("head")), None)
-    for o in (hair, brows, *specs):
-        if head_bone:
-            attach_to_bone(o, rig, head_bone)
+    for o in points:
+        attach_to_bone(o, rig, "mixamorig:Spine2")
+    rib = bpy.data.objects.get("Ivan_NeckRib")
+    if rib:
+        attach_to_bone(rib, rig, "mixamorig:Spine2")
+    for o in (hair, brows, lashes, *specs):
+        attach_to_bone(o, rig, "mixamorig:Head")
     return L
