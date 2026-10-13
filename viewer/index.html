@@ -1,0 +1,438 @@
+<title>Ivan's Apartment Set</title>
+<style>
+/* Layout: full-bleed 3D stage, slate control rail docked right (bottom sheet on phones). Single dark look by choice: it's a screening room. */
+:root {
+  --stage: #07080b;
+  --rail: #101218;
+  --rail-2: #171a22;
+  --line: #262a35;
+  --ink: #e7e4dc;
+  --mute: #8b8f9b;
+  --tally: #e0483e;      /* camera tally red, from the reference's KITT lights */
+  --cool: #8fb4ff;       /* laptop-screen blue */
+  --display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --body: "IBM Plex Sans", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body { background: var(--stage); color: var(--ink); font-family: var(--body); overflow: hidden; }
+#app { position: relative; height: 100%; display: grid; grid-template-columns: 1fr 300px; }
+#stage { position: relative; min-width: 0; overflow: hidden; }
+#stage canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+.slate {
+  position: absolute; left: 16px; top: 14px; pointer-events: none;
+  font-family: var(--mono); font-size: 11px; letter-spacing: .08em; color: var(--mute);
+  display: grid; gap: 4px;
+}
+.slate b { font-family: var(--display); font-weight: 600; font-size: 22px; letter-spacing: .04em; color: var(--ink); text-transform: uppercase; }
+.slate .rec { color: var(--tally); }
+#status[hidden] { display: none; }
+#status { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--mono); font-size: 12px; color: var(--mute); pointer-events: none; }
+aside {
+  background: var(--rail); border-left: 1px solid var(--line); overflow-y: auto;
+  padding-block: 16px 24px; padding-inline: 16px; display: grid; align-content: start; gap: 18px;
+}
+aside h2 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--mute); }
+.group { display: grid; gap: 8px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  font: 500 12px var(--body); color: var(--ink); background: var(--rail-2); border: 1px solid var(--line);
+  border-radius: 3px; padding: 6px 9px; cursor: pointer;
+}
+.chip[aria-pressed="true"] { border-color: var(--tally); box-shadow: inset 3px 0 0 var(--tally); }
+.chip:focus-visible, input:focus-visible { outline: 2px solid var(--cool); outline-offset: 2px; }
+.row { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; font-size: 12px; }
+.row output { font-family: var(--mono); font-size: 11px; color: var(--mute); font-variant-numeric: tabular-nums; }
+.row input[type=range] { grid-column: 1 / -1; width: 100%; accent-color: var(--tally); }
+.toggle { display: flex; align-items: center; gap: 8px; font-size: 12px; cursor: pointer; }
+.toggle input { accent-color: var(--tally); }
+.note { font-size: 12px; line-height: 1.5; color: var(--mute); margin: 0; }
+.note kbd { font-family: var(--mono); font-size: 11px; border: 1px solid var(--line); border-radius: 2px; padding: 0 4px; color: var(--ink); }
+@media (max-width: 760px) {
+  #app { grid-template-columns: 1fr; grid-template-rows: 58% 42%; }
+  aside { border-left: 0; border-top: 1px solid var(--line); }
+}
+@media (prefers-reduced-motion: reduce) { .chip { transition: none; } }
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600&family=IBM+Plex+Mono:wght@400&family=IBM+Plex+Sans:wght@400;500&display=swap">
+
+<div id="app">
+  <div id="stage">
+    <div class="slate" aria-live="polite">
+      <span><span class="rec">●</span> LIFE ON CLAUDE NINE · SET 01</span>
+      <b id="slateShot">Wide · from main door</b>
+      <span id="slateMeta">24 mm · 3:00 AM</span>
+    </div>
+    <div id="status">Loading the apartment…</div>
+  </div>
+  <aside>
+    <div class="group">
+      <h2>Camera</h2>
+      <div class="chips" id="cams"></div>
+      <div class="row"><label for="lens">Focal length</label><output id="lensOut"></output>
+        <input id="lens" type="range" min="12" max="85" step="1" value="24"></div>
+      <p class="note">Drag to orbit, right-drag to pan, scroll to dolly.</p>
+    </div>
+    <div class="group">
+      <h2>Time of night</h2>
+      <div class="chips" id="looks"></div>
+      <div class="row"><label for="exposure">Exposure</label><output id="expOut"></output>
+        <input id="exposure" type="range" min="-3" max="3" step="0.1" value="0"></div>
+    </div>
+    <div class="group">
+      <h2>Lens &amp; film</h2>
+      <label class="toggle"><input id="fx" type="checkbox" checked> Film look (bloom, streaks, grain, vignette)</label>
+      <label class="toggle"><input id="bars" type="checkbox" checked> Letterbox 2:1</label>
+      <label class="toggle"><input id="dof" type="checkbox"> Shallow focus</label>
+      <div class="row"><label for="focus">Focus distance</label><output id="focusOut"></output>
+        <input id="focus" type="range" min="0.3" max="8" step="0.05" value="1.4"></div>
+      <div class="row"><label for="aperture">Aperture</label><output id="apOut"></output>
+        <input id="aperture" type="range" min="1.2" max="11" step="0.1" value="2"></div>
+    </div>
+    <div class="group">
+      <h2>Set</h2>
+      <label class="toggle"><input id="mats" type="checkbox" checked> First material pass (off = grey-box)</label>
+      <label class="toggle"><input id="ceiling" type="checkbox" checked> Ceiling</label>
+      <label class="toggle"><input id="city" type="checkbox" checked> City outside the windows</label>
+    </div>
+    <p class="note">Layout v2: wider bedroom, desk turned so Ivan faces his laptop with his back to the bathroom wall. Props, textures and Ivan come next.</p>
+  </aside>
+</div>
+
+<script src="apartment-data.js"></script>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { BokehPass } from 'three/addons/postprocessing/BokehPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js';
+
+RectAreaLightUniformsLib.init();
+const $ = (id) => document.getElementById(id);
+const stage = $('stage');
+
+// ---------- renderer / scene ----------
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.toneMapping = THREE.AgXToneMapping;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+stage.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(40, 1, 0.03, 600);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.08;
+
+// Blender (x, y, z) -> three (x, z, -y)
+const B = (x, y, z) => new THREE.Vector3(x, z, -y);
+
+// ---------- post: bloom -> anamorphic streak -> output -> film ----------
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const bokeh = new BokehPass(scene, camera, { focus: 1.4, aperture: 0.002, maxblur: 0.008 });
+bokeh.enabled = false;
+composer.addPass(bokeh);
+const bloom = new UnrealBloomPass(new THREE.Vector2(512, 512), 0.5, 0.6, 0.9);
+composer.addPass(bloom);
+const streak = new ShaderPass({
+  uniforms: { tDiffuse: { value: null }, texel: { value: new THREE.Vector2() }, threshold: { value: 1.1 }, gain: { value: 0.32 }, tint: { value: new THREE.Color(0.75, 0.85, 1.0) } },
+  vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+  fragmentShader: `uniform sampler2D tDiffuse; uniform vec2 texel; uniform float threshold, gain; uniform vec3 tint; varying vec2 vUv;
+    vec3 bright(vec2 uv){ vec3 c = texture2D(tDiffuse, uv).rgb; float l = max(c.r, max(c.g, c.b)); return c * smoothstep(threshold, threshold * 2.5, l); }
+    void main(){
+      vec3 base = texture2D(tDiffuse, vUv).rgb; vec3 acc = vec3(0.0); float wsum = 0.0;
+      for (int i = -24; i <= 24; i++) { float f = float(i); float w = exp(-abs(f) / 9.0);
+        acc += bright(vUv + vec2(f * texel.x * 9.0, 0.0)) * w; wsum += w; }
+      gl_FragColor = vec4(base + tint * acc / wsum * gain * 6.0, 1.0);
+    }`,
+});
+composer.addPass(streak);
+composer.addPass(new OutputPass());
+const film = new ShaderPass({
+  uniforms: { tDiffuse: { value: null }, time: { value: 0 }, grain: { value: 0.06 }, vignette: { value: 0.42 }, ca: { value: 0.0025 }, bars: { value: 1 }, aspect: { value: 1.7 }, target: { value: 2.0 } },
+  vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`,
+  fragmentShader: `uniform sampler2D tDiffuse; uniform float time, grain, vignette, ca, bars, aspect, target; varying vec2 vUv;
+    float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233)) + time * 61.7) * 43758.5453); }
+    void main(){
+      vec2 d = vUv - 0.5; float r2 = dot(d, d);
+      vec2 off = d * ca * r2 * 4.0;
+      vec3 c = vec3(texture2D(tDiffuse, vUv + off).r, texture2D(tDiffuse, vUv).g, texture2D(tDiffuse, vUv - off).b);
+      c *= mix(1.0, smoothstep(0.85, 0.15, r2 * 2.2), vignette);
+      c += (hash(vUv * 1000.0) - 0.5) * grain;
+      if (bars > 0.5 && aspect < target * 1.6) { float h = aspect / target; if (abs(vUv.y - 0.5) > h * 0.5) c = vec3(0.0); }
+      gl_FragColor = vec4(c, 1.0);
+    }`,
+});
+composer.addPass(film);
+
+// ---------- procedural textures (first material pass) ----------
+function canvasTex(w, h, draw, repeat) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  draw(c.getContext('2d'), w, h);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace;
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; if (repeat) t.repeat.set(...repeat);
+  t.anisotropy = 8; return t;
+}
+const rand = (s => () => (s = (s * 16807) % 2147483647) / 2147483647)(7);
+const oakPlanks = canvasTex(1024, 1024, (g, w, h) => {
+  const rows = 8;
+  for (let r = 0; r < rows; r++) {
+    let x = -rand() * 400;
+    while (x < w) {
+      const len = 300 + rand() * 500, tone = 0.82 + rand() * 0.3;
+      g.fillStyle = `rgb(${120 * tone | 0},${84 * tone | 0},${55 * tone | 0})`;
+      g.fillRect(x, r * h / rows, len, h / rows);
+      for (let k = 0; k < 18; k++) { g.strokeStyle = `rgba(40,24,12,${0.05 + rand() * 0.08})`; g.lineWidth = 1 + rand() * 2;
+        const y = r * h / rows + rand() * h / rows; g.beginPath(); g.moveTo(x, y); g.bezierCurveTo(x + len * .3, y + rand() * 6 - 3, x + len * .6, y + rand() * 6 - 3, x + len, y); g.stroke(); }
+      g.fillStyle = 'rgba(20,12,6,.55)'; g.fillRect(x, r * h / rows, 2, h / rows);
+      x += len;
+    }
+    g.fillStyle = 'rgba(20,12,6,.6)'; g.fillRect(0, r * h / rows, w, 2);
+  }
+}, [3, 3]);
+const plasterTex = canvasTex(512, 512, (g, w, h) => {
+  g.fillStyle = '#cfc7ba'; g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 9000; i++) { g.fillStyle = `rgba(${rand() < .5 ? '255,250,240' : '90,80,70'},${rand() * 0.05})`; g.fillRect(rand() * w, rand() * h, 2 + rand() * 3, 2 + rand() * 3); }
+}, [2, 2]);
+const fabricTex = canvasTex(256, 256, (g, w, h) => {
+  g.fillStyle = '#3b414d'; g.fillRect(0, 0, w, h);
+  for (let y = 0; y < h; y += 2) { g.fillStyle = `rgba(0,0,0,${0.08 + rand() * .06})`; g.fillRect(0, y, w, 1); }
+  for (let x = 0; x < w; x += 2) { g.fillStyle = `rgba(255,255,255,${rand() * .04})`; g.fillRect(x, 0, 1, h); }
+}, [4, 4]);
+const PBR = {
+  Plaster:  { map: plasterTex, color: 0xffffff, roughness: 0.92 },
+  Ceiling:  { color: 0xd9d3c8, roughness: 0.95 },
+  Floor:    { map: oakPlanks, color: 0xffffff, roughness: 0.48 },
+  Furniture:{ color: 0x6e4b31, roughness: 0.5 },
+  Fabric:   { map: fabricTex, color: 0xffffff, roughness: 0.95 },
+  Dark:     { color: 0x18191c, roughness: 0.55 },
+  Metal:    { color: 0x9a9da3, roughness: 0.32, metalness: 1 },
+  White:    { color: 0xe4ded3, roughness: 0.6 },
+  Trim:     { color: 0xddd6ca, roughness: 0.5 },
+  Door:     { color: 0xcfc6b6, roughness: 0.55 },
+  Concrete: { color: 0x6f6c67, roughness: 0.9 },
+  Stone:    { color: 0xb9b2a6, roughness: 0.35 },
+  'Window Frame': { color: 0x2b2c30, roughness: 0.45, metalness: 0.6 },
+  Mirror:   { color: 0xffffff, roughness: 0.02, metalness: 1 },
+  Diffuser: { color: 0xf2efe8, roughness: 0.4, emissive: 0xfff1dc },
+  Glass:    { color: 0xaabbcc, roughness: 0.05, metalness: 0.2, transparent: true, opacity: 0.14, depthWrite: false },
+};
+
+// ---------- set ----------
+const meshes = []; const ceilingParts = [];
+let screen, screenLight, cityGroup;
+const glbCams = {};
+const glbBytes = Uint8Array.from(atob(window.APARTMENT_GLB), (c) => c.charCodeAt(0)).buffer;
+new GLTFLoader().parse(glbBytes, '', (gltf) => {
+  const root = gltf.scene;
+  const doomed = [];
+  root.traverse((o) => {
+    if (o.isLight) doomed.push(o);
+    if (o.isCamera) glbCams[o.name.replace(/_Orientation$/, '')] = o;
+    if (o.isMesh) {
+      o.castShadow = o.receiveShadow = true;
+      const name = o.material?.name || '';
+      o.userData.grey = o.material;
+      const spec = PBR[name];
+      o.userData.pbr = spec ? new THREE.MeshStandardMaterial({ name, ...spec }) : o.material;
+      if (name === 'Glass') o.castShadow = false;
+      meshes.push(o);
+      let p = o; while (p) { if (/^(Ceiling|Balcony_Soffit|Fixture_CeilingLight)/.test(p.name)) { ceilingParts.push(o); break; } p = p.parent; }
+    }
+  });
+  doomed.forEach((l) => l.parent.remove(l));
+  scene.add(root);
+  buildScreen(); buildCity(); buildLights();
+  applyMaterials(); setLook('3am'); setCam('wide');
+  $('status').hidden = true;
+}, (e) => { $('status').textContent = 'Could not read the apartment model: ' + e.message; });
+
+// Laptop screen: live code texture + an area light that actually lights Ivan's side of the desk.
+const codeCanvas = document.createElement('canvas'); codeCanvas.width = 640; codeCanvas.height = 420;
+const codeTex = new THREE.CanvasTexture(codeCanvas); codeTex.colorSpace = THREE.SRGBColorSpace;
+const lines = [
+  '$ python triage.py --inbox ivan@ --since 18:00', 'fetched 214 messages', 'classify: reply_needed=61 fyi=118 spam=35',
+  'def draft_reply(msg, tone="ivan"):', '    ctx = summarize(thread(msg))', '    return claude.complete(prompt(ctx, tone))',
+  '>>> review_and_approve(batch=20)', 'approved 20/20 ✓', '# TODO: calendar, then docs', '$ python calendar_sync.py',
+  'conflicts resolved: 3', 'Claude: Want me to handle meeting scheduling too?', '> yes. do it.', 'writing scheduler.py …',
+];
+let typed = 0;
+function drawCode(t) {
+  const g = codeCanvas.getContext('2d'); const W = codeCanvas.width, H = codeCanvas.height;
+  g.fillStyle = '#0b1220'; g.fillRect(0, 0, W, H);
+  g.fillStyle = '#e8edf6'; g.fillRect(W * 0.58, 0, W * 0.42, H);            // Claude chat pane
+  g.fillStyle = '#15213a'; g.fillRect(0, 0, W * 0.58, 26);
+  g.font = '15px IBM Plex Mono, monospace';
+  const chars = Math.floor(t * 18) % 900; let left = chars; let y = 50;
+  for (const l of lines) { if (left <= 0) break; const s = l.slice(0, left); left -= l.length;
+    g.fillStyle = l.startsWith('$') || l.startsWith('>>>') ? '#7ee0a3' : l.startsWith('#') ? '#6b7a99' : '#cfe0ff';
+    g.fillText(s, 14, y); y += 22; if (y > H - 10) break; }
+  if (Math.floor(t * 2) % 2) { g.fillStyle = '#cfe0ff'; g.fillRect(14 + 0, y - 16, 9, 18); }
+  g.fillStyle = '#2b2b2b'; g.font = '14px IBM Plex Sans, sans-serif';
+  ['Ivan: automate the simple ones', 'Claude: Here is a classifier and', 'a reply drafter. You review', 'and approve in batches.'].forEach((s, i) => g.fillText(s, W * 0.6, 60 + i * 24));
+  g.fillStyle = '#d97757'; g.beginPath(); g.arc(W * 0.6 + 6, 34, 6, 0, 7); g.fill();
+  codeTex.needsUpdate = true;
+}
+function buildScreen() {
+  // Lid centre from the shell script's laptop geometry (Blender coords), tilted back 18°.
+  screen = new THREE.Mesh(new THREE.PlaneGeometry(0.29, 0.185),
+    new THREE.MeshBasicMaterial({ map: codeTex, color: 0x9a9a9a, toneMapped: true }));
+  screen.position.copy(B(6.95, 3.232, 0.864)); screen.rotation.x = THREE.MathUtils.degToRad(-18);
+  scene.add(screen);
+  screenLight = new THREE.RectAreaLight(0x9fc2ff, 6, 0.29, 0.185);
+  screenLight.position.copy(screen.position).add(new THREE.Vector3(0, 0, 0.01));
+  screenLight.rotation.copy(screen.rotation); screenLight.rotateY(Math.PI);  // emit toward +Z (Ivan)
+  scene.add(screenLight);
+}
+
+// Mid-rise city around the flat: Ivan is ~7 floors up, a parking lot directly below.
+function buildCity() {
+  cityGroup = new THREE.Group(); scene.add(cityGroup);
+  const winTex = canvasTex(256, 512, (g, w, h) => {
+    g.fillStyle = '#0a0b10'; g.fillRect(0, 0, w, h);
+    for (let y = 8; y < h; y += 22) for (let x = 6; x < w; x += 18) {
+      const lit = rand() < 0.22; g.fillStyle = lit ? (rand() < .5 ? '#ffd9a0' : '#c9d8ff') : '#141722'; g.fillRect(x, y, 11, 13); }
+  });
+  const ground = -21;
+  const lot = new THREE.Mesh(new THREE.PlaneGeometry(400, 400), new THREE.MeshStandardMaterial({ color: 0x15161a, roughness: 0.95 }));
+  lot.rotation.x = -Math.PI / 2; lot.position.y = ground; lot.receiveShadow = true; cityGroup.add(lot);
+  for (let i = 0; i < 14; i++) { const s = new THREE.Mesh(new THREE.PlaneGeometry(0.12, 5), new THREE.MeshBasicMaterial({ color: 0x8a8a80 }));
+    s.rotation.x = -Math.PI / 2; s.position.set(14 + i * 2.6, ground + 0.02, -12); cityGroup.add(s); }
+  for (let i = 0; i < 70; i++) {
+    const a = rand() * Math.PI * 2, d = 45 + rand() * 160;
+    const w = 12 + rand() * 22, dpt = 12 + rand() * 22, hgt = 18 + rand() * (d > 120 ? 90 : 45);
+    const t = winTex.clone(); t.needsUpdate = true; t.repeat.set(w / 14, hgt / 26); t.offset.set(rand(), rand());
+    const m = new THREE.MeshStandardMaterial({ color: 0x1a1c22, roughness: 0.9, emissive: 0xffffff, emissiveMap: t, emissiveIntensity: 0.9 });
+    const b = new THREE.Mesh(new THREE.BoxGeometry(w, hgt, dpt), m);
+    b.position.set(5 + Math.cos(a) * d, ground + hgt / 2, -3.8 + Math.sin(a) * d); b.rotation.y = rand() * 0.4;
+    cityGroup.add(b);
+  }
+  for (let i = 0; i < 8; i++) { const p = new THREE.PointLight(0xffb36b, 30, 25, 2); p.position.set(10 + i * 5, ground + 6, -14 + (i % 2) * 8); cityGroup.add(p); }
+}
+
+// ---------- lighting presets ----------
+const L = {};
+function buildLights() {
+  L.hemi = new THREE.HemisphereLight(0x8fa6d6, 0x1a140f, 0.0); scene.add(L.hemi);
+  L.sun = new THREE.DirectionalLight(0xffb07a, 0); L.sun.castShadow = true;
+  L.sun.shadow.mapSize.set(2048, 2048); L.sun.shadow.bias = -0.0004; L.sun.shadow.normalBias = 0.02;
+  Object.assign(L.sun.shadow.camera, { left: -9, right: 9, top: 9, bottom: -9, near: 1, far: 60 });
+  // East, ~12° above the horizon: rakes through the dining window across the desk.
+  L.sun.position.copy(B(5 + 29, 3.8 - 5, 6.5)); L.sun.target.position.copy(B(5, 3.8, 0.8));
+  scene.add(L.sun, L.sun.target);
+  L.cityEast = new THREE.RectAreaLight(0x6f86c9, 0, 2.4, 1.5); L.cityEast.position.copy(B(9.7, 3.6, 1.55)); L.cityEast.lookAt(B(5, 3.6, 1.0)); scene.add(L.cityEast);
+  L.cityNorth = new THREE.RectAreaLight(0x7a6f9a, 0, 2.2, 2.2); L.cityNorth.position.copy(B(4.75, 5.35, 1.2)); L.cityNorth.lookAt(B(4.75, 2.0, 1.0)); scene.add(L.cityNorth);
+  L.fill = new THREE.AmbientLight(0x30384f, 0); scene.add(L.fill);
+}
+const LOOKS = {
+  review:  { label: 'Review light', time: 'flat work light', bg: 0x3a3f48, hemi: 1.6, sun: 2.0, sunColor: 0xfff4e6, screen: 2, cityE: 0, cityN: 0, fill: 0.6, exp: 0.2, city: 0.4 },
+  '3am':   { label: '3:00 AM', time: '3:00 AM', bg: 0x05070d, hemi: 0.02, sun: 0, screen: 3.2, cityE: 0.9, cityN: 0.6, fill: 0.03, exp: 0.6, city: 1.0 },
+  '4am':   { label: '4:00 AM', time: '4:00 AM · eyes burning', bg: 0x090d1a, hemi: 0.06, sun: 0, screen: 4, cityE: 0.6, cityN: 0.45, fill: 0.04, exp: 0.5, city: 0.6 },
+  sunrise: { label: 'Sunrise', time: '6:12 AM · sunrise', bg: 0xd9a27a, hemi: 0.5, sun: 7.5, sunColor: 0xffa66b, screen: 1.2, cityE: 0, cityN: 0.5, fill: 0.15, exp: 0.1, city: 0.08 },
+};
+let look = '3am';
+function setLook(k) {
+  look = k; const s = LOOKS[k];
+  scene.background = new THREE.Color(s.bg); scene.fog = new THREE.Fog(s.bg, 60, 260);
+  L.hemi.intensity = s.hemi; L.sun.intensity = s.sun; if (s.sunColor) L.sun.color.set(s.sunColor);
+  screenLight.intensity = s.screen; L.cityEast.intensity = s.cityE * 4; L.cityNorth.intensity = s.cityN * 4; L.fill.intensity = s.fill;
+  cityGroup.traverse((o) => { if (o.material?.emissiveMap) o.material.emissiveIntensity = s.city; if (o.isPointLight) o.intensity = 30 * s.city; });
+  meshes.forEach((m) => { if (m.material.name === 'Diffuser') m.material.emissiveIntensity = k === 'review' ? 0.6 : 0; });
+  $('exposure').value = s.exp; updateExposure(); updateChips(); updateSlate();
+}
+
+// ---------- cameras ----------
+const CAMS = {
+  wide:  { label: 'Wide · from main door', from: 'Cam_Wide', lens: 16 },
+  desk:  { label: 'Desk · facing Ivan', from: 'Cam_Desk', lens: 24 },
+  ots:   { label: 'Over the shoulder', pos: B(7.25, 2.3, 1.32), at: B(6.95, 3.25, 0.86), lens: 35 },
+  pov:   { label: "Ivan's eyes", pos: B(6.95, 2.66, 1.18), at: B(6.95, 3.3, 0.86), lens: 28 },
+  glass: { label: 'Desk close-up', pos: B(7.45, 2.9, 0.95), at: B(7.3, 3.15, 0.8), lens: 50 },
+  plan:  { label: 'Plan · ceiling off', pos: B(5, 3.85, 17), at: B(5, 3.86, 0), lens: 24, noCeiling: true },
+};
+let camKey = 'wide';
+function setCam(k) {
+  camKey = k; const c = CAMS[k];
+  if (c.from && glbCams[c.from]) {
+    const src = glbCams[c.from]; src.updateWorldMatrix(true, false);
+    src.getWorldPosition(camera.position);
+    const dir = src.getWorldDirection(new THREE.Vector3());
+    controls.target.copy(camera.position).add(dir.multiplyScalar(3));
+  } else { camera.position.copy(c.pos); controls.target.copy(c.at); }
+  camera.up.set(0, 1, 0); if (k === 'plan') camera.up.set(0, 0, -1);
+  $('lens').value = c.lens; updateLens();
+  $('ceiling').checked = !c.noCeiling; applyCeiling();
+  controls.update(); updateChips(); updateSlate();
+}
+
+// ---------- UI ----------
+function chips(el, defs, on) {
+  for (const [k, v] of Object.entries(defs)) { const b = document.createElement('button'); b.className = 'chip'; b.type = 'button';
+    b.textContent = v.label.split(' · ')[0]; b.dataset.k = k; b.addEventListener('click', () => on(k)); el.appendChild(b); }
+}
+chips($('cams'), CAMS, setCam); chips($('looks'), LOOKS, setLook);
+function updateChips() {
+  document.querySelectorAll('#cams .chip').forEach((b) => b.setAttribute('aria-pressed', b.dataset.k === camKey));
+  document.querySelectorAll('#looks .chip').forEach((b) => b.setAttribute('aria-pressed', b.dataset.k === look));
+}
+function updateSlate() {
+  $('slateShot').textContent = CAMS[camKey].label;
+  $('slateMeta').textContent = `${$('lens').value} mm · ${LOOKS[look].time}`;
+}
+function updateLens() {
+  const mm = +$('lens').value; const aspect = camera.aspect || 1.7;
+  // 36 mm sensor across the frame width, like Blender's default.
+  camera.fov = THREE.MathUtils.radToDeg(2 * Math.atan(18 / mm / aspect));
+  camera.updateProjectionMatrix(); $('lensOut').value = mm + ' mm'; updateSlate();
+}
+function updateExposure() { renderer.toneMappingExposure = Math.pow(2, +$('exposure').value); $('expOut').value = (+$('exposure').value).toFixed(1) + ' EV'; }
+function applyMaterials() { const on = $('mats').checked; meshes.forEach((m) => { m.material = on ? m.userData.pbr : m.userData.grey; }); setLookIfReady(); }
+function setLookIfReady() { if (screenLight) setLook(look); }
+function applyCeiling() { ceilingParts.forEach((m) => { m.visible = $('ceiling').checked; }); }
+function updateDof() {
+  bokeh.enabled = $('dof').checked;
+  bokeh.uniforms.focus.value = +$('focus').value;
+  bokeh.uniforms.aperture.value = 0.0045 / +$('aperture').value;
+  $('focusOut').value = (+$('focus').value).toFixed(2) + ' m'; $('apOut').value = 'f/' + (+$('aperture').value).toFixed(1);
+}
+$('lens').addEventListener('input', updateLens);
+$('exposure').addEventListener('input', updateExposure);
+$('mats').addEventListener('change', applyMaterials);
+$('ceiling').addEventListener('change', applyCeiling);
+$('city').addEventListener('change', () => { cityGroup.visible = $('city').checked; });
+['dof', 'focus', 'aperture'].forEach((id) => $(id).addEventListener('input', updateDof));
+$('fx').addEventListener('change', () => { const on = $('fx').checked; bloom.enabled = streak.enabled = on;
+  film.uniforms.grain.value = on ? 0.06 : 0; film.uniforms.vignette.value = on ? 0.42 : 0; film.uniforms.ca.value = on ? 0.0025 : 0; });
+$('bars').addEventListener('change', () => { film.uniforms.bars.value = $('bars').checked ? 1 : 0; });
+updateDof();
+
+// ---------- loop ----------
+function resize() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  renderer.setSize(w, h, false); composer.setSize(w, h); camera.aspect = w / h;
+  bloom.resolution.set(w / 2, h / 2);
+  streak.uniforms.texel.value.set(1 / w, 1 / h); film.uniforms.aspect.value = w / h;
+  updateLens();
+}
+new ResizeObserver(resize).observe(stage); resize();
+const clock = new THREE.Clock();
+renderer.setAnimationLoop(() => {
+  const t = clock.getElapsedTime();
+  if (screen) drawCode(t);
+  film.uniforms.time.value = t % 100;
+  controls.update(); composer.render();
+});
+</script>

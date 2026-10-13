@@ -55,17 +55,17 @@ APT = {
         {"id": "N", "kind": "ext", "box": (6.05, 7.45, 10.0, 7.7), "openings": []},
         {"id": "KitchenW", "kind": "ext", "box": (6.05, 5.3, 6.3, 7.7), "openings": []},
         {"id": "Balcony", "kind": "ext", "box": (0.0, 5.3, 6.3, 5.55), "openings": [
-            {"id": "BedroomWindow", "type": "window", "at": 1.2, "width": 1.4, "sill": 0.9,
+            {"id": "BedroomWindow", "type": "window", "at": 1.75, "width": 1.6, "sill": 0.9,
              "head": 2.2, "cols": 2, "room": "Bedroom"},
-            {"id": "BalconyDoor", "type": "slider", "at": 4.6, "width": 2.2, "sill": 0.0,
+            {"id": "BalconyDoor", "type": "slider", "at": 4.75, "width": 2.2, "sill": 0.0,
              "head": 2.3, "room": "Living"},
         ]},
         # Interior partitions (0.12 m). Ends overlap their neighbours by 5 cm so the joints are clean.
-        {"id": "BedHall", "kind": "int", "box": (2.64, 0.2, 2.76, 5.35), "openings": [
+        {"id": "BedHall", "kind": "int", "box": (3.40, 0.2, 3.52, 5.35), "openings": [
             {"id": "BedroomDoor", "type": "door", "at": 2.7, "width": 0.8, "head": 2.05,
              "hinge": "L", "swing_to": (1.5, 2.7), "angle": 60, "room": "Bedroom"},
         ]},
-        {"id": "BathW_N", "kind": "int", "box": (0.2, 2.04, 2.7, 2.16), "openings": [
+        {"id": "BathW_N", "kind": "int", "box": (0.2, 2.04, 3.46, 2.16), "openings": [
             {"id": "BathWDoor", "type": "door", "at": 0.825, "width": 0.75, "head": 2.05,
              "hinge": "L", "swing_to": (0.8, 1.2), "angle": 55, "room": "Bath_W"},
         ]},
@@ -77,12 +77,12 @@ APT = {
     ],
     # Zones for collections, skirting and ceiling lights. First match wins.
     "rooms": {
-        "Bedroom": (0.25, 2.16, 2.64, 5.3),
-        "Bath_W": (0.25, 0.25, 2.64, 2.04),
+        "Bedroom": (0.25, 2.16, 3.40, 5.3),
+        "Bath_W": (0.25, 0.25, 3.40, 2.04),
         "Bath_E": (6.01, 0.25, 9.75, 2.04),
-        "Entry": (2.76, 0.25, 5.89, 2.16),
-        "Desk": (5.89, 2.16, 7.9, 3.7),
-        "Living": (2.76, 2.16, 6.3, 5.3),
+        "Entry": (3.52, 0.25, 5.89, 2.16),
+        "Desk": (5.89, 2.16, 7.9, 3.75),
+        "Living": (3.52, 2.16, 6.3, 5.3),
         "Dining": (6.3, 2.16, 9.75, 5.2),
         "Kitchen": (6.3, 5.2, 9.75, 7.45),
         "Balcony": (0.0, 5.55, 6.05, 7.7),
@@ -91,44 +91,44 @@ APT = {
                 "rail_runs": [((0.08, 7.62), (6.05, 7.62)), ((0.08, 5.55), (0.08, 7.62))]},
     # Ceiling fixtures: room -> (x, y). One light each.
     "ceiling_lights": {
-        "Living": (4.3, 3.8), "Entry": (4.3, 1.2), "Dining": (8.6, 4.35),
-        "Kitchen": (8.0, 6.35), "Bedroom": (1.45, 3.7), "Bath_W": (1.45, 1.15),
+        "Living": (4.7, 3.8), "Entry": (4.7, 1.2), "Dining": (8.6, 4.35),
+        "Kitchen": (8.0, 6.35), "Bedroom": (1.8, 3.7), "Bath_W": (1.8, 1.15),
         "Bath_E": (7.9, 1.15), "Balcony": (3.0, 6.6),
     },
     # Wall plates: (kind, room, x, y, z, facing) with facing = the direction the plate faces.
     "plates": [
         ("Switch", "Entry", 5.35, 0.25, 1.1, "+y"),
-        ("Switch", "Entry", 3.6, 0.25, 1.1, "+y"),
-        ("Switch", "Bedroom", 2.64, 3.3, 1.1, "-x"),
+        ("Switch", "Entry", 3.9, 0.25, 1.1, "+y"),
+        ("Switch", "Bedroom", 3.40, 3.3, 1.1, "-x"),
         ("Switch", "Bedroom", 1.35, 2.16, 1.1, "+y"),
-        ("Switch", "Living", 2.76, 3.25, 1.1, "+x"),
+        ("Switch", "Living", 3.52, 3.25, 1.1, "+x"),
         ("Switch", "Bath_E", 8.6, 2.16, 1.1, "+y"),
         ("Switch", "Kitchen", 6.3, 5.75, 1.1, "+x"),
         ("Outlet", "Desk", 7.35, 2.16, 0.3, "+y"),
         ("Outlet", "Desk", 6.45, 2.16, 0.3, "+y"),
-        ("Outlet", "Living", 2.76, 4.5, 0.3, "+x"),
+        ("Outlet", "Living", 3.52, 4.5, 0.3, "+x"),
         ("Outlet", "Entry", 5.89, 1.0, 0.3, "-x"),
         ("Outlet", "Bedroom", 0.25, 4.3, 0.3, "+x"),
-        ("Outlet", "Bedroom", 2.64, 4.4, 0.3, "-x"),
+        ("Outlet", "Bedroom", 3.40, 4.4, 0.3, "-x"),
         ("Outlet", "Kitchen", 7.0, 7.45, 1.1, "-y"),
         ("Outlet", "Kitchen", 8.6, 7.45, 1.1, "-y"),
         ("Outlet", "Dining", 9.75, 5.0, 0.3, "-x"),
         ("Outlet", "Bath_W", 1.15, 0.25, 1.1, "+y"),
         ("Outlet", "Bath_E", 7.65, 0.25, 1.1, "+y"),
-        ("Thermostat", "Entry", 2.76, 1.6, 1.5, "+x"),
+        ("Thermostat", "Entry", 3.52, 1.6, 1.5, "+x"),
     ],
     # Furniture: (item, room, kind, (w, d, h), (x, y, z_base), rot_deg).
     # w along local X, d along local Y. rot 0 = the item's front (user side) faces -Y (south);
     # rot 90 -> faces +X (east), 180 -> +Y (north), -90 -> -X (west).
     "furniture": [
-        ("BookDrawer", "Living", "drawer_books", (0.8, 0.4, 0.9), (2.96, 3.9, 0), 90),
-        ("FloorLamp", "Living", "floor_lamp", (0.3, 0.3, 1.75), (3.0, 5.02, 0), 0),
-        ("BeanBag", "Living", "bean_bag", (0.85, 0.85, 0.6), (3.68, 4.6, 0), 0),
-        ("ShoeRack", "Entry", "shoe_rack", (0.8, 0.32, 0.5), (2.92, 0.75, 0), 90),
-        ("Desk", "Desk", "desk", (1.4, 0.7, 0.75), (6.95, 2.52, 0), 180),
-        ("OfficeChair", "Desk", "office_chair", (0.62, 0.62, 1.15), (6.95, 3.3, 0), 0),
-        ("Laptop", "Desk", "laptop", (0.31, 0.22, 0.22), (6.95, 2.56, 0.75), 180),
-        ("DeskLamp", "Desk", "desk_lamp", (0.16, 0.16, 0.45), (7.47, 2.33, 0.75), 180),
+        ("BookDrawer", "Living", "drawer_books", (0.8, 0.4, 0.9), (3.72, 3.9, 0), 90),
+        ("FloorLamp", "Living", "floor_lamp", (0.3, 0.3, 1.75), (3.76, 5.02, 0), 0),
+        ("BeanBag", "Living", "bean_bag", (0.85, 0.85, 0.6), (4.44, 4.45, 0), 0),
+        ("ShoeRack", "Entry", "shoe_rack", (0.8, 0.32, 0.5), (3.68, 0.75, 0), 90),
+        ("Desk", "Desk", "desk", (1.4, 0.7, 0.75), (6.95, 3.2, 0), 0),
+        ("OfficeChair", "Desk", "office_chair", (0.62, 0.62, 1.15), (6.95, 2.58, 0), 180),
+        ("Laptop", "Desk", "laptop", (0.31, 0.22, 0.22), (6.95, 3.1, 0.75), 0),
+        ("DeskLamp", "Desk", "desk_lamp", (0.16, 0.16, 0.45), (7.5, 3.4, 0.75), 0),
         ("WallClock", "Desk", "clock", (0.3, 0.04, 0.3), (6.95, 2.18, 1.6), 180),
         ("DiningTable", "Dining", "round_table", (0.9, 0.9, 0.75), (8.6, 4.35, 0), 0),
         ("DiningChair_W", "Dining", "chair", (0.45, 0.48, 0.9), (7.95, 4.35, 0), 90),
@@ -141,12 +141,12 @@ APT = {
         ("Fridge", "Kitchen", "fridge", (0.7, 0.65, 1.85), (9.4, 7.12, 0), 0),
         ("UpperCabinets", "Kitchen", "upper_cabinets", (2.15, 0.35, 0.72), (7.975, 7.275, 1.5), 0),
         ("Island", "Kitchen", "counter", (2.45, 0.65, 0.92), (8.525, 5.525, 0), 180),
-        ("Bed", "Bedroom", "bed", (1.4, 1.9, 0.55), (1.2, 3.7, 0), 90),
+        ("Bed", "Bedroom", "bed", (1.6, 2.0, 0.55), (1.35, 3.75, 0), 90),
         ("BedsideDrawer", "Bedroom", "drawer", (0.45, 0.4, 0.55), (0.45, 4.67, 0), 90),
         ("BedsideLamp", "Bedroom", "table_lamp", (0.22, 0.22, 0.42), (0.45, 4.7, 0.55), 0),
         ("ShowerTray", "Bath_W", "shower", (0.9, 0.9, 2.0), (0.7, 0.7, 0), 90),
-        ("Toilet_W", "Bath_W", "toilet", (0.38, 0.68, 0.8), (2.3, 0.95, 0), -90),
-        ("Vanity_W", "Bath_W", "vanity", (0.6, 0.45, 0.85), (1.6, 0.475, 0), 180),
+        ("Toilet_W", "Bath_W", "toilet", (0.38, 0.68, 0.8), (3.05, 0.95, 0), -90),
+        ("Vanity_W", "Bath_W", "vanity", (0.6, 0.45, 0.85), (2.0, 0.475, 0), 180),
         ("Toilet_E", "Bath_E", "toilet", (0.38, 0.68, 0.8), (6.35, 1.0, 0), 90),
         ("Vanity_E", "Bath_E", "vanity", (0.6, 0.45, 0.85), (7.2, 0.475, 0), 180),
         ("Bathtub", "Bath_E", "tub", (1.7, 0.75, 0.55), (8.9, 0.625, 0), 0),
@@ -880,14 +880,14 @@ def build_cameras(colls):
     look_at(obj, (4.15, 5.3, 1.15))
     colls["Cameras"].objects.link(obj)
     cams["wide"] = obj
-    # Desk 3/4: from the hall, west of the desk; Ivan's chair in profile-3/4, the east window behind.
+    # Desk 3/4: from the living side, facing Ivan across the laptop; east window to frame left.
     desk = bpy.data.cameras.new("Cam_Desk")
     desk.lens = 24
     desk.clip_start = 0.05
     desk.dof.use_dof = False
     obj = bpy.data.objects.new("Cam_Desk", desk)
-    obj.location = (5.25, 2.55, 1.45)
-    look_at(obj, (7.6, 3.55, 0.95))
+    obj.location = (6.2, 5.0, 1.35)
+    look_at(obj, (6.95, 2.7, 0.95))
     colls["Cameras"].objects.link(obj)
     cams["desk"] = obj
     return cams
