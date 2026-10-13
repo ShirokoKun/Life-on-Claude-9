@@ -1,0 +1,280 @@
+{
+  "plaster_wall": {
+    "source": "polyhaven:white_stucco",
+    "license": "CC0",
+    "url": "https://polyhaven.com/a/white_stucco",
+    "tile_m": 2.0,
+    "maps": [
+      "albedo",
+      "normal",
+      "rough",
+      "ao"
+    ]
+  },
+  "oak_floor": {
+    "source": "polyhaven:wood_floor",
+    "license": "CC0",
+    "url": "https://polyhaven.com/a/wood_floor",
+    "tile_m": 1.7,
+    "maps": [
+      "albedo",
+      "normal",
+      "rough",
+      "ao"
+    ]
+  },
+  "walnut": {
+    "source": "ambientcg:Wood066",
+    "license": "CC0",
+    "url": "https://ambientcg.com/a/Wood066",
+    "tile_m": 0.4,
+    "maps": [
+      "albedo",
+      "normal",
+      "rough"
+    ]
+  },
+  "light_wood": {
+    "source": "polyhaven:oak_veneer_01",
+    "license": "CC0",
+    "url": "https://polyhaven.com/a/oak_veneer_01",
+    "tile_m": 1.83,
+    "maps": [
+      "albedo",
+      "normal",
+      "rough",
+      "ao"
+    ]
+  },
+  "painted_wood": {
+    "source": "ambientcg:Plastic013A",
+    "license": "CC0",
+    "url": "https://ambientcg.com/a/Plastic013A",
+    "tile_m": 1.0,
+    "maps": [
+      "albedo",
+      "normal",
+      "rough"
+    ],
+    "tile_m_estimated": true,
+    "note": "No clean white painted-wood/metal CC0 asset found (all are weathered/rusty); uses a subtle white satin plastic surface as a painted-finish stand-in. Rough ~0.40."
+  },
+  "black_metal": {
+    "source": "ambientcg:Metal027",
+    "license": "CC0",
+    "url": "https://ambientcg.com/a/Metal027",
+    "tile_m": 1.0,
+    "maps": [
+      "albedo",
+      "normal",
+      "rough"
+    ],
+    "tile_m_estimated": true,
+    "note": "Black powder-coated steel. Albedo desaturated to neutral (source had a faint blue cast). It is paint: use metalness 0-0.2. Rough ~0.65."
+  },
+  "brushed_metal": {
+    "source": "ambientcg:Metal009",
+    "license": "CC0",
+    "url": "https://ambientcg.com/a/Metal009",
+    "tile_m": 0.5,
+    "maps": [
+      "albedo",
+      "normal",
+      "rough"
+    ],
+    "tile_m_estimated": true,
+    "note": "Brush direction is horizontal (U). Use metalness 1."
+  },
+  "fabric_weave": {
+    "source": "ambientcg:Fabric039",
+    "license": "CC0",
+    "url": "https://ambientcg.com/a/Fabric039",
+    "tile_m": 0.25,
+    "maps": [
+      "albedo",
+      "normal",
+      "rough",
+      "ao"
+    ],
+    "tile_m_estimated": true,
+    "note": "Dark grey woven fabric; strong normal, use normalScale ~0.5-1."
+  },
+  "rug": {
+    "source": "ambientcg:Carpet016",
+    "license": "CC0",
+    "url": "https://ambientcg.com/a/Carpet016",
+    "tile_m": 1.7,
+    "maps": [
+      "albedo",
+      "normal",
+      "rough",
+      "ao"
+    ]
+  },
+  "linen": {
+    "source": "ambientcg:Fabric036",
+    "license": "CC0",
+    "url": "https://ambientcg.com/a/Fabric036",
+    "tile_m": 0.25,
+    "maps": [
+      "albedo",
+      "normal",
+      "rough",
+      "ao"
+    ],
+    "tile_m_estimated": true,
+    "note": "Neutral light grey slub weave; tint via material.color."
+  },
+  "knit": {
+    "source": "ambientcg:Fabric019",
+    "license": "CC0",
+    "url": "https://ambientcg.com/a/Fabric019",
+    "tile_m": 0.25,
+    "maps": [
+      "albedo",
+      "normal",
+      "rough"
+    ],
+    "tile_m_estimated": true,
+    "note": "White wool knit; tint via material.color. Source opacity map not included."
+  },
+  "cardboard": {
+    "source": "ambientcg:Paper004",
+    "license": "CC0",
+    "url": "https://ambientcg.com/a/Paper004",
+    "tile_m": 0.3,
+    "maps": [
+      "albedo",
+      "normal",
+      "rough"
+    ],
+    "note": "Brown kraft packing paper."
+  },
+  "paper": {
+    "source": "ambientcg:Paper001",
+    "license": "CC0",
+    "url": "https://ambientcg.com/a/Paper001",
+    "tile_m": 0.3,
+    "maps": [
+      "albedo",
+      "normal",
+      "rough"
+    ],
+    "tile_m_estimated": true,
+    "note": "Source is 2048x1201 tileable; stacked 2x vertically then fit to 2048x2048 (fibres ~17% vertically compressed, still tileable)."
+  },
+  "cork": {
+    "source": "ambientcg:Cork002",
+    "license": "CC0",
+    "url": "https://ambientcg.com/a/Cork002",
+    "tile_m": 0.5,
+    "maps": [
+      "albedo",
+      "normal",
+      "rough"
+    ],
+    "tile_m_estimated": true
+  },
+  "concrete": {
+    "source": "polyhaven:brushed_concrete",
+    "license": "CC0",
+    "url": "https://polyhaven.com/a/brushed_concrete",
+    "tile_m": 2.5,
+    "maps": [
+      "albedo",
+      "normal",
+      "rough",
+      "ao"
+    ]
+  },
+  "asphalt": {
+    "source": "polyhaven:clean_asphalt",
+    "license": "CC0",
+    "url": "https://polyhaven.com/a/clean_asphalt",
+    "tile_m": 2.1,
+    "maps": [
+      "albedo",
+      "normal",
+      "rough",
+      "ao"
+    ]
+  },
+  "ceramic": {
+    "source": "ambientcg:Porcelain001",
+    "license": "CC0",
+    "url": "https://ambientcg.com/a/Porcelain001",
+    "tile_m": 0.5,
+    "maps": [
+      "albedo",
+      "normal",
+      "rough"
+    ],
+    "tile_m_estimated": true,
+    "note": "White glazed porcelain; rough ~0.07 with slight variation. Tint via material.color."
+  },
+  "plastic": {
+    "source": "ambientcg:Plastic012A",
+    "license": "CC0",
+    "url": "https://ambientcg.com/a/Plastic012A",
+    "tile_m": 0.5,
+    "maps": [
+      "albedo",
+      "normal",
+      "rough"
+    ],
+    "tile_m_estimated": true,
+    "note": "Black plastic. Roughness remapped from ~0.40 to ~0.61 mean (r = 0.35 + 0.65*r_src) for a matte look."
+  },
+  "leather": {
+    "source": "ambientcg:Leather030",
+    "license": "CC0",
+    "url": "https://ambientcg.com/a/Leather030",
+    "tile_m": 0.45,
+    "maps": [
+      "albedo",
+      "normal",
+      "rough"
+    ]
+  },
+  "terracotta": {
+    "source": "ambientcg:Clay001",
+    "license": "CC0",
+    "url": "https://ambientcg.com/a/Clay001",
+    "tile_m": 1.0,
+    "maps": [
+      "albedo",
+      "normal",
+      "rough",
+      "ao"
+    ],
+    "tile_m_estimated": true,
+    "note": "Unglazed brown/terracotta clay."
+  },
+  "soil": {
+    "source": "ambientcg:Ground048",
+    "license": "CC0",
+    "url": "https://ambientcg.com/a/Ground048",
+    "tile_m": 1.4,
+    "maps": [
+      "albedo",
+      "normal",
+      "rough",
+      "ao"
+    ]
+  },
+  "leaf": {
+    "source": "ambientcg:Leaf001",
+    "license": "CC0",
+    "url": "https://ambientcg.com/a/Leaf001",
+    "tile_m": 0.25,
+    "maps": [
+      "albedo",
+      "normal",
+      "rough",
+      "ao",
+      "alpha"
+    ],
+    "tile_m_estimated": true,
+    "note": "Not tileable: leaf atlas with two leaves (left/right halves) on black, plus alpha.jpg (opacity cut-out). Use alphaTest and map each leaf with UVs; not a monstera."
+  }
+}

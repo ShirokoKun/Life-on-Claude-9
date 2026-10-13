@@ -123,9 +123,10 @@ def apply(preset="3am"):
                 _glow(o, (1.0, 0.8, 0.6), 12.0)
     # Desk lamp ON: the warm pool on the desk against the cold screens (Birdcage ref).
     if p.get("lamp"):
-        shade = Vector((7.58 - 0.16, 3.48 - 0.10, 0.75 + 0.40))
+        from props_desk import LAMP_SHADE
+        shade = Vector(LAMP_SHADE) - Vector((0, 0, 0.02))
         lamp = _light("Desk_Lamp", "SPOT", shade, p["lamp"], (1.0, 0.60, 0.30), c, spot=(85, 0.75),
-                      target=(7.05, 3.10, 0.75), shadow_soft=0.02)
+                      target=(6.85, 3.05, 0.75), shadow_soft=0.02)
         lamp.visible_glossy = True
         bulb = bpy.data.materials.get("Fairy Bulb")
         geo_bulb = bpy.data.objects.get("Lamp_Shade")

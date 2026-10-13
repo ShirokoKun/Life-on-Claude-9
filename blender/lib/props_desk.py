@@ -8,6 +8,7 @@ import random
 from pathlib import Path
 
 import bpy
+from mathutils import Vector
 
 import geo
 import materials as M
@@ -234,7 +235,7 @@ def build_mouse_and_cable(m, c):
 
 def build_takeaway(m, c):
     """Lunch, fourteen hours ago: lid open, chopsticks laid across, barely touched."""
-    tx, ty = 6.40, 3.40
+    tx, ty = 6.58, 3.43
     lift = 0.012                     # sits on the printout stack
     geo.cyl("Takeaway_Box", 0.055, 0.065, (tx, ty, TOP + lift), m["kraft"], c, r_top=0.068, seg=4, rot=(0, 0, 45 + 12))
     geo.box("Takeaway_Noodles", (0.075, 0.075, 0.004), (tx, ty, TOP + lift + 0.052), m["noodle"], c, rot=(0, 0, 12), bev=0.002)
@@ -247,13 +248,20 @@ def build_takeaway(m, c):
                 rot=(0, 88, 15), seg=8, r_top=0.002)
 
 
+LAMP = (6.33, 3.47)                     # back-left corner: clear of both screens, reaching over the keyboard
+LAMP_SHADE = (LAMP[0] + 0.17, LAMP[1] - 0.10, TOP + 0.42)
+
+
 def build_lamp(m, c):
-    """Architect lamp, switched off: he works by screen light only."""
-    lx, ly = 7.58, 3.48
+    """Architect lamp on the back-left corner, its head reaching in over the keys."""
+    lx, ly = LAMP
+    sx, sy, sz = LAMP_SHADE
     geo.cyl("Lamp_Base", 0.07, 0.018, (lx, ly, TOP), m["steel"], c, seg=40, bev=0.003)
-    geo.tube("Lamp_Arm", [(lx, ly, TOP + 0.018), (lx - 0.03, ly - 0.02, TOP + 0.24), (lx - 0.16, ly - 0.10, TOP + 0.42)],
+    geo.tube("Lamp_Arm", [(lx, ly, TOP + 0.018), (lx + 0.03, ly - 0.02, TOP + 0.24), (sx, sy, sz)],
              0.006, m["steel"], c, handles="VECTOR")
-    geo.cyl("Lamp_Shade", 0.055, 0.13, (lx - 0.16, ly - 0.10, TOP + 0.42), m["steel"], c, rot=(0, 120, -150), r_top=0.025, seg=40)
+    aim = (Vector((6.85, 3.05, TOP)) - Vector(LAMP_SHADE)).to_track_quat("-Z", "Y").to_euler()   # wide end at the keys
+    geo.cyl("Lamp_Shade", 0.055, 0.13, (sx, sy, sz), m["steel"], c, rot=tuple(math.degrees(a) for a in aim),
+            r_top=0.025, seg=40)
 
 
 def build_chair(m, c):

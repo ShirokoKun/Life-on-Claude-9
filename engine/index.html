@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Claude Nine · 3:04 AM</title>
+<style>
+/* Screening room: the frame fills the window; a slim control rail on the right. Single dark look by choice. */
+:root {
+  --bg: #050608; --panel: rgba(12, 13, 17, .86); --line: #23262e; --ink: #e9e5dc; --mute: #8b8e98; --amber: #e9a35b; --tally: #e0483e;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace; --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: dark;
+}
+html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); font: 13px/1.45 var(--sans); overflow: hidden; }
+#stage { position: fixed; inset: 0; }
+#stage canvas { display: block; width: 100%; height: 100%; }
+#cap { position: absolute; left: 50%; bottom: 9%; transform: translateX(-50%); max-width: min(80ch, 86vw); text-align: center;
+  font-size: clamp(14px, 1.6vw, 22px); text-shadow: 0 1px 8px #000; pointer-events: none; }
+#slate { position: absolute; left: 12px; top: 10px; font: 11px var(--mono); color: var(--mute); letter-spacing: .06em; pointer-events: none; }
+#status { position: absolute; inset: 0; display: grid; place-items: center; font: 12px var(--mono); color: var(--mute); }
+aside { position: fixed; right: 12px; top: 12px; width: 260px; max-height: calc(100% - 24px); overflow: auto; background: var(--panel);
+  border: 1px solid var(--line); border-radius: 6px; padding: 12px; display: grid; gap: 12px; backdrop-filter: blur(6px); }
+aside h1 { margin: 0; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; }
+aside h1 b { color: var(--tally); font-weight: 400; }
+.row { display: grid; grid-template-columns: 1fr auto; gap: 4px 8px; align-items: center; }
+.row input[type=range] { grid-column: 1 / -1; width: 100%; accent-color: var(--amber); }
+output { font: 11px var(--mono); color: var(--mute); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+button { font: inherit; color: var(--ink); background: #15171d; border: 1px solid var(--line); border-radius: 4px; padding: 5px 9px; cursor: pointer; }
+button[aria-pressed=true] { border-color: var(--amber); color: var(--amber); }
+label.t { display: flex; gap: 8px; align-items: center; color: var(--mute); }
+.note { margin: 0; color: var(--mute); font-size: 11px; }
+#hide { position: fixed; right: 12px; bottom: 12px; }
+body.collapsed aside { display: none; }
+body.render aside, body.render #slate, body.render #hide, body.render #status { display: none !important; }
+</style>
+</head>
+<body>
+<div id="stage"><div id="cap"></div><div id="slate"></div><div id="status">Loading…</div></div>
+<aside>
+  <h1><b>●</b> Claude Nine · intro</h1>
+  <div class="chips"><button id="play" type="button">▶ Play</button><button id="free" type="button" aria-pressed="false">Free camera</button></div>
+  <div class="row"><label for="time">Timeline</label><output id="timeOut">0.0 s</output><input id="time" type="range" min="0" max="32" step="0.0417" value="0"></div>
+  <div><div class="note" style="margin-bottom:6px">Shots</div><div class="chips" id="shotChips"></div></div>
+  <label class="t"><input id="fx" type="checkbox" checked> Lens and film look</label>
+  <label class="t"><input id="caps" type="checkbox"> Captions</label>
+  <div class="row"><label for="exp">Exposure trim</label><output>EV</output><input id="exp" type="range" min="-2" max="2" step="0.05" value="0"></div>
+  <div class="row"><label for="lampK">Desk lamp</label><output>×</output><input id="lampK" type="range" min="0" max="2" step="0.05" value="1"></div>
+  <div class="row"><label for="scrK">Screen light</label><output>×</output><input id="scrK" type="range" min="0" max="2" step="0.05" value="1"></div>
+  <p class="note">Play runs the film with the voiceover. Free camera: drag to orbit, right-drag to pan, scroll to dolly.</p>
+</aside>
+<button id="hide" type="button" onclick="document.body.classList.toggle('collapsed')">Panel</button>
+<audio id="vo" src="assets/voiceover.wav" preload="auto"></audio>
+<script type="importmap">
+{ "imports": { "three": "./vendor/three/build/three.module.js", "three/addons/": "./vendor/three/examples/jsm/" } }
+</script>
+<script type="module" src="src/main.js"></script>
+</body>
+</html>
