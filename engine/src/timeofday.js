@@ -22,11 +22,19 @@ const sunDir = (az, el) => {             // Blender: from north, clockwise; towa
   return new THREE.Vector3(Math.sin(a) * Math.cos(e), Math.sin(e), -Math.cos(a) * Math.cos(e));
 };
 
+const FALLBACK_EV = { day: 1.6, evening: 1.0, sunrise: 0.2 };   // the Blender presets' exposures
+
 export async function loadSets(names, loadEXR, base) {
   const out = { '3am': base };
   await Promise.all(names.filter((n) => n !== '3am').map(async (n) => {
     const dir = `assets/lighting/${n}`;
-    const data = await (await fetch(`${dir}/lights.json`)).json();
+    const res = await fetch(`${dir}/lights.json`);
+    if (!res.ok) {                         // not baked yet: borrow the night lightmaps (structure checks only)
+      console.warn(`no lightmaps for ${n}; using 3am`);
+      out[n] = { LM: base.LM, exposure: FALLBACK_EV[n] ?? base.exposure };
+      return;
+    }
+    const data = await res.json();
     const [a, d, r] = await Promise.all(['ARCH', 'DESK', 'ROOM'].map((g) => loadEXR(`${dir}/lightmaps/lm_${g}.exr`)));
     for (const t of [a, d, r]) { t.channel = 1; t.flipY = false; t.colorSpace = THREE.LinearSRGBColorSpace; t.needsUpdate = true; }
     out[n] = { LM: { ARCH: a, DESK: d, ROOM: r }, exposure: data.exposure || 0 };

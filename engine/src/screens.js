@@ -105,7 +105,7 @@ export function wrap(g, text, maxW) {
 export function rr(g, x, y, w, h, r) { g.beginPath(); g.roundRect(x, y, w, h, r); }
 
 // ------------------------------------------------------------------ laptop
-function drawLaptop(g, t, keys) {
+export function drawLaptop(g, t, keys) {
   const W = 1600, H = 1000;
   g.fillStyle = C.ed; g.fillRect(0, 0, W, H);
   // menu bar
@@ -234,7 +234,7 @@ const SUBJECTS = ['re: Thursday sync', 'invoice 4471', 'Q3 planning notes', 'int
 const CONF = [0.97, 0.93, 0.71, 0.95, 0.88, 0.64, 0.99, 0.82, 0.91, 0.77, 0.69, 0.58];
 const SENT_AT = [31.6, 32.6, 33.5, 34.4, 35.1, 35.7, 36.3];
 
-function drawMonitor(g, t) {
+export function drawMonitor(g, t) {
   const W = 1600, H = 900;
   g.fillStyle = '#0d0f15'; g.fillRect(0, 0, W, H);
   g.fillStyle = '#151924'; g.fillRect(0, 0, W, 40);

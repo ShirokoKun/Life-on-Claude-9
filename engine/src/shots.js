@@ -74,7 +74,8 @@ const easeInOut = (x) => { x = Math.min(1, Math.max(0, x)); return 0.5 - 0.5 * M
 const lerp = (a, b, t) => a + (b - a) * t;
 const lerp3 = (a, b, t) => [lerp(a[0], b[0], t), lerp(a[1], b[1], t), lerp(a[2], b[2], t)];
 
-export function shotAt(t) { return SHOTS.find((s) => t >= s.t0 && t < s.t1) || SHOTS[SHOTS.length - 1]; }
+export function shotIn(shots, t) { return shots.find((s) => t >= s.t0 && t < s.t1) || shots[shots.length - 1]; }
+export function shotAt(t) { return shotIn(SHOTS, t); }
 
 // keyed targets: [[time, target], ...], eased between keys, held at the ends
 function keyed(k, t, resolve) {
@@ -85,8 +86,9 @@ function keyed(k, t, resolve) {
 }
 
 // pick: (name) -> THREE.Vector3 for 'eyes' / 'screen' / 'lap:x,y' / 'mon:x,y' (live positions from the scene)
-export function cameraAt(t, pick) {
-  const s = shotAt(t), u = easeInOut((t - s.t0) / (s.t1 - s.t0));
+export function cameraAt(t, pick) { return cameraIn(SHOTS, t, pick); }
+export function cameraIn(shots, t, pick) {
+  const s = shotIn(shots, t), u = easeInOut((t - s.t0) / (s.t1 - s.t0));
   const resolve = (f) => (typeof f === 'string' ? pick(f).clone() : B(...f));
   let pos;
   if (s.arc) {

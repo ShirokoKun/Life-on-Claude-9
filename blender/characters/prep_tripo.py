@@ -331,14 +331,34 @@ def export(rig, out, frames):
 if __name__ == "__main__":
     a = sys.argv[1:]
     rig, body = load(a[0])
+    if "--stand" in a:                                # standing still at x,y facing +Y (scene 2, the doorway)
+        import acting
+        x, y = (float(v) for v in a[a.index("--stand") + 1].split(","))
+        frames = int(float(a[a.index("--seconds") + 1]) * FPS) if "--seconds" in a else 10 * FPS
+        rig.rotation_mode = "XYZ"
+        rig.rotation_euler = (0, 0, math.pi)
+        bpy.context.view_layer.update()
+        hips = rig.matrix_world @ rig.pose.bones["mixamorig:Hips"].head
+        feet = min((rig.matrix_world @ pb.tail).z for pb in rig.pose.bones if "Toe" in pb.name or "Foot" in pb.name)
+        rig.location = (rig.location.x + x - hips.x, rig.location.y + y - hips.y, rig.location.z - feet + 0.01)
+        bpy.context.view_layer.update()
+        actor = acting.Actor(rig, body)
+        actor.calibrate()
+        actor.reset_upper()
+        actor.calibrate_fingers()
+        actor.perform_stand(frames, Vector((x, y + 6.0, 1.75)))
+        if "--blend" in a:
+            bpy.ops.wm.save_as_mainfile(filepath=a[a.index("--blend") + 1])
+        export(rig, a[1], frames)
+        sys.exit(0)
     seat(rig)
     if "--v1" in a:                                   # intro v1 (32 s, layered performance)
         frames = int(FILM_S * FPS)
         perform(rig, frames)
     else:                                             # intro v2: per-frame acting (acting.py), 37 s
         import acting
-        frames = int(37.0 * FPS)
-        actor = acting.Actor(rig, body)
+        frames = int((float(a[a.index("--seconds") + 1]) if "--seconds" in a else 37.0) * FPS)
+        actor = acting.Actor(rig, body, acting.SCENES[a[a.index("--scene") + 1]] if "--scene" in a else None)
         actor.fast(True)
         actor.calibrate()
         actor.reset_upper()
@@ -354,7 +374,7 @@ if __name__ == "__main__":
             import json
             with open(a[a.index("--events") + 1], "w") as fh:
                 json.dump({"fps": FPS, "keys": [[round(t, 3), s[0], f[0]] for t, s, f in actor.events],
-                           "typing": acting.SCENE["typing"], "gaze": acting.SCENE["gaze"]}, fh)
+                           "typing": actor.sc["typing"], "gaze": actor.sc["gaze"]}, fh)
     if "--blend" in a:
         bpy.ops.wm.save_as_mainfile(filepath=a[a.index("--blend") + 1])
     export(rig, a[1], frames)

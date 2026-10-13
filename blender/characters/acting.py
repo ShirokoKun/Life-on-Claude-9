@@ -28,6 +28,8 @@ HOME_R = Vector((7.012, 2.975, 0.805))
 SCREEN = Vector((6.95, 3.228, 0.871))       # laptop screen centre
 CHAT = Vector((7.00, 3.235, 0.885))         # the Claude chat column (right half of the screen)
 MONITOR = Vector((7.357, 3.315, 1.066))     # dashboard / pipeline monitor
+MOUSE = Vector((7.22, 2.98, 0.77))          # the mouse, right of the laptop
+AWAY = Vector((6.55, 4.60, 1.38))           # nowhere: past the screens, at the wall (an idea arriving)
 
 FINGERS = ("Index", "Middle", "Ring", "Pinky")
 BASE_CURL = {"Index": (0.16, 0.30, 0.16), "Middle": (0.15, 0.30, 0.16), "Ring": (0.14, 0.28, 0.15),
@@ -73,9 +75,41 @@ SCENE = {
 }
 
 
+# ---------------------------------------------------------------------------------------------
+# Scene 2, "The cheat code" (scenes/02-cheat-code/STORYBOARD.md). Film seconds, estimated read.
+# The doorway (65-74 s) is a separate standing performance (--stand).
+SCENE_S02 = {
+    "hunch": [(0, 0.45), (4.0, 0.50), (9.4, 0.50), (10.2, -0.30), (12.2, -0.25), (12.9, 0.55), (21.5, 0.60),
+              (24.5, 0.45), (29.0, 0.40), (31.0, 0.20), (33.0, 0.45),
+              # time-lapse: hours in seconds, he rocks in and out of the screen
+              (38.0, 0.6), (38.8, 0.9), (39.5, 0.3), (40.2, 1.0), (41.0, 0.5), (41.5, -0.3), (42.3, -0.3),
+              (43.0, 0.8), (43.7, 0.4), (44.4, 0.9), (45.0, 0.6),
+              (50.0, 0.55), (50.8, 0.25), (54.0, 0.25), (54.8, 0.6), (65.0, 0.65)],
+    "typing": [(0.3, 3.8, 4.0), (14.6, 15.3, 3.0), (15.5, 21.4, 5.5), (33.0, 37.8, 6.0), (38.0, 41.4, 18.0),
+               (42.4, 45.0, 18.0), (45.2, 49.8, 6.0), (54.6, 58.8, 5.0), (59.0, 65.0, 5.5)],
+    "gaze": [(0.0, 4.0, "screen", "type"), (4.0, 9.5, "screen", "read"), (9.5, 12.6, "screen", "still"),
+             (12.6, 14.6, "chat", "read"), (14.6, 21.5, "screen", "type"), (21.5, 24.5, "screen", "read"),
+             (24.5, 29.0, "monitor", "still"), (29.0, 30.6, "monitor", "still"), (30.6, 33.0, "away", "still"),
+             (33.0, 38.0, "screen", "type"), (38.0, 39.4, "monitor", "still"), (39.4, 41.4, "screen", "type"),
+             (41.4, 42.4, "away", "still"), (42.4, 43.6, "screen", "type"), (43.6, 44.4, "monitor", "still"),
+             (44.4, 50.0, "screen", "type"), (50.0, 54.0, "screen", "still"), (54.0, 65.0, "screen", "type")],
+    "hands_rest": [(0, 0), (9.4, 0), (9.9, 1), (12.4, 1), (12.9, 0), (24.4, 0), (24.9, 1), (32.6, 1), (33.0, 0),
+                   (50.0, 0), (50.4, 1), (54.2, 1), (54.6, 0)],
+    "hands_behind": [(0, 0), (41.3, 0), (41.6, 1), (42.2, 1), (42.5, 0)],
+    "rub": [(10.0, 12.0)],                    # right hand up under the glasses, rubbing his eyes
+    "mouse": [(4.2, 9.3), (21.6, 24.3)],      # scrolling the inbox; then Approve 20
+    "clicks": [5.0, 6.4, 7.9, 22.9],
+    "exhale": (10.3, 11.4),
+    "nod": (51.0, 51.9),
+}
+
+SCENES = {"intro": SCENE, "s02": SCENE_S02}
+
+
 class Actor:
-    def __init__(self, rig, body):
+    def __init__(self, rig, body, scene=None):
         self.rig, self.body = rig, body
+        self.sc = scene or SCENE
         self.mods = [m for m in body.modifiers if m.type == "ARMATURE"]
         self.rnd = random.Random(7)
         self.upper = [b for b in rig.pose.bones if not any(k in b.name for k in ("Leg", "Foot", "Toe", "Hips"))]
@@ -205,7 +239,7 @@ class Actor:
         """Key events: (time, side, finger). Phrases of 6-18 keys with 0.15-0.6 s gaps; thumbs hit space."""
         ev = []
         weights = {"Index": 0.34, "Middle": 0.28, "Ring": 0.22, "Pinky": 0.16}
-        for t0, t1, rate in SCENE["typing"]:
+        for t0, t1, rate in self.sc["typing"]:
             t = t0 + self.rnd.uniform(0.0, 0.2)
             while t < t1 - 0.1:
                 n = self.rnd.randint(6, 18)
@@ -224,8 +258,10 @@ class Actor:
                                 break
                         ev.append((t, side, f))
                     t += self.rnd.uniform(0.7, 1.3) / rate
-                t += self.rnd.uniform(0.15, 0.6)
-        self.events = ev
+                t += self.rnd.uniform(0.15, 0.6) * min(1.0, 8.0 / rate)   # time-lapse rates squeeze the pauses
+        for t in self.sc.get("clicks", []):              # mouse clicks: the right index finger
+            ev.append((t, "Right", "Index"))
+        self.events = sorted(ev)
 
     def press_amount(self, t, side):
         out = {}
@@ -244,14 +280,17 @@ class Actor:
                 return MONITOR + Vector((0.0, 0.0, -0.02))
             if name == "monitor_low":
                 return MONITOR + Vector((-0.05, 0.0, -0.06))
-            if name == "chat" and mode == "read":           # line by line, left to right, then down
+            if name == "away":
+                return AWAY
+            if mode == "read" and name in ("chat", "screen"):           # line by line, left to right, then down
                 line_t = 1.1
                 k = int((tt - t0) / line_t)
                 u = ((tt - t0) % line_t) / line_t
-                return CHAT + Vector((-0.035 + 0.07 * smooth(u * 1.15), 0.0, 0.04 - 0.012 * k))
+                base = CHAT if name == "chat" else SCREEN + Vector((-0.06, 0.0, 0.0))
+                return base + Vector((-0.035 + 0.07 * smooth(u * 1.15), 0.0, 0.04 - 0.012 * (k % 7)))
             drift = Vector((0.025 * math.sin(tt * 0.9), 0.0, 0.01 * math.sin(tt * 0.6)))
             return SCREEN + drift
-        segs = SCENE["gaze"]
+        segs = self.sc["gaze"]
         i = max(k for k, s in enumerate(segs) if s[0] <= t) if t >= segs[0][0] else 0
         s0, s1, name, mode = segs[i]
         p = point(name, mode, t, s0)
@@ -272,13 +311,15 @@ class Actor:
             sc.frame_set(f) if f == 1 else None
             self.reset_upper()
             breath = math.sin(2 * math.pi * 0.26 * t)
-            ex = SCENE["exhale"]
+            ex = self.sc.get("exhale", (-1, -1))
             drop = math.sin(math.pi * min(1, max(0, (t - ex[0]) / (ex[1] - ex[0])))) if ex[0] < t < ex[1] else 0.0
-            self.posture(curve(SCENE["hunch"], t), breath)
+            self.posture(curve(self.sc["hunch"], t), breath)
             self.shoulders(drop)
             # hands
-            rest = curve(SCENE["hands_rest"], t)
-            behind = curve(SCENE["hands_behind"], t)
+            rest = curve(self.sc["hands_rest"], t)
+            behind = curve(self.sc["hands_behind"], t)
+            rub = max([smooth((t - a) / 0.5) * smooth((b - t) / 0.5) for a, b in self.sc.get("rub", [])] or [0.0])
+            mouse = max([smooth((t - a) / 0.4) * smooth((b - t) / 0.4) for a, b in self.sc.get("mouse", [])] or [0.0])
             head = self.whead("Head")
             for side, home in (("Left", HOME_L), ("Right", HOME_R)):
                 sg = 1 if side == "Left" else -1
@@ -290,11 +331,22 @@ class Actor:
                     mid = (w + nape) / 2 + UP * 0.30 - Vector((0.32 * sg, 0.10, 0))   # wide and high, past the ears: relief, not head-in-hands
                     b = behind
                     w = (1 - b) ** 2 * w + 2 * (1 - b) * b * mid + b * b * nape     # an arc, not a slide
+                if side == "Right" and mouse > 0:           # hand on the mouse: scrolling, clicking
+                    on_mouse = MOUSE + Vector((0.0, -0.075, 0.032 - 0.002 * max(pr.values(), default=0.0)))
+                    w = w.lerp(on_mouse, mouse)
+                if side == "Right" and rub > 0:             # knuckles under the glasses, small circles
+                    eye = head + FWD * 0.10 + UP * 0.03
+                    at_eye = eye - UP * 0.11 + FWD * 0.02 + Vector((0.012 * math.sin(t * 8.0), 0.0, 0.008 * math.cos(t * 8.0)))
+                    w = w.lerp(at_eye, rub)
                 self.arm_to(side, w, behind)
-                self.fingers(side, pr if rest < 0.5 else {}, curl_extra=0.9 * behind, relax=rest * (1 - behind))
+                if side == "Right" and rub > 0.3:
+                    IP.aim(self.rig, "RightHand", UP * 1.0 - FWD * 0.25 - Vector((1, 0, 0)) * 0.25)
+                busy = rest < 0.5 or (side == "Right" and mouse > 0.5)
+                self.fingers(side, pr if busy else {}, curl_extra=0.9 * behind + 0.5 * (rub if side == "Right" else 0),
+                             relax=rest * (1 - behind) * (0.4 if side == "Right" and mouse > 0.5 else 1.0))
             # gaze last (the neck rides on the posture)
             nod = 0.0
-            n0, n1 = SCENE["nod"]
+            n0, n1 = self.sc.get("nod", (-1, -1))
             if n0 < t < n1:
                 nod = math.sin(math.pi * (t - n0) / (n1 - n0))
             g = self.gaze_point(t) - UP * 0.08 * nod
@@ -307,3 +359,29 @@ class Actor:
                     pb.keyframe_insert("rotation_quaternion", frame=f)
                     pb.keyframe_insert("location", frame=f)
         self.fast(False)
+
+    # -- standing (scene 2, the doorway) ---------------------------------------------------------
+    def perform_stand(self, frames, look_at):
+        """Standing still: upright, arms hanging, breathing, looking out through the door."""
+        self.fast(True)
+        for f in range(1, frames + 1):
+            t = (f - 1) / FPS
+            self.reset_upper()
+            breath = math.sin(2 * math.pi * 0.22 * t)
+            IP.aim(self.rig, "Spine", UP + FWD * 0.02)
+            IP.aim(self.rig, "Spine1", UP + FWD * (0.03 - 0.012 * breath))
+            IP.aim(self.rig, "Spine2", UP + FWD * (0.05 - 0.018 * breath))
+            self.shoulders(0.6 + 0.1 * breath)
+            for side, sg in (("Left", 1), ("Right", -1)):
+                out = Vector((-1, 0, 0)) * sg
+                sh = self.whead(f"{side}Arm")
+                wrist = sh + out * 0.09 - UP * (0.53 - 0.004 * breath) + FWD * 0.03
+                IP.two_bone_ik(self.rig, f"{side}Arm", f"{side}ForeArm", wrist, sh - FWD * 0.5 - UP * 0.2)
+                IP.aim(self.rig, f"{side}Hand", -UP * 1.0 + FWD * 0.08)
+                self.roll_palm(side, -out)
+                self.fingers(side, {}, curl_extra=0.15, relax=1.0)
+            self.look(look_at + Vector((0.0, 0.0, 0.02 * math.sin(t * 0.4))))
+            for pb in self.upper:
+                pb.keyframe_insert("rotation_quaternion", frame=f)
+        self.fast(False)
+

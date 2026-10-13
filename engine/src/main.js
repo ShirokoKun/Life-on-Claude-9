@@ -54,6 +54,7 @@ let mixer, L, atmo, post, screens, exposureEV = 0;
 let tod = null;                 // times of day (scenes that declare light(t))
 let roomRoot = null;
 const ivan = { head: null, root: null };
+const cast = [];                // scene-specific extra performances: { url, t0, t1, root, head, mixer }
 
 async function boot() {
   status('Loading the flat...');
@@ -109,29 +110,9 @@ async function boot() {
 
   if (Q.get('ivan') !== '0') {
     status('Seating Ivan...');
-    const iv = await loadGLB(SC.IVAN || 'assets/ivan.glb');
-    iv.scene.traverse((o) => {
-      if (o.isMesh) {
-        const src = o.material, n = src.name || '';
-        if (/Glasses Frame/.test(n)) o.material = new THREE.MeshPhysicalMaterial({ color: 0x0b0908, roughness: 0.28, clearcoat: 0.6, clearcoatRoughness: 0.1, name: n });
-        else if (/Glasses Lens/.test(n)) o.material = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.02, transparent: true, opacity: 0.06,
-          envMapIntensity: 1.6, specularIntensity: 1, depthWrite: false, name: n });
-        else {
-          // Tripo PBR: colour, roughness (G) and normal maps; a warm sheen gives skin and knit their soft edge glow
-          o.material = new THREE.MeshPhysicalMaterial({ map: src.map, normalMap: src.normalMap, roughnessMap: src.roughnessMap || null,
-            roughness: src.roughnessMap ? 1.0 : 0.62, metalness: 0, sheen: 0.15, sheenRoughness: 0.6, sheenColor: new THREE.Color(0xb08a76),
-            specularIntensity: 0.5, side: THREE.DoubleSide, name: 'Ivan' });
-          if (src.normalMap) o.material.normalScale.set(0.9, 0.9);
-          o.material.color.setScalar(0.84);            // off-white stays off-white instead of clipping under the keys
-          o.material.envMapIntensity = 0.15;          // key-to-fill ~8:1 like the references: the shadow side falls off
-        }
-        o.castShadow = !/Lens/.test(o.material.name); o.receiveShadow = true; o.frustumCulled = false;
-      }
-      if (o.isBone && /Head$/.test(o.name) && !/Top/.test(o.name)) ivan.head = o;
-    });
-    ivan.root = iv.scene;
-    scene.add(iv.scene);
-    if (iv.animations.length) { mixer = new THREE.AnimationMixer(iv.scene); mixer.clipAction(iv.animations[0]).play(); }
+    const iv = await loadCast(SC.IVAN || 'assets/ivan.glb');
+    Object.assign(ivan, { head: iv.head, root: iv.root }); mixer = iv.mixer;
+    for (const c of SC.CAST || []) cast.push({ ...c, ...(await loadCast(c.url)) });   // other Ivans (standing, ...)
   }
 
   L = createLights(scene, data, { quality: QUALITY });
@@ -161,12 +142,39 @@ async function boot() {
   window.__scene = scene; window.__THREE = THREE; window.__post = post; window.__L = L; window.__renderer = renderer; window.__screens = screens; window.__ready = true;
 }
 
+// Ivan: Tripo PBR materials made physical, glasses rebuilt, the performance as an animation clip
+async function loadCast(url) {
+  const iv = await loadGLB(url), out = { root: iv.scene, head: null, mixer: null };
+  iv.scene.traverse((o) => {
+    if (o.isMesh) {
+      const src = o.material, n = src.name || '';
+      if (/Glasses Frame/.test(n)) o.material = new THREE.MeshPhysicalMaterial({ color: 0x0b0908, roughness: 0.28, clearcoat: 0.6, clearcoatRoughness: 0.1, name: n });
+      else if (/Glasses Lens/.test(n)) o.material = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.02, transparent: true, opacity: 0.06,
+        envMapIntensity: 1.6, specularIntensity: 1, depthWrite: false, name: n });
+      else {
+        // Tripo PBR: colour, roughness (G) and normal maps; a warm sheen gives skin and knit their soft edge glow
+        o.material = new THREE.MeshPhysicalMaterial({ map: src.map, normalMap: src.normalMap, roughnessMap: src.roughnessMap || null,
+          roughness: src.roughnessMap ? 1.0 : 0.62, metalness: 0, sheen: 0.15, sheenRoughness: 0.6, sheenColor: new THREE.Color(0xb08a76),
+          specularIntensity: 0.5, side: THREE.DoubleSide, name: 'Ivan' });
+        if (src.normalMap) o.material.normalScale.set(0.9, 0.9);
+        o.material.color.setScalar(0.84);            // off-white stays off-white instead of clipping under the keys
+        o.material.envMapIntensity = 0.15;          // key-to-fill ~8:1 like the references: the shadow side falls off
+      }
+      o.castShadow = !/Lens/.test(o.material.name); o.receiveShadow = true; o.frustumCulled = false;
+    }
+    if (o.isBone && /Head$/.test(o.name) && !/Top/.test(o.name)) out.head = o;
+  });
+  scene.add(iv.scene);
+  if (iv.animations.length) { out.mixer = new THREE.AnimationMixer(iv.scene); out.mixer.clipAction(iv.animations[0]).play(); }
+  return out;
+}
+
 // Reflections and Ivan's ambient light: the room itself, rendered once into a cube from the desk.
 async function captureEnvironment() {
   const crt = new THREE.WebGLCubeRenderTarget(256, { type: THREE.HalfFloatType });
   const cube = new THREE.CubeCamera(0.05, 50, crt);
   cube.position.copy(B(6.95, 2.95, 1.15));
-  const hidden = []; if (ivan.root) { ivan.root.visible = false; hidden.push(ivan.root); }
+  const hidden = []; for (const r of [ivan.root, ...cast.map((c) => c.root)]) if (r && r.visible) { r.visible = false; hidden.push(r); }
   renderer.toneMapping = THREE.NoToneMapping;
   cube.update(renderer, scene);
   renderer.toneMapping = THREE.AgXToneMapping;
@@ -194,9 +202,11 @@ function applyTOD(w) {
 // ---------------------------------------------------------------- picks for focus pulls
 const tmpV = new THREE.Vector3();
 function pick(what) {
-  if (what === 'eyes' && ivan.head) {
-    ivan.head.updateWorldMatrix(true, false);
-    return ivan.head.getWorldPosition(tmpV.clone()).add(new THREE.Vector3(0, 0.085, -0.085));
+  const on = cast.find((c) => c.root.visible && c.head);
+  const head = on ? on.head : ivan.head;
+  if (what === 'eyes' && head) {
+    head.updateWorldMatrix(true, false);
+    return head.getWorldPosition(tmpV.clone()).add(new THREE.Vector3(0, 0.085, -0.085));
   }
   if (what === 'screen') return B(6.98, 3.22, 0.90);
   const m = /^(lap|mon):(\d+),(\d+)$/.exec(what);              // a pixel on a screen: 'lap:420,300'
@@ -209,6 +219,10 @@ let tNow = 0, playing = false, last = performance.now();
 const audio = $('vo');
 function setTime(t) {
   tNow = Math.max(0, Math.min(DURATION - 1 / FPS, t));
+  if (cast.length || SC.ivanVisible) {
+    for (const c of cast) { c.root.visible = tNow >= c.t0 && tNow < c.t1; if (c.mixer) c.mixer.setTime(Math.max(0, tNow - c.t0)); }
+    if (ivan.root) ivan.root.visible = SC.ivanVisible ? SC.ivanVisible(tNow) : true;
+  }
   if (mixer) { mixer.setTime(tNow); scene.updateMatrixWorld(true); }
   const fixed = window.__cam || Q.get('cam');            // window.__cam: set from a script for look-dev
   let c;
@@ -231,13 +245,13 @@ function setTime(t) {
     camera.fov = THREE.MathUtils.radToDeg(2 * Math.atan(18 / c.mm / camera.aspect)); camera.updateProjectionMatrix();
     post.lens.focus = c.focus; post.lens.fstop = c.f; post.lens.mm = c.mm;
   }
-  renderer.toneMappingExposure = Math.pow(2, exposureEV + LOOK.exposure + Number($('exp').value));
+  renderer.toneMappingExposure = Math.pow(2, exposureEV + LOOK.exposure + Number($('exp').value) + (SC.exposureBoost ? SC.exposureBoost(tNow) : 0));
   if (tod) applyTOD(SC.light(tNow));
   life(tNow);
   if (SC.props) SC.props(tNow, { named, root: roomRoot, scene, THREE });
   if (screens) screens.update(tNow);
-  atmo.setTime(tNow);
-  const fade = Math.min(1, tNow / 0.8, (DURATION - tNow) / 1.2);
+  atmo.setTime(SC.atmoTime ? SC.atmoTime(tNow) : tNow);          // a scene can freeze the air
+  const fade = Math.min(1, tNow / 0.8, SC.FADE_OUT === false ? 1 : (DURATION - tNow) / 1.2);
   post.film.uniforms.fade.value = Math.max(0, fade);
   post.film.uniforms.time.value = Math.floor(tNow * FPS) % 251;
   const cap = CAPTIONS.find(([a, b]) => tNow >= a && tNow < b);
