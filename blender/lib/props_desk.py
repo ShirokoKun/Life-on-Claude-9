@@ -148,7 +148,7 @@ def build_laptop(m, c):
 
 def build_glass(m, c):
     """The untouched glass of water, poured six hours ago: full, with clinging bubbles."""
-    gx, gy = 7.25, 3.15
+    gx, gy = 6.66, 3.10   # left of the laptop: in line with the cold lunch for the storyboard-2 shot
     prof = [(0.0, 0.0), (0.0335, 0.0), (0.0355, 0.002), (0.0360, 0.006), (0.0395, 0.108), (0.0400, 0.110),
             (0.0385, 0.110), (0.0372, 0.098), (0.0338, 0.009), (0.0, 0.009)]
     geo.lathe("Water_Glass", prof, (gx, gy, TOP), m["glass"], c)

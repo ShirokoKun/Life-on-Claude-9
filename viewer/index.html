@@ -1,13 +1,13 @@
-<title>Claude Nine Dailies</title>
+<title>Claude Nine · 3 AM</title>
 <style>
-/* Layout: a screening-room contact sheet. Hero still full width, shots in a 2-up grid, notes in a narrow column. Single dark look by choice. */
+/* Layout: screening room. The film on top, the live set under it (stage + control rail), notes at the end. Single dark look by choice. */
 :root {
-  --bg: #08090c;
-  --panel: #111319;
-  --line: #23262f;
+  --bg: #07080b;
+  --panel: #101218;
+  --line: #22252e;
   --ink: #ebe7de;
   --mute: #8d909b;
-  --amber: #e9a35b;        /* desk-lamp practical */
+  --amber: #e9a35b;
   --tally: #e0483e;
   --display: "Barlow Condensed", "Arial Narrow", sans-serif;
   --body: "IBM Plex Sans", system-ui, sans-serif;
@@ -15,106 +15,571 @@
   color-scheme: dark;
 }
 body { background: var(--bg); color: var(--ink); font-family: var(--body); }
-.wrap { max-width: 1280px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 64px; display: grid; gap: 28px; }
-header { display: grid; gap: 6px; }
+.wrap { max-width: 1320px; margin: 0 auto; padding-inline: 16px; padding-block: 24px 56px; display: grid; gap: 22px; }
 .eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; color: var(--mute); text-transform: uppercase; }
 .eyebrow b { color: var(--tally); font-weight: 400; }
-h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: clamp(30px, 5vw, 52px); letter-spacing: .02em; text-transform: uppercase; text-wrap: balance; }
-.lede { margin: 0; max-width: 68ch; color: var(--mute); line-height: 1.55; }
-figure { margin: 0; display: grid; gap: 8px; min-width: 0; }
-figure button { all: unset; cursor: zoom-in; display: block; }
-figure button:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
-figure img { display: block; width: 100%; height: auto; aspect-ratio: 2 / 1; object-fit: cover; background: #000; border: 1px solid var(--line); }
-figcaption { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; font-size: 13px; color: var(--mute); }
-figcaption strong { font-family: var(--display); font-weight: 600; font-size: 17px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
-figcaption code { font-family: var(--mono); font-size: 11px; color: var(--amber); }
-.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
-.ivan img { aspect-ratio: auto; }
-.cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; }
-section h2 { margin: 0 0 10px; font-family: var(--display); font-weight: 600; font-size: 14px; letter-spacing: .16em; text-transform: uppercase; color: var(--mute); }
-ul { margin: 0; padding-left: 18px; line-height: 1.6; font-size: 14px; }
-li { margin-bottom: 4px; }
-li em { color: var(--amber); font-style: normal; }
-.link { display: inline-block; font-family: var(--mono); font-size: 12px; color: var(--ink); border: 1px solid var(--line); padding: 8px 12px; text-decoration: none; }
-.link:hover, .link:focus-visible { border-color: var(--amber); outline: none; }
-dialog { padding: 0; border: 0; background: transparent; max-width: 96vw; }
-dialog::backdrop { background: rgba(0, 0, 0, .9); }
-dialog img { max-width: 96vw; max-height: 90vh; display: block; }
-@media (max-width: 760px) { .grid, .cols { grid-template-columns: 1fr; } }
+h1 { margin: 4px 0 0; font-family: var(--display); font-weight: 600; font-size: clamp(28px, 4.6vw, 48px); letter-spacing: .02em; text-transform: uppercase; text-wrap: balance; }
+h2 { margin: 0; font-family: var(--display); font-weight: 600; font-size: 14px; letter-spacing: .16em; text-transform: uppercase; color: var(--mute); }
+.lede { margin: 6px 0 0; max-width: 72ch; color: var(--mute); line-height: 1.55; font-size: 14px; }
+video { width: 100%; display: block; background: #000; border: 1px solid var(--line); aspect-ratio: 16 / 9; }
+.film-missing { padding: 28px; border: 1px dashed var(--line); color: var(--mute); font-size: 14px; }
+.live { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 0; border: 1px solid var(--line); background: #000; }
+#stage { position: relative; aspect-ratio: 16 / 9; min-width: 0; overflow: hidden; }
+#stage canvas { display: block; width: 100%; height: 100%; }
+#cap { position: absolute; left: 50%; bottom: 13%; transform: translateX(-50%); max-width: 78%; text-align: center; font-family: var(--body);
+  font-size: clamp(11px, 1.35vw, 18px); line-height: 1.35; color: #f2efe8; text-shadow: 0 1px 3px rgba(0, 0, 0, .9); transition: opacity .25s; }
+#slate { position: absolute; left: 12px; top: 10px; font-family: var(--mono); font-size: 11px; letter-spacing: .08em; color: var(--mute); pointer-events: none; }
+#status { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--mono); font-size: 12px; color: var(--mute); }
+aside { background: var(--panel); border-left: 1px solid var(--line); padding: 14px; display: grid; align-content: start; gap: 14px; min-width: 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: 500 12px var(--body); color: var(--ink); background: #171a22; border: 1px solid var(--line); border-radius: 3px; padding: 6px 9px; cursor: pointer; }
+.chip[aria-pressed="true"] { border-color: var(--tally); box-shadow: inset 3px 0 0 var(--tally); }
+.chip:focus-visible, input:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+.row { display: grid; grid-template-columns: 1fr auto; gap: 4px 8px; font-size: 12px; align-items: center; }
+.row output { font-family: var(--mono); font-size: 11px; color: var(--mute); font-variant-numeric: tabular-nums; }
+.row input[type=range] { grid-column: 1 / -1; width: 100%; accent-color: var(--tally); }
+.toggle { display: flex; gap: 8px; align-items: center; font-size: 12px; cursor: pointer; }
+.toggle input { accent-color: var(--tally); }
+.note { margin: 0; font-size: 12px; color: var(--mute); line-height: 1.5; }
+.shots { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+.shot { border: 1px solid var(--line); background: var(--panel); padding: 12px; display: grid; gap: 6px; font-size: 13px; line-height: 1.45; }
+.shot b { font-family: var(--display); font-weight: 600; letter-spacing: .05em; text-transform: uppercase; font-size: 15px; }
+.shot span { color: var(--mute); }
+.shot code { font-family: var(--mono); font-size: 11px; color: var(--amber); }
+a.link { display: inline-block; font-family: var(--mono); font-size: 12px; color: var(--ink); border: 1px solid var(--line); padding: 8px 12px; text-decoration: none; }
+a.link:hover, a.link:focus-visible { border-color: var(--amber); outline: none; }
+body.render .wrap > :not(.live), body.render aside { display: none !important; }
+body.render .wrap { max-width: none; padding: 0; }
+body.render .live { border: 0; grid-template-columns: 1fr; }
+body.render #slate, body.render #status { display: none; }
+body.render #stage { position: fixed; inset: 0; aspect-ratio: auto; z-index: 5; }
+@media (max-width: 860px) { .live { grid-template-columns: 1fr; } aside { border-left: 0; border-top: 1px solid var(--line); } }
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600&family=IBM+Plex+Mono&family=IBM+Plex+Sans:wght@400;500&display=swap">
 
 <div class="wrap">
   <header>
-    <span class="eyebrow"><b>●</b> Life on Claude Nine · intro · dailies round 3 · checkpoint before the look fixes</span>
-    <h1>Ivan's flat, 3 AM</h1>
-    <p class="lede">Path-traced look development for the intro chapter. Warm desk lamp and string lights against teal night, two screens on his face, haze and dust in the air, halation on every highlight. Ivan v2 is seated at the desk, mid-build. Click any frame to see it full size.</p>
+    <span class="eyebrow"><b>●</b> Life on Claude Nine · intro · scene 1 · 3:04 AM</span>
+    <h1>Ivan's room, 3:04 AM</h1>
+    <p class="lede">Environment pass. The room carries the light Cycles computed (baked at 4K) plus a physical lens, haze and grade, so it renders like the Blender scene. The character is out until the new model arrives. Scrub the shots, or switch on Free camera to fly around.</p>
   </header>
 
-  <figure>
-    <button type="button" data-full="dailies/r3_face.jpg"><img src="dailies/r3_face.jpg" alt="Ivan at the laptop, his face lit by the screen, glasses reflecting it, string lights and clock behind him"></button>
-    <figcaption><strong>Face · the hero frame</strong> 55 mm · f/2.2 <code>SHOTS["face"]</code> Storyboard 04, panel 3: the screen in his glasses. The clock reads 3:04 over his shoulder.</figcaption>
-  </figure>
+  <section>
+    <h2>The film · v1</h2>
+    <div id="filmBox" style="margin-top:10px"></div>
+  </section>
 
-  <div class="grid">
-    <figure>
-      <button type="button" data-full="dailies/r3_desk34.jpg"><img src="dailies/r3_desk34.jpg" alt="Three-quarter view of Ivan hunched over the laptop at the cluttered desk"></button>
-      <figcaption><strong>Desk 3/4</strong> 35 mm · f/3.2 The hunch, hands on the keys, the second screen, the lamp pool.</figcaption>
-    </figure>
-    <figure>
-      <button type="button" data-full="dailies/r3_ots.jpg"><img src="dailies/r3_ots.jpg" alt="Over the shoulder onto the laptop screen showing code and a Claude chat"></button>
-      <figcaption><strong>Over the shoulder</strong> 35 mm · f/2.8 Needs reframing: with Ivan seated, his back now blocks the laptop. The second screen reads well.</figcaption>
-    </figure>
-    <figure>
-      <button type="button" data-full="dailies/r3_establish.jpg"><img src="dailies/r3_establish.jpg" alt="Wide establishing view of the dark flat with Ivan at his lit desk"></button>
-      <figcaption><strong>Establishing</strong> 24 mm The flat at 3 AM: the only life is the corner where he works.</figcaption>
-    </figure>
-    <figure>
-      <button type="button" data-full="dailies/r3_glass.jpg"><img src="dailies/r3_glass.jpg" alt="Close insert of the full glass of water with bubbles, screens glowing behind"></button>
-      <figcaption><strong>Insert · the glass</strong> 85 mm · f/2.8 Poured six hours ago, still full. It still reads as metal: it needs backlight through the water.</figcaption>
-    </figure>
-  </div>
+  <section class="live" aria-label="Live 3D scene">
+    <div id="stage">
+      <div id="cap"></div>
+      <div id="slate">SHOT —</div>
+      <div id="status">Loading Ivan's flat…</div>
+    </div>
+    <aside>
+      <div class="chips">
+        <button class="chip" id="play" type="button">▶ Play</button>
+        <button class="chip" id="free" type="button" aria-pressed="false">Free camera</button>
+      </div>
+      <div class="row"><label for="time">Timeline</label><output id="timeOut">0.0 s</output>
+        <input id="time" type="range" min="0" max="40" step="0.042" value="0"></div>
+      <div><h2 style="margin-bottom:8px">Shots</h2><div class="chips" id="shotChips"></div></div>
+      <label class="toggle"><input id="fx" type="checkbox" checked> Lens look (bloom, focus, grade)</label>
+      <label class="toggle"><input id="caps" type="checkbox" checked> Captions</label>
+      <div class="row"><label for="exp">Exposure</label><output id="expOut"></output>
+        <input id="exp" type="range" min="-2" max="2" step="0.1" value="0"></div>
+      <div class="row"><label for="lampK">Desk lamp</label><output id="lampOut"></output>
+        <input id="lampK" type="range" min="0" max="2" step="0.05" value="1"></div>
+      <div class="row"><label for="scrK">Screen light</label><output id="scrOut"></output>
+        <input id="scrK" type="range" min="0" max="2" step="0.05" value="1"></div>
+      <p class="note">Free camera: drag to orbit, right-drag to pan, scroll to dolly. Turn it off to return to the shot.</p>
+    </aside>
+  </section>
 
-  <figure class="ivan">
-    <button type="button" data-full="dailies/ivan_turnaround.jpg"><img src="dailies/ivan_turnaround.jpg" alt="Ivan character turnaround: front, three-quarter, face close-up"></button>
-    <figcaption><strong>Ivan v2</strong> MPFB2 body shaped to the sheet · posable rig · strand hair · knit, cotton, wool, leather. Still to reach the sheet: skin realism, face likeness, hair styling.</figcaption>
-  </figure>
+  <section>
+    <h2 style="margin-bottom:10px">Shot list</h2>
+    <div class="shots" id="shotList"></div>
+  </section>
 
-  <div class="cols">
-    <section>
-      <h2>New this round</h2>
-      <ul>
-        <li><em>Mess with a reason:</em> second monitor with a live dashboard, printouts with notes, headphones, cans, a rubber duck, cables to the floor, delivery boxes, a dropped hoodie, a backpack.</li>
-        <li><em>Life on the walls:</em> shelves of books, binders, speakers and a trailing pothos; warm string lights; a cork board of notes by the window.</li>
-        <li><em>Plants:</em> a big monstera by the window and a small one by the desk, snake plant at the balcony. Leaves glow when backlit.</li>
-        <li><em>Birdcage look:</em> lamp ON, halation, mist depth into teal, room haze, floating dust, grain.</li>
-        <li><em>Ivan:</em> new face shaping, warm skin with blush and crease shading, clumped hair, lashes, clear wire glasses, boxy knit with the shirt in the neckline, wide trousers, lofted leather shoes, a seated typing pose.</li>
-        <li><em>Animation controls:</em> typing bursts, breathing, head drift and glances, screen scroll, LED blinks, light flicker, the two-keyframe camera push, handheld noise.</li>
-      </ul>
-    </section>
-    <section>
-      <h2>Next: from the multi-frame look analysis</h2>
-      <ul>
-        <li><em>Darker, cleaner:</em> 30–45% true black per frame, no room haze or fog veil, no dust specks or plaster grit, render noise at or below the reference.</li>
-        <li><em>One colour world per 3 AM shot:</em> screen blue as the key (as in the storyboard), one warm accent, black.</li>
-        <li><em>Glow only on sources:</em> small hot lights that bloom; the air stays clear.</li>
-        <li><em>Faces carved by light:</em> screen key at 45°, a cool rim, hair edge-lit; shallow focus so backgrounds turn into light points.</li>
-        <li><em>Ivan fixes:</em> neck and shoulder proportion, collar seated, cuffs over the wrists, softer hairline.</li>
-        <li>Ivan likeness pass against the sheet: eyes, nose, jaw, hair shape, skin detail.</li>
-        <li>First moving shots: a 5–8 second push-in on the face with typing and breathing.</li>
-        <li>4 AM and sunrise versions of these frames.</li>
-        <li>Bake the look into textures and lightmaps for the three.js engine.</li>
-      </ul>
-      <p style="margin:18px 0 0"><a class="link" href="set.html">Open the interactive 3D blockout (layout v2) →</a></p>
-    </section>
-  </div>
+  <p><a class="link" href="dailies.html">Round 3 path-traced stills and Ivan's turnaround →</a></p>
 </div>
 
-<dialog id="lb"><img id="lbimg" alt=""></dialog>
-<script>
-const lb = document.getElementById('lb'), img = document.getElementById('lbimg');
-document.querySelectorAll('[data-full]').forEach((b) => b.addEventListener('click', () => {
-  img.src = b.dataset.full; img.alt = b.querySelector('img').alt; lb.showModal();
-}));
-lb.addEventListener('click', () => lb.close());
+<script src="intro-data.js"></script>
+<script src="intro-data-2.js"></script>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { Pass, FullScreenQuad } from 'three/addons/postprocessing/Pass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const Q = new URLSearchParams(location.search);
+const RENDER = Q.get('render') === '1';
+const FPS = 24, DURATION = 40;
+if (RENDER) document.body.classList.add('render');
+RectAreaLightUniformsLib.init();
+const $ = (id) => document.getElementById(id);
+const B = (x, y, z) => new THREE.Vector3(x, z, -y);          // Blender (Z up) -> three (Y up)
+
+// ---------------------------------------------------------------- film block
+(() => {
+  const box = $('filmBox');
+  const v = document.createElement('video');
+  v.controls = true; v.playsInline = true; v.preload = 'metadata'; v.src = 'film/intro_v1.mp4';
+  v.addEventListener('error', () => { box.innerHTML = '<div class="film-missing">The rendered film is being produced. Play the live version below meanwhile.</div>'; });
+  box.appendChild(v);
+})();
+
+// ---------------------------------------------------------------- renderer
+const stage = $('stage');
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: RENDER });
+renderer.setPixelRatio(RENDER ? 1 : Math.min(devicePixelRatio, 1.75));
+renderer.toneMapping = THREE.AgXToneMapping;
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+stage.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x020308);
+const camera = new THREE.PerspectiveCamera(30, 16 / 9, 0.02, 400);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enabled = false; controls.enableDamping = true;
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+scene.environmentIntensity = 0.05;                            // speculars only; must not lift the blacks
+
+// ---------------------------------------------------------------- post
+const composer = new EffectComposer(renderer);
+// Lens: the scene renders once into an HDR target with depth; a physical depth of field (thin-lens
+// circle of confusion from focal length, f-stop and focus distance) gathers it before the bloom, so
+// bright points open into round bokeh discs the way a real lens does.
+const VS = `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`;
+const DOF_LOOK = 1.8;   // stylised: the reference keeps ~5% of the frame sharp (a larger-format, wide-open lens)
+class LensPass extends Pass {
+  constructor() {
+    super();
+    this.rt = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, depthTexture: new THREE.DepthTexture(1, 1, THREE.FloatType) });
+    this.focus = 1; this.fstop = 2.8; this.mm = 35;
+    this.mat = new THREE.ShaderMaterial({
+      uniforms: { tColor: { value: null }, tDepth: { value: null }, texel: { value: new THREE.Vector2() }, near: { value: 0.02 }, far: { value: 400 },
+        k: { value: 0 }, focus: { value: 1 }, maxR: { value: 16 }, on: { value: 1 }, haze: { value: 0.18 }, hazeCol: { value: new THREE.Color(0.016, 0.014, 0.02) } },
+      vertexShader: VS,
+      fragmentShader: `#include <packing>
+        uniform sampler2D tColor, tDepth; uniform vec2 texel; uniform float near, far, k, focus, maxR, on, haze; uniform vec3 hazeCol; varying vec2 vUv;
+        float dist(vec2 uv) { return -perspectiveDepthToViewZ(texture2D(tDepth, uv).x, near, far); }
+        float coc(float d) { return min(maxR, k * abs(d - focus) / max(d, 1e-3)); }      // radius, px
+        void main() {
+          vec3 col = texture2D(tColor, vUv).rgb; float dc = dist(vUv), rc = coc(dc);
+          if (on < 0.5 || maxR < 0.5) { float hz0 = 1.0 - exp(-min(dc, 12.0) * haze); gl_FragColor = vec4(col * (1.0 - 0.35 * hz0) + hazeCol * hz0, 1.0); return; }
+          float tot = 1.0, r = 0.7, a = 0.0;
+          for (int i = 0; i < 160; i++) {
+            if (r >= maxR) break;
+            vec2 uv = vUv + vec2(cos(a), sin(a)) * texel * r;
+            vec3 sc = texture2D(tColor, uv).rgb; float ds = dist(uv), rs = coc(ds);
+            if (ds > dc) rs = clamp(rs, 0.0, rc * 2.0);                      // sharp foreground stays clean
+            float m = smoothstep(r - 0.5, r + 0.5, rs);
+            col += mix(col / tot, sc, m); tot += 1.0;
+            a += 2.39996323; r += 1.15 / r;
+          }
+          col /= tot;
+          float hz = 1.0 - exp(-min(dc, 12.0) * haze);                                 // air between lens and surface
+          col = col * (1.0 - 0.35 * hz) + hazeCol * hz;
+          gl_FragColor = vec4(col, 1.0);
+        }`,
+    });
+    this.quad = new FullScreenQuad(this.mat);
+  }
+  setSize(w, h) { this.rt.setSize(w, h); this.mat.uniforms.texel.value.set(1 / w, 1 / h); this.w = w; }
+  render(renderer, writeBuffer) {
+    renderer.setRenderTarget(this.rt); renderer.clear(); renderer.render(scene, camera);
+    const f = this.mm / 1000, S = Math.max(this.focus, f * 1.5), u = this.mat.uniforms;
+    // thin lens: blur diameter on a 36 mm sensor = f^2 / (N (S - f)) * |d - S| / d; radius in pixels
+    u.k.value = this.enabled ? DOF_LOOK * 0.5 * (f * f / (this.fstop * (S - f))) / 0.036 * this.w : 0;
+    u.focus.value = S; u.near.value = camera.near; u.far.value = camera.far;
+    u.maxR.value = this.enabled ? Math.max(4, this.w / 72) : 0;
+    u.tColor.value = this.rt.texture; u.tDepth.value = this.rt.depthTexture;
+    renderer.setRenderTarget(this.renderToScreen ? null : writeBuffer); this.quad.render(renderer);
+  }
+}
+const lens = new LensPass();
+composer.addPass(lens);
+const bloom = new UnrealBloomPass(new THREE.Vector2(640, 360), 0.55, 0.35, 0.95);
+composer.addPass(bloom);
+const streak = new ShaderPass({
+  uniforms: { tDiffuse: { value: null }, texel: { value: new THREE.Vector2() }, threshold: { value: 1.8 }, gain: { value: 0.08 } },
+  vertexShader: VS,
+  fragmentShader: `uniform sampler2D tDiffuse; uniform vec2 texel; uniform float threshold, gain; varying vec2 vUv;
+    vec3 br(vec2 uv){ vec3 c = texture2D(tDiffuse, uv).rgb; float l = max(c.r, max(c.g, c.b)); return c * smoothstep(threshold, threshold * 2.2, l); }
+    void main(){ vec3 base = texture2D(tDiffuse, vUv).rgb; vec3 acc = vec3(0.0); float ws = 0.0;
+      for (int i = -40; i <= 40; i++) { float f = float(i); float w = exp(-abs(f) / 9.0); acc += br(vUv + vec2(f * texel.x * 3.0, 0.0)) * w; ws += w; }
+      gl_FragColor = vec4(base + vec3(0.7, 0.85, 1.0) * acc / ws * gain * 6.0, 1.0); }`,
+});
+composer.addPass(streak);
+composer.addPass(new OutputPass());
+const film = new ShaderPass({
+  uniforms: { tDiffuse: { value: null }, time: { value: 0 }, grain: { value: 0.0035 }, vignette: { value: 0.5 }, ca: { value: 0.0016 },
+    aspect: { value: 16 / 9 }, target: { value: 2.0 }, fade: { value: 1 }, sat: { value: 1.4 } },
+  vertexShader: VS,
+  fragmentShader: `uniform sampler2D tDiffuse; uniform float time, grain, vignette, ca, aspect, target, fade, sat; varying vec2 vUv;
+    float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233)) + time * 37.0) * 43758.5453); }
+    void main(){
+      vec2 d = vUv - 0.5; float r2 = dot(d, d);
+      vec2 o = d * ca * r2 * 4.0;
+      vec3 c = vec3(texture2D(tDiffuse, vUv + o).r, texture2D(tDiffuse, vUv).g, texture2D(tDiffuse, vUv - o).b);
+      float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
+      c = mix(vec3(l), c, sat);
+      c *= mix(vec3(1.0), vec3(0.94, 0.98, 1.06), pow(1.0 - clamp(l * 2.2, 0.0, 1.0), 2.0));   // a hint of night in the shadows
+      c *= mix(vec3(1.0), vec3(1.10, 1.0, 0.86), smoothstep(0.35, 1.0, l));                      // warm highlights
+      c *= mix(1.0, smoothstep(0.85, 0.12, r2 * 2.0), vignette);
+      c += (h(vUv * 900.0) - 0.5) * grain;
+      c *= fade;
+      float hb = aspect / target; if (abs(vUv.y - 0.5) > hb * 0.5) c = vec3(0.0);
+      gl_FragColor = vec4(c, 1.0); }`,
+});
+composer.addPass(film);
+
+// ---------------------------------------------------------------- textures made in the page
+function canvasTex(w, h, draw, rep) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  if (rep) t.repeat.set(...rep); t.anisotropy = 8; return t;
+}
+let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+const oak = canvasTex(1024, 1024, (g, w, h) => {
+  const rows = 8;
+  for (let r = 0; r < rows; r++) { let x = -rnd() * 400;
+    while (x < w) { const len = 320 + rnd() * 480, k = 0.85 + rnd() * 0.25;
+      g.fillStyle = `rgb(${88 * k | 0},${58 * k | 0},${36 * k | 0})`; g.fillRect(x, r * h / rows, len, h / rows);
+      for (let i = 0; i < 14; i++) { g.strokeStyle = `rgba(30,18,10,${0.05 + rnd() * 0.07})`; g.lineWidth = 1 + rnd() * 2; const y = r * h / rows + rnd() * h / rows;
+        g.beginPath(); g.moveTo(x, y); g.bezierCurveTo(x + len * .3, y + rnd() * 6 - 3, x + len * .6, y + rnd() * 6 - 3, x + len, y); g.stroke(); }
+      g.fillStyle = 'rgba(12,8,4,.6)'; g.fillRect(x, r * h / rows, 2, h / rows); x += len; }
+    g.fillStyle = 'rgba(12,8,4,.65)'; g.fillRect(0, r * h / rows, w, 2); }
+}, [2.4, 2.4]);
+const walnut = canvasTex(1024, 256, (g, w, h) => {
+  g.fillStyle = '#2b1a0f'; g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 160; i++) { g.strokeStyle = `rgba(${rnd() < .5 ? '70,44,26' : '18,10,6'},${0.15 + rnd() * 0.2})`; g.lineWidth = 1 + rnd() * 3;
+    const y = rnd() * h; g.beginPath(); g.moveTo(0, y); g.bezierCurveTo(w * .3, y + rnd() * 20 - 10, w * .7, y + rnd() * 20 - 10, w, y + rnd() * 8 - 4); g.stroke(); }
+}, [1, 1]);
+const ringTex = canvasTex(256, 256, (g, w, h) => {
+  const gr = g.createRadialGradient(w / 2, h / 2, w * 0.34, w / 2, h / 2, w * 0.46);
+  gr.addColorStop(0, 'rgba(60,30,12,0)'); gr.addColorStop(0.75, 'rgba(60,30,12,0.55)'); gr.addColorStop(1, 'rgba(60,30,12,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, w, h);
+});
+const facadeTex = canvasTex(256, 512, (g, w, h) => {
+  g.fillStyle = '#06070b'; g.fillRect(0, 0, w, h);
+  for (let y = 6; y < h; y += 20) for (let x = 5; x < w; x += 16) {
+    const r = rnd(); g.fillStyle = r < 0.07 ? '#ffcf8f' : r < 0.11 ? '#bcd0ff' : r < 0.13 ? '#ff9f6a' : '#0c0e14'; g.fillRect(x, y, 10, 12); }
+}, [3, 3]);
+
+// ---------------------------------------------------------------- materials (look bible)
+const S = THREE.MeshStandardMaterial, PH = THREE.MeshPhysicalMaterial;
+const MAT = {
+  'Plaster': () => new S({ color: 0x3d3a36, roughness: 0.95 }),
+  'Ceiling': () => new S({ color: 0x2e2c29, roughness: 0.95 }),
+  'Floor': () => new S({ map: oak, roughness: 0.42, metalness: 0 }),
+  'Desk Walnut': () => new S({ map: walnut, color: 0xffffff, roughness: 0.38 }),
+  'Shelf Oak': () => new S({ color: 0x5a3e26, roughness: 0.5 }),
+  'Frame Oak': () => new S({ color: 0x6a4a2c, roughness: 0.5 }),
+  'Black Steel': () => new S({ color: 0x0b0b0c, roughness: 0.4, metalness: 0.4 }),
+  'Laptop Alu': () => new S({ color: 0x9a9ca1, roughness: 0.3, metalness: 1 }),
+  'Metal': () => new S({ color: 0x8c8e92, roughness: 0.35, metalness: 1 }),
+  'Chrome': () => new S({ color: 0xdddddd, roughness: 0.08, metalness: 1 }),
+  'Hard Drive': () => new S({ color: 0x3a3a3e, roughness: 0.3, metalness: 1 }),
+  'Can Red': () => new S({ color: 0x8a0c08, roughness: 0.22, metalness: 0.9 }),
+  'Can Green': () => new S({ color: 0x2a6a1e, roughness: 0.22, metalness: 0.9 }),
+  'Can Black': () => new S({ color: 0x111113, roughness: 0.22, metalness: 0.9 }),
+  'Can Silver Blue': () => new S({ color: 0x4060b0, roughness: 0.22, metalness: 0.9 }),
+  'Key Brass': () => new S({ color: 0xb08a40, roughness: 0.3, metalness: 1 }),
+  'Glass': () => new S({ color: 0x8899aa, roughness: 0.05, transparent: true, opacity: 0.08, depthWrite: false }),
+  'Tumbler Glass': () => new PH({ color: 0xffffff, roughness: 0.02, transmission: 1, thickness: 0.004, ior: 1.5, transparent: true }),
+  'Water': () => new PH({ color: 0xe8f4ff, roughness: 0.0, transmission: 1, thickness: 0.06, ior: 1.33, transparent: true }),
+  'Air Bubble': () => new S({ color: 0xffffff, roughness: 0.1, transparent: true, opacity: 0.6 }),
+  'Carafe Glass': () => new S({ color: 0x99aabb, roughness: 0.05, transparent: true, opacity: 0.15, depthWrite: false }),
+  'Water Bottle': () => new S({ color: 0x99aabb, roughness: 0.05, transparent: true, opacity: 0.2, depthWrite: false }),
+  'Coffee': () => new PH({ color: 0x140904, roughness: 0.05, clearcoat: 1 }),
+  'Coffee Ring Stain': () => new S({ map: ringTex, transparent: true, depthWrite: false, roughness: 0.6, polygonOffset: true, polygonOffsetFactor: -2 }),
+  'Sheer Curtain': () => new S({ color: 0xb8b0a2, roughness: 0.85, transparent: true, opacity: 0.5, side: THREE.DoubleSide, depthWrite: false }),
+  'Chair Mesh': () => new S({ color: 0x101114, roughness: 0.9 }),
+  'Desk Mat Felt': () => new S({ color: 0x15171a, roughness: 1 }),
+  'Rug Wool': () => new S({ color: 0x1a1816, roughness: 1 }),
+  'Cardboard': () => new S({ color: 0x6d4c2a, roughness: 0.9 }),
+  'Cork': () => new S({ color: 0x6a4626, roughness: 0.95 }),
+  'Stone': () => new S({ color: 0x8d8880, roughness: 0.25 }),
+  'Concrete': () => new S({ color: 0x3a3936, roughness: 0.9 }),
+  'Own Facade': () => new S({ color: 0x26241f, roughness: 0.9 }),
+  'Asphalt': () => new S({ color: 0x0c0c0d, roughness: 0.9 }),
+  'Hoodie Charcoal': () => new S({ color: 0x1c1e22, roughness: 0.95 }),
+  'Backpack': () => new S({ color: 0x14202e, roughness: 0.85 }),
+  'Radio Grille': () => new S({ color: 0x0c0c0c, roughness: 0.9 }),
+  'Fairy Bulb': () => new S({ color: 0x000000, emissive: 0xffa25a, emissiveIntensity: 7 }),
+  'LED Green': () => new S({ color: 0x000000, emissive: 0x40ff80, emissiveIntensity: 5 }),
+  'LED Blue': () => new S({ color: 0x000000, emissive: 0x4a8cff, emissiveIntensity: 6 }),
+  'LED Amber': () => new S({ color: 0x000000, emissive: 0xffa030, emissiveIntensity: 4 }),
+  'Coffee Maker Clock': () => new S({ color: 0x000000, emissive: 0x50ff90, emissiveIntensity: 3 }),
+  'Sodium Lamp': () => new S({ color: 0x000000, emissive: 0xffa040, emissiveIntensity: 9 }),
+  'Aviation Red': () => new S({ color: 0x000000, emissive: 0xff2010, emissiveIntensity: 9 }),
+  'Tail Light': () => new S({ color: 0x000000, emissive: 0xff1808, emissiveIntensity: 4 }),
+  'Diffuser_On_Fixture_CeilingLight_Bath_E': () => new S({ color: 0x000000, emissive: 0xffc48a, emissiveIntensity: 2 }),
+  'Ivan Skin': () => new PH({ color: 0xc28a68, roughness: 0.5, sheen: 0.3, sheenColor: new THREE.Color(0xff8a70), sheenRoughness: 0.5, clearcoat: 0.04 }),
+  'Sweater Knit': () => new PH({ color: 0x7a7771, roughness: 0.95, sheen: 1, sheenColor: new THREE.Color(0xffffff), sheenRoughness: 0.55 }),
+  'Shirt Cotton': () => new S({ color: 0xa7a6a1, roughness: 0.75 }),
+  'Trouser Wool': () => new PH({ color: 0x15161b, roughness: 0.8, sheen: 0.4, sheenColor: new THREE.Color(0x667088) }),
+  'Shoe Leather Brown': () => new PH({ color: 0x2a1308, roughness: 0.35, clearcoat: 0.5 }),
+  'Glasses Frame': () => new S({ color: 0x0c0a09, roughness: 0.25 }),
+  'Glasses Lens': () => new PH({ color: 0xffffff, roughness: 0.04, transparent: true, opacity: 0.05, clearcoat: 0.25, specularIntensity: 0.35, depthWrite: false }),
+  'Ivan Brows': () => new S({ color: 0x2c1a10, roughness: 0.6, side: THREE.DoubleSide }),
+};
+const SCREEN_GAIN = { 'Laptop Screen': 1.5, 'Monitor Screen': 1.5, 'Phone Screen': 0.35 };   // Cycles: 3.0 / 2.4 before its film curve
+const SCREENS = [];
+const BAKE_GAIN = 1 / 2.83;                                   // bakes were stored x2.83 (see blender/lib/bake.py)
+const BAKED = [];
+const CHAR = {
+  'Ivan Skin Baked': { roughness: 0.48, sheen: 0.35, sheenColor: 0xff8a70, sheenRoughness: 0.5, clearcoat: 0.04 },
+  'Sweater Knit Baked': { roughness: 0.95, sheen: 1, sheenColor: 0xffffff, sheenRoughness: 0.5, normalScale: 0.8 },
+  'Trouser Wool Baked': { roughness: 0.8, sheen: 0.4, sheenColor: 0x667088 },
+  'Ivan Hair Shell Baked': { roughness: 0.45, sheen: 0.6, sheenColor: 0xc08a5a, sheenRoughness: 0.3, anisotropy: 0.6 },
+};
+const LIT_ROUGH = { 'Ivan Skin Lit': 0.42, 'Sweater Knit Lit': 0.95, 'Trouser Wool Lit': 0.8, 'Ivan Hair Shell Lit': 0.5, 'Shirt Cotton Lit': 0.8 };
+const STRAND = { Ivan_HairStrands: 0x1c1009, Ivan_BrowStrands: 0x120a06, Ivan_LashStrands: 0x080504 };
+function styleMaterial(m) {
+  const name = m.name || '';
+  if (/^Baked_| Lit$/.test(name)) {                              // Cycles light + materials, baked (set and Ivan)
+    const b = new S({ color: 0x000000, emissive: 0xffffff, emissiveMap: m.map, emissiveIntensity: BAKE_GAIN, roughness: m.roughnessMap ? 1 : (LIT_ROUGH[name] || 0.55), roughnessMap: m.roughnessMap || null, metalness: 0, name });
+    BAKED.push(b); return b;
+  }
+  if (CHAR[name]) {
+    const c = CHAR[name];
+    const n = new PH({ map: m.map, normalMap: m.normalMap, roughness: c.roughness, sheen: c.sheen || 0, sheenRoughness: c.sheenRoughness || 0.5,
+      sheenColor: new THREE.Color(c.sheenColor || 0xffffff), clearcoat: c.clearcoat || 0, anisotropy: c.anisotropy || 0, name });
+    if (c.normalScale) n.normalScale.set(c.normalScale, c.normalScale);
+    return n;
+  }
+  if (MAT[name]) { const n = MAT[name](); n.name = name; return n; }
+  if (/^Facade/.test(name)) return new S({ color: 0x0a0b0e, roughness: 0.8, emissive: 0xffffff, emissiveMap: facadeTex, emissiveIntensity: 1.6, name });
+  if (/^Leaf|Plant Stem/.test(name)) { m.side = THREE.DoubleSide; m.roughness = 0.5; return m; }
+  if (SCREEN_GAIN[name]) {
+    const s = new S({ color: 0x000000, emissive: 0xffffff, emissiveMap: m.map || m.emissiveMap, emissiveIntensity: SCREEN_GAIN[name], roughness: 0.12, name });
+    SCREENS.push(s); return s;
+  }
+  if (name === 'Ivan Hair Cards') {
+    m.color = new THREE.Color(Q.get('debughair') ? 0xff0000 : 0x3a2112); if (Q.get('debughair')) { m.map = null; } m.alphaTest = 0.35; m.transparent = false; m.side = THREE.DoubleSide; m.roughness = 0.45; return m;
+  }
+  if (name === 'Ivan Eyes') { m.roughness = 0.25; m.color.setScalar(0.32); return m; }   // sclera sits in lid shadow; never glow
+  return m;   // constant-colour materials export faithfully from Blender
+}
+
+// ---------------------------------------------------------------- load
+let mixer, clipDur = DURATION;
+const named = {};
+function loadGLB() {
+  const loader = new GLTFLoader();
+  const P = window.INTRO_GLB_PARTS, b64 = window.INTRO_GLB || (P && P[0] && P[1] ? P[0] + P[1] : '');   // published page: scene inlined in two files
+  if (b64) {
+    const bytes = Uint8Array.from(atob(b64), (c) => c.charCodeAt(0)).buffer;
+    return new Promise((res, rej) => loader.parse(bytes, '', res, rej));
+  }
+  return new Promise((res, rej) => loader.load(Q.get('glb') || 'intro.glb', res, undefined, rej));
+}
+loadGLB().then((gltf) => {
+  const root = gltf.scene;
+  root.traverse((o) => {
+    named[o.name] = o;
+    if (o.isLineSegments && STRAND[o.name] !== undefined) { o.material = new THREE.LineBasicMaterial({ color: STRAND[o.name] }); return; }
+    if (o.isMesh) {
+      o.castShadow = o.receiveShadow = true;
+      o.material = Array.isArray(o.material) ? o.material.map(styleMaterial) : styleMaterial(o.material);
+      const n = o.material.name || '';
+      if (/Glass|Curtain|Ring Stain|Lens|Bubble|Bottle|Carafe/.test(n)) o.castShadow = false;
+      if (o.isSkinnedMesh) o.frustumCulled = false;
+    }
+  });
+  if (Q.get('ivan') !== '1') root.traverse((o) => { if (/^(Ivan_|Glasses_)/.test(o.name) || (o.isSkinnedMesh)) o.visible = false; });
+  scene.add(root);
+  window.__scene = scene; window.__THREE = THREE;
+  if (gltf.animations.length) {
+    mixer = new THREE.AnimationMixer(root);
+    const act = mixer.clipAction(gltf.animations[0]); act.play();
+    clipDur = gltf.animations[0].duration;
+  }
+  buildLights();
+  $('status').hidden = true;
+  setTime(Number($('time').value));
+  window.__ready = true;
+}).catch((e) => { $('status').textContent = 'Could not load the scene: ' + e.message; });
+
+// ---------------------------------------------------------------- light: cozy 3 AM
+const L = {};
+function worldPos(name, fallback) {
+  const o = named[name]; if (!o) return fallback.clone();
+  o.updateWorldMatrix(true, false); return new THREE.Vector3().setFromMatrixPosition(o.matrixWorld);
+}
+function buildLights() {
+  const head = B(6.94, 2.66, 1.12);
+  const lap = worldPos('Laptop_Screen', B(6.95, 3.23, 0.87));
+  L.screen = new THREE.RectAreaLight(0x8fb6ff, 16, 0.3, 0.19); L.screen.position.copy(lap); L.screen.lookAt(head); scene.add(L.screen);
+  L.screenShadow = new THREE.SpotLight(0x86a8ff, 5, 6, 0.95, 1.0, 2); L.screenShadow.position.copy(lap); L.screenShadow.target.position.copy(head);
+  L.screenShadow.castShadow = true; L.screenShadow.shadow.mapSize.set(1024, 1024); L.screenShadow.shadow.bias = -0.0005; L.screenShadow.shadow.radius = 6;
+  scene.add(L.screenShadow, L.screenShadow.target);
+  const mon = worldPos('Monitor_Screen', B(7.36, 3.31, 1.06));
+  L.monitor = new THREE.RectAreaLight(0x7ad0ff, 9, 0.6, 0.34); L.monitor.position.copy(mon); L.monitor.lookAt(head); scene.add(L.monitor);
+  const bulb = worldPos('Lamp_Bulb', B(7.42, 3.38, 1.15));
+  L.lamp = new THREE.SpotLight(0xffa15a, 9, 4.5, 1.05, 0.75, 2); L.lamp.position.copy(bulb); L.lamp.target.position.copy(B(7.0, 3.05, 0.75));
+  L.lamp.castShadow = true; L.lamp.shadow.mapSize.set(1024, 1024); L.lamp.shadow.bias = -0.0004; L.lamp.shadow.radius = 4;
+  scene.add(L.lamp, L.lamp.target);
+  L.fairy = [B(6.3, 2.32, 2.05), B(7.3, 2.32, 2.05), B(8.3, 2.32, 2.05)].map((p) => { const l = new THREE.PointLight(0xffa860, 0.5, 2.6, 2); l.position.copy(p); scene.add(l); return l; });
+  L.window = new THREE.RectAreaLight(0x2c46a0, 0.45, 2.4, 1.5); L.window.position.copy(B(9.7, 3.6, 1.5)); L.window.lookAt(B(6.0, 3.6, 1.0)); scene.add(L.window);
+  L.balcony = new THREE.RectAreaLight(0x332f8a, 0.3, 2.2, 2.0); L.balcony.position.copy(B(4.75, 5.4, 1.2)); L.balcony.lookAt(B(4.75, 3.0, 1.0)); scene.add(L.balcony);
+  L.rim = new THREE.SpotLight(0x6f86ff, 1.6, 5, 0.5, 0.9, 2); L.rim.position.copy(B(7.6, 2.25, 1.9)); L.rim.target.position.copy(B(6.94, 2.66, 1.15)); scene.add(L.rim, L.rim.target);
+  L.hemi = new THREE.HemisphereLight(0x22304a, 0x0a0705, 0.06); scene.add(L.hemi);
+  applyLevels();
+}
+function applyLevels() {
+  if (!L.lamp) return;
+  const lk = +$('lampK').value, sk = +$('scrK').value;
+  L.lamp.intensity = 3.2 * lk; L.screen.intensity = 4.5 * sk; L.screenShadow.intensity = 1.2 * sk; L.monitor.intensity = 2.4 * sk;
+  SCREENS.forEach((m) => { m.emissiveIntensity = (SCREEN_GAIN[m.name] || 1) * (0.35 + 0.65 * sk); });
+  renderer.toneMappingExposure = Math.pow(2, +$('exp').value);
+  $('lampOut').value = lk.toFixed(2); $('scrOut').value = sk.toFixed(2); $('expOut').value = (+$('exp').value).toFixed(1) + ' EV';
+}
+
+// ---------------------------------------------------------------- the shots (Blender coords, metres)
+const HEAD = [6.94, 2.70, 1.15], GLASS = [6.66, 3.10, 0.81], SCREEN = [6.95, 3.24, 0.87];
+const SHOTS = [
+  { id: 'S1', name: 'The zone', t0: 0, t1: 8, mm: [24, 27], f: 4.0, ev: 0,
+    from: [4.35, 4.95, 2.05], to: [5.25, 4.25, 1.72], at0: [6.9, 2.75, 0.98], at1: [6.92, 2.75, 1.0], focus: 'eyes',
+    why: 'Storyboard 1. A slow descending push from the dark living room into the only lit corner. String lights, the clock at 3:04, the city beyond. He is small inside his world.' },
+  { id: 'S2', name: 'Still full', t0: 8, t1: 15.5, mm: [40, 45], f: 1.8, ev: -0.2,
+    from: [6.33, 3.62, 0.88], to: [6.42, 3.55, 0.87], at0: [6.80, 2.98, 0.90], at1: [6.86, 2.90, 0.98], focus: [GLASS, 'eyes'],
+    why: 'Storyboard 2. Desk level, past the cold lunch box and the full glass; focus racks from the glass to Ivan typing behind it. He never looks at either.' },
+  { id: 'S3', name: 'Lit by the work', t0: 15.5, t1: 23, mm: [50, 58], f: 2.0, ev: -0.6,
+    from: [6.86, 3.95, 1.12], to: [6.90, 3.62, 1.15], at0: [6.94, 2.70, 1.20], at1: [6.94, 2.70, 1.21], focus: 'eyes',
+    why: 'Storyboard 3. A push in on his face: screen-blue key, string-light bokeh behind, code reflected in his glasses. He leans in when it clicks.' },
+  { id: 'S4', name: 'The sprawl', t0: 23, t1: 31, mm: [32, 38], f: 2.8, ev: -0.3,
+    from: [7.48, 2.36, 1.40], to: [7.32, 2.60, 1.24], at0: SCREEN, at1: [6.95, 3.22, 0.88], focus: 'at',
+    why: 'Storyboards 4 and 5. Over his right shoulder and into the screen: terminal, Claude chat, the growing sprawl of scripts, hands on the keys.' },
+  { id: 'S5', name: 'Because he could', t0: 31, t1: 40, mm: [35, 30], f: 3.2, ev: -0.4,
+    from: [7.55, 4.15, 1.28], to: [6.15, 4.05, 1.42], at0: [6.98, 2.78, 1.02], at1: [6.92, 2.78, 1.05], focus: 'eyes',
+    why: 'Storyboard 6. A slow arc from his right to his left: the second screen climbing, his cocoon of light, the dark flat around. A small nod: it works.' },
+];
+const CAPS = [
+  [1.0, 7.2, "It's 3 AM and Ivan hasn't eaten since lunch."],
+  [8.6, 12.2, "There's a glass of water on his desk that he poured six hours ago."],
+  [12.5, 15.2, "It's still full."],
+  [16.0, 22.6, "He's hunched over his laptop, typing furiously, eyes bloodshot."],
+  [23.6, 30.6, 'On the screen: a terminal window, a Claude chat, and a growing sprawl of Python scripts.'],
+  [31.6, 35.0, "He's building an email automation system."],
+  [35.3, 37.4, 'Not because anyone asked him to.'],
+  [37.7, 39.6, 'Because he realized he could.'],
+];
+const ease = (x) => 0.5 - 0.5 * Math.cos(Math.PI * Math.min(1, Math.max(0, x)));
+const lerp3 = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
+// focus puller: the lens follows Ivan's eyes (skinned, so measured after the pose is applied)
+const eyeBox = new THREE.Box3();
+function eyes() {
+  const o = named.Ivan_Eyes; if (!o) return B(...HEAD);
+  o.updateWorldMatrix(true, false); o.skeleton && o.skeleton.update();
+  return eyeBox.setFromObject(o, true).getCenter(new THREE.Vector3());
+}
+function shotAt(t) { return SHOTS.find((s) => t >= s.t0 && t < s.t1) || SHOTS[SHOTS.length - 1]; }
+function shake(t, amp) {               // an operator breathing behind the camera
+  return new THREE.Euler(amp * (Math.sin(t * 0.9) * 0.6 + Math.sin(t * 2.3 + 1) * 0.25), amp * (Math.sin(t * 0.7 + 2) * 0.6 + Math.sin(t * 1.9) * 0.2), amp * 0.3 * Math.sin(t * 0.5));
+}
+function cameraAt(t) {
+  const s = shotAt(t), u = ease((t - s.t0) / (s.t1 - s.t0));
+  let pos, at;
+  if (s.id === 'S5') {                  // arc around him
+    const c = B(6.95, 2.75, 0); const p0 = B(...s.from), p1 = B(...s.to);
+    const a0 = Math.atan2(p0.z - c.z, p0.x - c.x), a1 = Math.atan2(p1.z - c.z, p1.x - c.x);
+    const r0 = Math.hypot(p0.x - c.x, p0.z - c.z), r1 = Math.hypot(p1.x - c.x, p1.z - c.z);
+    let da = a1 - a0; if (da > Math.PI) da -= 2 * Math.PI; if (da < -Math.PI) da += 2 * Math.PI;
+    const a = a0 + da * u, r = r0 + (r1 - r0) * u;
+    pos = new THREE.Vector3(c.x + Math.cos(a) * r, p0.y + (p1.y - p0.y) * u, c.z + Math.sin(a) * r);
+  } else pos = B(...lerp3(s.from, s.to, u));
+  at = B(...lerp3(s.at0, s.at1, u));
+  const mm = s.mm[0] + (s.mm[1] - s.mm[0]) * u;
+  let focusPt = at;
+  const pt = (f) => (f === 'eyes' ? eyes() : B(...f));
+  if (s.focus === 'eyes') focusPt = eyes();
+  if (Array.isArray(s.focus)) { const k = ease((t - s.t0 - 2.2) / 2.0); focusPt = pt(s.focus[0]).lerp(pt(s.focus[1]), k); }
+  const fixed = Q.get('cam');            // ?cam=px,py,pz,tx,ty,tz,mm,f  (Blender coords): parity tests vs Cycles
+  if (fixed) { const v = fixed.split(',').map(Number); pos = B(v[0], v[1], v[2]); at = B(v[3], v[4], v[5]);
+    const e = eyes(), fp = e.distanceTo(at) < 0.35 ? e : at;
+    return { pos, at, mm: v[6], f: v[7] || 8, focus: pos.distanceTo(fp), shot: { ...s, ev: 0 } }; }
+  return { pos, at, mm, f: s.f, focus: pos.distanceTo(focusPt), shot: s };
+}
+
+// ---------------------------------------------------------------- per-frame state
+let tNow = 0, playing = false, last = performance.now();
+const tmpE = new THREE.Euler();
+function setTime(t) {
+  tNow = Math.max(0, Math.min(DURATION - 1 / FPS, t));
+  if (mixer) { mixer.setTime(Math.min(tNow, clipDur - 0.001)); scene.updateMatrixWorld(true); }
+  const c = cameraAt(tNow);
+  if (!controls.enabled) {
+    camera.position.copy(c.pos); camera.lookAt(c.at);
+    const sh = shake(tNow, c.shot.id === 'S2' ? 0.0015 : 0.003);
+    camera.rotateX(sh.x); camera.rotateY(sh.y); camera.rotateZ(sh.z);
+    camera.fov = THREE.MathUtils.radToDeg(2 * Math.atan(18 / c.mm / camera.aspect)); camera.updateProjectionMatrix();
+    lens.focus = c.focus; lens.fstop = c.f; lens.mm = c.mm;
+  }
+  renderer.toneMappingExposure = Math.pow(2, +$('exp').value + (controls.enabled ? 0 : (c.shot.ev || 0)));
+  // a living room: LEDs blink, string lights breathe, the lamp hums
+  SCREENS.forEach((m) => { if (m.name === 'Monitor Screen') m.emissiveIntensity = (0.35 + 0.65 * +$('scrK').value) * (1 + 0.03 * Math.sin(tNow * 9)); });
+  const fade = Math.min(1, tNow / 1.0, (DURATION - tNow) / 1.0);
+  film.uniforms.fade.value = Math.max(0, fade);
+  film.uniforms.time.value = Math.floor(tNow * FPS) % 97;
+  const cap = CAPS.find(([a, b]) => tNow >= a && tNow < b);
+  const el = $('cap'); el.textContent = cap && $('caps').checked ? cap[2] : '';
+  $('slate').textContent = `${c.shot.id} · ${c.shot.name.toUpperCase()} · ${c.mm.toFixed(0)} mm · f/${c.f} · ${tNow.toFixed(1)} s`;
+  $('time').value = tNow; $('timeOut').value = tNow.toFixed(1) + ' s';
+  document.querySelectorAll('#shotChips .chip').forEach((b) => b.setAttribute('aria-pressed', b.dataset.id === c.shot.id));
+}
+function render() { controls.enabled && controls.update(); composer.render(); }
+window.renderFrame = (n) => { setTime(n / FPS); render(); return true; };
+
+// ---------------------------------------------------------------- UI
+SHOTS.forEach((s) => {
+  const b = document.createElement('button'); b.className = 'chip'; b.type = 'button'; b.dataset.id = s.id; b.textContent = `${s.id} ${s.name}`;
+  b.addEventListener('click', () => { exitFree(); setTime(s.t0 + 0.01); }); $('shotChips').appendChild(b);
+  const card = document.createElement('div'); card.className = 'shot';
+  card.innerHTML = `<b>${s.id} · ${s.name}</b><code>${s.t0}–${s.t1} s · ${s.mm[0]}→${s.mm[1]} mm · f/${s.f}</code><span>${s.why}</span>`;
+  $('shotList').appendChild(card);
+});
+function exitFree() { controls.enabled = false; $('free').setAttribute('aria-pressed', 'false'); }
+$('free').addEventListener('click', () => {
+  controls.enabled = !controls.enabled; $('free').setAttribute('aria-pressed', String(controls.enabled));
+  if (controls.enabled) { const c = cameraAt(tNow); controls.target.copy(c.at); lens.fstop = 64; }
+  else setTime(tNow);
+});
+$('play').addEventListener('click', () => { playing = !playing; $('play').textContent = playing ? '❚❚ Pause' : '▶ Play'; last = performance.now(); });
+$('time').addEventListener('input', () => setTime(+$('time').value));
+['exp', 'lampK', 'scrK'].forEach((id) => $(id).addEventListener('input', applyLevels));
+$('fx').addEventListener('change', () => { const on = $('fx').checked; bloom.enabled = streak.enabled = on; lens.mat.uniforms.on.value = on ? 1 : 0;
+  film.uniforms.vignette.value = on ? 0.5 : 0; film.uniforms.sat.value = on ? 1.4 : 1; film.uniforms.ca.value = on ? 0.0016 : 0; });
+$('caps').addEventListener('change', () => setTime(tNow));
+
+function resize() {
+  const w = stage.clientWidth, h = stage.clientHeight;
+  renderer.setSize(w, h, false); composer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix();
+  bloom.resolution.set(w / 2, h / 2); streak.uniforms.texel.value.set(1 / w, 1 / h); film.uniforms.aspect.value = w / h;
+  if (window.__ready) setTime(tNow);
+}
+if (Q.get('fx') === '0') { $('fx').checked = false; $('fx').dispatchEvent(new Event('change')); }
+if (Q.get('exp')) { $('exp').value = Q.get('exp'); }
+new ResizeObserver(resize).observe(stage); resize();
+if (!RENDER) renderer.setAnimationLoop(() => {
+  const now = performance.now();
+  if (playing && window.__ready) { let t = tNow + (now - last) / 1000; if (t >= DURATION - 0.05) t = 0; setTime(t); }
+  last = now;
+  if (window.__ready) render();
+});
 </script>

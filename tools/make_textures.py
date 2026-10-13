@@ -395,6 +395,25 @@ def printout():
     im.save(OUT / "printout.png")
 
 
+def hair_strands():
+    """Hair-card alpha: many fine strands with varying opacity, thinning toward the tip (v=1)."""
+    W, H = 256, 1024
+    im = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    for i in range(170):
+        x = rnd.uniform(4, W - 4)
+        length = rnd.uniform(0.6, 1.0) * H
+        a = rnd.randint(140, 255)
+        shade = rnd.randint(150, 255)
+        w = rnd.choice((1, 1, 2, 2, 3))
+        drift = rnd.uniform(-10, 10)
+        pts = [(x + drift * (y / H) ** 2 + 2 * math.sin(y / 90 + i), y) for y in range(0, int(length), 16)]
+        for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+            fade = int(a * (1 - (y1 / H) ** 3))
+            d.line((x0, y0, x1, y1), fill=(shade, shade, shade, fade), width=w)
+    im.save(OUT / "hair_strands.png")
+
+
 if __name__ == "__main__":
     laptop_screen()
     phone_lock()
@@ -409,4 +428,5 @@ if __name__ == "__main__":
     wall_print()
     monitor_screen()
     printout()
+    hair_strands()
     print("textures ->", OUT)

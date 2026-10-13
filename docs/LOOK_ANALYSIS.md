@@ -69,3 +69,25 @@
   - neck and shoulder proportion (thicker neck, closer shoulders, collar seated);
   - wrists covered by the cuffs;
   - hair silhouette with flyaways.
+
+## Round 4: why the three.js port looked cheap, and what changed
+
+**Method:**
+- **Parity sheet:** the same camera (`?cam=` in `viewer/index.html`) is rendered in Cycles and in three.js and placed side by side.
+- **Measurement:** `tools/look_metrics.py` measures any frame the same way it measures the 68 night shots of the reference. Its definitions are slightly different from round 3's, so compare rows within this table only.
+
+| Measure (night median) | Reference | three.js before | Cause | Fix |
+|---|---|---|---|---|
+| Fine noise in flat areas | **0.12** | 0.74–0.85 | grain 0.012 added every frame | grain 0.0035 |
+| Saturation of lit pixels | **0.40** | 0.18–0.28 | AgX desaturates; grade sat 1.18 | sat 1.4; warmer highlights |
+| Shadow colour | warm (+0.07) | blue (−0.04) | "cool shadows" grade term | only a hint of blue left |
+| Highlight area | **0.6%** | 4.3% | Ivan's albedo lit by live lights, then bloomed into a veil | Ivan's light baked in Cycles (below) |
+| Sharp share of frame | **0.6%** | 2.5–3.2% | BokehPass is weak and blotchy | physical thin-lens DOF pass (focal length, f-stop, focus distance) × 1.8 look factor |
+
+**What made it read as "models placed in a scene":**
+1. **Unbaked lighting.** In three.js every surface was lit only by a few analytic lights, with no bounce, no contact shadows and no soft falloff. *Now:* Cycles bakes direct and indirect light onto every static surface (ARCH / DESK / ROOM atlases), so three.js shows what Blender computed.
+2. **Ivan lit live.** He was a flat albedo under a strong area light, which reads as plastic. *Now:* his diffuse light, including skin subsurface, knit and contact shadows, is baked in Cycles in the seated pose (he only types, breathes and glances). three.js adds only the moving specular.
+3. **One roughness for everything baked.** *Now:* a roughness map is baked into each atlas, so the walnut and floor catch the screen while plaster stays matte.
+4. **Curves skipped by the bake.** Cables, wires and the lamp arm were exported unbaked and glowed white. *Now:* they are converted to meshes before the bake.
+5. **Lens streaks the width of the frame.** They read as scan lines. *Now:* shorter and fainter.
+6. **Frames carried page margins.** *Now:* the render-mode stage fills the frame.

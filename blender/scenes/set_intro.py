@@ -128,5 +128,6 @@ if __name__ == "__main__":
     samples = int(opt("--samples", "128"))
     scene, cams = build(preset, look="--no-look" not in args, ivan_blend=opt("--ivan", None))
     if "--blend" in args:
+        bpy.ops.file.pack_all()                       # one self-contained file (screens, clock, prints)
         bpy.ops.wm.save_as_mainfile(filepath=str(out / f"set_intro_{preset}.blend"))
     print("rendered", render(scene, cams, names, out, res, samples, preset))

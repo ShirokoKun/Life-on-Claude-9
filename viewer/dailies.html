@@ -1,0 +1,124 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Claude Nine Dailies</title>
+<style>
+body { margin: 0; } [hidden] { display: none !important; }
+/* Layout: a screening-room contact sheet. Hero still full width, shots in a 2-up grid, notes in a narrow column. Single dark look by choice. */
+:root {
+  --bg: #08090c;
+  --panel: #111319;
+  --line: #23262f;
+  --ink: #ebe7de;
+  --mute: #8d909b;
+  --amber: #e9a35b;        /* desk-lamp practical */
+  --tally: #e0483e;
+  --display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --body: "IBM Plex Sans", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+  color-scheme: dark;
+}
+body { background: var(--bg); color: var(--ink); font-family: var(--body); }
+.wrap { max-width: 1280px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 64px; display: grid; gap: 28px; }
+header { display: grid; gap: 6px; }
+.eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: .12em; color: var(--mute); text-transform: uppercase; }
+.eyebrow b { color: var(--tally); font-weight: 400; }
+h1 { margin: 0; font-family: var(--display); font-weight: 600; font-size: clamp(30px, 5vw, 52px); letter-spacing: .02em; text-transform: uppercase; text-wrap: balance; }
+.lede { margin: 0; max-width: 68ch; color: var(--mute); line-height: 1.55; }
+figure { margin: 0; display: grid; gap: 8px; min-width: 0; }
+figure button { all: unset; cursor: zoom-in; display: block; }
+figure button:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+figure img { display: block; width: 100%; height: auto; aspect-ratio: 2 / 1; object-fit: cover; background: #000; border: 1px solid var(--line); }
+figcaption { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: baseline; font-size: 13px; color: var(--mute); }
+figcaption strong { font-family: var(--display); font-weight: 600; font-size: 17px; letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
+figcaption code { font-family: var(--mono); font-size: 11px; color: var(--amber); }
+.grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+.ivan img { aspect-ratio: auto; }
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; }
+section h2 { margin: 0 0 10px; font-family: var(--display); font-weight: 600; font-size: 14px; letter-spacing: .16em; text-transform: uppercase; color: var(--mute); }
+ul { margin: 0; padding-left: 18px; line-height: 1.6; font-size: 14px; }
+li { margin-bottom: 4px; }
+li em { color: var(--amber); font-style: normal; }
+.link { display: inline-block; font-family: var(--mono); font-size: 12px; color: var(--ink); border: 1px solid var(--line); padding: 8px 12px; text-decoration: none; }
+.link:hover, .link:focus-visible { border-color: var(--amber); outline: none; }
+dialog { padding: 0; border: 0; background: transparent; max-width: 96vw; }
+dialog::backdrop { background: rgba(0, 0, 0, .9); }
+dialog img { max-width: 96vw; max-height: 90vh; display: block; }
+@media (max-width: 760px) { .grid, .cols { grid-template-columns: 1fr; } }
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600&family=IBM+Plex+Mono&family=IBM+Plex+Sans:wght@400;500&display=swap">
+
+</head><body>
+<div class="wrap">
+  <p style="margin:0"><a class="link" href="index.html">← The film and the live scene</a></p>
+  <header>
+    <span class="eyebrow"><b>●</b> Life on Claude Nine · intro · dailies round 3 · checkpoint before the look fixes</span>
+    <h1>Ivan's flat, 3 AM</h1>
+    <p class="lede">Path-traced look development for the intro chapter. Warm desk lamp and string lights against teal night, two screens on his face, haze and dust in the air, halation on every highlight. Ivan v2 is seated at the desk, mid-build. Click any frame to see it full size.</p>
+  </header>
+
+  <figure>
+    <button type="button" data-full="dailies/r3_face.jpg"><img src="dailies/r3_face.jpg" alt="Ivan at the laptop, his face lit by the screen, glasses reflecting it, string lights and clock behind him"></button>
+    <figcaption><strong>Face · the hero frame</strong> 55 mm · f/2.2 <code>SHOTS["face"]</code> Storyboard 04, panel 3: the screen in his glasses. The clock reads 3:04 over his shoulder.</figcaption>
+  </figure>
+
+  <div class="grid">
+    <figure>
+      <button type="button" data-full="dailies/r3_desk34.jpg"><img src="dailies/r3_desk34.jpg" alt="Three-quarter view of Ivan hunched over the laptop at the cluttered desk"></button>
+      <figcaption><strong>Desk 3/4</strong> 35 mm · f/3.2 The hunch, hands on the keys, the second screen, the lamp pool.</figcaption>
+    </figure>
+    <figure>
+      <button type="button" data-full="dailies/r3_ots.jpg"><img src="dailies/r3_ots.jpg" alt="Over the shoulder onto the laptop screen showing code and a Claude chat"></button>
+      <figcaption><strong>Over the shoulder</strong> 35 mm · f/2.8 Needs reframing: with Ivan seated, his back now blocks the laptop. The second screen reads well.</figcaption>
+    </figure>
+    <figure>
+      <button type="button" data-full="dailies/r3_establish.jpg"><img src="dailies/r3_establish.jpg" alt="Wide establishing view of the dark flat with Ivan at his lit desk"></button>
+      <figcaption><strong>Establishing</strong> 24 mm The flat at 3 AM: the only life is the corner where he works.</figcaption>
+    </figure>
+    <figure>
+      <button type="button" data-full="dailies/r3_glass.jpg"><img src="dailies/r3_glass.jpg" alt="Close insert of the full glass of water with bubbles, screens glowing behind"></button>
+      <figcaption><strong>Insert · the glass</strong> 85 mm · f/2.8 Poured six hours ago, still full. It still reads as metal: it needs backlight through the water.</figcaption>
+    </figure>
+  </div>
+
+  <figure class="ivan">
+    <button type="button" data-full="dailies/ivan_turnaround.jpg"><img src="dailies/ivan_turnaround.jpg" alt="Ivan character turnaround: front, three-quarter, face close-up"></button>
+    <figcaption><strong>Ivan v2</strong> MPFB2 body shaped to the sheet · posable rig · strand hair · knit, cotton, wool, leather. Still to reach the sheet: skin realism, face likeness, hair styling.</figcaption>
+  </figure>
+
+  <div class="cols">
+    <section>
+      <h2>New this round</h2>
+      <ul>
+        <li><em>Mess with a reason:</em> second monitor with a live dashboard, printouts with notes, headphones, cans, a rubber duck, cables to the floor, delivery boxes, a dropped hoodie, a backpack.</li>
+        <li><em>Life on the walls:</em> shelves of books, binders, speakers and a trailing pothos; warm string lights; a cork board of notes by the window.</li>
+        <li><em>Plants:</em> a big monstera by the window and a small one by the desk, snake plant at the balcony. Leaves glow when backlit.</li>
+        <li><em>Birdcage look:</em> lamp ON, halation, mist depth into teal, room haze, floating dust, grain.</li>
+        <li><em>Ivan:</em> new face shaping, warm skin with blush and crease shading, clumped hair, lashes, clear wire glasses, boxy knit with the shirt in the neckline, wide trousers, lofted leather shoes, a seated typing pose.</li>
+        <li><em>Animation controls:</em> typing bursts, breathing, head drift and glances, screen scroll, LED blinks, light flicker, the two-keyframe camera push, handheld noise.</li>
+      </ul>
+    </section>
+    <section>
+      <h2>Next: from the multi-frame look analysis</h2>
+      <ul>
+        <li><em>Darker, cleaner:</em> 30–45% true black per frame, no room haze or fog veil, no dust specks or plaster grit, render noise at or below the reference.</li>
+        <li><em>One colour world per 3 AM shot:</em> screen blue as the key (as in the storyboard), one warm accent, black.</li>
+        <li><em>Glow only on sources:</em> small hot lights that bloom; the air stays clear.</li>
+        <li><em>Faces carved by light:</em> screen key at 45°, a cool rim, hair edge-lit; shallow focus so backgrounds turn into light points.</li>
+        <li><em>Ivan fixes:</em> neck and shoulder proportion, collar seated, cuffs over the wrists, softer hairline.</li>
+        <li>Ivan likeness pass against the sheet: eyes, nose, jaw, hair shape, skin detail.</li>
+        <li>First moving shots: a 5–8 second push-in on the face with typing and breathing.</li>
+        <li>4 AM and sunrise versions of these frames.</li>
+        <li>Bake the look into textures and lightmaps for the three.js engine.</li>
+      </ul>
+      <p style="margin:18px 0 0"><a class="link" href="set.html">Open the interactive 3D blockout (layout v2) →</a></p>
+    </section>
+  </div>
+</div>
+
+<dialog id="lb"><img id="lbimg" alt=""></dialog>
+<script>
+const lb = document.getElementById('lb'), img = document.getElementById('lbimg');
+document.querySelectorAll('[data-full]').forEach((b) => b.addEventListener('click', () => {
+  img.src = b.dataset.full; img.alt = b.querySelector('img').alt; lb.showModal();
+}));
+lb.addEventListener('click', () => lb.close());
+</script>
+</body></html>

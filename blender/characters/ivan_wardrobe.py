@@ -437,8 +437,9 @@ def hide_covered_skin(body, L):
             side = "l" if (co.x > 0) == (sh["l"].x > 0) else "r"
             a, b = sh[side], hand[side]
             t = (co - a).dot(b - a) / (b - a).length_squared
-            if co.z > pel.z and abs(co.x) > abs(sh[side].x) * 0.75 and t > 0.9:
-                continue
+            near_hand = (co - hand[side]).length < 0.14             # hand + fingers (they hang below the pelvis)
+            if near_hand or (abs(co.x) > abs(sh[side].x) * 0.75 and t > 0.86):
+                continue                                             # forearm under the cuff stays: no wrist gap
             idx.append(v.index)
     g.add(idx, 1.0, "REPLACE")
     m = body.modifiers.new("Hide under clothes", "MASK")
@@ -530,6 +531,8 @@ def grow_hair(body, L, guides=1400, per_guide=26):
         return pts
 
     roots = [(co, n) for co, n in _surface_samples(body, "scalp", guides * 3) if in_hairline(co)][:guides]
+    crown = [(co, n) for co, n in roots if co.z > eye.z + 0.075]          # edge breakup on top only
+    hair_cards(body, crown, [guide_path(co, n) for co, n in crown], hc, width=0.006)
     strands = []
     for co, nrm in roots:
         gp = guide_path(co, nrm)
@@ -544,6 +547,116 @@ def grow_hair(body, L, guides=1400, per_guide=26):
                 pts.append(tuple(gpnt + off * (1.0 - clump * t) + jitter))
             strands.append(pts)
     return _curves("Ivan_Hair", strands, 0.000075, hair_material(), body.users_collection[0])
+
+
+def hair_cards(body, roots, paths, skull, width=0.0075):
+    """Export-friendly hair: one textured ribbon per guide clump (+ a second, rotated, for volume)."""
+    from pathlib import Path as _P
+    tex = _P(__file__).resolve().parents[1] / "assets" / "textures" / "hair_strands.png"
+    mat = M._new("Ivan Hair Cards")
+    k = M.NodeKit(mat)
+    img = k.node("ShaderNodeTexImage")
+    img.image = bpy.data.images.load(str(tex), check_existing=True)
+    uv = k.node("ShaderNodeTexCoord")
+    k.link(uv, "UV", img, "Vector")
+    k.link(img, "Alpha", k.bsdf, "Alpha")
+    tint = k.node("ShaderNodeMix", _data_type="RGBA", _blend_type="MULTIPLY", Factor=1.0)
+    k.link(img, "Color", tint, 6)
+    tint.inputs[7].default_value = (0.16, 0.085, 0.045, 1)
+    k.link(tint, 2, k.bsdf, "Base Color")
+    k.set(Roughness=0.45, **{"Specular IOR Level": 0.6})
+    if hasattr(mat, "blend_method"):
+        mat.blend_method = "HASHED"
+    bm = bmesh.new()
+    uvl = bm.loops.layers.uv.new("UVMap")
+    for (co, nrm), path in zip(roots, paths):
+        for twist in (0.0, 1.0):
+            prev = None
+            n = len(path)
+            for i, p in enumerate(path):
+                t = i / (n - 1)
+                tang = (path[min(i + 1, n - 1)] - path[max(i - 1, 0)]).normalized()
+                out = (p - skull).normalized()
+                side = tang.cross(out).normalized()
+                if twist:
+                    side = (side + out * 0.8).normalized()
+                w = width * (1.0 - 0.6 * t)
+                lift = out * 0.0012
+                a_ = bm.verts.new(p - side * w / 2 + lift)
+                b_ = bm.verts.new(p + side * w / 2 + lift)
+                if prev:
+                    f = bm.faces.new((prev[0], prev[1], b_, a_))
+                    for l, uvv in zip(f.loops, ((0, (i - 1) / (n - 1)), (1, (i - 1) / (n - 1)), (1, t), (0, t))):
+                        l[uvl].uv = uvv
+                prev = (a_, b_)
+    # Keep every card vertex at least 3 mm outside the real head (the guide paths ride a sphere,
+    # and the skull bulges past it between roots).
+    from mathutils.bvhtree import BVHTree
+    with no_mods(body):
+        dg = bpy.context.evaluated_depsgraph_get()
+        ev = body.evaluated_get(dg)
+        hm = ev.to_mesh()
+        verts = [body.matrix_world @ v.co for v in hm.vertices]
+        polys = [tuple(p.vertices) for p in hm.polygons]
+        ev.to_mesh_clear()
+    tree = BVHTree.FromPolygons(verts, polys)
+    for v in bm.verts:
+        d = v.co - skull
+        if d.length < 1e-6:
+            continue
+        hit = tree.ray_cast(skull + d.normalized() * 0.3, -d.normalized(), 0.3)
+        if hit[0] is not None:
+            surface = (hit[0] - skull).length
+            if d.length < surface + 0.003 and surface - d.length < 0.015:
+                v.co = skull + d.normalized() * (surface + 0.003 + 0.002 * (v.co.z > skull.z))
+    me = bpy.data.meshes.new("Ivan_HairCards")
+    bm.to_mesh(me)
+    bm.free()
+    o = bpy.data.objects.new("Ivan_HairCards", me)
+    body.users_collection[0].objects.link(o)
+    me.materials.append(mat)
+    return o
+
+
+def hair_shell(body, L):
+    """The hair volume: scalp region grown outward (quiff on top-front, tight back and sides),
+    smoothed into a combed mass. Reliable in any renderer; cards add edge breakup on top."""
+    f = L["front"]
+    eye = (L["l-eye"] + L["r-eye"]) / 2
+    hc = Vector((eye.x, eye.y - f * 0.10, eye.z + 0.01))
+    part_x = hc.x + 0.032 * (1 if L["l-eye"].x > hc.x else -1)
+    gi = body.vertex_groups["scalp"].index
+    co_all = shaped_coords(body)
+    scalp = set(v.index for v in body.data.vertices if any(g.group == gi and g.weight > 0.3 for g in v.groups))
+
+    def in_hairline(co):
+        depth = -(co.y - eye.y) * f
+        if depth < 0.06:
+            return co.z > eye.z + 0.070 - 0.012 * min(1.0, abs(co.x) / 0.05)
+        if depth < 0.11:
+            return co.z > eye.z + 0.032
+        return co.z > eye.z - 0.08 + max(0.0, 0.03 - abs(co.x) * 0.2)
+
+    def keep(co):
+        return in_hairline(co) and (co - hc).length < 0.16
+
+    def off(co):
+        top = max(0.0, min(1.0, (co.z - (eye.z + 0.03)) / 0.10))
+        front = max(0.0, min(1.0, ((co.y - eye.y) * f + 0.10) / 0.06))
+        centre = max(0.0, 1.0 - abs(co.x - part_x) / 0.09)
+        return 0.004 + 0.010 * top + 0.010 * front * top * centre      # quiff over the forehead
+
+    mat = M._new("Ivan Hair Shell")
+    k = M.NodeKit(mat)
+    p, po = k.pos(scale=(260.0, 30.0, 30.0))
+    n = k.node("ShaderNodeTexNoise", Scale=1.0, Detail=10.0, Roughness=0.7)
+    k.link(p, po, n, "Vector")
+    col = k.ramp(n, "Fac", [(0.3, (0.07, 0.035, 0.018)), (0.6, (0.16, 0.085, 0.045)), (0.8, (0.24, 0.14, 0.08))])
+    k.link(col, "Color", k.bsdf, "Base Color")
+    k.bump(n, "Fac", strength=0.5, distance=0.0008)
+    k.set(Roughness=0.42, **{"Anisotropic": 0.7, "Sheen Weight": 0.3})
+    o = shell(body, "Ivan_HairShell", keep, off, mat, thickness=0.004, subdiv=1, smooth_iter=20)
+    return o
 
 
 def grow_brows(body, L, count=1800):
@@ -623,10 +736,11 @@ def dress(body, rig):
     trousers = dress_trousers(body, L)
     shoes = dress_shoes(body, L, rig)
     hair = grow_hair(body, L)
+    shell_hair = hair_shell(body, L)
     brows = grow_brows(body, L)
     lashes = grow_lashes(body, L)
     specs = glasses(body, L)
-    for o in (sweater, collar, trousers):
+    for o in (sweater, collar, trousers, shell_hair):
         bind(o, body, rig)            # weights must come from the full body, before any skin is masked
     hide_covered_skin(body, L)
     for o in points:
@@ -634,6 +748,7 @@ def dress(body, rig):
     rib = bpy.data.objects.get("Ivan_NeckRib")
     if rib:
         attach_to_bone(rib, rig, "mixamorig:Spine2")
-    for o in (hair, brows, lashes, *specs):
+    cards = bpy.data.objects.get("Ivan_HairCards")
+    for o in (hair, brows, lashes, *specs, *( [cards] if cards else [] )):
         attach_to_bone(o, rig, "mixamorig:Head")
     return L
