@@ -4,3 +4,4 @@ __pycache__/
 node_modules/
 viewer/intro-data*.js
 renders/
+node_modules
