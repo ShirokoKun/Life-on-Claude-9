@@ -18,8 +18,8 @@ import math
 import sys
 from pathlib import Path
 
+import bpy  # must load before bmesh/mathutils in the pip build
 import bmesh
-import bpy
 from mathutils import Matrix, Vector
 
 ROOT = Path(__file__).resolve().parents[2]
