@@ -65,6 +65,14 @@ export function createLights(scene, data, { quality = 'high' } = {}) {
     L.monitor.lookAt(B(6.95, 2.70, 1.15));
     scene.add(L.monitor);
   }
+  // Warm wall wash behind him (the reference's warm background): grazing from high on his right so the
+  // plaster shows its texture, the shelf throws shadows, and the light falls off into the dark corners.
+  L.wash = new THREE.SpotLight(0xffaa66, 4.0, 6, THREE.MathUtils.degToRad(38), 1.0, 2);
+  L.wash.position.copy(B(8.55, 2.35, 2.30));
+  L.wash.target.position.copy(B(6.55, 1.40, 0.95));
+  L.wash.castShadow = true; L.wash.shadow.mapSize.set(1024, 1024); L.wash.shadow.radius = 6;
+  L.wash.shadow.bias = -0.0003; L.wash.shadow.normalBias = 0.02;
+  scene.add(L.wash, L.wash.target);
   L.apply = ({ lamp: lk = 1, screen: sk = 1 } = {}) => {
     L.lamp.intensity = L.lampBase * lk;
     L.screen.intensity = L.screenBase * sk;

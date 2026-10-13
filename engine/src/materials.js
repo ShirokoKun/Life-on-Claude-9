@@ -16,7 +16,7 @@ const TEX_ROOT = 'assets/tex/';
 // strength, coat: clearcoat (lacquer), sheen: fabrics, mapAlbedo:false keeps only normal+rough detail.
 export const LIB = {
   // architecture
-  'Plaster':        { key: 'plaster_wall', color: '#a8a39a', rough: 0.92, nrm: 0.45 },
+  'Plaster':        { key: 'plaster_wall', color: '#968a7c', rough: 0.92, nrm: 0.55 },   // warm limewash, a stop under white
   'Ceiling':        { key: 'plaster_wall', color: '#9a958c', rough: 0.95, nrm: 0.35 },
   'Floor':          { key: 'oak_floor', color: '#6a4b33', rough: 0.55, nrm: 0.5, coat: 0.35, coatRough: 0.28 },
   'Trim':           { key: 'painted_wood', color: '#d6d2ca', rough: 0.45, nrm: 0.4 },
@@ -32,7 +32,8 @@ export const LIB = {
   'Shelf Oak':      { key: 'light_wood', color: '#8a6a4a', rough: 0.55, nrm: 0.4 },
   'Frame Oak':      { key: 'light_wood', color: '#7d5c3e', rough: 0.5, nrm: 0.4 },
   'Furniture':      { key: 'light_wood', color: '#6e5038', rough: 0.55, nrm: 0.4 },
-  'Shelf White':    { key: 'painted_wood', color: '#d4d1ca', rough: 0.5, nrm: 0.3 },
+  // dark stained wood: the shelf behind him must not merge with his off-white sweater
+  'Shelf White':    { key: 'light_wood', color: '#3b2a1e', rough: 0.5, nrm: 0.45, coat: 0.2, coatRough: 0.35 },
   'Chopstick':      { key: 'light_wood', color: '#b39066', rough: 0.6, nrm: 0.3 },
   // metals and hard goods
   'Black Steel':    { key: 'black_metal', color: '#1b1b1d', rough: 0.55, metal: 0.25, nrm: 0.4 },
