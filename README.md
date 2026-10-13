@@ -37,7 +37,7 @@ Later launches skip straight to the Studio. Stop it with Ctrl+C in its terminal 
 | **Files** | Browse everything the film is made of (scenes, engine, assets, Blender scripts, docs, renders, deliveries), with previews of images, video, audio, Markdown and code, and **Show in folder** buttons. |
 | **System** | What was found on this machine (Node, Chromium, ffmpeg, git, Blender) and the settings: GPU rendering, live reload, Blender path. |
 
-Renders on your machine use its GPU. A 1080p frame takes about a second there, against about 11 s on the cloud's CPU.
+Renders on your machine use its GPU. The cloud renders 1080p at about 11 s a frame on CPU; a desktop GPU should be many times faster. Each job's log shows the real seconds per frame.
 
 ## Working with Claude on this project
 
