@@ -44,7 +44,7 @@ export function createAtmosphere({ lamp, lampTarget, screen, count = 2200 }) {
         vec3 L = p - lampPos; float dl = length(L);
         float cone = smoothstep(0.62, 0.86, dot(L / dl, lampDir)) / (1.0 + dl * dl * 6.0);
         float scr = 1.0 / (1.0 + pow(length(p - screenPos) / 0.35, 2.0));
-        vCol = vec3(1.0, 0.62, 0.32) * cone * 2.2 + vec3(0.55, 0.70, 1.0) * scr * 0.55 + vec3(0.02);
+        vCol = vec3(1.0, 0.62, 0.32) * cone * 2.2 + vec3(0.55, 0.70, 1.0) * scr * 0.55 + vec3(0.004);   // motes only exist where light is
         float size = (0.0007 + 0.0011 * seed.w) * px / d;          // 0.7-1.8 mm motes
         float coc = cocK * abs(d - focus) / d;                     // same thin lens as the scene
         float sz = max(size, coc * 2.0);

@@ -10,10 +10,10 @@ import { Pass, FullScreenQuad } from 'three/addons/postprocessing/Pass.js';
 export const VS = `varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }`;
 
 export const LOOK = {
-  dof: 1.6,            // stylised: a larger-format, wide-open lens (reference keeps ~5% of frame sharp)
+  dof: 2.0,            // stylised: a larger-format, wide-open lens (reference keeps ~5% of frame sharp)
   haze: 0.10, hazeColor: [0.010, 0.010, 0.016],
-  bloom: { strength: 0.22, radius: 0.55, threshold: 1.6 },
-  grain: 0.010, vignette: 0.42, ca: 0.0012, halation: 0.10, sat: 1.10, contrast: 1.06,
+  bloom: { strength: 0.32, radius: 0.72, threshold: 1.4 },   // halos that hug the sources, not a veil
+  grain: 0.004, vignette: 0.42, ca: 0.0012, halation: 0.14, sat: 1.20, contrast: 1.10,   // references: clean, rich
   letterbox: 2.0,
   exposure: -1.0,      // EV trim on top of Blender's +1.35, calibrated against the Cycles stills (median luminance)
 };
@@ -108,7 +108,7 @@ export function createPost(renderer, scene, camera, atmo) {
         c = mix(vec3(l), c, sat);
         c = clamp((c - 0.5) * contrast + 0.5 + (l - 0.5) * 0.0, 0.0, 1.0);
         c *= mix(vec3(1.0), vec3(0.985, 0.99, 1.02), pow(1.0 - clamp(l * 4.0, 0.0, 1.0), 3.0));   // a whisper of night in the deepest blacks
-        c *= mix(vec3(1.0), vec3(1.06, 1.0, 0.90), smoothstep(0.25, 1.0, l));                      // tungsten-warm highlights
+        c *= mix(vec3(1.0), vec3(1.03, 1.0, 0.96), smoothstep(0.25, 1.0, l));                      // highlights near-neutral (refs)
         c *= mix(1.0, smoothstep(0.9, 0.15, r2 * 2.0), vignette);
         float g = h(vUv * 1000.0) - 0.5;
         c += g * grain * (0.35 + 0.65 * (1.0 - l));                    // grain lives in the shadows, like film

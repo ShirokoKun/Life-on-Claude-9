@@ -16,8 +16,8 @@ const TEX_ROOT = 'assets/tex/';
 // strength, coat: clearcoat (lacquer), sheen: fabrics, mapAlbedo:false keeps only normal+rough detail.
 export const LIB = {
   // architecture
-  'Plaster':        { key: 'plaster_wall', color: '#968a7c', rough: 0.92, nrm: 0.55 },   // warm limewash, a stop under white
-  'Ceiling':        { key: 'plaster_wall', color: '#9a958c', rough: 0.95, nrm: 0.35 },
+  'Plaster':        { key: 'plaster_wall', color: '#968a7c', rough: 0.92, nrm: 0.55, lm: 0.65 },   // warm limewash, a stop under white
+  'Ceiling':        { key: 'plaster_wall', color: '#9a958c', rough: 0.95, nrm: 0.35, lm: 0.65 },
   'Floor':          { key: 'oak_floor', color: '#6a4b33', rough: 0.55, nrm: 0.5, coat: 0.35, coatRough: 0.28 },
   'Trim':           { key: 'painted_wood', color: '#d6d2ca', rough: 0.45, nrm: 0.4 },
   'Door':           { key: 'painted_wood', color: '#cdc8bf', rough: 0.42, nrm: 0.4 },
@@ -124,10 +124,12 @@ export const LIB = {
 // glass and liquids: real transmission only where the camera looks closely (the hero glass)
 const GLASS = {
   // the hero glass: thick enough walls to bend what's behind it, crisp rim reflections, faintly green edges
-  'Tumbler Glass': () => new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.02, transmission: 1, thickness: 0.025, ior: 1.52,
-    specularIntensity: 1, envMapIntensity: 2.2, attenuationColor: new THREE.Color(0xd8f0e6), attenuationDistance: 0.12 }),
-  'Water':         () => new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.0, transmission: 1, thickness: 0.07, ior: 1.33,
-    specularIntensity: 1, envMapIntensity: 1.8, attenuationColor: new THREE.Color(0xcfe4f0), attenuationDistance: 0.35 }),
+  // the hero glass: transmission reads as nothing on a dark set, so the glass is drawn the way a lens sees it:
+  // a faint body, strong rim reflections of the screens and lamp, and blue-tinted water with a bright meniscus
+  'Tumbler Glass': () => new THREE.MeshPhysicalMaterial({ color: 0xcfe3ff, roughness: 0.03, transparent: true, opacity: 0.10,
+    specularIntensity: 1, envMapIntensity: 1.6, clearcoat: 1, clearcoatRoughness: 0.02, depthWrite: true }),   // writes depth: the lens must focus on it
+  'Water':         () => new THREE.MeshPhysicalMaterial({ color: 0x7fb0ff, roughness: 0.02, transparent: true, opacity: 0.30,
+    specularIntensity: 1, envMapIntensity: 2.4, clearcoat: 1, clearcoatRoughness: 0.0, emissive: 0x0a1c40, emissiveIntensity: 0.6, depthWrite: false }),
   'Glass':         () => new THREE.MeshPhysicalMaterial({ color: 0x9fb0c0, roughness: 0.05, transparent: true, opacity: 0.12, depthWrite: false, envMapIntensity: 1.0 }),
   'Carafe Glass':  () => new THREE.MeshPhysicalMaterial({ color: 0xa0b2c4, roughness: 0.05, transparent: true, opacity: 0.16, depthWrite: false }),
   'Water Bottle':  () => new THREE.MeshPhysicalMaterial({ color: 0xa0b2c4, roughness: 0.08, transparent: true, opacity: 0.22, depthWrite: false }),
@@ -201,7 +203,8 @@ export async function build(name, gltfMat, lightMap) {
   else m = upgrade(gltfMat);
   m.name = name;
   if (lightMap && !m.transparent && !m.transmission) {
-    m.lightMap = lightMap; m.lightMapIntensity = Math.PI;   // Cycles diffuse pass = E/pi
+    // Cycles diffuse pass = E/pi. lm < 1 on walls: less bounce fill, so live light pools read as shapes (refs)
+    m.lightMap = lightMap; m.lightMapIntensity = Math.PI * ((LIB[name] && LIB[name].lm) || 1);
     patchBaked(m);
   }
   return m;
@@ -271,7 +274,7 @@ function upgrade(src) {
   if (/Screen/.test(name)) {
     const s = new THREE.MeshPhysicalMaterial({
       // screens at 0.6 of Blender's strength: the white editor page must stay below clipping after the lens
-      color: 0x000000, emissive: 0xffffff, emissiveMap: src.emissiveMap || src.map, emissiveIntensity: 0.6 * src.emissiveIntensity,
+      color: 0x000000, emissive: 0xffffff, emissiveMap: src.emissiveMap || src.map, emissiveIntensity: 0.45 * src.emissiveIntensity,
       roughness: 0.08, clearcoat: 1.0, clearcoatRoughness: 0.04, envMapIntensity: 0.6,
     });
     return s;

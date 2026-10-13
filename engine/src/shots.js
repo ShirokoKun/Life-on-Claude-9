@@ -11,22 +11,22 @@ export const B = (x, y, z) => new THREE.Vector3(x, z, -y);
 const GLASS = [6.66, 3.10, 0.84];
 
 export const SHOTS = [
-  { id: 'S1', name: 'The zone', t0: 0, t1: 5.6, mm: [24, 30], f: 2.8,
-    from: [4.30, 4.95, 1.70], to: [5.25, 4.20, 1.42], at0: [6.90, 2.85, 1.02], at1: [6.92, 2.80, 1.08], focus: 'eyes', roll: [-1.2, -0.4],
-    why: 'A slow descending push from the dark living room into the only lit corner: the lamp pool, the two screens, the string lights, the clock at 3:04. He is small inside his world.' },
-  { id: 'S2', name: 'Still full', t0: 5.6, t1: 11.4, mm: [24, 26], f: 2.0,
-    from: [6.38, 3.27, 0.83], to: [6.41, 3.23, 0.836], at0: [7.16, 2.62, 1.06], at1: [7.16, 2.60, 1.08],
+  { id: 'S1', name: 'The zone', t0: 0, t1: 5.6, mm: [20, 24], f: 2.8,
+    from: [8.80, 2.32, 2.02], to: [8.62, 2.38, 1.86], at0: [6.80, 3.40, 0.98], at1: [6.85, 3.35, 1.00], focus: 'eyes', roll: [-1.4, -0.6],
+    why: 'High in the corner behind his right shoulder, drifting down: the dark flat, the city in the window, and the one glowing corner where he works. He is small inside his world.' },
+  { id: 'S2', name: 'Still full', t0: 5.6, t1: 11.4, mm: [28, 30], f: 4.0,
+    from: [6.452, 3.223, 0.80], to: [6.47, 3.21, 0.803], at0: [7.22, 2.58, 1.07], at1: [7.22, 2.57, 1.08],
     focus: [[5.6, GLASS], [7.6, GLASS], [8.8, 'eyes'], [9.9, 'eyes'], [10.7, GLASS]], roll: [0.6, 0.3],
     why: 'Desk height, past the cold take-out and the full glass. Focus holds the glass for the line, racks to Ivan typing behind it, then back to the glass on "still full".' },
   { id: 'S3', name: 'Lit by the work', t0: 11.4, t1: 16.2, mm: [50, 62], f: 2.0,
     from: [6.86, 3.98, 1.14], to: [6.90, 3.58, 1.15], at0: [6.94, 2.72, 1.18], at1: [6.94, 2.72, 1.19], focus: 'eyes', roll: [0, 0],
     why: 'Push in on his face over the laptop lid: the screen is his key light, the string lights fall to bokeh behind him. He leans in, typing faster.' },
-  { id: 'S4', name: 'The sprawl', t0: 16.2, t1: 22.2, mm: [30, 35], f: 2.8,
-    from: [7.62, 2.46, 1.36], to: [7.44, 2.66, 1.26], at0: [7.05, 3.20, 0.92], at1: [7.16, 3.26, 0.98], focus: 'screen', roll: [1.0, 0.4],
+  { id: 'S4', name: 'The sprawl', t0: 16.2, t1: 22.2, mm: [32, 45], f: 2.8,
+    from: [7.25, 2.60, 1.24], to: [7.06, 2.93, 1.03], at0: [6.96, 3.22, 0.89], at1: [6.95, 3.22, 0.88], focus: 'screen', roll: [0.8, 0.2],
     why: 'Over his right shoulder into the screens: terminal, the Claude chat, scripts piling up; his eyes flick to the dashboard climbing on the second monitor.' },
-  { id: 'S5', name: 'Because he could', t0: 22.2, t1: 32, mm: [35, 26], f: 3.2, arc: [6.95, 2.75],
-    from: [7.30, 4.25, 1.52], to: [5.95, 4.30, 1.58], at0: [6.96, 2.78, 1.06], at1: [6.92, 2.85, 1.05], focus: 'eyes', roll: [0.4, -0.8],
-    why: 'A slow arc from his right to his left and out: his cocoon of light, the dark flat around it. On the last line, a small nod. Fade on the room.' },
+  { id: 'S5', name: 'Because he could', t0: 22.2, t1: 32, mm: [40, 46], f: 2.4,
+    from: [7.95, 3.10, 1.40], to: [7.70, 2.86, 1.30], at0: [6.94, 2.70, 1.17], at1: [6.94, 2.70, 1.18], focus: 'eyes', roll: [0.4, -0.2],
+    why: 'His right three-quarter profile (storyboard panel 6), the screen light raking across his face and glasses, the room dark behind. A small nod on the last line. Fade.' },
 ];
 
 export const CAPTIONS = [

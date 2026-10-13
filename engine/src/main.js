@@ -73,6 +73,8 @@ async function boot() {
       const n = (Array.isArray(o.material) ? o.material[0] : o.material).name || '';
       o.castShadow = !/Glass|Curtain|Bubble|Water|Screen|Facade|Lot Line/.test(n);
       o.receiveShadow = true;
+      if (n === 'Water' || n === 'Air Bubble') o.renderOrder = 1;   // inside the glass: drawn before it
+      if (n === 'Tumbler Glass') o.renderOrder = 2;
     }));
   });
   await Promise.all(jobs);
@@ -93,6 +95,7 @@ async function boot() {
             roughness: src.roughnessMap ? 1.0 : 0.62, metalness: 0, sheen: 0.35, sheenRoughness: 0.6, sheenColor: new THREE.Color(0xb08a76),
             specularIntensity: 0.5, side: THREE.DoubleSide, name: 'Ivan' });
           if (src.normalMap) o.material.normalScale.set(0.9, 0.9);
+          o.material.envMapIntensity = 0.45;          // let the keys shape him; the room fill must not flatten the face
         }
         o.castShadow = !/Lens/.test(o.material.name); o.receiveShadow = true; o.frustumCulled = false;
       }
@@ -107,7 +110,7 @@ async function boot() {
   const lampShade = data.lights.find((l) => l.name === 'Desk_Lamp');
   const lampPos = B(...lampShade.location);
   atmo = createAtmosphere({ lamp: lampPos, lampTarget: lampPos.clone().add(new THREE.Vector3(lampShade.forward[0], lampShade.forward[2], -lampShade.forward[1]).multiplyScalar(0.55)),
-    screen: B(...(data.marks.Laptop_Screen || [6.95, 3.22, 0.87])), count: QUALITY === 'high' ? 2400 : 1200 });
+    screen: B(...(data.marks.Laptop_Screen || [6.95, 3.22, 0.87])), count: QUALITY === 'high' ? 900 : 500 });
   post = createPost(renderer, scene, camera, atmo);
 
   status('Waiting for textures...');

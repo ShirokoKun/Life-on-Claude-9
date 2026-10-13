@@ -44,15 +44,15 @@ export function createLights(scene, data, { quality = 'high' } = {}) {
   // Face key: from the laptop, narrow, blue; it throws his shadow onto the wall behind him.
   const lap = v3(key.location);
   // range 1.05 m: it reaches his face (0.55 m) and fades out before the wall behind him
-  L.faceKey = new THREE.SpotLight(0x4570ff, 2.1, 1.05, THREE.MathUtils.degToRad(26), 1.0, 1.4);
+  L.faceKey = new THREE.SpotLight(0x4570ff, 2.1, 1.05, THREE.MathUtils.degToRad(26), 0.6, 1.4);
   L.faceKey.position.copy(lap.clone().add(new THREE.Vector3(0, 0.02, 0)));
   L.faceKey.target.position.copy(B(6.94, 2.66, 1.20));
   L.faceKey.castShadow = true; L.faceKey.shadow.mapSize.set(shadowSize, shadowSize);
-  L.faceKey.shadow.bias = -0.0002; L.faceKey.shadow.normalBias = 0.015; L.faceKey.shadow.radius = 5;
+  L.faceKey.shadow.bias = -0.0002; L.faceKey.shadow.normalBias = 0.015; L.faceKey.shadow.radius = 2;
   L.faceKey.shadow.camera.near = 0.1; L.faceKey.shadow.camera.far = 5;
   scene.add(L.faceKey, L.faceKey.target);
   // Warm backlight: the bathroom light he left on, behind his right shoulder. Rims hair, ear and shoulders.
-  L.rim = new THREE.SpotLight(0xffa25e, 3.2, 5, THREE.MathUtils.degToRad(15), 0.75, 2);
+  L.rim = new THREE.SpotLight(0xffcfa0, 1.3, 5, THREE.MathUtils.degToRad(15), 0.75, 2);
   L.rim.position.copy(B(7.75, 1.35, 1.95));
   L.rim.target.position.copy(B(6.93, 2.70, 1.15));
   scene.add(L.rim, L.rim.target);
@@ -73,6 +73,19 @@ export function createLights(scene, data, { quality = 'high' } = {}) {
   L.wash.castShadow = true; L.wash.shadow.mapSize.set(1024, 1024); L.wash.shadow.radius = 6;
   L.wash.shadow.bias = -0.0003; L.wash.shadow.normalBias = 0.02;
   scene.add(L.wash, L.wash.target);
+  // Sodium streetlight through the east window blinds: warm stripes across the ceiling and walls, the hard
+  // light shapes every reference has (blind stripes in the CRT frame, the figure's shadow in the precinct).
+  const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d');
+  g.fillStyle = '#000'; g.fillRect(0, 0, 256, 256);
+  g.fillStyle = '#fff'; for (let y = 34; y < 222; y += 15) g.fillRect(38, y, 180, 8);      // slats
+  g.fillStyle = '#000'; g.fillRect(124, 30, 8, 196); g.filter = 'blur(1.5px)';            // the window mullion
+  const blinds = new THREE.CanvasTexture(c); blinds.colorSpace = THREE.SRGBColorSpace;
+  L.blinds = new THREE.SpotLight(0xff9a4a, 9, 0, THREE.MathUtils.degToRad(24), 0.25, 2);
+  L.blinds.position.copy(B(11.6, 3.35, 0.55));
+  L.blinds.target.position.copy(B(7.3, 3.0, 2.55));
+  L.blinds.map = blinds; L.blinds.castShadow = true; L.blinds.shadow.mapSize.set(1024, 1024);
+  L.blinds.shadow.camera.near = 0.5; L.blinds.shadow.camera.far = 12; L.blinds.shadow.bias = -0.0004;
+  scene.add(L.blinds, L.blinds.target);
   L.apply = ({ lamp: lk = 1, screen: sk = 1 } = {}) => {
     L.lamp.intensity = L.lampBase * lk;
     L.screen.intensity = L.screenBase * sk;
