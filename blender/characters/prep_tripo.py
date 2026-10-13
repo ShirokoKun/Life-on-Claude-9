@@ -332,8 +332,24 @@ if __name__ == "__main__":
     a = sys.argv[1:]
     rig, body = load(a[0])
     seat(rig)
-    frames = int(FILM_S * FPS)
-    perform(rig, frames)
+    if "--v1" in a:                                   # intro v1 (32 s, layered performance)
+        frames = int(FILM_S * FPS)
+        perform(rig, frames)
+    else:                                             # intro v2: per-frame acting (acting.py), 37 s
+        import acting
+        frames = int(37.0 * FPS)
+        actor = acting.Actor(rig, body)
+        actor.fast(True)
+        actor.calibrate()
+        actor.reset_upper()
+        actor.posture(0.55, 0.0)
+        actor.shoulders(0.0)
+        for side, home in (("Left", acting.HOME_L), ("Right", acting.HOME_R)):
+            actor.arm_to(side, home)
+        actor.calibrate_fingers()
+        if "--frames" in a:
+            frames = int(a[a.index("--frames") + 1])
+        actor.perform(frames)
     if "--blend" in a:
         bpy.ops.wm.save_as_mainfile(filepath=a[a.index("--blend") + 1])
     export(rig, a[1], frames)
