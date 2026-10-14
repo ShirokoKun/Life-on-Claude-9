@@ -135,7 +135,7 @@ export function atmoTime(t) {
 
 // ------------------------------------------------------------------ props
 let clock = null, cork = null, curtain = null;
-export function props(t, { root, scene, THREE }) {
+export function props(t, { root, scene, THREE, ivan }) {
   if (!clock) {
     // a clock face over the baked one, so its hands can turn (2.13)
     const c = document.createElement('canvas'); c.width = c.height = 512;
