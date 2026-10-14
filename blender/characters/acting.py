@@ -30,6 +30,7 @@ CHAT = Vector((7.00, 3.235, 0.885))         # the Claude chat column (right half
 MONITOR = Vector((7.357, 3.315, 1.066))     # dashboard / pipeline monitor
 MOUSE = Vector((7.22, 2.98, 0.77))          # the mouse, right of the laptop
 AWAY = Vector((6.55, 4.60, 1.38))           # nowhere: past the screens, at the wall (an idea arriving)
+BEYOND = Vector((6.82, 4.40, 1.12))         # just past the top of the screen (the private moment)
 
 # surfaces the hands touch (props_desk.py): key tops, the laptop's palm rest, the mouse (an ellipsoid), the desk
 DESK_Z = 0.75
@@ -114,7 +115,7 @@ SCENE_S02 = {
              (24.5, 29.0, "monitor", "still"), (29.0, 30.6, "monitor", "still"), (30.6, 33.0, "away", "still"),
              (33.0, 38.0, "screen", "type"), (38.0, 39.4, "monitor", "still"), (39.4, 41.4, "screen", "type"),
              (41.4, 42.4, "away", "still"), (42.4, 43.6, "screen", "type"), (43.6, 44.4, "monitor", "still"),
-             (44.4, 50.0, "screen", "type"), (50.0, 54.0, "screen", "still"), (54.0, 65.0, "screen", "type")],
+             (44.4, 50.0, "screen", "type"), (50.0, 54.0, "beyond", "still"), (54.0, 65.0, "screen", "type")],
     "hands_rest": [(0, 0), (9.4, 0), (9.9, 1), (12.4, 1), (12.9, 0), (24.4, 0), (24.9, 1), (32.6, 1), (33.0, 0),
                    (50.0, 0), (50.4, 1), (54.2, 1), (54.6, 0)],
     "hands_behind": [(0, 0), (41.3, 0), (41.6, 1), (42.2, 1), (42.5, 0)],
@@ -510,6 +511,8 @@ class Actor:
                 return MONITOR + Vector((-0.05, 0.0, -0.06))
             if name == "away":
                 return AWAY
+            if name == "beyond":                          # just past the top of the screen: chin up a little
+                return BEYOND
             if mode == "read" and name in ("chat", "screen"):           # line by line, left to right, then down
                 line_t = 1.1
                 k = int((tt - t0) / line_t)

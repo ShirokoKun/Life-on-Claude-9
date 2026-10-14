@@ -17,7 +17,7 @@ export const SETS = ['3am', 'day', 'evening', 'sunrise'];
 export const FADE_OUT = false;                 // it ends on white, not black
 
 const FACE = [6.94, 2.72, 1.12];
-const NOTE = [7.02, 3.245, 0.886];          // REVIEW + APPROVE, on the back of the laptop lid
+const NOTE = [7.02, 3.259, 0.925];          // REVIEW + APPROVE, high on the back of the laptop lid (it leans 20° back)
 const CLOCK = [6.95, 2.21, 1.78];
 const DOOR = [4.75, 5.43, 1.25];
 
@@ -48,7 +48,7 @@ export const SHOTS = [
     from: [7.42, 2.30, 1.42], to: [7.38, 2.36, 1.40], at0: [7.05, 3.15, 0.90], at1: [7.05, 3.15, 0.90], focus: 'lap:800,500', roll: [0.6, 0.4],
     why: 'He clicks Approve 20; the drafts go out.' },
   { id: '2.7', name: 'The plan', t0: 24.5, t1: 29.0, mm: [85, 85], f: 2.0,
-    from: [7.03, 3.60, 0.92], to: [7.02, 3.53, 0.925], at0: [6.99, 3.00, 0.97], at1: [6.97, 3.00, 1.00],
+    from: [7.03, 3.60, 0.93], to: [7.02, 3.53, 0.935], at0: [7.02, 3.25, 0.93], at1: [6.97, 3.00, 1.07],
     focus: [[24.5, NOTE], [26.6, NOTE], [27.8, 'eyes']], roll: [0, 0],
     why: 'The sticky note on the back of his laptop: REVIEW + APPROVE. The focus slips off it to his face.' },
   { id: '2.8', name: 'What else', t0: 29.0, t1: 33.0, mm: [58, 62], f: 2.0,
@@ -74,7 +74,7 @@ export const SHOTS = [
     focus: [[45.0, 'lap:420,200'], [46.2, 'lap:420,260'], [47.2, 'lap:420,340'], [48.2, 'lap:420,420'], [49.2, 'lap:420,500']], roll: [0.5, 0.3],
     why: 'His to-do list checks itself off, item by item.' },
   { id: '2.12', name: 'Cheat code', t0: 50.0, t1: 54.0, mm: [85, 88], f: 1.4,
-    from: [6.97, 3.76, 1.05], to: [6.97, 3.72, 1.05], at0: FACE, at1: FACE, track: 0.85, focus: 'eyes', roll: [0, 0],
+    from: [6.97, 3.76, 0.99], to: [6.97, 3.72, 0.99], at0: FACE, at1: FACE, track: 1.0, focus: 'eyes', roll: [0, 0],
     why: 'Very close and still. A small private smile, a nod. Dust hangs in the screen light.' },
   { id: '2.13', name: 'Hours to minutes', t0: 54.0, t1: 59.0, mm: [50, 50], f: 2.0,
     from: [7.15, 3.55, 1.30], to: [7.12, 3.50, 1.31], at0: [6.98, 2.30, 1.62], at1: [6.97, 2.25, 1.70],
@@ -135,6 +135,8 @@ export function atmoTime(t) {
 
 // ------------------------------------------------------------------ props
 let clock = null, cork = null, curtain = null;
+const boardMats = [];
+let boardLight = null;
 export function props(t, { root, scene, THREE, ivan }) {
   if (!clock) {
     // a clock face over the baked one, so its hands can turn (2.13)
@@ -144,10 +146,30 @@ export function props(t, { root, scene, THREE, ivan }) {
     m.position.copy(B(CLOCK[0], 2.2035, CLOCK[2])); m.rotation.y = Math.PI;      // over the baked face, into the room (+y Blender)
     m.receiveShadow = true; scene.add(m);
     clock = { m, g: c.getContext('2d'), tex, last: -1 };
+    // REVIEW + APPROVE: a sticky note on the back of the laptop lid (the lid leans 20° back, away from Ivan)
+    const nc = document.createElement('canvas'); nc.width = nc.height = 256;
+    const g = nc.getContext('2d');
+    g.fillStyle = '#f2d35b'; g.fillRect(0, 0, 256, 256);
+    g.fillStyle = 'rgba(0,0,0,0.06)'; g.fillRect(0, 0, 256, 34);
+    g.fillStyle = '#23201a'; g.textAlign = 'center'; g.font = `bold 50px "Marker Felt", "Comic Sans MS", ${SANS}`;
+    g.fillText('REVIEW', 128, 112); g.font = `bold 44px "Marker Felt", "Comic Sans MS", ${SANS}`; g.fillText('+ APPROVE', 128, 172);
+    g.strokeStyle = '#23201a'; g.lineWidth = 4; g.beginPath(); g.moveTo(48, 196); g.quadraticCurveTo(128, 210, 208, 192); g.stroke();
+    const ntex = new THREE.CanvasTexture(nc); ntex.colorSpace = THREE.SRGBColorSpace; ntex.anisotropy = 8;
+    const note = new THREE.Mesh(new THREE.PlaneGeometry(0.076, 0.076), new THREE.MeshStandardMaterial({ map: ntex, roughness: 0.8 }));
+    const a20 = 20 * Math.PI / 180;
+    const nrm = [0, Math.cos(a20), -Math.sin(a20)];                       // the lid's back, in Blender axes
+    note.position.copy(B(NOTE[0] + nrm[0] * 0.003, NOTE[1] + nrm[1] * 0.003, NOTE[2] + nrm[2] * 0.003));
+    note.lookAt(note.position.clone().add(B(...nrm)));
+    note.rotateZ(-0.05);
+    note.receiveShadow = true; scene.add(note);
     // the cork board's notes (Baked meshes split by material); found by where they are
     cork = [];
     root.traverse((o) => {
       if (o.name === 'Curtain_S') curtain = o;
+      if (o.isMesh && !Array.isArray(o.material) && /^(Cork|Sticky|Paper Print)/.test(o.material.name || '')) {
+        const p = new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3());
+        if (p.x > B(9.55, 0, 0).x && p.y > 1.0 && !boardMats.includes(o.material)) { o.material.userData.lmBase = o.material.lightMapIntensity; boardMats.push(o.material); }
+      }
       if (!o.isMesh || Array.isArray(o.material)) return;
       if (!/Sticky|Paper Print|Printout/.test(o.material.name || '')) return;
       const p = new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3());
@@ -163,6 +185,15 @@ export function props(t, { root, scene, THREE, ivan }) {
   cork.forEach((o, i) => { o.visible = !(t >= 34.55 + i * 0.3 && t < 65); });
   if (ivan) vibrate(t, ivan, THREE);
   if (curtain) curtain.visible = !(t >= 34.25 && t < 35.5);         // the sheer curtain hangs in front of the board
+  // the board was baked behind the curtain: lift its light while the curtain is out of the way
+  const lit = t >= 34.25 && t < 35.5 ? 6.0 : 1.0;
+  for (const m of boardMats) m.lightMapIntensity = m.userData.lmBase * lit;
+  if (!boardLight) {
+    boardLight = new THREE.SpotLight(0xfff2e0, 0, 4, 0.55, 0.8, 1.5);
+    boardLight.position.copy(B(8.55, 2.70, 2.05)); boardLight.target.position.copy(B(9.72, 2.85, 1.25));
+    scene.add(boardLight, boardLight.target);
+  }
+  boardLight.intensity = t >= 34.25 && t < 35.5 ? 6.0 : 0;
 }
 // 2.14: "vibrating at a different frequency". Two faint copies of Ivan, sharing his skeleton, shaken a few
 // pixels either side of him at a rate the camera can't hold: a double image only he has, while the air is still.
@@ -273,16 +304,16 @@ function chat(g, t, keys) {
   const msgs = [['you', 'I get 200+ emails a day and most of them need some kind of reply. it is eating my whole day']];
   msgs.push(['claude', CLAUDE.slice(0, Math.floor(Math.max(0, t - 12.2) * 70))]);
   if (t >= 15.3) msgs.push(['you', ASK]);
-  g.font = `24px ${SANS}`;
-  let y = 120;
+  g.font = `500 30px ${SANS}`;                     // big enough to read in the insert, through the bloom
+  let y = 110;
   for (const [who, text] of msgs) {
-    const ls = wrap(g, text, who === 'you' ? 440 : 550);
+    const ls = wrap(g, text, who === 'you' ? 430 : 545);
     if (who === 'you') {
       const w = Math.max(...ls.map((l) => g.measureText(l).width)) + 30;
-      g.fillStyle = C.bubble; rr(g, 1580 - w, y, w, ls.length * 34 + 24, 14); g.fill();
-      g.fillStyle = C.ink; ls.forEach((l, k) => g.fillText(l, 1580 - w + 15, y + 28 + k * 34));
-    } else { g.fillStyle = C.ink; ls.forEach((l, k) => g.fillText(l, 1022, y + 16 + k * 34)); }
-    y += ls.length * 34 + 50;
+      g.fillStyle = C.bubble; rr(g, 1580 - w, y, w, ls.length * 40 + 24, 14); g.fill();
+      g.fillStyle = C.ink; ls.forEach((l, k) => g.fillText(l, 1580 - w + 15, y + 32 + k * 40));
+    } else { g.fillStyle = C.ink; ls.forEach((l, k) => g.fillText(l, 1022, y + 20 + k * 40)); }
+    y += ls.length * 40 + 46;
   }
   g.fillStyle = '#ffffff'; rr(g, 1010, 920, 570, 56, 12); g.fill(); g.strokeStyle = '#d6d2c6'; g.lineWidth = 1.5; g.stroke();
   const n = keysIn(keys, 14.6, 15.3, t), tot = Math.max(1, keysIn(keys, 14.6, 15.3, 1e9));
