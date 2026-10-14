@@ -138,15 +138,22 @@ const GLASS = {
 };
 
 // ------------------------------------------------------------------------------------------------
-const loader = new THREE.TextureLoader();
+// ImageBitmaps decode in the browser's background threads while the rest loads; an <img> would decode on the
+// main thread at its first upload (~7-10 s for the 78 maps). Flipped at decode, so flipY stays false.
+const loader = new THREE.ImageBitmapLoader();
+const bitmapOptions = { imageOrientation: 'flipY', premultiplyAlpha: 'none' };
+loader.setOptions(bitmapOptions);
 const cache = new Map();
 let MAX_ANISO = 8;
 export function setAnisotropy(n) { MAX_ANISO = n; }
+// preview only: decode the 2K maps smaller (less to upload, a quarter of the GPU memory at 1024)
+export function setTextureSize(px) { Object.assign(bitmapOptions, { resizeWidth: px, resizeHeight: px, resizeQuality: 'high' }); }
 
 function tex(key, map, srgb) {
   const id = key + '/' + map;
   if (!cache.has(id)) {
-    const t = loader.load(TEX_ROOT + id + '.jpg');
+    const t = new THREE.Texture(); t.flipY = false;
+    loader.load(TEX_ROOT + id + '.jpg', (img) => { t.image = img; t.needsUpdate = true; });
     t.wrapS = t.wrapT = THREE.RepeatWrapping;
     t.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace;
     t.anisotropy = MAX_ANISO;

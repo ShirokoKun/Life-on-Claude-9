@@ -3,10 +3,12 @@
 //   ?render=1      headless film capture (window.renderFrame(n), window.__ready)
 //   ?cam=px,py,pz,tx,ty,tz,mm,f   fixed camera in Blender coords (look-dev / parity checks)
 //   ?q=med         lighter shadows and lens for slower machines
+//   ?pq=balanced|fast   Studio preview quality (never applies to ?render=1): lower resolution, ?q=med, and for
+//                  fast, textures decoded at 1K. The look (grade, lens, grain) is the same, only softer.
 //   ?ivan=0        hide the character
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import { EXRLoader } from 'three/addons/loaders/EXRLoader.js';
+import { loadEXR } from './exr.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import Stats from 'three/addons/libs/stats.module.js';
 import * as MAT from './materials.js';
@@ -22,19 +24,21 @@ const SCENE = Q.get('scene') || 'intro';
 const SC = SCENE === 'intro' ? await import('./shots.js') : await import(`../scenes/${SCENE}/scene.js`);
 const { FPS, DURATION, VO_OFFSET, SHOTS, CAPTIONS, cameraAt, shotAt } = SC;
 const RENDER = Q.get('render') === '1';
-const QUALITY = Q.get('q') || 'high';
+const PREVIEW = RENDER ? null : { balanced: { scale: 0.75 }, fast: { scale: 0.5, tex: 1024 } }[Q.get('pq')] || null;
+const QUALITY = Q.get('q') || (PREVIEW ? 'med' : 'high');
 const $ = (id) => document.getElementById(id);
 if (RENDER) document.body.classList.add('render');
 
 // ---------------------------------------------------------------- renderer
 const stage = $('stage');
 const renderer = new THREE.WebGLRenderer({ antialias: false, preserveDrawingBuffer: RENDER, powerPreference: 'high-performance' });
-renderer.setPixelRatio(RENDER ? 1 : Math.min(devicePixelRatio, 1.5));
+renderer.setPixelRatio(RENDER ? 1 : Math.min(devicePixelRatio, 1.5) * (PREVIEW ? PREVIEW.scale : 1));
 renderer.toneMapping = THREE.AgXToneMapping;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 stage.prepend(renderer.domElement);
 MAT.setAnisotropy(Math.min(8, renderer.capabilities.getMaxAnisotropy()));
+if (PREVIEW && PREVIEW.tex) MAT.setTextureSize(PREVIEW.tex);
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x000000);
@@ -55,7 +59,6 @@ const loads = { n: 0, idle: [] };
 }
 const gltf = new GLTFLoader();
 const loadGLB = (url) => new Promise((res, rej) => gltf.load(url, res, undefined, rej));
-const loadEXR = (url) => new Promise((res, rej) => new EXRLoader().load(url, res, undefined, rej));
 
 const named = {};
 let mixer, L, atmo, post, screens, exposureEV = 0;
@@ -329,6 +332,8 @@ window.studio = {
   seek(t) { exitFree(); setTime(t); syncAudio(); },
   play(on = !playing) { if (on !== playing) $('play').click(); },
   state: () => ({ t: tNow, duration: DURATION, fps: FPS, playing, shot: window.__ready ? shotAt(tNow).id : null, scene: SCENE, ready: !!window.__ready }),
+  // the Studio keeps a loaded player alive while you visit other pages: hidden, it stops drawing (and playing)
+  active(on) { if (RENDER) return; if (!on) this.play(false); renderer.setAnimationLoop(on ? loop : null); last = performance.now(); },
 };
 if (Q.get('panel') === '0') document.body.classList.add('collapsed');
 if (Q.get('caps') === '1') $('caps').checked = true;
@@ -342,11 +347,12 @@ function resize() {
   if (window.__ready) setTime(tNow);
 }
 new ResizeObserver(resize).observe(stage);
-if (!RENDER) renderer.setAnimationLoop(() => {
+function loop() {
   const now = performance.now();
   if (playing && window.__ready) { let t = tNow + (now - last) / 1000; if (t >= DURATION - 0.05) { t = 0; } setTime(t); syncAudio(); }
   last = now;
   if (window.__ready) render();
-});
+}
+if (!RENDER) renderer.setAnimationLoop(loop);
 
 boot().catch((e) => { console.error(e); status('Could not load: ' + e.message); });
