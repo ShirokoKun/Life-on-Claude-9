@@ -24,7 +24,7 @@ def _mat_names(o):
 
 
 def _skip(o):
-    if o.type != "MESH" or not o.visible_get():
+    if o.type != "MESH" or not o.visible_get() or o.get("no_bake"):   # no_bake: leaves, books... lit live + environment
         return True
     if any(c.name in ("Ivan", "Exterior", "Lighting", "Shots", "Cameras") for c in o.users_collection):
         return True
@@ -33,6 +33,8 @@ def _skip(o):
 
 
 def _group(o):
+    if o.get("bake_group"):                    # a set can keep a surface on its own map (a wall pulled for some shots)
+        return o["bake_group"]
     c = o.matrix_world.translation
     n = o.name
     if n.startswith(("Wall", "Floor", "Ceiling", "Skirting", "Door", "Window", "Balcony", "Fixture", "Switch", "Outlet",

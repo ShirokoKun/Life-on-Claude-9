@@ -204,13 +204,26 @@ def _restore(state):
             obj.inputs["Strength"].default_value = v
 
 
-def bake_lightmaps(out_dir, sizes=None, samples=64, live_samples=24, reuse=False):
+def bake_lightmaps(out_dir, sizes=None, samples=64, live_samples=24, reuse=False, device="CPU"):
     sizes = sizes or {"ARCH": 4096, "DESK": 4096, "ROOM": 2048}
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     scene = bpy.context.scene
     scene.render.engine = "CYCLES"
-    scene.cycles.device = "CPU"
+    scene.cycles.device = device
+    if device == "GPU":                              # OptiX (or CUDA) on the laptop's GTX 1650
+        prefs = bpy.context.preferences.addons["cycles"].preferences
+        for kind in ("OPTIX", "CUDA"):
+            try:
+                prefs.compute_device_type = kind
+                prefs.get_devices()
+                if any(d.type == kind for d in prefs.devices):
+                    break
+            except TypeError:
+                continue
+        for d in prefs.devices:
+            d.use = d.type != "CPU"
+        print("baking on", prefs.compute_device_type, [d.name for d in prefs.devices if d.use], flush=True)
     scene.render.bake.margin = 8
 
     unblock_live_lights()

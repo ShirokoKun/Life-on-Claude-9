@@ -76,8 +76,9 @@ async function boot() {
   const lm = (g) => (SC.ROOM ? loadEXR(`${ROOM}/lightmaps/lm_${g}.exr`).catch(() => null) : loadEXR(`${ROOM}/lightmaps/lm_${g}.exr`));
   const data = await (await fetch(`${ROOM}/lights.json`)).json();
   exposureEV = data.exposure || 0;
-  const [room, lmA, lmD, lmR] = await Promise.all([loadGLB(`${ROOM}/room.glb`), lm('ARCH'), lm('DESK'), lm('ROOM')]);
-  const LM = { ARCH: lmA, DESK: lmD, ROOM: lmR };
+  const GROUPS = data.groups || ['ARCH', 'DESK', 'ROOM'];        // a set may bake more groups (lights.json)
+  const [room, ...maps] = await Promise.all([loadGLB(`${ROOM}/room.glb`), ...GROUPS.map(lm)]);
+  const LM = Object.fromEntries(GROUPS.map((g, i) => [g, maps[i]]));
   for (const t of Object.values(LM)) if (t) { t.channel = 1; t.flipY = false; t.colorSpace = THREE.LinearSRGBColorSpace; t.needsUpdate = true; }
 
   status('Dressing the set...');
@@ -85,7 +86,7 @@ async function boot() {
   room.scene.traverse((o) => {
     named[o.name] = o;
     if (!o.isMesh) return;
-    let g = null; for (let p = o; p; p = p.parent) { const m = /^Baked_(ARCH|DESK|ROOM)/.exec(p.name); if (m) { g = m[1]; break; } }
+    let g = null; for (let p = o; p; p = p.parent) { const m = /^Baked_([A-Z]+)/.exec(p.name); if (m && m[1] in LM) { g = m[1]; break; } }
     const mats = Array.isArray(o.material) ? o.material : [o.material];
     const dbg = Q.get('debug');
     if (dbg === 'lm') { o.material = g ? new THREE.MeshBasicMaterial({ map: LM[g], name: 'lm' }) : new THREE.MeshBasicMaterial({ color: 0x220000 }); return; }
@@ -178,6 +179,7 @@ async function loadCast(url) {
     }
     if (o.isBone && /Head$/.test(o.name) && !/Top/.test(o.name)) out.head = o;
   });
+  if (SC.CAST_OFFSET) iv.scene.position.add(B(...SC.CAST_OFFSET));   // a performance made at the flat's desk, played at this set's
   scene.add(iv.scene);
   if (iv.animations.length) { out.mixer = new THREE.AnimationMixer(iv.scene); out.mixer.clipAction(iv.animations[0]).play(); }
   return out;

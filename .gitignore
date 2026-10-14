@@ -11,4 +11,5 @@ studio/.local/
 engine/assets/_try/
 engine/assets/lighting/*/lightmaps/*_full.exr
 engine/assets/lighting/*/lightmaps/*_live.exr
-blender/assets/props/        # CC0 Poly Haven models: node tools/polyhaven.mjs <id> fetches them again
+# CC0 Poly Haven models: node tools/polyhaven.mjs <id> fetches them again
+blender/assets/props/
