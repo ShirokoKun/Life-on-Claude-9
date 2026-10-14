@@ -17,6 +17,10 @@ SKIP_MAT = ("Glass", "Water", "Air Bubble", "Carafe", "Bottle", "Lens", "Sheer C
             "Coffee Ring", "Lamp", "Diffuser_On", "Sodium", "Aviation", "Tail Light", "Coffee Maker Clock", "Facade",
             "Haze", "Dust", "Hair", "Brows", "Lashes")
 DESK = Vector((6.95, 3.2, 0.0))
+# The light pass is divided by the surface's albedo; procedural Base Colors (brick-pattern floors, noise paints) can
+# evaluate to ~0 inside the bake, which leaves black lightmaps with garbage at seams (s03 LESSONS.md). With FLAT_ALBEDO
+# the bake copies get a constant Base Color: the material's viewport colour (so bounce light keeps its tint).
+FLAT_ALBEDO = False
 
 
 def _mat_names(o):
@@ -98,8 +102,17 @@ def _targets(ob, img):
     for slot in ob.material_slots:
         if not slot.material:
             continue
-        m = slot.material.copy()
+        orig = slot.material
+        m = orig.copy()
         slot.material = m
+        if FLAT_ALBEDO and m.use_nodes:
+            for bs in [n for n in m.node_tree.nodes if n.type == "BSDF_PRINCIPLED"]:
+                sock = bs.inputs["Base Color"]
+                if sock.is_linked and not any(l.from_node.type == "TEX_IMAGE" for l in sock.links):
+                    for l in list(sock.links):
+                        m.node_tree.links.remove(l)
+                    c = orig.diffuse_color
+                    sock.default_value = (c[0], c[1], c[2], 1) if max(c[:3]) < 0.99 else (0.5, 0.5, 0.5, 1)
         if not m.use_nodes:
             m.use_nodes = True
         nt = m.node_tree

@@ -40,6 +40,7 @@ UNITS = 3
 DOOR_Y0, DOOR_Y1 = 1.05, 1.95      # east wall
 OFF = Vector((-5.90, 1.23, 0.0))   # old intro desk zone -> this room (Ivan's chair 6.95,2.60 -> 1.05,3.83)
 TOP = 0.75                         # desk top
+DESK_LAMP_HEAD = (0.77, 4.56, TOP + 0.60)   # the arm lamp's bulb (desk_lamp_arm_01 at 0.55,4.70 turned 238)
 GROUND = -38.0
 MOON = (1.0, -0.35, -0.75)          # moonlight direction (travelling): in through the west window, down onto the bed and rug                     # the valley floor below the hill the house sits on
 
@@ -157,8 +158,8 @@ def sky_texture(path, w=2048, h=512, seed=3):
 
 # Workbench preview colours for the procedural materials (Cycles and the engine use the real shaders)
 SHOW = {"wall": (0.07, 0.11, 0.09), "ceil": (0.3, 0.3, 0.3), "floor": (0.22, 0.12, 0.07), "walnut": (0.20, 0.09, 0.05),
-        "bedwood": (0.16, 0.08, 0.04), "duvet": (0.06, 0.08, 0.16), "mattress": (0.5, 0.5, 0.48), "pillow": (0.55, 0.55, 0.52),
-        "rug_navy": (0.04, 0.05, 0.12), "spruce": (0.6, 0.38, 0.16), "rosewood": (0.12, 0.05, 0.03), "lamp_base": (0.32, 0.22, 0.14),
+        "bedwood": (0.16, 0.08, 0.04), "duvet": (0.06, 0.08, 0.16), "sheet": (0.36, 0.40, 0.46), "pillow": (0.62, 0.60, 0.56),
+        "rug_oat": (0.30, 0.26, 0.21), "spruce": (0.6, 0.38, 0.16), "rosewood": (0.12, 0.05, 0.03), "lamp_base": (0.32, 0.22, 0.14),
         "cloth_grey": (0.10, 0.10, 0.12), "cloth_olive": (0.16, 0.16, 0.09), "tree": (0.03, 0.06, 0.03), "trim": (0.62, 0.60, 0.56)}
 
 
@@ -176,7 +177,7 @@ def _mats():
     except ImportError:                              # no scipy: a plain gradient card
         sky = None
     return {
-        "wall": M.plaster("Wall Green", (0.090, 0.130, 0.100), 0.9),   # light must bounce: deep green, not black
+        "wall": M.plaster("Wall Green", (0.175, 0.215, 0.180), 0.9),   # light must bounce: deep green, not black
         "ceil": M.plaster("Ceiling", (0.30, 0.31, 0.29), 0.95),
         "floor": M.oak_floor("Floor Dark Oak"),
         "trim": M.paint("Trim", (0.62, 0.60, 0.56), 0.45),
@@ -184,12 +185,14 @@ def _mats():
         "blind": M.paint("Blind Slat", (0.66, 0.64, 0.58), 0.5),
         "walnut": M.walnut("Desk Walnut"),
         "bedwood": M.walnut("Bed Walnut", base=(0.09, 0.045, 0.025), light=(0.20, 0.11, 0.06)),
-        "duvet": M.fabric("Duvet Navy", (0.035, 0.045, 0.085), 0.95, weave=1400.0, sheen=0.5),
-        "mattress": M.fabric("Mattress", (0.50, 0.50, 0.48), 0.9),
-        "pillow": M.fabric("Pillow Linen", (0.42, 0.42, 0.40), 0.92, weave=1600.0),
-        "rug_navy": M.fabric("Rug Navy", (0.02, 0.03, 0.07), 0.98, weave=600.0, sheen=0.3),
+        "duvet": M.paint("Duvet Navy", (0.050, 0.068, 0.130), 0.95),
+        "sheet": M.paint("Sheet Cotton", (0.36, 0.40, 0.46), 0.95),
+        "pillow": M.paint("Pillow Linen", (0.62, 0.60, 0.56), 0.95),
+        "rug_navy": M.fabric("Rug Navy", (0.035, 0.050, 0.110), 0.98, weave=600.0, sheen=0.3),
         "rug": M.image_mat("Rug Persian", rug, 0.95),
-        "shade": M.emission("Lamp Shade", (1.0, 0.62, 0.30), 4.0),
+        "shade": M.emission("Lamp Shade", (1.0, 0.62, 0.30), 10.0),
+        "rug_oat": M.paint("Rug Oat", (0.30, 0.26, 0.21), 0.98),
+        "lamp_metal": M.paint("Lamp Metal", (0.05, 0.05, 0.05), 0.45),
         "lamp_base": M.ceramic("Lamp Ceramic", (0.32, 0.22, 0.14), 0.3),
         "bulb": M.emission("Lamp_Bulb", (1.0, 0.75, 0.45), 30.0),
         "spruce": M.paint("Guitar Spruce", (0.62, 0.38, 0.16), 0.3, coat=0.8),
@@ -199,9 +202,24 @@ def _mats():
         "paper": M.paint("Printer Paper", (0.80, 0.79, 0.76), 0.85),
         "print": M.image_mat("Printout", TEX / "printout.png", 0.85),
         "poster": M.image_mat("Poster Print", TEX / "wall_print.png", 0.7),
+        "poster_band": M.image_mat("Poster Band", TEX / "poster_band.png", 0.75),
+        "poster_dev": M.image_mat("Poster Dev", TEX / "poster_dev.png", 0.75),
+        "poster_hello": M.image_mat("Poster Hello", TEX / "poster_hello.png", 0.75),
+        "cable_white": M.plastic("Cable", (0.80, 0.80, 0.78), 0.45),
+        "poster_film": M.image_mat("Poster Film", TEX / "poster_film.png", 0.75),
+        "cork": M.paint("Cork", (0.42, 0.29, 0.17), 0.95),
+        "note": M.paint("Note Paper", (0.82, 0.80, 0.74), 0.9),
+        "sticky_y": M.paint("Sticky Note Yellow", (0.85, 0.72, 0.20), 0.9),
+        "sticky_p": M.paint("Sticky Note Pink", (0.85, 0.42, 0.52), 0.9),
+        "printer_orange": M.plastic("Printer Orange", (0.75, 0.22, 0.04), 0.4),
+        "console_grey": M.plastic("Console Grey", (0.55, 0.55, 0.53), 0.5),
+        "led_blue": M.emission("LED Blue", (0.25, 0.5, 1.0), 6.0),
+        "led_green": M.emission("LED Green", (0.25, 1.0, 0.45), 5.0),
+        "printer_screen": M.emission("Printer Screen", (1.0, 0.5, 0.15), 2.5),
+        "sole": M.plastic("Sole White", (0.78, 0.77, 0.73), 0.7),
         "can_red": M.brushed_metal("Can Red", (0.5, 0.03, 0.02), 0.25),
         "can_silver": M.brushed_metal("Can Silver Blue", (0.25, 0.35, 0.6), 0.25),
-        "cloth_grey": M.fabric("Hoodie Grey", (0.06, 0.065, 0.075), 0.95, weave=900.0),
+        "cloth_grey": M.fabric("Hoodie Grey", (0.09, 0.10, 0.12), 0.95, weave=900.0),
         "cloth_olive": M.fabric("Tee Olive", (0.10, 0.10, 0.06), 0.95),
         "code": M.emission("Code Screen", (1, 1, 1), 2.4, TEX / "monitor_screen.png"),
         "black": M.plastic("Monitor Black", (0.012, 0.012, 0.014), 0.35),
@@ -287,7 +305,7 @@ def ph(asset, loc, rot=0.0, scale=1.0, name=None, coll="Props", src=None):
     o.scale = (scale, scale, scale) if isinstance(scale, (int, float)) else scale
     o["keep_uv"] = True
     if asset.startswith(LIVE_LIT):
-        o["no_bake"] = True
+        o["bake_group"] = "PROPS"
     return o
 
 
@@ -325,6 +343,16 @@ def cloth_drape(o, colliders, frames=45, thickness=0.02, wrinkle=0.0):
     sol.thickness, sol.offset = thickness, -1
     geo.subsurf(o, 1)
     return geo.smooth(o, 80)
+
+
+def drop_faces(o, test):
+    """Delete the faces whose world normal passes `test` (faces the camera never sees but the bake would light)."""
+    bm = bmesh.new()
+    bm.from_mesh(o.data)
+    rot = o.matrix_world.to_3x3()
+    bmesh.ops.delete(bm, geom=[f for f in bm.faces if test(rot @ f.normal)], context="FACES")
+    bm.to_mesh(o.data)
+    bm.free()
 
 
 def grid_plane(name, size, loc, mat, coll, cuts):
@@ -366,6 +394,8 @@ def build_shell(m):
     box("Wall_W_n", (T_EXT, D - WIN_Y1, H), (xW, (D + WIN_Y1) / 2, 0), m["wall"])
     box("Wall_W_sill", (T_EXT, WIN_Y1 - WIN_Y0, SILL), (xW, (WIN_Y0 + WIN_Y1) / 2, 0), m["wall"])
     box("Wall_W_head", (T_EXT, WIN_Y1 - WIN_Y0, H - HEAD), (xW, (WIN_Y0 + WIN_Y1) / 2, HEAD), m["wall"])
+    for n in ("Wall_W_s", "Wall_W_n", "Wall_W_sill", "Wall_W_head"):
+        drop_faces(bpy.data.objects[n], lambda nrm: nrm.x < -0.9)
     for n, s, l in (("Skirting_W1", (0.015, WIN_Y0, 0.10), (0.0075, WIN_Y0 / 2, 0)),
                     ("Skirting_W2", (0.015, D, 0.10), (0.0075, D / 2, 0)),
                     ("Skirting_S", (W, 0.015, 0.10), (W / 2, 0.0075, 0)),
@@ -414,31 +444,98 @@ def build_window(m):
     for y in (WIN_Y0 + 0.4, WIN_Y1 - 0.4):
         geo.box("Blind_Cord", (0.004, 0.004, 0.9), (-0.02, y, top - 0.95), m["blind"], cb, bev=0)
     for o in cb.objects:              # lit live: they sit in the window light's hottest spot and the bake burned them white
-        o["no_bake"] = True
+        o["bake_group"] = "PROPS"
 
 
 # ---------------------------------------------------------------------------------------------- furniture
+def rumpled_duvet(name, cx, hw, v0, v1, top, mat, coll, seed=3):
+    """A duvet as one cloth sheet: flat on the mattress with low, soft rumples, rolling over the sides and the foot
+    (a quarter circle, then straight down), the head edge turned back into a soft roll, one corner flung open."""
+    rng = random.Random(seed)
+    waves = [(rng.uniform(4, 9), rng.uniform(3, 8), rng.uniform(0, 6.3), rng.uniform(0.006, 0.014)) for _ in range(5)]
+    hang, r, base = 0.24, 0.06, top + 0.035
+    q = r * math.pi / 2
+
+    def roll(e):                                     # distance past the edge -> (out, down)
+        if e < q:
+            return r * math.sin(e / r), r * (1 - math.cos(e / r))
+        return r + 0.012 * math.sin(e * 30), r + (e - q)
+
+    nu, nv = 70, 90
+    bm = bmesh.new()
+    rows = []
+    for j in range(nv + 1):
+        v = v0 + (v1 - v0 + hang + q) * j / nv
+        row = []
+        for i in range(nu + 1):
+            u = -hw - hang - q + 2 * (hw + hang + q) * i / nu
+            x, y, z = u, v, base
+            soft = sum(a_ * math.sin(fu * u + fv * v + ph_) for fu, fv, ph_, a_ in waves)
+            ex, ey = max(0.0, abs(u) - hw), max(0.0, v - v1)
+            if ex > 0:
+                o, d = roll(ex)
+                x = math.copysign(hw + o, u)
+                z -= d
+            if ey > 0:
+                o, d = roll(ey)
+                y = v1 + o
+                z -= d
+            if ex > 0 or ey > 0:                          # hanging cloth folds vertically
+                k = min(1.0, (ex + ey) / 0.08)
+                if ex > 0:
+                    x += math.copysign(0.018 * k * math.sin(v * 13 + 1.7), u)
+                if ey > 0:
+                    y += 0.018 * k * math.sin(u * 13 + 0.4)
+            z += soft * (1.0 if ex == 0 and ey == 0 else 0.4)
+            dv = v - v0                                   # the head edge turned back: a soft roll along the top
+            z += 0.045 * math.exp(-((dv - 0.07) / 0.06) ** 2)
+            cu, cv = (u - (hw - 0.35)) / 0.35, dv / 0.45  # the room-side head corner thrown open
+            if cu > 0 and cv < 1 and ex == 0:
+                z += 0.05 * min(1.0, cu) * (1 - cv)
+            row.append(bm.verts.new((cx + x, y, z)))
+        rows.append(row)
+    for j in range(nv):
+        for i in range(nu):
+            bm.faces.new((rows[j][i], rows[j][i + 1], rows[j + 1][i + 1], rows[j + 1][i]))
+    me = bpy.data.meshes.new(name)
+    bm.to_mesh(me)
+    bm.free()
+    o = bpy.data.objects.new(name, me)
+    coll.objects.link(o)
+    o.data.materials.append(mat)
+    sol = o.modifiers.new("Thick", "SOLIDIFY")
+    sol.thickness = 0.03
+    sol.offset = -1
+    geo.subsurf(o, 1)
+    geo.smooth(o, 80)
+    return o
+
+
 def build_bed(m):
-    """Queen bed, head on the south wall: walnut platform, mattress, pillows, a navy duvet dropped by cloth sim."""
+    """Queen bed, head on the south wall: a low walnut platform with a headboard, the mattress fitted inside it,
+    a flat fitted sheet, a navy duvet folded back over the foot third, two plump pillows. Clean, rounded shapes in
+    flat colours (the references' softness comes from shape and light, not from noise)."""
     c = geo.coll("Bed")
-    x0, x1, y0, y1 = 0.48, 2.10, 0.04, 2.16          # frame footprint
-    cx = (x0 + x1) / 2
-    geo.box("Bed_Headboard", (x1 - x0 + 0.04, 0.06, 1.05), (cx, y0 + 0.03, 0.0), m["bedwood"], c, bev=0.008)
-    geo.box("Bed_Frame", (x1 - x0, y1 - y0 - 0.06, 0.24), (cx, (y0 + y1) / 2 + 0.03, 0.06), m["bedwood"], c, bev=0.01)
-    for sx in (x0 + 0.05, x1 - 0.05):
-        geo.box(f"Bed_Foot_{sx:.1f}", (0.07, 0.07, 0.06), (sx, y1 - 0.05, 0.0), m["bedwood"], c, bev=0.004)
-    mat_ = geo.rounded_slab("Bed_Mattress", (x1 - x0 - 0.06, y1 - y0 - 0.12, 0.24), 0.05, (cx, (y0 + y1) / 2 + 0.03, 0.30),
-                            m["mattress"], c)
-    pillows = []
+    x0, x1, y0, y1 = 0.48, 2.10, 0.04, 2.16          # frame footprint (1.62 x 2.12)
+    cx, cy = (x0 + x1) / 2, (y0 + y1) / 2 + 0.03
+    wood = m["bedwood"]
+    geo.box("Bed_Headboard", (x1 - x0 + 0.04, 0.07, 0.95), (cx, y0 + 0.035, 0.0), wood, c, bev=0.012)
+    geo.box("Bed_Frame", (x1 - x0, y1 - y0 - 0.07, 0.20), (cx, cy, 0.08), wood, c, bev=0.012)   # the platform's sides
+    for sx in (x0 + 0.06, x1 - 0.06):
+        for sy in (y0 + 0.12, y1 - 0.06):
+            geo.box(f"Bed_Leg_{sx:.1f}_{sy:.1f}", (0.06, 0.06, 0.08), (sx, sy, 0.0), wood, c, bev=0.006)
+    mw, md = x1 - x0 - 0.04, y1 - y0 - 0.11          # the mattress sits inside the frame, 2 cm proud on each side
+    sheet = geo.rounded_slab("Bed_Mattress", (mw, md, 0.24), 0.07, (cx, cy, 0.24), m["sheet"], c)
+    geo.subsurf(sheet, 1)
+    geo.smooth(sheet, 80)
+    # duvet: slept in and pushed back. A rumpled sheet over the lower two thirds, hanging over the sides and the foot,
+    # its top edge turned back, one corner thrown open toward the room (look_target, the ref's soft quilt folds)
+    rumpled_duvet("Bed_Duvet", cx, mw / 2 + 0.03, y0 + 0.78, y1 + 0.01, 0.48, m["duvet"], c)
     for i, px in enumerate((cx - 0.38, cx + 0.38)):
-        p = geo.rounded_slab(f"Bed_Pillow_{i}", (0.68, 0.40, 0.12), 0.06, (px, 0.34, 0.54), m["pillow"], c,
-                             rot=(0, 0, 4 if i else -3))
+        p = geo.rounded_slab(f"Bed_Pillow_{i}", (0.66, 0.42, 0.13), 0.065, (px, y0 + 0.36, 0.47), m["pillow"], c,
+                             rot=(8, 0, 3 if i else -2))
         geo.subsurf(p, 2)
         geo.smooth(p, 80)
-        pillows.append(p)
-    duvet = grid_plane("Bed_Duvet", (1.95, 1.62), (cx, 1.30, 0.80), m["duvet"], c, (56, 48))
-    duvet.rotation_euler = (0, 0, math.radians(1.5))
-    cloth_drape(duvet, [mat_, *pillows, bpy.data.objects["Bed_Frame"]], frames=50, thickness=0.035, wrinkle=0.035)
     return c
 
 
@@ -570,6 +667,85 @@ def fill_shelves(shelf):
             y += 0.55 * sc + rng.uniform(0.02, 0.10)
 
 
+def build_story_wall(m):
+    """The east wall behind Ivan, seen in the reverse shot from the desk: the door with a hoodie and headphones on a
+    hook, a big film poster and a corkboard, a low console with his gadgets (a 3D printer, a NAS with blue LEDs, an old
+    game console, a small warm lamp), a wardrobe in the corner, sneakers and a box on the floor."""
+    import props_clutter
+    c = geo.coll("StoryWall")
+    xw = W                                            # the wall's inner face
+    face = (90, 0, 90)                                # planes facing -x, into the room
+    # the door: hooks with a hoodie and the headphones
+    for k, y in enumerate((1.22, 1.70)):
+        geo.cyl(f"Door_Hook_{k}", 0.006, 0.05, (xw - 0.02, y, 1.78), m["black"], c, rot=(0, -90, 0), seg=12)
+    hood = props_clutter.cloth_heap("Hoodie_Door", (xw - 0.07, 1.22, 1.40), (0.05, 0.21, 0.40), m["cloth_grey"], c, seed=7)
+    geo.torus("Headphones_Hang_Band", 0.085, 0.011, (xw - 0.05, 1.70, 1.66), m["black"], c, rot=(0, 90, 0), arc=200)
+    for k, dy in enumerate((-0.075, 0.075)):
+        geo.cyl(f"Headphones_Hang_Cup_{k}", 0.045, 0.035, (xw - 0.05, 1.70 + dy, 1.60), m["black"], c, rot=(0, 90, 0),
+                seg=32, bev=0.006)
+    geo.box("Light_Switch", (0.012, 0.08, 0.12), (xw - 0.006, 2.12, 1.12), m["trim"], c, bev=0.002)
+    # the console under the poster
+    cy0, cy1, ch, cd = 2.30, 3.70, 0.55, 0.42
+    ccy = (cy0 + cy1) / 2
+    geo.box("Console", (cd, cy1 - cy0, ch), (xw - cd / 2, ccy, 0.0), m["walnut"], c, bev=0.006)
+    geo.box("Console_Shelf", (0.02, cy1 - cy0 - 0.12, 0.20), (xw - cd - 0.001, ccy, 0.06), m["black"], c, bev=0)
+    for k, y in enumerate((cy0 + 0.35, cy1 - 0.35)):
+        geo.box(f"Console_Drawer_{k}", (0.012, 0.62, 0.22), (xw - cd - 0.006, y, 0.29), m["walnut"], c, bev=0.003)
+    top = ch
+    # 3D printer: a black frame, orange parts, a glowing little screen
+    px, py, ps = xw - 0.22, cy0 + 0.25, 0.36
+    for k, (dx, dy) in enumerate(((-1, -1), (-1, 1), (1, -1), (1, 1))):
+        geo.box(f"Printer_Post_{k}", (0.02, 0.02, 0.42), (px + dx * ps / 2, py + dy * ps / 2, top), m["black"], c, bev=0.002)
+    geo.box("Printer_Top", (ps + 0.02, ps + 0.02, 0.025), (px, py, top + 0.42), m["black"], c, bev=0.003)
+    geo.box("Printer_Bed", (ps - 0.04, ps - 0.04, 0.012), (px, py, top + 0.10), m["printer_orange"], c, bev=0.002)
+    geo.box("Printer_Head", (0.07, 0.07, 0.06), (px - 0.03, py + 0.04, top + 0.30), m["printer_orange"], c, bev=0.006)
+    geo.box("Printer_Base", (ps + 0.02, ps + 0.02, 0.06), (px, py, top), m["black"], c, bev=0.004)
+    geo.plane("Printer_Screen", (0.07, 0.035), (px - ps / 2 - 0.012, py, top + 0.035), m["printer_screen"], c, rot=face)
+    # NAS with blue LEDs, an old console with a controller
+    nx, ny = xw - 0.20, cy0 + 0.66
+    geo.box("NAS", (0.20, 0.13, 0.19), (nx, ny, top), m["black"], c, bev=0.006)
+    for k in range(3):
+        geo.plane(f"NAS_LED_{k}", (0.006, 0.006), (nx - 0.101, ny - 0.04 + k * 0.03, top + 0.15), m["led_blue"], c, rot=face)
+    gx, gy = xw - 0.22, cy0 + 0.95
+    geo.box("Game_Console", (0.22, 0.26, 0.055), (gx, gy, top), m["console_grey"], c, bev=0.008)
+    geo.plane("Game_Console_LED", (0.008, 0.008), (gx - 0.111, gy + 0.09, top + 0.03), m["led_green"], c, rot=face)
+    geo.rounded_slab("Game_Pad", (0.14, 0.09, 0.03), 0.02, (gx - 0.05, gy + 0.20, top), m["console_grey"], c, rot=(0, 0, 25))
+    # a small warm lamp at the console's corner end (the reverse shot's warm pool)
+    lx, ly = xw - 0.18, cy1 - 0.12
+    geo.cyl("Story_Lamp_Base", 0.06, 0.20, (lx, ly, top), m["lamp_ceramic"] if "lamp_ceramic" in m else m["black"], c, seg=32)
+    geo.cyl("Story_Lamp_Shade", 0.11, 0.16, (lx, ly, top + 0.20), m["shade"], c, r_top=0.08, cap=False, seg=48)
+    geo.cyl("Lamp_Bulb_Story", 0.02, 0.03, (lx, ly, top + 0.25), m["bulb"], c, seg=16)
+    # the wall above: a film poster, the corkboard with notes and pinned plans
+    geo.plane("Poster_Film", (0.62, 0.87), (xw - 0.004, 2.80, 1.62), m["poster_film"], c, rot=face)
+    geo.box("Corkboard", (0.015, 0.70, 0.48), (xw - 0.0075, 3.55, 1.30), m["cork"], c, bev=0.002)
+    geo.box("Corkboard_Frame", (0.012, 0.73, 0.51), (xw - 0.003, 3.55, 1.285), m["walnut"], c, bev=0.002)
+    rng = random.Random(11)
+    for k in range(7):
+        w_, h_ = rng.choice(((0.10, 0.14), (0.15, 0.10), (0.21, 0.15), (0.08, 0.08)))
+        mat = m[rng.choice(("note", "note", "sticky_y", "sticky_p"))]
+        geo.plane(f"Cork_Note_{k}", (w_, h_), (xw - 0.017, 3.28 + rng.uniform(0, 0.52), 1.36 + rng.uniform(0, 0.36)), mat, c,
+                  rot=(90 + rng.uniform(-4, 4), 0, 90))
+    # the wardrobe in the north-east corner, sticky notes on a door
+    wx0, wy0, wy1, wh = xw - 0.56, 3.95, 4.74, 1.95
+    geo.box("Wardrobe", (xw - wx0, wy1 - wy0, wh), ((wx0 + xw) / 2, (wy0 + wy1) / 2, 0.0), m["walnut"], c, bev=0.008)
+    for k, y in enumerate(((wy0 + wy1) / 2 - 0.19, (wy0 + wy1) / 2 + 0.19)):
+        geo.box(f"Wardrobe_Door_{k}", (0.015, 0.37, wh - 0.12), (wx0 - 0.007, y, 0.06), m["bedwood"], c, bev=0.004)
+        geo.cyl(f"Wardrobe_Knob_{k}", 0.012, 0.025, (wx0 - 0.02, y + (0.15 if k == 0 else -0.15), 1.05), m["string"], c,
+                rot=(0, 90, 0), seg=16)
+    for k in range(3):
+        geo.plane(f"Wardrobe_Sticky_{k}", (0.07, 0.07), (wx0 - 0.016, wy0 + 0.10 + k * 0.06, 1.25 + (k % 2) * 0.09),
+                  m["sticky_y" if k != 1 else "sticky_p"], c, rot=(90, 0, 90 + (k - 1) * 6))
+    # floor: sneakers by the console, a box, a cable to the socket
+    for k, (y, rz) in enumerate(((2.05, 12), (2.17, -8))):
+        geo.rounded_slab(f"Sneaker_Sole_{k}", (0.29, 0.10, 0.03), 0.03, (xw - 0.55, y, 0.0), m["sole"], c, rot=(0, 0, 90 + rz))
+        geo.rounded_slab(f"Sneaker_Upper_{k}", (0.25, 0.09, 0.07), 0.04, (xw - 0.55, y, 0.025), m["cloth_grey"], c,
+                         rot=(0, 0, 90 + rz))
+    ph("cardboard_box_01", (xw - 0.70, 3.82, 0), rot=-20, scale=0.85, name="Story_Box")
+    geo.tube("Console_Cable", [Vector((xw - 0.05, cy0 + 0.5, top - 0.02)), Vector((xw - 0.03, cy0 + 0.5, 0.15)),
+                               Vector((xw - 0.02, cy0 + 0.15, 0.02)), Vector((xw - 0.012, cy0 - 0.05, 0.25))], 0.003, m["black"], c)
+    return (lx, ly, top + 0.25)
+
+
 def build_dressing(m):
     """Everything from the top-down ref that makes the room lived-in."""
     c = geo.coll("Props")
@@ -583,14 +759,10 @@ def build_dressing(m):
     geo.box("Side_Table", (0.46, 0.40, 0.52), (2.42, 0.24, 0.0), m["bedwood"], c, bev=0.006)
     for i, (dx, dy, mat) in enumerate(((-0.12, 0.05, "can_red"), (0.0, -0.06, "can_silver"), (0.1, 0.08, "can_red"))):
         geo.cyl(f"Soda_Can_{i}", 0.033, 0.122, (2.42 + dx, 0.24 + dy, 0.52), m[mat], c, seg=32)
-    geo.cyl("Soda_Can_Floor", 0.033, 0.122, (2.62, 0.62, 0.033), m["can_red"], c, rot=(90, 0, 70), seg=32)
     # by the window: the guitar on the wall, a dropped backpack and clothes
     gtr = glb("guitar.glb", (0.30, 3.48, 0.0), rot=-70, name="Guitar")    # on its stand in the window corner
     dec = gtr.modifiers.new("Lighter", "DECIMATE")
     dec.ratio = 0.3
-    import props_clutter
-    props_clutter.cloth_heap("Clothes_Pile", (0.42, 3.02, 0.08), (0.30, 0.24, 0.10), m["cloth_grey"], c, seed=2)
-    props_clutter.cloth_heap("Tee_Floor", (1.05, 2.55, 0.03), (0.22, 0.16, 0.03), m["cloth_olive"], c, seed=5)
     # the bookshelf in the window/desk corner, photo and a trailing plant on top
     shelf = ph("wooden_bookshelf_worn", (0.21, 4.36, 0), rot=90, scale=(0.62, 0.70, 0.92), name="Bookshelf")
     fill_shelves(shelf)
@@ -600,29 +772,40 @@ def build_dressing(m):
     ph("potted_plant_01", (2.62, 4.45, 0), rot=-40, name="Plant_Desk")
     ph("potted_plant_04", (2.12, 4.62, TOP), rot=15, name="Plant_DeskSmall")
     # east wall: a chest of drawers by the door
-    ph("drawer_cabinet", (W - 0.26, 3.45, 0), rot=-90, scale=(0.8, 1.0, 0.62), name="Chest")
-    # wall art: posters on the bed wall and next to the window
-    for i, (x, z, w_, h_) in enumerate(((0.88, 1.62, 0.46, 0.62), (2.55, 1.55, 0.40, 0.55))):
-        geo.plane(f"Poster_{i}", (w_, h_), (x, 0.004, z), m["poster"], c, rot=(90, 0, 180))
-    geo.plane("Poster_Window", (0.42, 0.58), (0.004, 0.50, 1.70), m["poster"], c, rot=(90, 0, -90))
-    # rugs: a worn Persian runner by the bed, a navy rug under the desk chair
-    geo.plane("Rug_Persian", (1.25, 2.05), (1.55, 2.62, 0.008), m["rug"], c, rot=(0, 0, 2))
-    geo.plane("Rug_Navy", (2.2, 1.6), (1.55, 3.95, 0.010), m["rug_navy"], c, rot=(0, 0, -1))
-    # floor life: papers, crumpled sheets
-    rng = random.Random(4)
-    for i, (x, y) in enumerate(((1.75, 2.95), (2.35, 3.35), (2.75, 2.45), (1.25, 3.10))):
-        geo.plane(f"Floor_Paper_{i}", (0.21, 0.297), (x, y, 0.013), m["print"] if i % 2 else m["paper"], c,
-                  rot=(0, 0, rng.uniform(0, 180)))
-    for i, (x, y) in enumerate(((2.05, 2.35), (2.55, 3.00), (1.95, 3.55))):
-        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=3, radius=0.035, location=(x, y, 0.03))
-        o = bpy.context.active_object
-        o.name = f"Paper_Ball_{i}"
-        for cc in list(o.users_collection):
-            cc.objects.unlink(o)
-        c.objects.link(o)
-        for v in o.data.vertices:
-            v.co *= 0.75 + 0.5 * rng.random()
-        o.data.materials.append(m["paper"])
+    # wall art: a band poster over the bed, a dev print by the door side, a retro print by the window (portrait 5:7)
+    for i, (x, z, w_, mat) in enumerate(((0.88, 1.62, 0.50, "poster_band"), (2.55, 1.55, 0.44, "poster_dev"))):
+        geo.plane(f"Poster_{i}", (w_, w_ * 1.4), (x, 0.004, z), m[mat], c, rot=(90, 0, 180))
+    geo.plane("Poster_Window", (0.42, 0.59), (0.004, 0.50, 1.70), m["poster_hello"], c, rot=(90, 0, -90))
+    # one rug, under the bed's foot and the desk chair (navy, look_target)
+    geo.plane("Rug", (2.5, 2.2), (1.45, 3.25, 0.008), m["rug_oat"], c, rot=(0, 0, 0))
+    # the desk lamp: a clamp arm lamp at the desk's left end, its head reaching over the laptop
+    ph("desk_lamp_arm_01", (0.55, 4.70, TOP), rot=238, name="DeskLamp_Arm")
+    geo.cyl("Lamp_Bulb_Desk", 0.018, 0.02, DESK_LAMP_HEAD, m["bulb"], c, seg=16)
+    # desk life: headphones by the monitor, energy cans, a rubber duck, Sarah's photo, cables to the floor
+    hx, hy = 1.74, 4.28
+    geo.torus("Headphones_Band", 0.085, 0.011, (hx, hy, TOP + 0.03), m["black"], c, rot=(0, 72, 20), arc=200)
+    for k, dx in enumerate((-0.07, 0.07)):
+        geo.cyl(f"Headphones_Cup_{k}", 0.045, 0.035, (hx + dx * 0.35, hy + dx, TOP), m["black"], c, rot=(0, 0, 20),
+                seg=32, bev=0.006)
+    geo.cyl("Energy_Can", 0.033, 0.155, (2.22, 4.28, TOP), m["can_silver"], c, seg=32)
+    geo.cyl("Energy_Can_2", 0.033, 0.155, (2.30, 4.38, TOP), m["can_silver"], c, seg=32)
+    ph("rubber_duck_toy", (1.66, 4.66, TOP), rot=-150, scale=0.30, name="Rubber_Duck")
+    ph("standing_picture_frame_02", (2.24, 4.62, TOP), rot=-140, scale=0.85, name="Photo_Sarah")
+    for k, (p0, p1) in enumerate((((1.46, 4.66, TOP), (1.58, 4.76, 0.01)), ((2.02, 4.70, TOP), (1.70, 4.77, 0.01)),
+                                   ((1.20, 4.62, TOP), (1.40, 4.77, 0.01)))):
+        mx_ = (p0[0] + p1[0]) / 2
+        geo.tube(f"Cable_Desk_{k}", [Vector(p0), Vector((mx_, 4.76, TOP - 0.02)), Vector((mx_ + 0.03, 4.775, 0.25)),
+                                     Vector(p1)], 0.0035, m["black"], c)
+    # floor: a laundry basket with clothes by the door, a moving box in the corner, a hoodie dropped by the bed
+    import props_clutter
+    ph("wicker_basket_01", (3.62, 0.86, 0), rot=15, scale=1.5, name="Laundry_Basket")
+    props_clutter.cloth_heap("Laundry_Clothes", (3.62, 0.86, 0.17), (0.25, 0.19, 0.07), m["cloth_grey"], c, seed=4)
+    ph("cardboard_box_01", (3.62, 0.40, 0), rot=8, scale=1.25, name="Moving_Box")
+    props_clutter.cloth_heap("Hoodie_Floor", (2.32, 1.62, 0.04), (0.24, 0.18, 0.05), m["cloth_grey"], c, seed=2)
+    # the phone, charging on the bed, its cable over the edge to the nightstand
+    geo.rounded_slab("Phone_Bed", (0.0715, 0.147, 0.0078), 0.009, (0.92, 0.66, 0.482), m["black"], c, rot=(0, 0, 28))
+    geo.tube("Phone_Cable", [Vector((0.95, 0.60, 0.484)), Vector((0.70, 0.58, 0.49)), Vector((0.50, 0.60, 0.47)),
+                             Vector((0.40, 0.62, 0.62)), Vector((0.36, 0.64, 0.70))], 0.0025, m["cable_white"], c)
     return lamp
 
 
@@ -675,7 +858,7 @@ def build_exterior(m):
         for k in range(rng.randint(3, 6)):
             r = rng.uniform(1.6, 3.2)
             cx, cy, cz = x + rng.uniform(-1.5, 1.5), y + rng.uniform(-1.8, 1.8), z0 + h * rng.uniform(0.55, 0.95)
-            g = bmesh.ops.create_icosphere(crowns, subdivisions=3, radius=r,
+            g = bmesh.ops.create_icosphere(crowns, subdivisions=2, radius=r,
                                            matrix=Matrix.Translation((cx, cy, cz)) @ Matrix.Diagonal((1, 1, 0.8, 1)))
             for v in g["verts"]:
                 v.co += (v.co - Vector((cx, cy, cz))) * (rng.random() * 0.35 - 0.12)
@@ -786,6 +969,7 @@ def build():
     build_desk(m)
     build_desk_props(m)
     lamp = build_dressing(m)
+    scene["story_lamp"] = list(build_story_wall(m))
     build_exterior(m)
     scene["lamp"] = list(lamp)
     return scene, add_cams()
@@ -797,16 +981,16 @@ def build():
 #   sun: (strength, colour, travel direction) through the window; window: the sky panel outside it (W, colour);
 #   city: the valley's lights and the sky card as light sources; screens: the monitors' and laptop's emission.
 PRESETS = {
-    "3am":     dict(world=((0.002, 0.003, 0.009), (0.02, 0.015, 0.012), 1.0), lamp=240, window=(320, (0.36, 0.46, 1.0)),
-                    moon=0.7, sun=None, sodium=1400, fill=70, city=1.0, screens=1.0, exposure=1.35),
+    "3am":     dict(world=((0.004, 0.006, 0.016), (0.03, 0.03, 0.05), 1.0), lamp=105, window=(140, (0.36, 0.46, 1.0)),
+                    moon=0.0, sun=None, sodium=0, fill=0, city=1.0, screens=1.0, desk=9, story=14, exposure=1.35),
     "evening": dict(world=((0.03, 0.04, 0.12), (0.55, 0.28, 0.14), 1.2), lamp=240, window=(900, (1.0, 0.56, 0.36)),
-                    moon=0.0, sun=None, sodium=900, fill=70, city=0.7, screens=1.0, exposure=1.0),
+                    moon=0.0, sun=None, sodium=0, fill=0, city=0.7, screens=1.0, desk=18, exposure=1.0),
     "day":     dict(world=((0.25, 0.35, 0.60), (0.60, 0.60, 0.58), 1.5), lamp=0, window=(2600, (0.85, 0.90, 1.0)),
-                    moon=0.0, sun=(4.0, (1.0, 0.90, 0.78), (1.0, 0.30, -0.62)), sodium=0, fill=20, city=0.0, screens=0.5,
-                    exposure=0.1),
+                    moon=0.0, sun=(4.0, (1.0, 0.90, 0.78), (1.0, 0.30, -0.62)), sodium=0, fill=0, city=0.0, screens=0.5,
+                    desk=0, exposure=0.1),
     "sunrise": dict(world=((0.12, 0.16, 0.30), (0.90, 0.50, 0.25), 2.0), lamp=240, window=(700, (1.0, 0.68, 0.48)),
-                    moon=0.0, sun=(5.0, (1.0, 0.58, 0.32), (1.0, -0.20, -0.13)), sodium=0, fill=50, city=0.1, screens=0.8,
-                    exposure=0.6),
+                    moon=0.0, sun=(5.0, (1.0, 0.58, 0.32), (1.0, -0.20, -0.13)), sodium=0, fill=0, city=0.1, screens=0.8,
+                    desk=18, exposure=0.6),
 }
 CITY_LIGHTS = ("Sodium Light", "Street LED", "House Window LED", "Facade City", "Aviation Red", "Sky Night")
 SCREEN_MATS = ("Laptop Screen", "Monitor Screen", "Code Screen", "Phone Screen")
@@ -841,15 +1025,27 @@ def light_rig(scene, preset="3am"):
     lamp = Vector(scene["lamp"])
     L = lighting._light
     # the room's key at night: warm everywhere (energy 0 keeps the light, so every preset has the same live list)
-    L("Desk_Lamp", "POINT", tuple(lamp - Vector((0, 0, 0.06))), max(p["lamp"], 0.001), (1.0, 0.60, 0.32), c, shadow_soft=0.12)
+    L("Desk_Lamp", "POINT", tuple(lamp - Vector((0, 0, 0.06))), max(p["lamp"], 0.001), (1.0, 0.66, 0.42), c, shadow_soft=0.20)
+    if p.get("story"):                              # the console lamp on the story wall: a small amber pool behind Ivan
+        L("Story_Lamp", "POINT", tuple(Vector(scene["story_lamp"])), p["story"], (1.0, 0.64, 0.40), c, shadow_soft=0.12)
+    # a fabric shade glows and lets light through; as an opaque blocker its rim cut hard shapes into the wall, the
+    # poster and the bed (LESSONS.md). Same for the desk lamp's small shade.
+    for n in ("Lamp_Shade", "DeskLamp_Arm", "Story_Lamp_Shade"):
+        if n in bpy.data.objects:
+            bpy.data.objects[n].visible_shadow = False
     bpy.context.view_layer.update()
     hinge = bpy.data.objects["Laptop_Hinge"]
     L("Key_Laptop", "AREA", tuple(hinge.matrix_world @ Vector((0, -0.01, 0.112))), 4.0 * p["screens"], (0.62, 0.74, 1.0), c,
       size=(0.29, 0.18), target=(1.05, 3.75, 1.15))
     # the sky through the window: a panel outside it, coloured by the time of day
     cy = (WIN_Y0 + WIN_Y1) / 2
-    L("City_West", "AREA", (-2.6, cy, (SILL + HEAD) / 2 + 0.4), p["window"][0], p["window"][1], c,
-      size=((WIN_Y1 - WIN_Y0) * 1.6, (HEAD - SILL) * 1.6), target=(2.2, cy, 0.6))
+    # the night sky outside the window: a big, far, soft source (the window frames it; nothing burns)
+    L("City_West", "AREA", (-4.5, cy, (SILL + HEAD) / 2 + 1.0), p["window"][0], p["window"][1], c,
+      size=(7.0, 4.0), target=(2.2, cy, 0.6))
+    if p.get("desk"):                               # the small warm desk lamp
+        # soft (15 cm): a 3 cm point threw hard streaks from the desk and chair legs over the floor and the bed
+        L("Desk_Practical", "POINT", tuple(Vector(DESK_LAMP_HEAD) - Vector((0, 0, 0.04))), p["desk"], (1.0, 0.62, 0.34), c,
+          shadow_soft=0.15)
     if p["moon"]:
         moon = bpy.data.lights.new("Moon", "SUN")
         moon.energy, moon.color, moon.angle = p["moon"], (0.58, 0.70, 1.0), math.radians(9.0)   # hazy moon: a soft wash
@@ -880,6 +1076,7 @@ def bake_and_export(out, scene, small=False, samples=64, preset="3am", lm_only=F
     import bake as BK
     import export_intro as X
     import lightmap
+    BK.FLAT_ALBEDO = True                           # procedural colours baked black: the floor, the bed (LESSONS.md)
     lightmap.LIVE_LIGHTS = ("Key_Laptop",)          # the lamp is baked: soft Cycles shadows instead of a hard shadow map
     BK.DESK = Vector((1.3, 4.4, 0.0))               # the desk zone gets its own, sharper map
     bpy.data.objects["Wall_N"]["bake_group"] = "WALLN"   # wild wall and ceiling: own maps, so shots can pull them
@@ -891,10 +1088,12 @@ def bake_and_export(out, scene, small=False, samples=64, preset="3am", lm_only=F
             o.parent = None
             o.matrix_world = mw
     light_rig(scene, preset)
-    groups = {"ARCH": 2048, "DESK": 2048, "ROOM": 2048, "WALLN": 512, "CEIL": 512}
+    groups = {"ARCH": 4096, "DESK": 2048, "ROOM": 4096, "PROPS": 2048, "WALLN": 1024, "CEIL": 1024}
     write_lights(out, scene, groups=list(groups), exposure=scene.view_settings.exposure)
+    if "--preview" in sys.argv:                      # look-dev: half-size maps, minutes instead of half an hour
+        groups = {g: s // 2 for g, s in groups.items()}
     lightmap.bake_lightmaps(out / "lightmaps", sizes={g: 128 for g in groups} if small else groups,
-                            samples=4 if small else samples, live_samples=2 if small else 24, device="GPU",
+                            samples=4 if small else samples, live_samples=2 if small else max(24, samples // 2), device="GPU",
                             reuse="--resume" in sys.argv)
     if lm_only:                                      # another time of day on the same geometry: lightmaps + lights.json
         print("BAKED", preset, out, flush=True)
@@ -905,6 +1104,7 @@ def bake_and_export(out, scene, small=False, samples=64, preset="3am", lm_only=F
 
 def write_lights(out, scene, groups=None, exposure=0.0):
     import json
+    bpy.context.view_layer.update()                  # light rotations set by target= are not in matrix_world yet
     ob = bpy.data.objects
     at = lambda n: [round(v, 4) for v in ob[n].matrix_world.translation]   # noqa: E731
     lights = []

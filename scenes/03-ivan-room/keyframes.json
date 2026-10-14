@@ -1,0 +1,250 @@
+{
+  "note": "Look-lock keyframes for Ivan's room (scene s03). Each is one fixed camera next to the reference it must reach. tools/keyframes.mjs renders them and builds the side-by-side sheet with numbers.",
+  "scene": "s03",
+  "at": 5,
+  "frames": [
+    {
+      "id": "KF1",
+      "name": "Window wall at 3 AM",
+      "cam": [
+        3.75,
+        2.3,
+        1.35,
+        0.0,
+        2.3,
+        1.15,
+        22,
+        4
+      ],
+      "ref": "ref/look_night.webp",
+      "take": "light hierarchy: lamp pool on the left wall, blue screens, the window as a bright, framed city; deep but soft blacks; warm overall"
+    },
+    {
+      "id": "KF2",
+      "name": "Ivan at the desk",
+      "cam": [
+        2.25,
+        3.55,
+        1.28,
+        0.95,
+        4.15,
+        1.05,
+        35,
+        2
+      ],
+      "ref": "ref/mood/mood_4.webp",
+      "take": "night desk: the monitor is the cool key on the face and desk, one small warm lamp behind, the room readable in deep blue, never black",
+      "before": "ref/review2/our_desk_s1.webp"
+    },
+    {
+      "id": "KF3",
+      "name": "Lamp corner and bed",
+      "cam": [
+        2.95,
+        3.05,
+        1.3,
+        0.35,
+        0.65,
+        0.75,
+        28,
+        2.8
+      ],
+      "ref": "ref/mood/mood_5.png",
+      "take": "a floor lamp soft warm pool on the wall and soft bedding, cool window light on the other side, clean plump fabrics, soft graded shadows"
+    },
+    {
+      "id": "KF4",
+      "name": "Top-down",
+      "cam": [
+        2.25,
+        2.4,
+        3.45,
+        0.85,
+        2.4,
+        0.35,
+        18,
+        5.6
+      ],
+      "ref": "ref/plan_topdown.jpg",
+      "take": "layout, readable objects, light pools seen from above (the reference is daylight; we match layout and readability, not the sun)",
+      "before": "ref/review2/our_topdown.webp"
+    },
+    {
+      "id": "KF5",
+      "name": "Door side",
+      "cam": [
+        0.45,
+        2.4,
+        1.55,
+        4.0,
+        2.3,
+        1.0,
+        22,
+        4
+      ],
+      "ref": "ref/mood/mood_6.png",
+      "before": "ref/review2/our_doorside.webp",
+      "take": "the quiet side of a night room: soft cool ambient from the window, walls and furniture readable in low light, clean matte surfaces, no hard light patches"
+    },
+    {
+      "id": "M1",
+      "name": "Wide from the door corner",
+      "cam": [
+        3.8,
+        0.3,
+        1.6,
+        0.5,
+        3.8,
+        1.0,
+        18,
+        5.6
+      ],
+      "ref": "ref/mood/mood_1.webp",
+      "take": "warm practicals fill the room evenly; walls readable mid-tones; soft falloff into one dark corner"
+    },
+    {
+      "id": "M2",
+      "name": "Lamp corner, close",
+      "cam": [
+        2.2,
+        1.6,
+        1.3,
+        0.2,
+        0.3,
+        0.8,
+        28,
+        2.8
+      ],
+      "ref": "ref/mood/mood_2.png",
+      "take": "one warm patterned lamp, soft shadow gradients on a textured wall, plant silhouettes"
+    },
+    {
+      "id": "M3",
+      "name": "Bed wall, frontal",
+      "cam": [
+        1.3,
+        4.2,
+        1.4,
+        1.3,
+        0.0,
+        0.9,
+        22,
+        4
+      ],
+      "ref": "ref/mood/mood_3.png",
+      "take": "frontal wall composition: warm lamp + cool window edge, framed prints, rug grounding the furniture"
+    },
+    {
+      "id": "M4",
+      "name": "Night wide, desk side",
+      "cam": [
+        3.8,
+        1.0,
+        1.7,
+        0.8,
+        4.3,
+        0.9,
+        20,
+        4
+      ],
+      "ref": "ref/mood/mood_4.webp",
+      "take": "blue night ambient everywhere, monitor glow as the accent, one small warm lamp, nothing pure black"
+    },
+    {
+      "id": "M5",
+      "name": "Lamp and bed",
+      "cam": [
+        2.95,
+        3.05,
+        1.3,
+        0.35,
+        0.65,
+        0.75,
+        28,
+        2.8
+      ],
+      "ref": "ref/mood/mood_5.png",
+      "take": "warm lamp pool on wall and soft plump bedding, cool window light opposite"
+    },
+    {
+      "id": "M6",
+      "name": "Door side",
+      "cam": [
+        0.45,
+        2.4,
+        1.55,
+        4.0,
+        2.3,
+        1.0,
+        22,
+        4
+      ],
+      "ref": "ref/mood/mood_6.png",
+      "take": "quiet dark side: clean matte furniture, soft cool fill from the window, readable shapes"
+    },
+    {
+      "id": "M7",
+      "name": "Wide from the desk corner",
+      "cam": [
+        2.8,
+        4.5,
+        1.6,
+        1.0,
+        0.3,
+        0.8,
+        20,
+        4
+      ],
+      "ref": "ref/mood/mood_7.png",
+      "take": "dark room held together by several small warm pools, teal window, rug, depth in layers"
+    },
+    {
+      "id": "M8",
+      "name": "Window wall from the door",
+      "cam": [
+        3.75,
+        2.3,
+        1.35,
+        0.0,
+        2.3,
+        1.15,
+        22,
+        4
+      ],
+      "ref": "ref/mood/mood_8.png",
+      "take": "blue moonlit window as the brightest shape, soft blue spill on the floor, deep blue shadows"
+    },
+    {
+      "id": "H1",
+      "name": "Hero: window wall",
+      "cam": [
+        3.95,
+        2.35,
+        1.15,
+        0.0,
+        2.35,
+        1.25,
+        24,
+        2.8
+      ],
+      "ref": "ref/mood/hero_window.png",
+      "take": "frontal and centred: the window the brightest shape (soft city bokeh), monitors the cool accent, one amber lamp left, bookshelf and guitar right, dark green walls, a soft foreground"
+    },
+    {
+      "id": "H2",
+      "name": "Hero: reverse from the desk",
+      "cam": [
+        0.85,
+        4.62,
+        1.02,
+        3.9,
+        1.9,
+        1.05,
+        30,
+        2
+      ],
+      "ref": "ref/mood/hero_reverse.png",
+      "take": "layered depth: blurred laptop and desk in front, the chair as a dark silhouette, the story wall behind (door with hoodie, poster, corkboard, console with LEDs, wardrobe), one amber lamp at the side, small coloured LED accents"
+    }
+  ]
+}

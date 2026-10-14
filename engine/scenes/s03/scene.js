@@ -7,6 +7,9 @@
 import * as THREE from 'three';
 import { createVolume } from '../../src/volume.js';
 import { COMMON } from '../../src/atmosphere.js';
+import { drawLaptop } from '../../src/screens.js';
+import { applyLook, lookExposure } from './looks.js';
+export { LOOKS, LOOK_NAME } from './looks.js';
 import { B, cameraIn, shotIn, SHOTS as INTRO, CAPTIONS as INTRO_CAPS, VO_OFFSET as INTRO_VO, DURATION as INTRO_LEN } from '../../src/shots.js';
 
 export const FPS = 24;
@@ -44,10 +47,12 @@ export const CAPTIONS = INTRO_CAPS;
 // Shots that look at his face from the desk side stand where the north wall is: it is a wild wall, pulled for
 // those shots as on a film set. The top shot takes the ceiling off.
 export function props(t, { named }) {
-  const s = shotAt(t);
-  const camY = cameraAt(t, () => new THREE.Vector3()).pos.z * -1;      // three z = -Blender y
+  // decide from where the camera really is (the free camera too): a wall or the ceiling goes only when the camera
+  // stands in it or beyond it; anywhere inside the room every wall is there
+  const cam = window.__camera ? window.__camera.position : cameraAt(t, () => new THREE.Vector3()).pos;
+  const camY = -cam.z, camZ = cam.y;                                    // three -> Blender
   const ceil = named.Baked_CEIL || named.Ceiling, wall = named.Baked_WALLN || named.Wall_N;   // baked or layout export
-  if (ceil) ceil.visible = !s.top;
+  if (ceil) ceil.visible = camZ < 2.66;
   if (wall) wall.visible = camY < 4.75;
 }
 
@@ -90,7 +95,8 @@ export function createLights(scene, data, { quality = 'high' } = {}) {
   if (baked && key) {
     const [w, h] = key.size;
     const s = new THREE.RectAreaLight(new THREE.Color(...key.color), 0.22 * key.energy_w / (Math.PI * w * h), w, h);
-    s.position.copy(B(...key.location)); s.lookAt(s.position.clone().add(new THREE.Vector3(key.forward[0], key.forward[2], -key.forward[1])));
+    // aimed from the screen at his face and chest (lights.json once exported this light pointing at the floor)
+    s.position.copy(B(...key.location)); s.lookAt(B(1.05, 3.75, 1.15));
     scene.add(s); L.screens.push({ s, base: s.intensity });
   }
   for (const n of baked ? [] : ['Monitor_Screen', 'Monitor2_Screen', 'Laptop_Screen']) {
@@ -109,8 +115,15 @@ export function createLights(scene, data, { quality = 'high' } = {}) {
   }
   // what the dark green walls give back: barely anything, a little blue (baked: the environment capture does it)
   // baked: a faint warm fill keeps live-lit things (Ivan, plants, books) from falling to pure black, as in the ref
-  L.fill = baked ? new THREE.HemisphereLight(0x3a2c22, 0x120c08, 0.35) : new THREE.HemisphereLight(0x22305a, 0x0b0806, 0.10);
-  scene.add(L.fill);
+  // baked: no fill light; the bake's bounce and the environment capture light Ivan and the props (LOOK_REVIEW.md B)
+  if (!baked) { L.fill = new THREE.HemisphereLight(0x22305a, 0x0b0806, 0.10); scene.add(L.fill); }
+  // baked: the night itself, the third layer. A deep-blue sky from above and a warm floor bounce from below, so
+  // shadows land in readable navy and brown, never black (mood_4, look_night: black share under 10%).
+  // ?amb=<k> tunes it for look-dev.
+  else {
+    const k = +(new URLSearchParams(location.search).get('amb') ?? 0.9);
+    L.fill = new THREE.HemisphereLight(0x22325a, 0x140e0a, k); scene.add(L.fill);
+  }
 
   L.apply = ({ lamp: lk = 1, screen: sk = 1 } = {}) => {
     L.lamp.intensity = L.lampBase * lk;
@@ -127,20 +140,35 @@ const OUTSIDE = /^(Tree_Line|Hill|Ground|Neighbourhood|Street_|Valley_|House_Win
 // room's haze (it has its own distance in the lens).
 export function tweakMaterial(m, o) {
   const n = m.name || '';
+  // look-dev: ?nomap=<regex> drops the albedo texture, ?nolm=<regex> the lightmap, to see which one makes a pattern
+  const Q = new URLSearchParams(location.search);
+  if (Q.get('nomap') && new RegExp(Q.get('nomap')).test(n)) { m.map = null; m.needsUpdate = true; }
+  if (Q.get('nolm') && new RegExp(Q.get('nolm')).test(n)) { m.lightMap = null; m.needsUpdate = true; }
+  // baked surfaces reflect the room capture only faintly: at 1.0 every matte thing got a grey sheen (the plastic look)
+  if (m.lightMap) m.envMapIntensity *= +(Q.get('env') ?? (/Floor/.test(n) ? 0.8 : 0.35));
+  if (Q.get('lmonly') && m.lightMap) {             // look-dev: the bake alone, on white matte surfaces
+    Object.assign(m, { map: null, normalMap: null, roughnessMap: null, metalnessMap: null, roughness: 1, metalness: 0,
+      clearcoat: 0, sheen: 0, envMapIntensity: 0 }); m.color.setRGB(0.5, 0.5, 0.5); m.needsUpdate = true;
+  }
   if (OUTSIDE.test(o.name) || /Glass/.test(n)) {
     m.fog = false;
     if (!/Glass/.test(n)) m.envMapIntensity = 0;                  // the room's reflections must not light the valley
     // the tree line and the slope hold a little of the city's glow, so they read as shapes against the lights
     if (/^Tree_Line/.test(o.name)) { m.emissive.setHex(0x050c09); m.emissiveIntensity = 1; }
     if (/^Hill/.test(o.name)) { m.emissive.setHex(0x06090c); m.emissiveIntensity = 1; }
-    if (/^Facade_Towers/.test(o.name)) m.emissiveIntensity *= 0.4;   // sparse lit windows, dark towers (the ref's skyline)
-    if (/^Valley_/.test(o.name)) m.emissiveIntensity *= 0.55;
+    if (/^Facade_Towers/.test(o.name)) m.emissiveIntensity *= 0.08;   // towers: dark silhouettes, a few lit windows   // sparse lit windows, dark towers (the ref's skyline)
+    if (/^Valley_/.test(o.name)) m.emissiveIntensity *= 0.15;
+    // the night sky reads brighter than the room's shadows (look_night, mood_4): a lit navy, not a black hole
+    if (/^Sky_Card/.test(o.name)) m.emissiveIntensity *= +(new URLSearchParams(location.search).get('sky') ?? 9);
     if (!/Glass/.test(n)) return;
     m.opacity = 0.04;                                              // clean glass: the city, not a grey film
   }
-  if (/Laptop Alu/.test(n)) Object.assign(m, { roughness: 0.55, metalness: 0.6, clearcoat: 0, envMapIntensity: 0.35 });
+  if (/^ClassicNightstand/.test(n)) { m.color.multiplyScalar(4); m.roughness = Math.max(m.roughness, 0.6); }   // its scan reads 0.6% albedo: black
+  else if (/^Trim$/.test(n) && m.normalScale) m.normalScale.multiplyScalar(0.25);   // door and trim: smooth paint, no plank grooves
+  else if (/^Desk Walnut$/.test(n)) Object.assign(m, { clearcoat: 0, roughness: m.roughness * 1.3 });   // satin desk, not lacquer
+  else if (/Laptop Alu/.test(n)) Object.assign(m, { roughness: 0.55, metalness: 0.6, clearcoat: 0, envMapIntensity: 0.35 });
   else if (/Monitor Black|Bezel|^Keys$|Trackpad/.test(n)) Object.assign(m, { roughness: 0.8, clearcoat: 0, envMapIntensity: 0.2 });
-  else if (/^Lamp Shade$/.test(n)) m.emissiveIntensity *= 0.6;     // the shade glows, it does not blow out
+  else if (/^Lamp Shade$/.test(n)) m.emissiveIntensity *= 0.3;     // the shade glows like fabric, it does not blow out to white
   else if (/Screen/.test(n)) Object.assign(m, { clearcoat: 0.12, clearcoatRoughness: 0.5, roughness: 0.6, envMapIntensity: 0.08 });
 }
 
@@ -163,21 +191,37 @@ const veil = (map, color, opacity) => new THREE.MeshBasicMaterial({ map, color, 
 
 // Haze: the dark teal air that lifts the blacks a touch (fog), the glow that hangs around every practical plus the
 // lens. All additive, all soft, all in the lens (depth of field blurs them like air).
+const SOFT_AIR = false;
 export let VOLUME = null;                     // the room's volumetric light (volume.js); times of day retune it
-export function setup({ scene, data, atmo }) {
+// The room's lightmaps are stored bottom-up relative to the glTF lightmap UVs (lightmap.py writes Blender pixel
+// rows), so they are read mirrored in v. Unflipped, every surface sampled another island's light: the stripes, boxes
+// and blotches of LESSONS.md. ?lmflip=0 shows the old, wrong sampling.
+export function flipV(t) {
+  if (!t || t.userData.flippedV) return t;
+  t.repeat.set(1, -1); t.offset.set(0, 1); t.updateMatrix(); t.userData.flippedV = true; t.needsUpdate = true;
+  return t;
+}
+export const LM_FLIP = new URLSearchParams(location.search).get('lmflip') !== '0';
+
+export function setup({ scene, data, atmo, LM, L, root, post, renderer }) {
+  if (LM && LM_FLIP) for (const t of Object.values(LM)) flipV(t);
+  applyLook({ post, root, LM, L, renderer });       // ?look= mood preset (looks.js)
   if (atmo) {
-    atmo.beamMesh.visible = false;            // the intro's desk-lamp cone; this lamp is a shaded table lamp (volume below)
-    VOLUME = atmo.add(createVolume({ room: data.room, lamp: data.marks.Lamp_Shade || data.lights[0].location, COMMON }));
+    atmo.beamMesh.visible = false;            // the intro's desk-lamp cone; this lamp is a shaded table lamp
+    // the volume (volume.js) is off until it is redone soft (LOOK_REVIEW.md G); dust stays
+    if (SOFT_AIR) VOLUME = atmo.add(createVolume({ room: data.room, lamp: data.marks.Lamp_Shade || data.lights[0].location, COMMON }));
   }
   scene.fog = new THREE.FogExp2(0x060a10, 0.045);
-  const glow = radialTexture([[0, 1], [0.25, 0.45], [0.6, 0.12], [1, 0]]);
-  const sprite = (pos, size, color, opacity) => {
-    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: glow, color, opacity, transparent: true, depthWrite: false,
-      blending: THREE.AdditiveBlending, fog: false }));
-    sp.position.copy(B(...pos)); sp.scale.setScalar(size); scene.add(sp); return sp;
-  };
-  const m = data.marks;
-  if (m.Lamp_Shade) { sprite(m.Lamp_Shade, 1.3, 0xffa04a, 0.30); sprite(m.Lamp_Shade, 0.45, 0xffc888, 0.35); }
-  for (const n of ['Monitor_Screen', 'Monitor2_Screen']) if (m[n]) sprite([m[n][0], m[n][1] - 0.08, m[n][2]], 1.0, 0x4f7dff, 0.16);
-  if (m.Laptop_Screen) sprite([m.Laptop_Screen[0], m.Laptop_Screen[1] - 0.1, m.Laptop_Screen[2]], 0.7, 0x6f95ff, 0.14);
+  // (no glow sprites, no window veil: they drew shapes instead of air; LOOK_REVIEW.md)
 }
+
+// The laptop at 3 AM: the intro's editor, with the chat panel in dark mode (the intro's cream panel read as half the
+// screen lit; the refs show one dark editor). 'difference' with white inverts the panel: dark ground, light text.
+export const exposureBoost = () => lookExposure();
+
+export const SCREENS = {
+  laptop(g, t, keys) {
+    drawLaptop(g, t, keys);
+    g.save(); g.globalCompositeOperation = 'difference'; g.fillStyle = '#ffffff'; g.fillRect(990, 26, 610, 974); g.restore();
+  },
+};

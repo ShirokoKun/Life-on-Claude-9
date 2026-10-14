@@ -371,11 +371,26 @@ export async function createScreens(root, actingURL = 'assets/acting.json', cust
     if (o.material.name === 'Laptop Screen' || /^Laptop_Screen/.test(o.name)) { meshes.lap = o; o.material.emissiveMap = lap.tex; o.material.needsUpdate = true; }
     if (o.material.name === 'Monitor Screen' || /^Monitor_Screen/.test(o.name)) { meshes.mon = o; o.material.emissiveMap = mon.tex; o.material.needsUpdate = true; }
   });
+  // a scene may drive more screens (Ch 1: the second monitor and the phone); without them nothing changes here
+  const extra = {};
+  if (custom.monitor2 || custom.phone) {
+    const want = { mon2: [custom.monitor2, /^Monitor2_Screen/, 1600, 900], phone: [custom.phone, /^Phone_Screen/, 720, 1560] };
+    for (const [k, [draw, re, w, h]] of Object.entries(want)) {
+      if (!draw) continue;
+      root.traverse((o) => {
+        if (extra[k] || !o.isMesh || Array.isArray(o.material) || !re.test(o.name)) return;
+        const cv = make(w, h);
+        o.material = o.material.clone(); o.material.emissiveMap = cv.tex; o.material.emissive.set(0xffffff); o.material.needsUpdate = true;
+        meshes[k] = o; extra[k] = { draw, ...cv, w, h };
+      });
+    }
+  }
   let lastT = -1;
   function update(t) {
     if (t === lastT) return; lastT = t;
     laptop(lap.g, t, keys); lap.tex.needsUpdate = true;
     monitor(mon.g, t); mon.tex.needsUpdate = true;
+    for (const x of Object.values(extra)) { x.draw(x.g, t, keys); x.tex.needsUpdate = true; }
   }
   // world position of a pixel: bilinear over the plane's four UV corners
   const corners = {};
@@ -390,7 +405,7 @@ export async function createScreens(root, actingURL = 'assets/acting.json', cust
   }
   function screenPoint(which, px, py) {
     const m = meshes[which]; if (!m) return null;
-    const [W, H] = which === 'lap' ? [1600, 1000] : [1600, 900];
+    const [W, H] = which === 'lap' ? [1600, 1000] : extra[which] ? [extra[which].w, extra[which].h] : [1600, 900];
     const u = px / W, v = py / H, [a, b, c, d] = corners[which];
     const top = a.clone().lerp(b, u), bot = c.clone().lerp(d, u);
     m.updateWorldMatrix(true, false);

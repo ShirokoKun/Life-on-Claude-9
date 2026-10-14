@@ -120,13 +120,16 @@ export const LIB = {
   'Cold Noodles':   { color: '#b58a4c', rough: 0.45 },
   'Coffee Residue': { color: '#2a160a', rough: 0.3 },
   // Ivan's room (scene s03: blender/scenes/set_room03.py)
-  'Wall Green':     { key: 'plaster_wall', color: '#3d5344', rough: 0.92, nrm: 0.5, lm: 0.9 },    // deep bottle green, limewashed (~12% albedo); full bounce
-  'Floor Dark Oak': { key: 'oak_floor', color: '#4a2d1c', rough: 0.5, nrm: 0.5, coat: 0.3, coatRough: 0.3 },
-  'Bed Walnut':     { key: 'walnut', color: '#3a2214', rough: 0.45, nrm: 0.35, coat: 0.3, coatRough: 0.3 },
+  'Wall Green':     { key: 'plaster_wall', color: '#55665e', rough: 0.92, nrm: 0.25, lm: 1.0 },   // muted sage plaster (~20%): light gradients read on it
+  'Floor Dark Oak': { key: 'oak_floor', color: '#6b4d35', rough: 0.6, nrm: 0.35, coat: 0.1, coatRough: 0.4 },     // satin, not lacquer
+  'Bed Walnut':     { key: 'light_wood', color: '#7a5a3e', rough: 0.6, nrm: 0.3 },   // a mid oak frame (intro's Furniture), not a black block
   'Blind Slat':     { key: 'plastic', color: '#cfc8b8', rough: 0.5, mapAlbedo: false, nrm: 0.1 },
-  'Duvet Navy':     { key: 'linen', color: '#2c3a60', rough: 0.95, nrm: 0.8, sheen: 0.55 },     // navy cotton ~8%: dark, not a hole
+  'Duvet Navy':     { key: 'linen', color: '#3d4a6a', rough: 1.0, nrm: 0.1, sheen: 0, mapAlbedo: false },   // flat navy cotton
+  'Sheet Cotton':   { key: 'linen', color: '#c2bcb0', rough: 1.0, nrm: 0.08, sheen: 0, mapAlbedo: false },
+  'Rug Oat':        { key: 'rug', color: '#2c3858', rough: 1.0, nrm: 0.5, sheen: 0.3, mapAlbedo: false },
+  'Lamp Metal':     { key: 'black_metal', color: '#151515', rough: 0.45, metal: 0.5, nrm: 0.2 },
   'Mattress':       { key: 'linen', color: '#b9b5ac', rough: 0.95, nrm: 0.5, sheen: 0.3 },
-  'Pillow Linen':   { key: 'linen', color: '#aeaa9f', rough: 0.95, nrm: 0.6, sheen: 0.4 },
+  'Pillow Linen':   { key: 'linen', color: '#d6d0c4', rough: 1.0, nrm: 0.08, sheen: 0, mapAlbedo: false },
   'Rug Navy':       { key: 'rug', color: '#24325a', rough: 1.0, nrm: 0.9, sheen: 0.4 },
   'Lamp Ceramic':   { key: 'ceramic', color: '#6a4528', rough: 0.25, nrm: 0.1, coat: 0.5 },
   'Guitar Spruce':  { key: 'light_wood', color: '#a8682e', rough: 0.3, nrm: 0.2, coat: 0.8, coatRough: 0.1 },

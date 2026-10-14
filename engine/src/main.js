@@ -139,7 +139,7 @@ async function boot() {
     ...(SC.DUST ? { center: SC.DUST.center, spread: SC.DUST.spread } : {}) });   // a set's own air
   post = createPost(renderer, scene, camera, atmo);
   roomRoot = room.scene;
-  if (SC.setup) await SC.setup({ scene, named, root: room.scene, THREE, camera, renderer, data, L, LM, loadEXR, roomDir: ROOM, atmo });   // a set's air, its times of day
+  if (SC.setup) await SC.setup({ scene, named, root: room.scene, THREE, camera, renderer, data, L, LM, loadEXR, roomDir: ROOM, atmo, post });   // a set's air, its times of day
   if (SC.light) {
     status('Loading the other times of day...');
     const sets = await TOD.loadSets(SC.SETS, loadEXR, { LM, exposure: data.exposure || 0 });
@@ -155,9 +155,18 @@ async function boot() {
   screens = await createScreens(room.scene, SC.ACTING || 'assets/acting.json', SC.SCREENS);
   resize();
   if (!$('fx').checked) post.setEnabled(false);
+  if (SC.LOOKS) {                              // a scene's mood presets: one chip each; a click reloads with ?look=
+    $('lookBox').hidden = false;
+    for (const name of Object.keys(SC.LOOKS)) {
+      const b = document.createElement('button'); b.type = 'button'; b.textContent = name;
+      b.setAttribute('aria-pressed', String(name === SC.LOOK_NAME));
+      b.addEventListener('click', () => { const q = new URLSearchParams(location.search); q.set('look', name); location.search = q.toString(); });
+      $('lookChips').appendChild(b);
+    }
+  }
   setTime(0);
   $('status').hidden = true;
-  window.__scene = scene; window.__THREE = THREE; window.__post = post; window.__L = L; window.__renderer = renderer; window.__screens = screens; window.__ready = true;
+  window.__scene = scene; window.__camera = camera; window.__THREE = THREE; window.__post = post; window.__L = L; window.__renderer = renderer; window.__screens = screens; window.__ready = true;
 }
 
 // Ivan: Tripo PBR materials made physical, glasses rebuilt, the performance as an animation clip

@@ -21,10 +21,11 @@ export const CAST_OFFSET = ROOM3.CAST_OFFSET;
 export const ENV_AT = ROOM3.ENV_AT;
 export const createLights = ROOM3.createLights;
 export const tweakMaterial = ROOM3.tweakMaterial;
+export { SCREENS } from './screens.js';
 let RL = null;                                        // the room's times of day (s03/roomlight.js)
 export async function setup(args) {
   ROOM3.setup(args);
-  RL = await createRoomLight(args);
+  RL = await createRoomLight({ ...args, volume: ROOM3.VOLUME });
 }
 // each shot's light field in timeline.json ("3am -> day (blend 38.0-40.4)", "time-lapse: ...") drives the room;
 // the engine asks for the exposure first in every frame, so the light is set here

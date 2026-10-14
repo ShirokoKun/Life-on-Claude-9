@@ -4,6 +4,7 @@
 // '4am' is the 3am bake a little cooler and darker; '4am_iso' keeps only the desk lit (the rest of the room's
 // lightmaps fall away), the chapter's "it's not all pleasant" spotlight.
 import * as THREE from 'three';
+import { flipV, LM_FLIP } from './scene.js';
 
 const BAKED = ['3am', 'evening', 'day', 'sunrise'];
 // what each state does beyond its lightmaps: exposure (stops, relative to lights.json), room-group scale (iso),
@@ -17,9 +18,21 @@ const LOOKS = {
   sunrise:  { base: 'sunrise', ev: 0, room: 1, sky: [8, 5, 4], skyK: 1, city: 0.15, tree: 0x1a1612, sun: 0.7, sunColor: 0xffa060 },
   void:     { base: '3am', ev: 0, room: 0, sky: [0, 0, 0], skyK: 0, city: 0, tree: 0, sun: 0 },
 };
+// the air per state (volume.js): light direction through the window (Blender, travelling), its colour and density,
+// the lamp's in-scatter and the haze. Night: thin cool moon shafts; day: warm beams with dust; sunrise: long and orange.
+const MOON = [1, -0.35, -0.75], DAYSUN = [1, 0.3, -0.62], DAWN = [1, -0.2, -0.13];
+const AIR = {
+  '3am':    { dir: MOON, col: [0.45, 0.58, 1.0], k: 0.022, lamp: 0.0045, haze: 0.0012 },
+  '4am':    { dir: MOON, col: [0.42, 0.55, 1.0], k: 0.018, lamp: 0.0030, haze: 0.0010 },
+  '4am_iso':{ dir: MOON, col: [0.40, 0.50, 1.0], k: 0.005, lamp: 0.0008, haze: 0.0005 },
+  evening:  { dir: [1, 0.0, -0.35], col: [1.0, 0.60, 0.42], k: 0.020, lamp: 0.0045, haze: 0.0014 },
+  day:      { dir: DAYSUN, col: [1.0, 0.93, 0.82], k: 0.060, lamp: 0.0, haze: 0.0022 },
+  sunrise:  { dir: DAWN, col: [1.0, 0.60, 0.32], k: 0.080, lamp: 0.0025, haze: 0.0018 },
+  void:     { dir: MOON, col: [0, 0, 0], k: 0, lamp: 0, haze: 0 },
+};
 export const STATES = Object.keys(LOOKS);
 
-export async function createRoomLight({ scene, root, renderer, data, loadEXR, LM, roomDir, L }) {
+export async function createRoomLight({ scene, root, renderer, data, loadEXR, LM, roomDir, L, volume }) {
   const groups = data.groups || Object.keys(LM);
   const sets = { '3am': { LM, exposure: data.exposure || 0 } };
   await Promise.all(BAKED.filter((n) => n !== '3am').map(async (n) => {
@@ -32,6 +45,7 @@ export async function createRoomLight({ scene, root, renderer, data, loadEXR, LM
     groups.forEach((g, i) => {
       const t = maps[i] || LM[g];
       t.channel = 1; t.flipY = false; t.colorSpace = THREE.LinearSRGBColorSpace; t.needsUpdate = true; lm[g] = t;
+      if (LM_FLIP && maps[i]) flipV(t);
     });
     sets[n] = { LM: lm, exposure: d.exposure || 0 };
   }));
@@ -80,6 +94,7 @@ export async function createRoomLight({ scene, root, renderer, data, loadEXR, LM
             rts[g] = new THREE.WebGLRenderTarget(size, size, { type: THREE.HalfFloatType, depthBuffer: false, generateMipmaps: false,
               minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, colorSpace: THREE.LinearSRGBColorSpace });
             rts[g].texture.channel = 1; rts[g].texture.flipY = false;
+            if (LM_FLIP) flipV(rts[g].texture);        // the blend copies the maps texel for texel, so it keeps their orientation
           }
           quad.material.uniforms.a.value = A; quad.material.uniforms.b.value = Bt; quad.material.uniforms.w.value = wbb / (wa + wbb);
           const prev = renderer.getRenderTarget(), tm = renderer.toneMapping;
@@ -115,6 +130,19 @@ export async function createRoomLight({ scene, root, renderer, data, loadEXR, LM
       for (const o of outside.trees) o.m.emissive.copy(tree);
       sun.intensity = sunK; if (sunK > 0) sun.color.copy(sunC.multiplyScalar(1 / sunK));
       if (L && L.fill) L.fill.intensity = 0.35 * Math.min(1, room + 0.2);
+      if (volume) {
+        const u = volume.uniforms, dir = new THREE.Vector3(), col = new THREE.Color(0, 0, 0);
+        let k = 0, lampK = 0, haze = 0;
+        for (const [n, wt] of Object.entries(w)) {
+          const a = AIR[n]; if (!a || wt <= 0) continue;
+          dir.addScaledVector(new THREE.Vector3(...a.dir).normalize(), wt);
+          col.r += wt * a.col[0] * a.k; col.g += wt * a.col[1] * a.k; col.b += wt * a.col[2] * a.k;
+          k += wt * a.k; lampK += wt * a.lamp; haze += wt * a.haze;
+        }
+        u.winDir.value.copy(dir.normalize());
+        if (k > 0) u.winColor.value.setRGB(col.r / k, col.g / k, col.b / k);
+        u.winK.value = k; u.lampK.value = lampK; u.hazeK.value = haze;
+      }
       exposure = ev;
     },
   };

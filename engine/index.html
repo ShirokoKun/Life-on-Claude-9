@@ -43,6 +43,7 @@ body.render aside, body.render #slate, body.render #hide, body.render #status { 
   <div class="chips"><button id="play" type="button">▶ Play</button><button id="free" type="button" aria-pressed="false">Free camera</button></div>
   <div class="row"><label for="time">Timeline</label><output id="timeOut">0.0 s</output><input id="time" type="range" min="0" max="32" step="0.0417" value="0"></div>
   <div><div class="note" style="margin-bottom:6px">Shots</div><div class="chips" id="shotChips"></div></div>
+  <div id="lookBox" hidden><div class="note" style="margin-bottom:6px">Look (mood preset)</div><div class="chips" id="lookChips"></div></div>
   <label class="t"><input id="fx" type="checkbox" checked> Lens and film look</label>
   <label class="t"><input id="caps" type="checkbox"> Captions</label>
   <div class="row"><label for="exp">Exposure trim</label><output>EV</output><input id="exp" type="range" min="-2" max="2" step="0.05" value="0"></div>
