@@ -567,12 +567,12 @@ class Actor:
                     d = d.lerp(-FWD * 0.75 - out * 0.65 + UP * 0.25, k)              # fingers back around the skull
                     palm = palm.lerp((C - cradle).normalized(), k)                    # palm toward the head
                 if side == "Right" and mouse > 0:           # hand on the mouse: scrolling, clicking
-                    w = w.lerp(MOUSE + Vector((0.004, -0.088, 0.024)), mouse) + UP * 0.045 * math.sin(math.pi * mouse)
+                    w = w.lerp(MOUSE + Vector((0.012, -0.112, 0.020)), mouse) + UP * 0.045 * math.sin(math.pi * mouse)
                     d, palm = d.lerp(FWD - UP * 0.12, mouse), palm.lerp(-UP, mouse)
                 if side == "Right" and rub > 0:             # the heel of his hand pressed into his brow
-                    brow = C + FWD * (rf * 0.85) + UP * (self.head_r.y * 0.30) + out * 0.01
-                    w = w.lerp(brow + FWD * 0.02 - UP * 0.06, rub)
-                    d, palm = d.lerp(UP * 0.9 - out * 0.55 + FWD * 0.05, rub), palm.lerp(-FWD, rub)
+                    brow = C + FWD * (rf * 0.85) + UP * (self.head_r.y * 0.08)
+                    w = w.lerp(brow + FWD * 0.02 - UP * 0.04 + out * 0.05, rub)
+                    d, palm = d.lerp(UP * 0.45 - out * 0.9 + FWD * 0.05, rub), palm.lerp(-FWD, rub)   # fingers across the brow
 
                 neutral = 0.85 * math.sin(math.pi * min(1.0, max(0.0, behind)))     # mid-arc: a straight wrist
                 if side == "Right":
@@ -595,7 +595,7 @@ class Actor:
                     self.upd()
                     self.fit_knuckles(side, height, contact)
                     self.fit_fingers(side, pr if contact > 0.5 and rest < 0.5 else {}, contact, relaxed=rest * (1 - behind),
-                                     extra=1.3 * behind + (0.6 * rub if side == "Right" else 0.0))
+                                     extra=1.3 * behind + (0.35 * rub if side == "Right" else 0.0))
                     low = min(self.clearance(side, f) for f in FINGERS)
                     if low > SKIN * 0.3 or behind > 0.3:
                         break
