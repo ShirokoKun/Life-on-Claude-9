@@ -2,6 +2,9 @@
 const $ = (s, el = document) => el.querySelector(s);
 const main = $('#main');
 const S = { project: null, jobs: [], git: null, system: null, activity: [], incoming: [], follow: null, logs: {} };
+// ?export=board: the Board alone at full length, for tools/board_png.mjs (no sidebar, tabs or buttons)
+const EXPORT = new URLSearchParams(location.search).get('export');
+if (EXPORT) document.documentElement.classList.add('export');
 
 // ------------------------------------------------------------------ small DOM helper
 function h(tag, attrs = {}, ...kids) {
@@ -74,6 +77,7 @@ function connect() {
   es.addEventListener('job', (e) => {
     const j = JSON.parse(e.data); const i = S.jobs.findIndex((x) => x.id === j.id);
     if (i >= 0) S.jobs[i] = j; else S.jobs.unshift(j);
+    view.onJob?.(j);
     if (j.state === 'done' || j.state === 'failed') { refreshProject(); if (j.state === 'done') toast(`${j.title}: done`); else toast(`${j.title}: failed. See the log in Renders & jobs.`); }
     drawSide(); view.onJob?.(j);
   });
@@ -287,16 +291,25 @@ function Player(s, body) {
 }
 
 function Board(s, body) {
-  const draw = () => body.replaceChildren(
-    h('div.row', { style: { margin: '18px 0' } }, h('p.muted.grow', { style: { margin: 0 } }, 'One engine frame per shot, taken 60% through it. Click a frame to open it in the player.'),
-      h('button.btn.primary', { onclick: run(async () => { await api('/api/jobs', { kind: 'stills', scene: s.id }); toast('Queued: board stills. Progress in Renders & jobs.'); }) }, 'Render board stills')),
-    h('div.board', {}, s.shots.map((x) => {
+  const png = `deliver/board_${s.id}.png`;
+  const lastExport = h('a.btn.ghost', { href: fileURL(png), target: '_blank', hidden: true }, 'Open PNG');
+  const showLast = () => fetch(fileURL(png), { method: 'HEAD' }).then((r) => { lastExport.hidden = !r.ok; if (r.ok) lastExport.href = `${fileURL(png)}?${Date.now()}`; }).catch(() => {});
+  const intro = EXPORT
+    ? h('p.muted', { style: { margin: '6px 0 2px' } }, `Board · ${s.shots.length} shots · one engine frame per shot, 60% through it · ${new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'long', year: 'numeric' })}`)
+    : h('div.row', { style: { margin: '18px 0' } }, h('p.muted.grow', { style: { margin: 0 } }, 'One engine frame per shot, taken 60% through it. Click a frame to open it in the player.'),
+      lastExport,
+      h('button.btn', { title: `The whole board as one image: ${png}`, onclick: run(async () => { await api('/api/jobs', { kind: 'board', scene: s.id }); toast(`Exporting the board to ${png}. Progress in Renders & jobs.`); }) }, 'Export PNG'),
+      h('button.btn.primary', { onclick: run(async () => { await api('/api/jobs', { kind: 'stills', scene: s.id }); toast('Queued: board stills. Progress in Renders & jobs.'); }) }, 'Render board stills'));
+  const draw = () => body.replaceChildren(intro,
+    h('div.board', { style: EXPORT ? { gridTemplateColumns: `repeat(${s.shots.length <= 9 ? 3 : 4}, minmax(0, 1fr))` } : {} }, s.shots.map((x) => {
       const still = stillFor(s, x); const vo = s.captions.filter(([a, b]) => a < x.t1 && b > x.t0).map((c) => c[2]).join(' ');
       return h('div.s', {}, h('div.img', { style: still ? { backgroundImage: `url(${fileURL(still)}?${Date.now() >> 14})` } : {}, onclick: () => { location.hash = `#/scene/${s.id}/player`; setTimeout(() => $('iframe')?.contentWindow?.studio?.seek(x.t0 + 0.6 * (x.t1 - x.t0)), 2500); } }, still ? '' : 'no still yet'),
         h('div.slate', {}, h('span', {}, h('b', {}, x.id), ` · ${fmtT(x.t0)}–${fmtT(x.t1)}`), h('span', {}, x.dolly ? 'dolly zoom' : `${x.mm[0]}${x.mm[1] !== x.mm[0] ? '→' + x.mm[1] : ''} mm`, ` · f/${x.f}`)),
         h('h2', {}, x.name), vo ? h('p.vo', {}, vo) : null, h('p', {}, x.why));
     })));
-  draw(); view.onProject = () => { const n = S.project.scenes.find((x) => x.id === s.id); if (n) { s = n; draw(); } };
+  draw(); showLast();
+  view.onProject = () => { const n = S.project.scenes.find((x) => x.id === s.id); if (n) { s = n; draw(); } };
+  view.onJob = (j) => { if (j.kind === 'board' && j.scene === s.id && j.state === 'done') showLast(); };
 }
 
 function Notes(s, body) {
@@ -316,15 +329,17 @@ function Renders(s, body) {
   const step = h('select', {}, h('option', { value: 1 }, 'Every frame (final)'), h('option', { value: 2 }, 'Every 2nd frame, interpolated (draft)'));
   const take = h('input', { type: 'text', placeholder: 'take name (optional, e.g. final_v3)' });
   const deliver = h('input', { type: 'checkbox', checked: true });
+  const subs = h('input', { type: 'checkbox', checked: false });
   const go = run(async () => {
     const [, w, hh] = PRESETS[+preset.value];
-    await api('/api/jobs', { kind: 'render', scene: s.id, w, h: hh, frames: range.value === 'all' ? null : range.value, step: +step.value, take: take.value.trim().replace(/[^\w-]/g, '_') || undefined, deliver: deliver.checked });
+    await api('/api/jobs', { kind: 'render', scene: s.id, w, h: hh, frames: range.value === 'all' ? null : range.value, step: +step.value, take: take.value.trim().replace(/[^\w-]/g, '_') || undefined, deliver: deliver.checked, subs: subs.checked });
     toast('Render queued. Watch it in Renders & jobs.');
   });
   const draw = () => body.replaceChildren(h('div.two', { style: { marginTop: '18px' } },
     h('div.card.form', {}, h('h2', {}, 'Render a film'),
       h('label.f', {}, h('span', {}, 'Resolution'), preset), h('label.f', {}, h('span', {}, 'Range'), range), h('label.f', {}, h('span', {}, 'Frames'), step), h('label.f', {}, h('span', {}, 'Take'), take),
       h('label.chk', {}, deliver, 'Copy the MP4s into deliver/ when done'),
+      h('label.chk', {}, subs, 'Burn in subtitles (also writes a _subtitled.mp4 and .srt; the clean MP4s stay)'),
       h('p.faint', { style: { margin: 0, fontSize: '12.5px' } }, `Full look (lens, bloom, grade, grain, letterbox). ${s.voiceover ? 'A second MP4 with the voiceover, starting at ' + s.voOffset + ' s.' : 'No voiceover for this scene yet: silent MP4 only.'} A take resumes where it stopped.`),
       h('div.row', {}, h('button.btn.primary', { onclick: go }, 'Queue render'))),
     h('div', { style: { display: 'grid', gap: '12px' } }, h('h3', {}, 'Takes'),

@@ -9,6 +9,7 @@
 //   node tools/render_mp4.mjs --take final --skip-existing   # resume a take
 //   node tools/render_mp4.mjs --encode-only --take final     # re-encode existing frames
 //   node tools/render_mp4.mjs --deliver                # also copy the MP4s into deliver/
+//   node tools/render_mp4.mjs --subs                   # also a _subtitled.mp4 (+ .srt) with the captions burned in
 //
 // Needs: Node 18+, `npm install` (playwright), `npx playwright install chromium`, and ffmpeg on PATH
 // (or `npm install ffmpeg-static`). The Studio (npm run studio) runs this for you.
@@ -103,9 +104,17 @@ if (vo && fs.existsSync(vo)) {
     '-af', 'apad', '-shortest', '-movflags', '+faststart', withVO]);
   console.log('wrote', path.relative(ROOT, withVO));
 }
+const outputs = [silent, withVO];
+if (has('subs')) {                                  // captions burned into copies; the clean MP4s stay as they are
+  const { burn } = await import('./subtitle.mjs');
+  for (const f of [silent, withVO]) if (fs.existsSync(f)) {
+    const o = f.replace(/\.mp4$/, '_subtitled.mp4');
+    if (await burn(ffmpeg, f, o, scene.captions || [], F0 / 24)) { outputs.push(o); console.log('wrote', path.relative(ROOT, o)); }
+  }
+}
 if (has('deliver')) {
   fs.mkdirSync(path.join(ROOT, 'deliver'), { recursive: true });
-  for (const f of [silent, withVO]) if (fs.existsSync(f)) {
+  for (const f of outputs) if (fs.existsSync(f)) {
     const d = path.join(ROOT, 'deliver', `claude_nine_${path.basename(f)}`); fs.copyFileSync(f, d); console.log('delivered', path.relative(ROOT, d));
   }
 }

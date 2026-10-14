@@ -113,6 +113,7 @@ async function commandFor(j) {
     if (j.step > 1) a.push('--step', String(j.step));
     if (!config.gpu) a.push('--soft');
     if (j.deliver) a.push('--deliver');
+    if (j.subs) a.push('--subs');
     return [node, a];
   }
   if (j.kind === 'stills') {                                    // one frame per shot (or the given times) for the board
@@ -123,6 +124,9 @@ async function commandFor(j) {
     if (config.gpu) a.push('--gpu');
     j.total = times.length;
     return [node, a];
+  }
+  if (j.kind === 'board') {                                     // the Board page as one PNG, for sharing
+    return [node, ['tools/board_png.mjs', '--scene', s.id, '--url', `http://localhost:${PORT}`, '--out', `deliver/board_${s.id}.png`]];
   }
   if (j.kind === 'bake') {
     const b = await findBlender(); if (!b) throw new Error('Blender not found: set its path in System');
@@ -152,7 +156,7 @@ async function next() {
       if (m) { j.done = +m[1]; j.total = +m[2]; }
       if ((m = /s\/frame/.test(line) && /([\d.]+) s\/frame/.exec(line))) j.rate = +m[1];
       if (/^encoding/.test(line)) j.phase = 'encoding';
-      if ((m = /^(?:wrote|delivered) (.+\.mp4)$/.exec(line.trim()))) (j.outputs ||= []).push(m[1]);
+      if ((m = /^(?:wrote|delivered) (.+\.(?:mp4|png))$/.exec(line.trim()))) (j.outputs ||= []).push(m[1]);
       if (line.trim()) j.last = line.trim().slice(0, 200);
     }
     emit('job', pub(j));
@@ -172,7 +176,7 @@ async function next() {
 function addJob(spec) {
   const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
   const s = sceneById(spec.scene || 'intro');
-  const titles = { render: `Render ${s.title} ${spec.w}×${spec.h}${spec.frames ? ' frames ' + spec.frames : ''}`, stills: `Board stills for ${s.title}`,
+  const titles = { render: `Render ${s.title} ${spec.w}×${spec.h}${spec.frames ? ' frames ' + spec.frames : ''}`, stills: `Board stills for ${s.title}`, board: `Board PNG for ${s.title}`,
     bake: `Bake ${spec.preset} lighting`, pull: 'Pull the latest work' };
   const j = { id, state: 'queued', created: Date.now(), take: spec.take || id, ...spec, scene: s.id, title: titles[spec.kind] || spec.kind };
   jobs.unshift(j); saveJobs(); emit('job', pub(j)); next();

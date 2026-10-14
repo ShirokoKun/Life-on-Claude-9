@@ -175,3 +175,10 @@ label.chk { display: inline-flex; gap: 7px; align-items: center; cursor: pointer
   .page { padding: 18px 16px 40px }
 }
 iframe.engine { position: fixed; border: 0; z-index: 2; background: #000 }   /* the player, kept alive between pages (app.js engineFor) */
+/* ?export=board (tools/board_png.mjs): the Board alone, full length, for one PNG */
+.export, .export body, .export .app { height: auto }
+.export .app { grid-template-columns: 1fr }
+.export .side, .export .tabs, .export .head select, .export #toast { display: none !important }
+.export main { overflow: visible }
+.export .page { max-width: none; padding: 44px 52px 52px }
+.export .board .img { cursor: default }
