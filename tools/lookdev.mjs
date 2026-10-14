@@ -8,7 +8,7 @@ const url = arg('url', 'http://localhost:8791/index.html'), out = arg('out', 'lo
 const W = +arg('w', 960), H = +arg('h', 540);
 const specs = process.argv.slice(2).filter((a, i, all) => !a.startsWith('--') && !(all[i - 1] || '').startsWith('--'));
 fs.mkdirSync(out, { recursive: true });
-const args = process.argv.includes('--gpu') ? ['--enable-gpu', '--ignore-gpu-blocklist']
+const args = process.argv.includes('--gpu') ? ['--enable-gpu', '--ignore-gpu-blocklist', '--force_high_performance_gpu']
   : ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'];
 const b = await chromium.launch({ args });
 const p = await b.newPage({ viewport: { width: W, height: H } });

@@ -52,12 +52,10 @@ await new Promise((r) => server.listen(0, r));
 const url = `http://localhost:${server.address().port}/index.html`;
 
 if (!has('encode-only')) {
-  const { chromium } = await import('playwright');
+  const { openPage, GPU_ARGS, SOFT_ARGS } = await import('./browser.mjs');
   fs.mkdirSync(FRAMES_DIR, { recursive: true });
-  const args = has('soft') ? ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']
-    : ['--enable-gpu', '--ignore-gpu-blocklist', '--enable-unsafe-webgpu'];
-  const browser = await chromium.launch({ args, headless: !has('headed') });
-  const page = await browser.newPage({ viewport: { width: W, height: H } });
+  const gpu = !has('soft');
+  const { page, close } = await openPage({ gpu, w: W, h: H, headless: !has('headed'), args: gpu ? [...GPU_ARGS, '--enable-unsafe-webgpu'] : SOFT_ARGS });
   page.on('pageerror', (e) => console.log('page error:', e.message));
   await page.goto(`${url}?render=1${EXTRA ? '&' + EXTRA : ''}`);
   console.log('loading the scene...');
@@ -78,7 +76,7 @@ if (!has('encode-only')) {
     n++;
     console.log(`progress ${i + 1}/${todo.length} frame ${f}  ${((Date.now() - t0) / n / 1000).toFixed(2)} s/frame`);
   }
-  await browser.close();
+  await close();
 }
 server.close();
 
