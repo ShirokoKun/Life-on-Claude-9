@@ -110,7 +110,7 @@ async function boot() {
 
   if (Q.get('ivan') !== '0') {
     status('Seating Ivan...');
-    const iv = await loadCast(SC.IVAN || 'assets/ivan.glb');
+    const iv = await loadCast(Q.get('ivanglb') || SC.IVAN || 'assets/ivan.glb');   // ?ivanglb=: try a performance
     Object.assign(ivan, { head: iv.head, root: iv.root }); mixer = iv.mixer;
     for (const c of SC.CAST || []) cast.push({ ...c, ...(await loadCast(c.url)) });   // other Ivans (standing, ...)
   }

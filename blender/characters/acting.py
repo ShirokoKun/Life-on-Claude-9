@@ -23,18 +23,40 @@ UP = Vector((0, 0, 1))
 FWD = Vector((0, 1, 0))          # Ivan faces +Y (north) at the desk
 
 # Desk geometry (Blender metres): laptop base centre (6.95, 3.08), key tops at 0.767, home row y 3.096
-HOME_L = Vector((6.872, 2.975, 0.805))     # wrists above the front edge, fingertips land on ASDF / JKL;
-HOME_R = Vector((7.012, 2.975, 0.805))
+HOME_L = Vector((6.872, 2.948, 0.800))     # wrists above the front edge, fingertips land on ASDF / JKL;
+HOME_R = Vector((7.012, 2.948, 0.800))
 SCREEN = Vector((6.95, 3.228, 0.871))       # laptop screen centre
 CHAT = Vector((7.00, 3.235, 0.885))         # the Claude chat column (right half of the screen)
 MONITOR = Vector((7.357, 3.315, 1.066))     # dashboard / pipeline monitor
 MOUSE = Vector((7.22, 2.98, 0.77))          # the mouse, right of the laptop
 AWAY = Vector((6.55, 4.60, 1.38))           # nowhere: past the screens, at the wall (an idea arriving)
 
+# surfaces the hands touch (props_desk.py): key tops, the laptop's palm rest, the mouse (an ellipsoid), the desk
+DESK_Z = 0.75
+KEY_Z = 0.7667
+KEYS = (6.815, 7.090, 3.045, 3.165)         # keyboard well: x0, x1, y0, y1
+LAPTOP = (6.794, 7.106, 2.970, 3.190)       # laptop base footprint
+MOUSE_C, MOUSE_R = Vector((7.22, 2.98, 0.75)), Vector((0.031, 0.056, 0.019))
+SKIN = 0.011                                 # bone axis to skin, fingers and the edge of the hand
+
 FINGERS = ("Index", "Middle", "Ring", "Pinky")
 BASE_CURL = {"Index": (0.16, 0.30, 0.16), "Middle": (0.15, 0.30, 0.16), "Ring": (0.14, 0.28, 0.15),
              "Pinky": (0.12, 0.26, 0.14), "Thumb": (0.05, 0.10, 0.08)}       # arched, reaching, not a fist
 PRESS = (0.26, 0.14, 0.08)                  # extra flexion (rad) per joint at the bottom of a keystroke
+SHARE = (0.34, 0.42, 0.24)                  # how a finger's curl splits over its three joints (on a surface)
+HOVER = 0.008                               # fingertip above the key before a stroke (m)
+
+
+def surface_z(x, y):
+    """Height of whatever is under (x, y) on the desk."""
+    dx, dy = (x - MOUSE_C.x) / MOUSE_R.x, (y - MOUSE_C.y) / MOUSE_R.y
+    if dx * dx + dy * dy < 1.0:
+        return MOUSE_C.z + MOUSE_R.z * math.sqrt(1.0 - dx * dx - dy * dy)
+    if KEYS[0] < x < KEYS[1] and KEYS[2] < y < KEYS[3]:
+        return KEY_Z
+    if LAPTOP[0] < x < LAPTOP[1] and LAPTOP[2] < y < LAPTOP[3]:
+        return DESK_Z + 0.0155
+    return DESK_Z
 
 
 def smooth(x):
@@ -147,6 +169,23 @@ class Actor:
             pb.matrix_basis = Matrix.Identity(4)
         self.upd()
         self.fwd_local = {n: self.wrot(self.pb(n)).inverted() @ FWD for n in ("Neck", "Head")}
+        self.calibrate_head()
+
+    def calibrate_head(self):
+        """An ellipsoid around the skull and face, in the Head bone's space, from the mesh (rest pose).
+        The hands are kept out of it (plus SKIN), so no gesture can pass through his head."""
+        names = {g.index: g.name for g in self.body.vertex_groups}
+        hm = (self.rig.matrix_world @ self.pb("Head").matrix).inverted()
+        mw = self.body.matrix_world
+        pts = []
+        for v in self.body.data.vertices:
+            if v.groups and names[max(v.groups, key=lambda g: g.weight).group].replace(P, "").startswith("Head"):
+                pts.append(hm @ (mw @ v.co))
+        lo = Vector([min(p[i] for p in pts) for i in range(3)])
+        hi = Vector([max(p[i] for p in pts) for i in range(3)])
+        self.head_c = (lo + hi) / 2
+        self.head_r = (hi - lo) / 2
+        print("head ellipsoid (bone space): centre", tuple(round(v, 3) for v in self.head_c), "radii", tuple(round(v, 3) for v in self.head_r))
 
     def calibrate_fingers(self):
         self.flex_axis = {}
@@ -202,13 +241,20 @@ class Actor:
             side = Vector((-1, 0, 0)) * sg
             IP.aim(self.rig, f"{s}Shoulder", side * 1.0 + FWD * 0.20 - UP * (0.06 + 0.10 * drop))
 
-    def arm_to(self, side, wrist, behind=0.0):
+    def arm_to(self, side, wrist, behind=0.0, hand_dir=None, palm=None, neutral=0.0):
         sg = 1 if side == "Left" else -1
         out = Vector((-1, 0, 0)) * sg
         sh = self.whead(f"{side}Arm")
         pole = sh + out * (0.35 + 0.15 * behind) - UP * (0.45 * (1 - behind)) + UP * (0.35 * behind) - FWD * 0.1
         IP.two_bone_ik(self.rig, f"{side}Arm", f"{side}ForeArm", wrist, pole)
-        if behind < 0.5:                                # typing: fingers forward and down, palm down
+        if hand_dir is not None:                        # the caller blends the hand's direction and palm
+            if neutral > 0:                             # in transit the wrist rides straight with the forearm
+                fa = self.pb(f"{side}ForeArm")
+                fd = (self.rig.matrix_world.to_3x3() @ (fa.tail - fa.head)).normalized()
+                hand_dir = hand_dir.normalized().lerp(fd, neutral)
+            IP.aim(self.rig, f"{side}Hand", hand_dir)
+            self.roll_palm(side, palm)
+        elif behind < 0.5:                                # typing: fingers forward and down, palm down
             IP.aim(self.rig, f"{side}Hand", FWD * 1.0 - UP * 0.30 - out * 0.06)
             self.roll_palm(side, -UP + out * 0.12)
         else:                                           # cradling the back of the head
@@ -218,7 +264,10 @@ class Actor:
         hand = self.pb(f"{side}Hand")
         d = (self.rig.matrix_world.to_3x3() @ (hand.tail - hand.head)).normalized()
         n = self.palm_normal(side)
-        w = (want - d * want.dot(d)).normalized()
+        w = want - d * want.dot(d)
+        if w.length < 1e-4:
+            return
+        w.normalize()
         n = (n - d * n.dot(d)).normalized()
         ang = math.atan2(d.dot(n.cross(w)), n.dot(w))
         self.rotate_world(hand, d, ang)
@@ -233,6 +282,185 @@ class Actor:
                     continue
                 a = base[j - 1] * (1 - 0.5 * relax) + PRESS[j - 1] * p + curl_extra * (0.6 if j == 1 else 0.8)
                 pb.rotation_quaternion = Quaternion(self.flex_axis[pb.name], a)
+
+    # -- hands: contact, collision, twist ----------------------------------------------------
+    def head_frame(self):
+        m = self.rig.matrix_world @ self.pb("Head").matrix
+        return m, m.inverted()
+
+    def head_centre(self):
+        return self.head_frame()[0] @ self.head_c
+
+    def hand_points(self, side):
+        """Joint positions with the flesh around each: the palm is thick, fingers are not."""
+        mw, pts = self.rig.matrix_world, []
+        for n in [f"{side}Hand"] + [f"{side}Hand{f}{j}" for f in FINGERS + ("Thumb",) for j in (1, 2, 3)]:
+            pb = self.rig.pose.bones.get(P + n)
+            if pb:
+                m = 0.034 if n.endswith("Hand") else 0.026 if n.endswith("Thumb1") else SKIN
+                pts += [(mw @ pb.head, m), (mw @ pb.tail, m)]
+        return pts
+
+    def inside_head(self, p, skin=SKIN):
+        """Depth (m) of a hand point inside the head volume grown by SKIN, and the outward normal (world)."""
+        m, mi = self.head_frame()
+        q = (mi @ p) - self.head_c
+        r = self.head_r + Vector((skin, skin, skin))
+        e = 3.0                                          # a superellipsoid: fuller at the brow and the back corners
+        s = sum(abs(q[i] / r[i]) ** e for i in range(3)) ** (1 / e)
+        if s >= 1.0:
+            return 0.0, None
+        g = Vector([math.copysign(abs(q[i]) ** (e - 1) / r[i] ** e, q[i]) for i in range(3)])
+        if g.length < 1e-9:
+            g = Vector((0, 1, 0))
+        n = (m.to_3x3() @ g).normalized()
+        return (1.0 - s) * min(r), n
+
+    def keep_out(self, side, w, pose):
+        """Re-pose with the wrist pushed out until no hand point is inside the head."""
+        for _ in range(6):
+            worst, push = 0.0, Vector()
+            for p, m in self.hand_points(side):
+                d, n = self.inside_head(p, m)
+                if d > 0:
+                    worst = max(worst, d)
+                    push += n * d
+            if worst < 0.002:
+                break
+            w = w + push.normalized() * (worst + 0.003)
+            pose(w)
+        return w
+
+    def tip(self, side, f):
+        return self.rig.matrix_world @ self.pb(f"{side}Hand{f}3").tail
+
+    def solve1d(self, apply, err, lo, hi, it=10):
+        """Find x in [lo, hi] with err(x) = 0 (bisection), or the end with the smaller error."""
+        apply(lo); el = err()
+        apply(hi); eh = err()
+        if el * eh > 0:
+            x = lo if abs(el) < abs(eh) else hi
+            apply(x)
+            return x
+        for _ in range(it):
+            mid = (lo + hi) / 2
+            apply(mid); em = err()
+            if em * el > 0:
+                lo, el = mid, em
+            else:
+                hi = mid
+        apply((lo + hi) / 2)
+        return (lo + hi) / 2
+
+    def fit_knuckles(self, side, height, weight):
+        """Pitch the hand about the knuckle line's axis so the knuckles sit `height` above the surface."""
+        if weight < 0.01:
+            return
+        hand = self.pb(f"{side}Hand")
+        base = hand.matrix.copy()
+        mw = self.rig.matrix_world
+        d = (mw.to_3x3() @ (hand.tail - hand.head)).normalized()
+        axis = d.cross(UP).normalized()
+        to_arm = mw.to_3x3().inverted()
+        ax = (to_arm @ axis).normalized()
+        h = base.to_translation()
+
+        def knuckle():
+            k = (mw @ self.pb(f"{side}HandIndex1").head + mw @ self.pb(f"{side}HandPinky1").head) / 2
+            return k
+
+        k0 = knuckle()
+        want = k0.z + weight * ((surface_z(k0.x, k0.y) + height) - k0.z)
+
+        def apply(a):
+            hand.matrix = Matrix.Translation(h) @ Matrix.Rotation(a, 4, ax) @ Matrix.Translation(-h) @ base
+            self.upd()
+        self.solve1d(apply, lambda: knuckle().z - want, -0.7, 0.7, it=9)
+
+    def finger_curl(self, side, f, c):
+        for j in (1, 2, 3):
+            pb = self.rig.pose.bones.get(f"{P}{side}Hand{f}{j}")
+            if pb and pb.name in self.flex_axis:
+                pb.rotation_quaternion = Quaternion(self.flex_axis[pb.name], c * SHARE[j - 1])
+
+    def fit_fingers(self, side, presses, weight, relaxed, extra=0.0):
+        """Curl each finger until its tip touches what is under it (hovering, or pressing a key)."""
+        for f in FINGERS + ("Thumb",):
+            free = sum(BASE_CURL[f]) * (1 - 0.5 * relaxed) + extra * (0.5 if f == "Thumb" else 1.0)
+            if weight < 0.01:
+                self.finger_curl(side, f, free)
+                continue
+            p = presses.get(f, 0.0)
+            lift = (HOVER * (1 - p) - 0.0015 * p) if f != "Thumb" else 0.006 * (1 - p)
+
+            def err():
+                t = self.tip(side, f)
+                return t.z - (surface_z(t.x, t.y) + SKIN * 0.6 + lift)
+            if f == "Thumb":                            # the thumb lifts on its own axis, over the space bar
+                self.finger_curl(side, f, free)
+                self.upd()
+                self.lift_thumb(side, err, weight)
+                continue
+            c = self.solve1d(lambda x: (self.finger_curl(side, f, x), self.upd()), err, -0.35, 2.2, it=9)
+            self.finger_curl(side, f, free + weight * (c - free))
+        self.upd()
+        for f in FINGERS:                               # whatever the pose, never through the desk (any joint)
+            if self.clearance(side, f) < SKIN * 0.5:
+                self.solve1d(lambda x: (self.finger_curl(side, f, x), self.upd()),
+                             lambda: self.clearance(side, f) - SKIN * 0.5, -0.35, 2.2, it=7)
+        t = self.tip(side, "Thumb")
+        floor = surface_z(t.x, t.y) + SKIN * 0.5
+        if t.z < floor:
+            self.lift_thumb(side, lambda: self.tip(side, "Thumb").z - floor, 1.0)
+
+    def clearance(self, side, f):
+        """Lowest height of a finger's joints above whatever is under them."""
+        mw = self.rig.matrix_world
+        pts = [mw @ self.pb(f"{side}Hand{f}{j}").head for j in (2, 3)] + [self.tip(side, f)]
+        return min(p.z - surface_z(p.x, p.y) for p in pts)
+
+    def lift_thumb(self, side, err, weight):
+        """Swing the whole thumb up or down about the hand's across axis until err() = 0 (blended by weight)."""
+        pb = self.pb(f"{side}HandThumb1")
+        base = pb.matrix.copy()
+        hand = self.pb(f"{side}Hand")
+        mw = self.rig.matrix_world
+        d = (mw.to_3x3() @ (hand.tail - hand.head)).normalized()
+        ax = (mw.to_3x3().inverted() @ d.cross(UP).normalized()).normalized()
+        h = base.to_translation()
+
+        def apply(a):
+            pb.matrix = Matrix.Translation(h) @ Matrix.Rotation(a, 4, ax) @ Matrix.Translation(-h) @ base
+            self.upd()
+        a = self.solve1d(apply, err, -0.9, 0.9, it=8)
+        apply(a * weight)
+
+    def twist_rel(self, side):
+        c, p = self.pb(f"{side}Hand"), self.pb(f"{side}ForeArm")
+        rest = p.bone.matrix_local.inverted() @ c.bone.matrix_local
+        q = (rest.inverted() @ (p.matrix.inverted() @ c.matrix)).to_quaternion()
+        return 2 * math.atan2(q.y, q.w)
+
+    def spread_twist(self, side, share=0.55):
+        """A forearm turns with the hand (radius over ulna): give it part of the wrist's roll, so the wrist
+        never wrings like a towel. The hand keeps its exact world pose."""
+        tw = self.twist_rel(side)
+        tw = (tw + math.pi) % (2 * math.pi) - math.pi
+        if abs(tw) < 0.3:
+            return
+        hand, fa = self.pb(f"{side}Hand"), self.pb(f"{side}ForeArm")
+        keep = hand.matrix.copy()
+        axis = (self.rig.matrix_world.to_3x3() @ (fa.tail - fa.head)).normalized()
+        for sign in (1, -1):
+            self.rotate_world(fa, axis, sign * tw * share)
+            hand.matrix = keep
+            self.upd()
+            new = (self.twist_rel(side) + math.pi) % (2 * math.pi) - math.pi
+            if abs(new) < abs(tw):
+                return
+            self.rotate_world(fa, axis, -sign * tw * share)
+            hand.matrix = keep
+            self.upd()
 
     # -- typing schedule ------------------------------------------------------------------------
     def schedule(self):
@@ -320,30 +548,61 @@ class Actor:
             behind = curve(self.sc["hands_behind"], t)
             rub = max([smooth((t - a) / 0.5) * smooth((b - t) / 0.5) for a, b in self.sc.get("rub", [])] or [0.0])
             mouse = max([smooth((t - a) / 0.4) * smooth((b - t) / 0.4) for a, b in self.sc.get("mouse", [])] or [0.0])
-            head = self.whead("Head")
+            C = self.head_centre()
+            rf = max(self.head_r.x, self.head_r.z)          # the head's depth (bone-space x/z: across and front)
             for side, home in (("Left", HOME_L), ("Right", HOME_R)):
                 sg = 1 if side == "Left" else -1
+                out = Vector((-1, 0, 0)) * sg
                 pr = self.press_amount(t, side)
                 drift = Vector((0.006 * math.sin(t * 0.7 + sg), 0.004 * math.sin(t * 0.5 + 2 * sg), 0.0))
-                w = home + drift - UP * 0.003 * max(pr.values(), default=0.0) + UP * 0.025 * rest - FWD * 0.03 * rest
-                if behind > 0:
-                    nape = head + Vector((-0.085 * sg, -0.07, 0.07))
-                    mid = (w + nape) / 2 + UP * 0.30 - Vector((0.32 * sg, 0.10, 0))   # wide and high, past the ears: relief, not head-in-hands
+                w = home + drift + UP * 0.025 * rest - FWD * 0.03 * rest
+                lift = smooth(behind / 0.05)                # the hands leave the keys as soon as the stretch starts
+                d, palm = FWD * 1.0 - UP * 0.30 * (1 - lift) - out * 0.06, -UP + out * 0.12   # typing: fingers forward, palm down
+                if behind > 0:                              # hands cradling the back of his head
+                    cradle = C + out * (rf + 0.035) - FWD * 0.045 + UP * 0.012
+                    mid = (w + cradle) / 2 + UP * 0.30 + out * 0.32 - FWD * 0.10    # wide and high, past the ears
                     b = behind
-                    w = (1 - b) ** 2 * w + 2 * (1 - b) * b * mid + b * b * nape     # an arc, not a slide
+                    w = (1 - b) ** 2 * w + 2 * (1 - b) * b * mid + b * b * cradle      # an arc, not a slide
+                    k = smooth(behind)
+                    d = d.lerp(-FWD * 0.75 - out * 0.65 + UP * 0.25, k)              # fingers back around the skull
+                    palm = palm.lerp((C - cradle).normalized(), k)                    # palm toward the head
                 if side == "Right" and mouse > 0:           # hand on the mouse: scrolling, clicking
-                    on_mouse = MOUSE + Vector((0.0, -0.075, 0.032 - 0.002 * max(pr.values(), default=0.0)))
-                    w = w.lerp(on_mouse, mouse)
-                if side == "Right" and rub > 0:             # knuckles under the glasses, small circles
-                    eye = head + FWD * 0.10 + UP * 0.03
-                    at_eye = eye - UP * 0.11 + FWD * 0.02 + Vector((0.012 * math.sin(t * 8.0), 0.0, 0.008 * math.cos(t * 8.0)))
-                    w = w.lerp(at_eye, rub)
-                self.arm_to(side, w, behind)
-                if side == "Right" and rub > 0.3:
-                    IP.aim(self.rig, "RightHand", UP * 1.0 - FWD * 0.25 - Vector((1, 0, 0)) * 0.25)
-                busy = rest < 0.5 or (side == "Right" and mouse > 0.5)
-                self.fingers(side, pr if busy else {}, curl_extra=0.9 * behind + 0.5 * (rub if side == "Right" else 0),
-                             relax=rest * (1 - behind) * (0.4 if side == "Right" and mouse > 0.5 else 1.0))
+                    w = w.lerp(MOUSE + Vector((0.004, -0.088, 0.024)), mouse) + UP * 0.045 * math.sin(math.pi * mouse)
+                    d, palm = d.lerp(FWD - UP * 0.12, mouse), palm.lerp(-UP, mouse)
+                if side == "Right" and rub > 0:             # the heel of his hand pressed into his brow
+                    brow = C + FWD * (rf * 0.85) + UP * (self.head_r.y * 0.30) + out * 0.01
+                    w = w.lerp(brow + FWD * 0.02 - UP * 0.06, rub)
+                    d, palm = d.lerp(UP * 0.9 - out * 0.55 + FWD * 0.05, rub), palm.lerp(-FWD, rub)
+
+                neutral = 0.85 * math.sin(math.pi * min(1.0, max(0.0, behind)))     # mid-arc: a straight wrist
+                if side == "Right":
+                    neutral = max(neutral, 0.85 * math.sin(math.pi * rub))
+
+                def pose(ww, side=side, d=d, palm=palm, neutral=neutral):
+                    self.arm_to(side, ww, behind, d, palm, neutral)
+                pose(w)
+                # on the keys (typing, or resting there between bursts), on the mouse, or off the desk entirely
+                on_keys = (1 - lift) * ((1 - rub) * (1 - mouse) if side == "Right" else 1.0)
+                on_mouse = mouse * (1 - rub) if side == "Right" else 0.0
+                contact = max(on_keys, on_mouse)
+                m_share = on_mouse / max(1e-6, on_keys + on_mouse)
+                height = (0.060 - 0.016 * rest) * (1 - m_share) + 0.016 * m_share   # a resting hand sits lower
+                if side == "Right":
+                    height += 0.04 * math.sin(math.pi * mouse)  # lifted while it travels to and from the mouse
+                base_hand = self.pb(f"{side}Hand").matrix.copy()
+                for _ in range(4):                           # if a finger can't clear the desk, the hand rises
+                    self.pb(f"{side}Hand").matrix = base_hand
+                    self.upd()
+                    self.fit_knuckles(side, height, contact)
+                    self.fit_fingers(side, pr if contact > 0.5 and rest < 0.5 else {}, contact, relaxed=rest * (1 - behind),
+                                     extra=1.3 * behind + (0.6 * rub if side == "Right" else 0.0))
+                    low = min(self.clearance(side, f) for f in FINGERS)
+                    if low > SKIN * 0.3 or behind > 0.3:
+                        break
+                    height += 0.015
+                    contact = max(contact, 0.6)
+                self.keep_out(side, w, pose)
+                self.spread_twist(side)
             # gaze last (the neck rides on the posture)
             nod = 0.0
             n0, n1 = self.sc.get("nod", (-1, -1))
