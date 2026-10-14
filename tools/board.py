@@ -56,10 +56,11 @@ def jpeg(path, w=1100):
 
 
 CSS = """
+/* a dark film board: frames first, slate data in mono, the voiceover line in the serif */
 :root { --bg:#0e0f11; --panel:#16181b; --line:#2a2d32; --fg:#e8e4dc; --dim:#9a968e; --faint:#6c6962; --accent:#e0b552; color-scheme:dark }
 * { box-sizing:border-box }
-body { background:var(--bg); color:var(--fg); margin:0; font:15px/1.55 'Inter', system-ui, sans-serif }
-.wrap { max-width:1240px; margin:0 auto; padding-inline:20px; padding-block:40px 64px }
+body { background:var(--bg); color:var(--fg); margin:0; font:15px/1.55 'Public Sans', system-ui, sans-serif }
+.wrap { max-width:1240px; margin:0 auto; padding-left:max(16px, env(safe-area-inset-left, 0px)); padding-right:max(16px, env(safe-area-inset-right, 0px)); padding-block:40px 64px }
 header { display:grid; gap:10px; border-bottom:1px solid var(--line); padding-bottom:24px }
 .eyebrow { font:500 12px/1 'IBM Plex Mono', ui-monospace, monospace; letter-spacing:.14em; text-transform:uppercase; color:var(--accent) }
 h1 { font:600 clamp(28px, 4.4vw, 46px)/1.1 'Newsreader', Georgia, serif; margin:0; text-wrap:balance }
@@ -104,8 +105,9 @@ def build(scene_js, frames_dir, out):
     bar = ''.join(f'<span style="width:{(p[3] - p[2]) / dur * 100:.2f}%;background:{p[5]}">{p[0]}</span>' for p in PARTS)
     legend = ''.join(f'<span><b>{p[0]}. {p[1]}</b> {clock(p[2])}–{clock(p[3])}, {p[4]}</span>' for p in PARTS)
     page = f"""<title>The Cheat Code Storyboard</title>
+<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,400&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Public+Sans:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,400&display=swap">
 <style>{CSS}</style>
 <div class="wrap">
 <header>
