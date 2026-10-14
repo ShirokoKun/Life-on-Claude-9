@@ -120,7 +120,7 @@ export const LIB = {
   'Cold Noodles':   { color: '#b58a4c', rough: 0.45 },
   'Coffee Residue': { color: '#2a160a', rough: 0.3 },
   // Ivan's room (scene s03: blender/scenes/set_room03.py)
-  'Wall Green':     { key: 'plaster_wall', color: '#2a3a30', rough: 0.92, nrm: 0.5, lm: 0.45 },   // deep bottle green, limewashed
+  'Wall Green':     { key: 'plaster_wall', color: '#2e3f33', rough: 0.92, nrm: 0.5, lm: 0.9 },    // deep bottle green, limewashed; full bounce
   'Floor Dark Oak': { key: 'oak_floor', color: '#4a2d1c', rough: 0.5, nrm: 0.5, coat: 0.3, coatRough: 0.3 },
   'Bed Walnut':     { key: 'walnut', color: '#3a2214', rough: 0.45, nrm: 0.35, coat: 0.3, coatRough: 0.3 },
   'Blind Slat':     { key: 'plastic', color: '#cfc8b8', rough: 0.5, mapAlbedo: false, nrm: 0.1 },

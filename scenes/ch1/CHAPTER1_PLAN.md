@@ -7,7 +7,7 @@
 - Lines A1–A6 keep the intro's measured caption times. That voiceover is real and reads at about 2.5 words/s.
 
 **Files:**
-- Machine-readable spine: `timeline.json` (same data as the cards below)
+- Machine-readable spine: `engine/scenes/ch1/timeline.json` (same data as the cards below)
 - Storyboard panel map: `storyboards/PANELS.md`
 
 **Sources:**
@@ -91,7 +91,7 @@
 
 ### Light states
 
-All are listed in `timeline.json` under `light_states`.
+All are listed in `engine/scenes/ch1/timeline.json` under `light_states`.
 
 | State | Built how | Shots |
 |---|---|---|
@@ -171,7 +171,7 @@ Contact sheets viewed for fern CIA, Kurzgesagt Scariest Place, Our Animated Box 
 | B6 4 AM | 147.4–190.2 | "It's not all pleasant." → "...what HE told it to do." | Crisis and release: dread → it works → rush → pride | dread → peak | 4am, 4am_iso, green spill | low heartbeat pulse, mug rattle, Enter hit, pass chord, motif lands |
 | B7 Sunrise | 190.2–231.8 | [Dawn] "By sunrise..." → "...supposed to do now." | Return with a change; the button | exhausted and wired → empty / release | 4am → sunrise | birds, first traffic, the motif once on piano, then only room tone |
 
-The voiceover lines with their estimated times are in `timeline.json` → `vo`.
+The voiceover lines with their estimated times are in `engine/scenes/ch1/timeline.json` → `vo`.
 
 ### Script and storyboard notes that shape the plan
 

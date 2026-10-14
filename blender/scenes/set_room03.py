@@ -175,7 +175,7 @@ def _mats():
     except ImportError:                              # no scipy: a plain gradient card
         sky = None
     return {
-        "wall": M.plaster("Wall Green", (0.055, 0.085, 0.068), 0.9),
+        "wall": M.plaster("Wall Green", (0.090, 0.130, 0.100), 0.9),   # light must bounce: deep green, not black
         "ceil": M.plaster("Ceiling", (0.30, 0.31, 0.29), 0.95),
         "floor": M.oak_floor("Floor Dark Oak"),
         "trim": M.paint("Trim", (0.62, 0.60, 0.56), 0.45),
@@ -802,14 +802,14 @@ def light_rig(scene):
             o.visible_shadow = False                # nor may the sky card and the far city shade the moon
     lamp = Vector(scene["lamp"])
     L = lighting._light
-    L("Desk_Lamp", "POINT", tuple(lamp - Vector((0, 0, 0.06))), 110, (1.0, 0.58, 0.28), c, shadow_soft=0.09)
+    L("Desk_Lamp", "POINT", tuple(lamp - Vector((0, 0, 0.06))), 240, (1.0, 0.60, 0.32), c, shadow_soft=0.12)   # the room's key: warm everywhere
     bpy.context.view_layer.update()
     hinge = bpy.data.objects["Laptop_Hinge"]
     L("Key_Laptop", "AREA", tuple(hinge.matrix_world @ Vector((0, -0.01, 0.112))), 4.0, (0.62, 0.74, 1.0), c,
       size=(0.29, 0.18), target=(1.05, 3.75, 1.15))
     # the night through the window: cool sky panel, the moon, and street lights below throwing warm light up
     cy = (WIN_Y0 + WIN_Y1) / 2
-    L("City_West", "AREA", (-2.6, cy, (SILL + HEAD) / 2 + 0.4), 520, (0.30, 0.42, 1.0), c, size=((WIN_Y1 - WIN_Y0) * 1.6, (HEAD - SILL) * 1.6),
+    L("City_West", "AREA", (-2.6, cy, (SILL + HEAD) / 2 + 0.4), 320, (0.36, 0.46, 1.0), c, size=((WIN_Y1 - WIN_Y0) * 1.6, (HEAD - SILL) * 1.6),
       target=(2.2, cy, 0.6))
     moon = bpy.data.lights.new("Moon", "SUN")
     moon.energy, moon.color, moon.angle = 0.7, (0.58, 0.70, 1.0), math.radians(9.0)   # hazy moon: a soft wash
@@ -819,6 +819,9 @@ def light_rig(scene):
     for i, y in enumerate((WIN_Y0 + 0.5, WIN_Y1 - 0.6)):
         L(f"Sodium_{i}", "SPOT", (-7.0, y, -3.0), 1400, (1.0, 0.50, 0.16), c, spot=(12, 0.7), target=(1.6, y + 0.3, H),
           shadow_soft=0.3)
+    # the room's fill: lamp light scattered off the ceiling, walls and bedding, the soft low glow every corner of
+    # the reference has (shadows never fall to black). A broad, dim, warm panel just under the ceiling.
+    L("Room_Fill", "AREA", (W / 2, D / 2, H - 0.05), 70, (1.0, 0.80, 0.62), c, size=(W * 0.8, D * 0.8), target=(W / 2, D / 2, 0))
     scene.view_settings.exposure = 1.35
 
 

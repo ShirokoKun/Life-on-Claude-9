@@ -105,7 +105,9 @@ export function createLights(scene, data, { quality = 'high' } = {}) {
     scene.add(L.monitor, L.monitor.target);
   }
   // what the dark green walls give back: barely anything, a little blue (baked: the environment capture does it)
-  if (!baked) { L.fill = new THREE.HemisphereLight(0x22305a, 0x0b0806, 0.10); scene.add(L.fill); }
+  // baked: a faint warm fill keeps live-lit things (Ivan, plants, books) from falling to pure black, as in the ref
+  L.fill = baked ? new THREE.HemisphereLight(0x3a2c22, 0x120c08, 0.35) : new THREE.HemisphereLight(0x22305a, 0x0b0806, 0.10);
+  scene.add(L.fill);
 
   L.apply = ({ lamp: lk = 1, screen: sk = 1 } = {}) => {
     L.lamp.intensity = L.lampBase * lk;
@@ -135,6 +137,7 @@ export function tweakMaterial(m, o) {
   }
   if (/Laptop Alu/.test(n)) Object.assign(m, { roughness: 0.55, metalness: 0.6, clearcoat: 0, envMapIntensity: 0.35 });
   else if (/Monitor Black|Bezel|^Keys$|Trackpad/.test(n)) Object.assign(m, { roughness: 0.8, clearcoat: 0, envMapIntensity: 0.2 });
+  else if (/^Lamp Shade$/.test(n)) m.emissiveIntensity *= 0.6;     // the shade glows, it does not blow out
   else if (/Screen/.test(n)) Object.assign(m, { clearcoat: 0.12, clearcoatRoughness: 0.5, roughness: 0.6, envMapIntensity: 0.08 });
 }
 

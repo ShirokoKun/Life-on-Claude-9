@@ -4,6 +4,15 @@
   "branch": "claude/wonderful-franklin-gzawe0",
   "scenes": [
     {
+      "id": "ch1",
+      "number": 0,
+      "title": "Chapter 1 \u00b7 The Binge",
+      "module": "engine/scenes/ch1/scene.js",
+      "folder": "scenes/ch1",
+      "voiceover": null,
+      "stage": "animatic"
+    },
+    {
       "id": "intro",
       "number": 1,
       "title": "3 AM",
