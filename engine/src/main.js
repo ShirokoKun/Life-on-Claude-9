@@ -45,6 +45,14 @@ const stats = new Stats(); if (!RENDER) { stats.dom.style.cssText = 'position:ab
 
 // ---------------------------------------------------------------- load
 const status = (t) => { $('status').textContent = t; };
+// THREE's LoadingManager keeps its isLoading flag private, so count the loads in flight ourselves
+// (materials.js fires texture loads without awaiting them; boot waits for the count to reach zero)
+const loads = { n: 0, idle: [] };
+{
+  const M = THREE.DefaultLoadingManager, start = M.itemStart, end = M.itemEnd;   // errors also end with itemEnd
+  M.itemStart = (url) => { loads.n++; start(url); };
+  M.itemEnd = (url) => { end(url); if (--loads.n === 0) loads.idle.splice(0).forEach((f) => f()); };
+}
 const gltf = new GLTFLoader();
 const loadGLB = (url) => new Promise((res, rej) => gltf.load(url, res, undefined, rej));
 const loadEXR = (url) => new Promise((res, rej) => new EXRLoader().load(url, res, undefined, rej));
@@ -129,7 +137,7 @@ async function boot() {
   }
 
   status('Waiting for textures...');
-  await new Promise((res) => { if (THREE.DefaultLoadingManager.isLoading === false) res(); THREE.DefaultLoadingManager.onLoad = res; setTimeout(res, 60000); });
+  await new Promise((res) => { if (loads.n === 0) res(); else loads.idle.push(res); setTimeout(res, 60000); });
   collectLiving();
   if (tod) {                                   // one environment per time of day: Ivan's ambient follows the light
     for (const n of SC.SETS) { applyTOD({ [n]: 1 }); tod.env[n] = await captureEnvironment(); }
