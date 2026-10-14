@@ -167,7 +167,7 @@ function Scene(id, tab = 'player') {
 }
 
 function Player(s, body) {
-  const frame = h('iframe', { src: `/engine/index.html?scene=${s.id}&caps=1`, title: 'Engine', allow: 'autoplay' });
+  const frame = h('iframe', { src: `/engine/index.html?scene=${s.id}&caps=1&panel=0`, title: 'Engine', allow: 'autoplay' });
   const tcEl = h('span.tc', {}, '00:00:00'); const shotEl = h('div.shotInfo');
   const head = h('div.playhead'); const track = h('div.track');
   const capTrack = h('div.track.caps'); const noteTrack = h('div.track.notes');
