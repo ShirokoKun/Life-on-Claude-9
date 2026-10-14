@@ -84,7 +84,7 @@ function connect() {
   es.addEventListener('incoming', (e) => { S.incoming = JSON.parse(e.data).incoming; drawSide(); view.onGit?.(); });
   es.addEventListener('files', (e) => view.onFiles?.(JSON.parse(e.data)));
   es.addEventListener('frames', () => view.onFrames?.());
-  es.addEventListener('reload', (e) => view.onReload?.(JSON.parse(e.data)));
+  es.addEventListener('reload', (e) => { if (view.onReload) view.onReload(JSON.parse(e.data)); else if (engine.frame) engine.stale = true; });   // a hidden player reloads when shown
 }
 let refreshT;
 function refreshProject() { clearTimeout(refreshT); refreshT = setTimeout(async () => { S.project = await api('/api/project'); drawSide(); view.onProject?.(); }, 400); }
@@ -166,9 +166,41 @@ function Scene(id, tab = 'player') {
   ({ player: Player, board: Board, notes: Notes, renders: Renders, script: Script }[tab] || Player)(s, body);
 }
 
+// ------------------------------------------------------------------ the engine: one loaded player, kept alive between pages
+// A scene takes seconds to load (textures, lightmaps, shaders), so leaving the player hides it instead of unloading
+// it: back on the player it is there at once. Another scene or another preview quality replaces it.
+const PREVIEW_Q = [['full', 'Full'], ['balanced', 'Balanced'], ['fast', 'Fast']];
+let previewQ = 'full';
+try { previewQ = localStorage.getItem('previewQuality') || 'full'; } catch { /* storage blocked: full */ }
+const engine = { frame: null, scene: null, pq: null, stale: false, key: null, started: 0, loadedIn: null };
+function engineFor(id) {
+  if (engine.frame && (engine.scene !== id || engine.pq !== previewQ)) {
+    try { engine.frame.contentWindow.__renderer?.forceContextLoss(); } catch { /* not loaded yet */ }   // free its GPU memory now, not at GC
+    engine.frame.remove(); engine.frame = null;
+  }
+  if (!engine.frame) {
+    const f = h('iframe.engine', { src: `/engine/index.html?scene=${id}&caps=1&panel=0${previewQ === 'full' ? '' : '&pq=' + previewQ}`, title: 'Engine', allow: 'autoplay; fullscreen' });
+    f.style.visibility = 'hidden';
+    f.addEventListener('load', () => {
+      f.contentWindow.addEventListener('keydown', (e) => { if (e.target === f.contentWindow.document.body) engine.key?.(e); });
+      if (!engine.key) f.contentWindow.studio?.active?.(false);      // already left the player while it loaded
+    });
+    document.body.append(f);
+    Object.assign(engine, { frame: f, scene: id, pq: previewQ, stale: false, started: performance.now(), loadedIn: null });
+  } else if (engine.stale) reloadEngine();
+  return engine.frame;
+}
+function reloadEngine() { Object.assign(engine, { stale: false, started: performance.now(), loadedIn: null }); engine.frame.contentWindow.location.reload(); }
+function hideEngine() {
+  if (!engine.frame) return;
+  engine.frame.style.visibility = 'hidden'; engine.key = null;
+  engine.frame.contentWindow?.studio?.active?.(false);
+}
+
 function Player(s, body) {
-  const frame = h('iframe', { src: `/engine/index.html?scene=${s.id}&caps=1&panel=0`, title: 'Engine', allow: 'autoplay' });
-  const tcEl = h('span.tc', {}, '00:00:00'); const shotEl = h('div.shotInfo');
+  let frame = engineFor(s.id);
+  const screen = h('div.screen');
+  const tcEl = h('span.tc', {}, '00:00:00'); const shotEl = h('div.shotInfo'); const loadEl = h('span.faint.mono', { style: { fontSize: '12px' } });
   const head = h('div.playhead'); const track = h('div.track');
   const capTrack = h('div.track.caps'); const noteTrack = h('div.track.notes');
   const W = (t) => (100 * t) / s.duration + '%';
@@ -179,6 +211,7 @@ function Player(s, body) {
   const tl = h('div.timeline', {}, track, capTrack, noteTrack, head);
   const E = () => frame.contentWindow?.studio;
   const seek = (t) => E()?.seek(Math.max(0, Math.min(s.duration - 1 / 24, t)));
+  const seekWhenReady = (t) => { const wait = setInterval(() => { if (!frame.isConnected) clearInterval(wait); else if (E()?.state().ready) { clearInterval(wait); seek(t); } }, 300); };
   let dragging = false;
   const at = (e) => { const r = track.getBoundingClientRect(); return ((e.clientX - r.left) / r.width) * s.duration; };
   tl.addEventListener('pointerdown', (e) => { dragging = true; tl.setPointerCapture(e.pointerId); seek(at(e)); });
@@ -186,25 +219,42 @@ function Player(s, body) {
   tl.addEventListener('pointerup', () => { dragging = false; });
   const playBtn = h('button.btn.primary', { onclick: () => E()?.play() }, '▶ Play');
   const shotJump = (d) => { const st = E()?.state(); if (!st) return; const i = s.shots.findIndex((x) => x.id === st.shot); const n = s.shots[Math.max(0, Math.min(s.shots.length - 1, i + d))]; seek(n.t0 + 0.01); };
+  const quality = h('select', { 'aria-label': 'Preview quality', title: 'Preview quality: Balanced and Fast draw fewer pixels with lighter shadows; Fast also uses smaller textures. Renders always use full quality.',
+    onchange: (e) => {
+      const t = E()?.state()?.t || 0; previewQ = e.target.value;
+      try { localStorage.setItem('previewQuality', previewQ); } catch { /* not remembered */ }
+      frame = engineFor(s.id); engine.key = key; seekWhenReady(t);
+    } }, PREVIEW_Q.map(([v, l]) => h('option', { value: v, selected: v === previewQ }, `Preview: ${l}`)));
   const noteText = h('textarea', { placeholder: 'What should change here? e.g. "his right hand goes through his cheek"' });
   const addNote = run(async () => {
     const st = E()?.state(); if (!noteText.value.trim() || !st) return;
     s.notes = await api('/api/notes', { scene: s.id, t: st.t, shot: st.shot, text: noteText.value }); noteText.value = ''; drawNotes(); toast(`Note saved to ${s.folder}/NOTES.md`);
   });
   body.replaceChildren(h('div.playerWrap', {},
-    h('div', {}, h('div.screen', {}, frame),
+    h('div', {}, screen,
       h('div.transport', {}, playBtn, h('button.btn', { onclick: () => shotJump(-1), title: 'Previous shot ([)' }, '⏮'), h('button.btn', { onclick: () => seek((E()?.state().t || 0) - 1 / 24), title: 'Back one frame (←)' }, '◀'),
         h('button.btn', { onclick: () => seek((E()?.state().t || 0) + 1 / 24), title: 'Forward one frame (→)' }, '▶'), h('button.btn', { onclick: () => shotJump(1), title: 'Next shot (])' }, '⏭'), tcEl, h('span.grow'),
+        quality,
         h('button.btn.ghost', { onclick: () => frame.contentWindow?.document.body.classList.toggle('collapsed'), title: 'The engine\'s own panel: look, lights, free camera' }, 'Engine panel'),
         h('button.btn.ghost', { onclick: () => frame.requestFullscreen?.() }, 'Fullscreen')),
       tl, h('div.ruler', {}, ...Array.from({ length: 7 }, (_, i) => h('span', {}, fmtT((s.duration * i) / 6)))),
-      h('p.faint', { style: { fontSize: '12px' } }, h('span.kbd', {}, 'Space'), ' play · ', h('span.kbd', {}, '←'), h('span.kbd', {}, '→'), ' frame · ', h('span.kbd', {}, '['), h('span.kbd', {}, ']'), ' shot · ', h('span.kbd', {}, 'N'), ' note')),
+      h('p.faint.row', { style: { fontSize: '12px' } }, h('span.grow', {}, h('span.kbd', {}, 'Space'), ' play · ', h('span.kbd', {}, '←'), h('span.kbd', {}, '→'), ' frame · ', h('span.kbd', {}, '['), h('span.kbd', {}, ']'), ' shot · ', h('span.kbd', {}, 'N'), ' note'), loadEl)),
     h('div.card.shotInfo', {}, shotEl, h('div.noteBox', {}, h('h3', {}, 'Note at this moment'), noteText,
       h('div.row', {}, h('button.btn.primary', { onclick: addNote }, 'Save note'), h('span.faint', { style: { fontSize: '12px' } }, 'Claude reads these from NOTES.md'))))));
+  // the iframe lives outside the page (so it survives navigation) and is laid over the screen box every frame
+  const place = () => {
+    const r = screen.getBoundingClientRect(), m = main.getBoundingClientRect();
+    const clip = [Math.max(0, m.top - r.top), Math.max(0, r.right - m.right), Math.max(0, r.bottom - m.bottom), Math.max(0, m.left - r.left)];
+    Object.assign(frame.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px',
+      clipPath: `inset(${clip.map((v) => v + 'px').join(' ')} round 8px)`, visibility: 'visible' });
+  };
   let lastShot = null, raf;
   const tick = () => {
+    if (!document.fullscreenElement) place();
     const st = E()?.state?.();
     if (st && st.ready) {
+      if (engine.loadedIn == null) engine.loadedIn = (performance.now() - engine.started) / 1000;
+      loadEl.textContent = `loaded in ${engine.loadedIn.toFixed(1)} s`;
       head.style.left = W(st.t); tcEl.textContent = tc(st.t); playBtn.textContent = st.playing ? '❚❚ Pause' : '▶ Play';
       if (st.shot !== lastShot) {
         lastShot = st.shot; const x = s.shots.find((y) => y.id === st.shot);
@@ -216,23 +266,23 @@ function Player(s, body) {
             vo ? h('p.vo', {}, vo) : null, h('p.muted', { style: { margin: 0 } }, x.why));
         }
       }
-    } else tcEl.textContent = 'loading…';
+    } else { tcEl.textContent = `loading… ${Math.floor((performance.now() - engine.started) / 1000)} s`; loadEl.textContent = ''; }
     raf = requestAnimationFrame(tick);
   };
-  tick();
   const key = (e) => {
     if (/TEXTAREA|INPUT|SELECT/.test(document.activeElement?.tagName)) return;
     const st = E()?.state(); if (!st) return;
     if (e.key === ' ') { e.preventDefault(); E().play(); } else if (e.key === 'ArrowLeft') seek(st.t - 1 / 24); else if (e.key === 'ArrowRight') seek(st.t + 1 / 24);
     else if (e.key === '[') shotJump(-1); else if (e.key === ']') shotJump(1); else if (e.key.toLowerCase() === 'n') { e.preventDefault(); noteText.focus(); }
   };
+  tick();
   addEventListener('keydown', key);
-  frame.addEventListener('load', () => frame.contentWindow.addEventListener('keydown', (e) => { if (e.target === frame.contentWindow.document.body) key(e); }));
-  view.leave = () => { cancelAnimationFrame(raf); removeEventListener('keydown', key); };
+  engine.key = key;
+  E()?.active?.(true);
+  view.leave = () => { cancelAnimationFrame(raf); removeEventListener('keydown', key); hideEngine(); };
   view.onReload = (d) => {
     const t = E()?.state()?.t || 0; toast(`Engine updated (${d.why}). Reloading the player.`);
-    frame.addEventListener('load', function once() { frame.removeEventListener('load', once); const wait = setInterval(() => { if (E()?.state().ready) { clearInterval(wait); seek(t); } }, 300); });
-    frame.contentWindow.location.reload();
+    reloadEngine(); seekWhenReady(t);
   };
 }
 

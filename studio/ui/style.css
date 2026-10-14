@@ -174,3 +174,4 @@ label.chk { display: inline-flex; gap: 7px; align-items: center; cursor: pointer
   .side nav { flex-direction: row; flex-wrap: wrap } .navScenes, .sideFoot { display: none }
   .page { padding: 18px 16px 40px }
 }
+iframe.engine { position: fixed; border: 0; z-index: 2; background: #000 }   /* the player, kept alive between pages (app.js engineFor) */
