@@ -81,10 +81,15 @@ async function system() {
   return { node: process.version, platform: `${os.platform()} ${os.arch()}`, cpus: os.cpus().length, memGB: Math.round(os.totalmem() / 1e9),
     playwright, chromium, ffmpeg, blender, git: await has('git', ['--version']), branch, root: ROOT, config };
 }
+// every Blender under Program Files, newest first, so a new release is found without a code change
+function windowsBlenders() {
+  const d = 'C:\\Program Files\\Blender Foundation';
+  try { return fs.readdirSync(d).filter((n) => /^Blender [\d.]+$/.test(n)).sort((a, b) => b.localeCompare(a, undefined, { numeric: true })).map((n) => path.join(d, n, 'blender.exe')); }
+  catch { return []; }
+}
 async function findBlender() {
   const c = [config.blender, process.env.BLENDER, 'blender',
-    '/Applications/Blender.app/Contents/MacOS/Blender',
-    ...['5.0', '4.5', '4.4', '4.3', '4.2'].map((v) => `C:\\Program Files\\Blender Foundation\\Blender ${v}\\blender.exe`)].filter(Boolean);
+    '/Applications/Blender.app/Contents/MacOS/Blender', ...windowsBlenders()].filter(Boolean);
   for (const b of c) { const r = await sh(b, ['--version']); if (r.ok) return { path: b, version: r.out.split('\n')[0] }; }
   return null;
 }

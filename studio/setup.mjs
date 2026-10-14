@@ -45,8 +45,10 @@ say(ffmpeg ? 'ffmpeg: found' : 'ffmpeg: NOT found. MP4 encoding will fail; insta
 const git = spawnSync('git', ['--version'], { shell: win }).status === 0;
 say(git ? 'git: found' : 'git: not found. Following Claude\'s work needs git (https://git-scm.com).');
 
-const blenders = [process.env.BLENDER, 'blender', '/Applications/Blender.app/Contents/MacOS/Blender',
-  ...['5.0', '4.5', '4.4', '4.3', '4.2'].map((v) => `C:\\Program Files\\Blender Foundation\\Blender ${v}\\blender.exe`)].filter(Boolean);
+const BF = 'C:\\Program Files\\Blender Foundation';   // every installed version, newest first
+const winBlenders = fs.existsSync(BF) ? fs.readdirSync(BF).filter((n) => /^Blender [\d.]+$/.test(n))
+  .sort((a, b) => b.localeCompare(a, undefined, { numeric: true })).map((n) => path.join(BF, n, 'blender.exe')) : [];
+const blenders = [process.env.BLENDER, 'blender', '/Applications/Blender.app/Contents/MacOS/Blender', ...winBlenders].filter(Boolean);
 const blender = blenders.find((b) => spawnSync(b, ['--version'], { stdio: 'ignore' }).status === 0);
 say(blender ? `blender: ${blender}` : 'blender: not found (optional: only for re-baking light and changing the set; set its path in Studio > System).');
 
