@@ -20,6 +20,15 @@
       "folder": "scenes/02-cheat-code",
       "voiceover": null,
       "stage": "draft"
+    },
+    {
+      "id": "s03",
+      "number": 3,
+      "title": "Ivan's room",
+      "module": "engine/scenes/s03/scene.js",
+      "folder": "scenes/03-ivan-room",
+      "voiceover": null,
+      "stage": "draft"
     }
   ]
 }

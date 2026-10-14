@@ -70,14 +70,15 @@ const cast = [];                // scene-specific extra performances: { url, t0,
 async function boot() {
   status('Loading the flat...');
   await MAT.loadManifest();
-  const data = await (await fetch('assets/lights.json')).json();
+  // a scene with its own set (SC.ROOM: a folder with room.glb, lights.json, lightmaps/) loads it instead of the flat;
+  // its lightmaps are optional while the set is a grey-box (unbaked groups render with live light only)
+  const ROOM = SC.ROOM || 'assets';
+  const lm = (g) => (SC.ROOM ? loadEXR(`${ROOM}/lightmaps/lm_${g}.exr`).catch(() => null) : loadEXR(`${ROOM}/lightmaps/lm_${g}.exr`));
+  const data = await (await fetch(`${ROOM}/lights.json`)).json();
   exposureEV = data.exposure || 0;
-  const [room, lmA, lmD, lmR] = await Promise.all([
-    loadGLB('assets/room.glb'),
-    loadEXR('assets/lightmaps/lm_ARCH.exr'), loadEXR('assets/lightmaps/lm_DESK.exr'), loadEXR('assets/lightmaps/lm_ROOM.exr'),
-  ]);
+  const [room, lmA, lmD, lmR] = await Promise.all([loadGLB(`${ROOM}/room.glb`), lm('ARCH'), lm('DESK'), lm('ROOM')]);
   const LM = { ARCH: lmA, DESK: lmD, ROOM: lmR };
-  for (const t of Object.values(LM)) { t.channel = 1; t.flipY = false; t.colorSpace = THREE.LinearSRGBColorSpace; t.needsUpdate = true; }
+  for (const t of Object.values(LM)) if (t) { t.channel = 1; t.flipY = false; t.colorSpace = THREE.LinearSRGBColorSpace; t.needsUpdate = true; }
 
   status('Dressing the set...');
   const jobs = [];
@@ -99,34 +100,36 @@ async function boot() {
   });
   await Promise.all(jobs);
   scene.add(room.scene);
-  // The monitor body was baked into a group, so its children (screen, stickies) lost their parent and sit at
-  // the origin. Put them back: monitor body at (7.36, 3.32, 0.88), tilted -4°, turned -28° toward Ivan.
-  const C = new THREE.Matrix4().set(1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1);   // Blender -> three axes
-  const D = Math.PI / 180;
-  const body = new THREE.Matrix4().compose(new THREE.Vector3(7.36, 3.32, 0.88),
-    new THREE.Quaternion().setFromEuler(new THREE.Euler(-4 * D, 0, -28 * D, 'ZYX')), new THREE.Vector3(1, 1, 1));
-  const toWorld = C.clone().multiply(body).multiply(C.clone().invert());
-  for (const [n, o] of Object.entries(named)) {
-    if (!/^Monitor_(Screen|Sticky)/.test(n)) continue;
-    o.updateWorldMatrix(true, false);
-    if (new THREE.Vector3().setFromMatrixPosition(o.matrixWorld).length() < 0.5) o.applyMatrix4(toWorld);
-  }
-  // the two sticky notes on the monitor's corner baked black (the screen was dark in the bake) and cover the dashboard
-  room.scene.traverse((o) => {
-    if (o.isMesh && /^Sticky (Yellow|Pink)$/.test(o.material.name || '')) {
-      const p = new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3());
-      if (p.distanceTo(B(7.17, 3.42, 1.19)) < 0.12) o.visible = false;
+  if (!SC.ROOM) {                  // fixes for the flat's own export
+    // The monitor body was baked into a group, so its children (screen, stickies) lost their parent and sit at
+    // the origin. Put them back: monitor body at (7.36, 3.32, 0.88), tilted -4°, turned -28° toward Ivan.
+    const C = new THREE.Matrix4().set(1, 0, 0, 0, 0, 0, 1, 0, 0, -1, 0, 0, 0, 0, 0, 1);   // Blender -> three axes
+    const D = Math.PI / 180;
+    const body = new THREE.Matrix4().compose(new THREE.Vector3(7.36, 3.32, 0.88),
+      new THREE.Quaternion().setFromEuler(new THREE.Euler(-4 * D, 0, -28 * D, 'ZYX')), new THREE.Vector3(1, 1, 1));
+    const toWorld = C.clone().multiply(body).multiply(C.clone().invert());
+    for (const [n, o] of Object.entries(named)) {
+      if (!/^Monitor_(Screen|Sticky)/.test(n)) continue;
+      o.updateWorldMatrix(true, false);
+      if (new THREE.Vector3().setFromMatrixPosition(o.matrixWorld).length() < 0.5) o.applyMatrix4(toWorld);
     }
-  });
+    // the two sticky notes on the monitor's corner baked black (the screen was dark in the bake) and cover the dashboard
+    room.scene.traverse((o) => {
+      if (o.isMesh && /^Sticky (Yellow|Pink)$/.test(o.material.name || '')) {
+        const p = new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3());
+        if (p.distanceTo(B(7.17, 3.42, 1.19)) < 0.12) o.visible = false;
+      }
+    });
+  }
 
-  if (Q.get('ivan') !== '0') {
+  if (Q.get('ivan') !== '0' && SC.IVAN !== null) {   // IVAN = null: a set with nobody in it yet
     status('Seating Ivan...');
     const iv = await loadCast(Q.get('ivanglb') || SC.IVAN || 'assets/ivan.glb');   // ?ivanglb=: try a performance
     Object.assign(ivan, { head: iv.head, root: iv.root }); mixer = iv.mixer;
     for (const c of SC.CAST || []) cast.push({ ...c, ...(await loadCast(c.url)) });   // other Ivans (standing, ...)
   }
 
-  L = createLights(scene, data, { quality: QUALITY });
+  L = (SC.createLights || createLights)(scene, data, { quality: QUALITY });   // a set brings its own live rig
   const lampShade = data.lights.find((l) => l.name === 'Desk_Lamp');
   const lampPos = B(...lampShade.location);
   atmo = createAtmosphere({ lamp: lampPos, lampTarget: lampPos.clone().add(new THREE.Vector3(lampShade.forward[0], lampShade.forward[2], -lampShade.forward[1]).multiplyScalar(0.55)),
@@ -184,7 +187,7 @@ async function loadCast(url) {
 async function captureEnvironment() {
   const crt = new THREE.WebGLCubeRenderTarget(256, { type: THREE.HalfFloatType });
   const cube = new THREE.CubeCamera(0.05, 50, crt);
-  cube.position.copy(B(6.95, 2.95, 1.15));
+  cube.position.copy(B(...(SC.ENV_AT || [6.95, 2.95, 1.15])));
   const hidden = []; for (const r of [ivan.root, ...cast.map((c) => c.root)]) if (r && r.visible) { r.visible = false; hidden.push(r); }
   renderer.toneMapping = THREE.NoToneMapping;
   cube.update(renderer, scene);
