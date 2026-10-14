@@ -91,6 +91,7 @@ async function boot() {
     const dbg = Q.get('debug');
     if (dbg === 'lm') { o.material = g ? new THREE.MeshBasicMaterial({ map: LM[g], name: 'lm' }) : new THREE.MeshBasicMaterial({ color: 0x220000 }); return; }
     jobs.push(Promise.all(mats.map((m) => MAT.build(m.name, m, g ? LM[g] : null))).then((built) => {
+      if (SC.tweakMaterial) built.forEach((m) => SC.tweakMaterial(m, o));   // a set's own finish (gloss, fog)
       o.material = Array.isArray(o.material) ? built : built[0];
       const n = (Array.isArray(o.material) ? o.material[0] : o.material).name || '';
       o.castShadow = !/Glass|Curtain|Bubble|Water|Screen|Facade|Lot Line/.test(n);
@@ -137,6 +138,7 @@ async function boot() {
     screen: B(...(data.marks.Laptop_Screen || [6.95, 3.22, 0.87])), count: QUALITY === 'high' ? 900 : 500 });
   post = createPost(renderer, scene, camera, atmo);
   roomRoot = room.scene;
+  if (SC.setup) SC.setup({ scene, named, root: room.scene, THREE, camera, renderer, data });   // a set's air: fog, haze
   if (SC.light) {
     status('Loading the other times of day...');
     const sets = await TOD.loadSets(SC.SETS, loadEXR, { LM, exposure: data.exposure || 0 });

@@ -23,7 +23,7 @@ sys.path[:0] = [str(HERE), str(HERE.parent / "lib")]
 import bmesh  # noqa: E402
 import bpy  # noqa: E402
 import numpy as np  # noqa: E402
-from mathutils import Vector  # noqa: E402
+from mathutils import Matrix, Vector  # noqa: E402
 
 import geo  # noqa: E402
 import materials as M  # noqa: E402
@@ -136,15 +136,14 @@ def sky_texture(path, w=2048, h=512, seed=3):
     rng = np.random.default_rng(seed)
     y, x = np.mgrid[0:h, 0:w].astype(np.float32)
     v = y / h                                       # 0 = horizon (bottom row written first), 1 = top
-    top, mid, glow = np.array([0.010, 0.016, 0.045]), np.array([0.035, 0.055, 0.11]), np.array([0.20, 0.13, 0.09])
-    img = top + (mid - top) * np.exp(-v * 3.0)[..., None]
-    img += glow * np.exp(-v / 0.06)[..., None]
+    top, mid, glow = np.array([0.010, 0.013, 0.040]), np.array([0.075, 0.085, 0.200]), np.array([0.30, 0.20, 0.30])
+    img = top + (mid - top) * np.exp(-v * 2.2)[..., None]       # deep navy overhead -> dusky blue-violet low down
+    img += glow * np.exp(-v / 0.16)[..., None]                   # the city's glow rising off the horizon
     n = np.zeros((h, w), np.float32)                # clouds: a few octaves of smoothed noise
     for k, s in ((8, 1.0), (16, 0.5), (32, 0.25)):
         g = rng.random((k, k * 4)).astype(np.float32)
         n += s * np.kron(g, np.ones((h // k + 1, w // (k * 4) + 1)))[:h, :w]
-    from scipy.ndimage import gaussian_filter  # noqa: E402 (bundled with Blender's numpy? fall back below)
-    n = gaussian_filter(n, 18)
+    n = _blur(n, 18)
     c = np.clip((n - 1.05) * 2.5, 0, 1) * np.clip(v * 4, 0, 1) * np.clip(1.4 - v, 0, 1)
     img += c[..., None] * np.array([0.05, 0.065, 0.10])
     out = np.concatenate([img, np.ones((h, w, 1), np.float32)], axis=2)
@@ -238,11 +237,16 @@ def metric_uv(o):
 LIVE_LIT = ("potted_plant", "fern", "book_", "alarm_clock", "standing_picture")
 
 
-def ph(asset, loc, rot=0.0, scale=1.0, name=None, coll="Props"):
+def glb(file, loc, rot=0.0, scale=1.0, name=None):
+    """A model the director supplied (blender/assets/props_src/<file>), handled like a Poly Haven one."""
+    return ph(file, loc, rot, scale, name, src=ROOT / "blender" / "assets" / "props_src" / file)
+
+
+def ph(asset, loc, rot=0.0, scale=1.0, name=None, coll="Props", src=None):
     """A Poly Haven model, joined into one object (its own UVs and textures are kept: keep_uv).
     Leafy and many-part small props stay out of the lightmaps (thousands of tiny islands would starve the
     big surfaces of resolution); the engine lights them live and with the room's reflection capture."""
-    f = next((PROPS / asset).glob("*.gltf"))
+    f = src or next((PROPS / asset).glob("*.gltf"))
     before = set(bpy.data.objects)
     bpy.ops.import_scene.gltf(filepath=str(f))
     new = [o for o in bpy.data.objects if o not in before]
@@ -403,11 +407,13 @@ def build_window(m):
     geo.box("Blind_HeadRail", (0.05, wd - 0.04, 0.05), (-0.05, cy, top - 0.05), m["blind"], cb, bev=0.004)
     n = 24
     for k in range(n):
-        geo.box(f"Blind_Slat_{k:02d}", (0.05, wd - 0.06, 0.003), (-0.05, cy, top - 0.07 - k * 0.0105), m["blind"], cb,
-                rot=(0, 12 * (1 if k % 2 else -1), 0), bev=0)
-    geo.box("Blind_BottomRail", (0.05, wd - 0.06, 0.02), (-0.05, cy, top - 0.09 - n * 0.0105), m["blind"], cb, bev=0.003)
+        geo.box(f"Blind_Slat_{k:02d}", (0.05, wd - 0.06, 0.003), (-0.05, cy, top - 0.07 - k * 0.0125), m["blind"], cb,
+                rot=(0, 8, 0), bev=0)
+    geo.box("Blind_BottomRail", (0.05, wd - 0.06, 0.02), (-0.05, cy, top - 0.09 - n * 0.0125), m["blind"], cb, bev=0.003)
     for y in (WIN_Y0 + 0.4, WIN_Y1 - 0.4):
         geo.box("Blind_Cord", (0.004, 0.004, 0.9), (-0.02, y, top - 0.95), m["blind"], cb, bev=0)
+    for o in cb.objects:              # lit live: they sit in the window light's hottest spot and the bake burned them white
+        o["no_bake"] = True
 
 
 # ---------------------------------------------------------------------------------------------- furniture
@@ -578,7 +584,9 @@ def build_dressing(m):
         geo.cyl(f"Soda_Can_{i}", 0.033, 0.122, (2.42 + dx, 0.24 + dy, 0.52), m[mat], c, seg=32)
     geo.cyl("Soda_Can_Floor", 0.033, 0.122, (2.62, 0.62, 0.033), m["can_red"], c, rot=(90, 0, 70), seg=32)
     # by the window: the guitar on the wall, a dropped backpack and clothes
-    build_guitar(m, (0.16, 3.42, 0.0), lean_deg=13, rot=90)
+    gtr = glb("guitar.glb", (0.30, 3.48, 0.0), rot=-70, name="Guitar")    # on its stand in the window corner
+    dec = gtr.modifiers.new("Lighter", "DECIMATE")
+    dec.ratio = 0.3
     import props_clutter
     props_clutter.cloth_heap("Clothes_Pile", (0.42, 3.02, 0.08), (0.30, 0.24, 0.10), m["cloth_grey"], c, seed=2)
     props_clutter.cloth_heap("Tee_Floor", (1.05, 2.55, 0.03), (0.22, 0.16, 0.03), m["cloth_olive"], c, seed=5)
@@ -632,30 +640,57 @@ def blobs(name, points, r, mat, coll):
     return o
 
 
+def hill_z(x):
+    """Ground height of the slope below the house: just under the floor at the wall, the valley floor by ~140 m."""
+    return max(GROUND, -4.0 + 0.25 * x)
+
+
 def build_exterior(m):
     """The valley city beyond the window (west, -x), in depth layers so the lens turns each into bokeh."""
     c = geo.coll("Exterior")
     rng = random.Random(11)
-    geo.box("Ground", (4000, 4000, 0.1), (-1800, 2.4, GROUND - 0.1), m["ground"], c, bev=0)
-    # 1. treetops just below the sill (the house is on a hillside): dark masses, a few edges catch the street glow
-    for i in range(26):
-        x, y = -rng.uniform(3, 26), 2.4 + rng.uniform(-22, 22)
-        r = rng.uniform(1.6, 3.6)
-        bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=2, radius=r, location=(x, y, -rng.uniform(2.5, 6.0) + x * 0.12))
-        o = bpy.context.active_object
-        o.name = f"Tree_{i}"
-        for cc in list(o.users_collection):
-            cc.objects.unlink(o)
-        c.objects.link(o)
-        o.scale = (1, 1, rng.uniform(0.6, 0.9))
-        for v in o.data.vertices:
-            v.co *= 0.8 + 0.4 * rng.random()
-        o.data.materials.append(m["tree"])
+    grid_plane("Ground", (2600, 4000), (-1400, 2.4, GROUND - 0.1), m["ground"], c, (60, 8))
+    # the hillside falls away from the house into the valley
+    hill = bmesh.new()
+    xs = [-3, -10, -25, -45, -70, -100, -140, -200]
+    rows = [[hill.verts.new((x, y, hill_z(x))) for y in (-400, 400)] for x in xs]
+    for a, b in zip(rows, rows[1:]):
+        hill.faces.new((a[0], a[1], b[1], b[0]))
+    me = bpy.data.meshes.new("Hill")
+    hill.to_mesh(me)
+    hill.free()
+    ho = bpy.data.objects.new("Hill", me)
+    c.objects.link(ho)
+    me.materials.append(m["ground"])
+    # 1. a tree line on the slope, seen through the window: dark crowns with city light between and behind them
+    crowns = bmesh.new()
+    for i in range(60):                                # crowns sit below eye level: the city shows above them
+        x = -rng.uniform(16, 90)
+        y = 2.4 + rng.uniform(-60, 60)
+        h = rng.uniform(6, 10)
+        z0 = hill_z(x)
+        bmesh.ops.create_cone(crowns, cap_ends=True, segments=6, radius1=0.25, radius2=0.18, depth=h * 0.6,
+                              matrix=Matrix.Translation((x, y, z0 + h * 0.3)))
+        for k in range(rng.randint(3, 6)):
+            r = rng.uniform(1.6, 3.2)
+            cx, cy, cz = x + rng.uniform(-1.5, 1.5), y + rng.uniform(-1.8, 1.8), z0 + h * rng.uniform(0.55, 0.95)
+            g = bmesh.ops.create_icosphere(crowns, subdivisions=3, radius=r,
+                                           matrix=Matrix.Translation((cx, cy, cz)) @ Matrix.Diagonal((1, 1, 0.8, 1)))
+            for v in g["verts"]:
+                v.co += (v.co - Vector((cx, cy, cz))) * (rng.random() * 0.35 - 0.12)
+    me = bpy.data.meshes.new("Tree_Line")
+    crowns.to_mesh(me)
+    crowns.free()
+    for poly in me.polygons:
+        poly.use_smooth = True
+    to = bpy.data.objects.new("Tree_Line", me)
+    c.objects.link(to)
+    me.materials.append(m["tree"])
     # 2. the neighbourhood down the hill: houses with a lit window or two, warm street lights along the roads
     houses, lights, wins = [], [], []
     for row in range(14):
         x = -40 - row * 26
-        z = GROUND + max(0.0, 30 - row * 4.0) * 0.6        # the slope flattens into the valley
+        z = hill_z(x)                                    # the slope flattens into the valley
         for k in range(26):
             y = 2.4 + (k - 13) * 18 + rng.uniform(-5, 5)
             if rng.random() < 0.8:
@@ -679,13 +714,18 @@ def build_exterior(m):
     hw_ = bpy.data.objects.new("House_Windows", me)
     c.objects.link(hw_)
     me.materials.append(m["house_win"])
+    # 2b. the valley floor: a carpet of small lights out to downtown (the ref's sea of bokeh)
+    far = [(-rng.uniform(300, 1000), 2.4 + rng.uniform(-1000, 1000), GROUND + rng.uniform(0.5, 6)) for _ in range(3600)]
+    blobs("Valley_Sodium", [p for p in far[:2300]], 0.7, m["sodium"], c)
+    blobs("Valley_LED", [p for p in far[2300:]], 0.6, m["led_white"], c)
     # 3. downtown across the valley: towers with lit window grids (the engine draws them: 'Facade' material)
     towers = []
-    for i in range(70):
-        x = -rng.uniform(900, 2200)
-        y = 2.4 + rng.uniform(-1300, 1300) * (1 - abs(x + 1500) / 2000)
-        hgt = rng.uniform(40, 120) * (2.2 if abs(y - 2.4) < 400 and rng.random() < 0.55 else 1.0)
-        t = geo.box(f"Tower_{i}", (rng.uniform(25, 45), rng.uniform(25, 45), hgt), (x, y, GROUND), m["facade"], c, bev=0)
+    for i in range(170):                               # slender towers, a taller core straight ahead
+        x = -rng.uniform(800, 1900)
+        y = 2.4 + rng.uniform(-1100, 1100) * (1 - abs(x + 1350) / 1600)
+        core = abs(y - 2.4) < 380
+        hgt = rng.uniform(60, 150) * (rng.uniform(1.5, 2.4) if core and rng.random() < 0.6 else 1.0)
+        t = geo.box(f"Tower_{i}", (rng.uniform(16, 30), rng.uniform(16, 30), hgt), (x, y, GROUND), m["facade"], c, bev=0)
         towers.append(t)
         if hgt > 140:
             geo.cyl(f"Aviation_{i}", 1.2, 1.2, (x, y, GROUND + hgt + 1), m["aviation"], c, seg=8)
@@ -694,6 +734,27 @@ def build_exterior(m):
     geo.join(towers, "Facade_Towers")
     # 4. the sky: one far card, glow at the horizon
     geo.plane("Sky_Card", (9000, 2600), (-3200, 2.4, GROUND + 1100), m["sky"], c, rot=(90, 0, -90))
+    squash_far(c)
+
+
+EYE = Vector((0.0, 2.4, 1.3))
+
+
+def squash_far(coll, near=120.0, room=270.0, fall=900.0):
+    """The engine's camera sees 400 m; the valley is kilometres deep. Everything past `near` is pulled in along
+    its line of sight from the window (d -> near + room * (1 - e^-(d-near)/fall)): every object keeps its angle
+    and its angular size, so the view is the same, it just fits the depth range. The lens sees it all as infinity."""
+    for o in coll.objects:
+        if o.type != "MESH":
+            continue
+        mw, mi = o.matrix_world.copy(), o.matrix_world.inverted()
+        for v in o.data.vertices:
+            w = mw @ v.co
+            d = -w.x
+            if d <= near:
+                continue
+            k = (near + room * (1 - math.exp(-(d - near) / fall))) / d
+            v.co = mi @ (EYE + (w - EYE) * k)
 
 
 # ---------------------------------------------------------------------------------------------- cameras, render, export
@@ -741,17 +802,17 @@ def light_rig(scene):
             o.visible_shadow = False                # nor may the sky card and the far city shade the moon
     lamp = Vector(scene["lamp"])
     L = lighting._light
-    L("Desk_Lamp", "POINT", tuple(lamp - Vector((0, 0, 0.06))), 55, (1.0, 0.60, 0.30), c, shadow_soft=0.03)
+    L("Desk_Lamp", "POINT", tuple(lamp - Vector((0, 0, 0.06))), 110, (1.0, 0.58, 0.28), c, shadow_soft=0.09)
     bpy.context.view_layer.update()
     hinge = bpy.data.objects["Laptop_Hinge"]
     L("Key_Laptop", "AREA", tuple(hinge.matrix_world @ Vector((0, -0.01, 0.112))), 4.0, (0.62, 0.74, 1.0), c,
       size=(0.29, 0.18), target=(1.05, 3.75, 1.15))
     # the night through the window: cool sky panel, the moon, and street lights below throwing warm light up
     cy = (WIN_Y0 + WIN_Y1) / 2
-    L("City_West", "AREA", (-0.65, cy, (SILL + HEAD) / 2), 260, (0.30, 0.42, 1.0), c, size=(WIN_Y1 - WIN_Y0, HEAD - SILL),
+    L("City_West", "AREA", (-2.6, cy, (SILL + HEAD) / 2 + 0.4), 520, (0.30, 0.42, 1.0), c, size=((WIN_Y1 - WIN_Y0) * 1.6, (HEAD - SILL) * 1.6),
       target=(2.2, cy, 0.6))
     moon = bpy.data.lights.new("Moon", "SUN")
-    moon.energy, moon.color, moon.angle = 2.4, (0.58, 0.70, 1.0), math.radians(0.6)
+    moon.energy, moon.color, moon.angle = 0.7, (0.58, 0.70, 1.0), math.radians(9.0)   # hazy moon: a soft wash
     mo = bpy.data.objects.new("Moon", moon)
     c.objects.link(mo)
     mo.rotation_euler = Vector(MOON).to_track_quat("-Z", "Y").to_euler()   # the window's pattern lands across the bed
@@ -766,6 +827,7 @@ def bake_and_export(out, scene, small=False, samples=64):
     import bake as BK
     import export_intro as X
     import lightmap
+    lightmap.LIVE_LIGHTS = ("Key_Laptop",)          # the lamp is baked: soft Cycles shadows instead of a hard shadow map
     BK.DESK = Vector((1.3, 4.4, 0.0))               # the desk zone gets its own, sharper map
     bpy.data.objects["Wall_N"]["bake_group"] = "WALLN"   # wild wall and ceiling: own maps, so shots can pull them
     bpy.data.objects["Ceiling"]["bake_group"] = "CEIL"

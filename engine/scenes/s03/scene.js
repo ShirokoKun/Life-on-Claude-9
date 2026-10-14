@@ -30,8 +30,10 @@ const NEW = {
     why: 'Straight down into his room (the reference frame): bed, guitar, rugs, the lamp, and at the edge of it all the one lit desk. He is small inside his world.' },
   S1: { from: [3.72, 0.40, 1.78], to: [3.05, 1.45, 1.58], at0: DESK, at1: [1.05, 4.40, 1.00], mm: [22, 26], f: 2.8, focus: 'eyes', roll: [-1.0, -0.4],
     why: 'From the dark corner by the door, one long slow push across the room toward the only lit corner, where he works. "It\'s 3 AM."' },
+  // reading: a little more depth of field, so focus rolls across the lines instead of cutting them out
+  S4: { mm: [52, 56], f: 2.4 },
 };
-export const SHOTS = INTRO.map((s) => (NEW[s.id] ? { ...s, ...NEW[s.id] } : moved(s)));
+export const SHOTS = INTRO.map((s) => (NEW[s.id] ? { ...moved(s), ...NEW[s.id] } : moved(s)));
 export const shotAt = (t) => shotIn(SHOTS, t);
 export const cameraAt = (t, pick) => cameraIn(SHOTS, t, pick);
 export const CAPTIONS = INTRO_CAPS;
@@ -59,21 +61,16 @@ export function createLights(scene, data, { quality = 'high' } = {}) {
   // direct light, which stay live so Ivan shadows the desk. Unbaked layout exports get a full live rig instead.
   const baked = !!data.groups;
 
-  // table lamp on the nightstand: warm, the "home" light behind his left shoulder
+  // table lamp on the nightstand: warm, the "home" light. Baked (soft Cycles shadows, the reference's falloff);
+  // live only as a faint unshadowed fill on Ivan when the set is unbaked.
   const lamp = by.Desk_Lamp;
-  L.lamp = new THREE.PointLight(new THREE.Color(...lamp.color), lamp.energy_w / (4 * Math.PI), 0, 2);
+  L.lamp = new THREE.PointLight(new THREE.Color(...lamp.color), baked ? 0 : lamp.energy_w / (4 * Math.PI), 0, 2);
   L.lamp.position.copy(B(...lamp.location));
-  L.lamp.castShadow = true; L.lamp.shadow.mapSize.set(1024, 1024); L.lamp.shadow.radius = 4;
-  L.lamp.shadow.bias = -0.0005; L.lamp.shadow.normalBias = 0.02; L.lamp.shadow.camera.near = 0.12;
   scene.add(L.lamp); L.lampBase = L.lamp.intensity;
 
-  // moon over the valley: a cool, hard-ish key from high outside the west window; frame and blinds print on the bed
-  // (baked: a faint live copy on top, for crisp window shadows and Ivan's cool edge)
-  L.moon = new THREE.DirectionalLight(0x9db4ff, baked ? 0.12 : 0.6);
+  // the hazy moon over the valley: baked as a soft wash; live only as a faint cool edge on Ivan (no hard shadows)
+  L.moon = new THREE.DirectionalLight(0x9db4ff, baked ? 0.06 : 0.6);
   L.moon.position.copy(B(-8.4, 5.1, 8.0)); L.moon.target.position.copy(B(1.6, 1.6, 0.5));   // set_room03.MOON
-  L.moon.castShadow = true; L.moon.shadow.mapSize.set(shadow, shadow);
-  Object.assign(L.moon.shadow.camera, { left: -4, right: 4, top: 4, bottom: -4, near: 1, far: 25 });
-  L.moon.shadow.bias = -0.0004; L.moon.shadow.normalBias = 0.02; L.moon.shadow.radius = 2;
   scene.add(L.moon, L.moon.target);
 
   // the window as a soft source: night sky over the bed and the floor (baked: in the lightmaps)
@@ -102,10 +99,9 @@ export function createLights(scene, data, { quality = 'high' } = {}) {
   }
   const mon = data.marks.Monitor_Screen;
   if (mon) {
-    L.monitor = new THREE.SpotLight(0x86b8ff, 1.9, 1.7, THREE.MathUtils.degToRad(22), 0.5, 1.5);
+    // a soft side key, no shadow map: hands and arms must not print hard shapes on his face (S5)
+    L.monitor = new THREE.SpotLight(0x86b8ff, 1.9, 1.9, THREE.MathUtils.degToRad(34), 0.95, 1.5);
     L.monitor.position.copy(B(...mon)); L.monitor.target.position.copy(FACE);
-    L.monitor.castShadow = true; L.monitor.shadow.mapSize.set(1024, 1024); L.monitor.shadow.radius = 2;
-    L.monitor.shadow.bias = -0.0002; L.monitor.shadow.normalBias = 0.015;
     scene.add(L.monitor, L.monitor.target);
   }
   // what the dark green walls give back: barely anything, a little blue (baked: the environment capture does it)
@@ -117,4 +113,60 @@ export function createLights(scene, data, { quality = 'high' } = {}) {
     if (L.monitor) L.monitor.intensity = 1.9 * sk;
   };
   return L;
+}
+
+// ---------------------------------------------------------------- the set's finish and air (look_night.webp)
+const OUTSIDE = /^(Tree_Line|Hill|Ground|Neighbourhood|Street_|Valley_|House_Windows|Facade_Towers|Aviation_|Sky_Card)/;
+
+// Matte electronics (the reference's monitors and laptop read as objects, not mirrors); the city ignores the
+// room's haze (it has its own distance in the lens).
+export function tweakMaterial(m, o) {
+  const n = m.name || '';
+  if (OUTSIDE.test(o.name) || /Glass/.test(n)) {
+    m.fog = false;
+    if (!/Glass/.test(n)) m.envMapIntensity = 0;                  // the room's reflections must not light the valley
+    // the tree line and the slope hold a little of the city's glow, so they read as shapes against the lights
+    if (/^Tree_Line/.test(o.name)) { m.emissive.setHex(0x050c09); m.emissiveIntensity = 1; }
+    if (/^Hill/.test(o.name)) { m.emissive.setHex(0x06090c); m.emissiveIntensity = 1; }
+    if (/^Facade_Towers/.test(o.name)) m.emissiveIntensity *= 0.4;   // sparse lit windows, dark towers (the ref's skyline)
+    if (/^Valley_/.test(o.name)) m.emissiveIntensity *= 0.55;
+    if (!/Glass/.test(n)) return;
+    m.opacity = 0.04;                                              // clean glass: the city, not a grey film
+  }
+  if (/Laptop Alu/.test(n)) Object.assign(m, { roughness: 0.55, metalness: 0.6, clearcoat: 0, envMapIntensity: 0.35 });
+  else if (/Monitor Black|Bezel|^Keys$|Trackpad/.test(n)) Object.assign(m, { roughness: 0.8, clearcoat: 0, envMapIntensity: 0.2 });
+  else if (/Screen/.test(n)) Object.assign(m, { clearcoat: 0.12, clearcoatRoughness: 0.5, roughness: 0.6, envMapIntensity: 0.08 });
+}
+
+function radialTexture(stops) {
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const g = c.getContext('2d'), gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  stops.forEach(([o, a]) => gr.addColorStop(o, `rgba(255,255,255,${a})`));
+  g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+function linearTexture(stops, w = 16, h = 256) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const g = c.getContext('2d'), gr = g.createLinearGradient(0, 0, 0, h);
+  stops.forEach(([o, a]) => gr.addColorStop(o, `rgba(255,255,255,${a})`));
+  g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+const veil = (map, color, opacity) => new THREE.MeshBasicMaterial({ map, color, opacity, transparent: true, depthWrite: false,
+  blending: THREE.AdditiveBlending, side: THREE.DoubleSide, fog: false, toneMapped: true });
+
+// Haze: the dark teal air that lifts the blacks a touch (fog), the glow that hangs around every practical plus the
+// lens. All additive, all soft, all in the lens (depth of field blurs them like air).
+export function setup({ scene, data }) {
+  scene.fog = new THREE.FogExp2(0x060a10, 0.045);
+  const glow = radialTexture([[0, 1], [0.25, 0.45], [0.6, 0.12], [1, 0]]);
+  const sprite = (pos, size, color, opacity) => {
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: glow, color, opacity, transparent: true, depthWrite: false,
+      blending: THREE.AdditiveBlending, fog: false }));
+    sp.position.copy(B(...pos)); sp.scale.setScalar(size); scene.add(sp); return sp;
+  };
+  const m = data.marks;
+  if (m.Lamp_Shade) { sprite(m.Lamp_Shade, 1.3, 0xffa04a, 0.30); sprite(m.Lamp_Shade, 0.45, 0xffc888, 0.35); }
+  for (const n of ['Monitor_Screen', 'Monitor2_Screen']) if (m[n]) sprite([m[n][0], m[n][1] - 0.08, m[n][2]], 1.0, 0x4f7dff, 0.16);
+  if (m.Laptop_Screen) sprite([m.Laptop_Screen[0], m.Laptop_Screen[1] - 0.1, m.Laptop_Screen[2]], 0.7, 0x6f95ff, 0.14);
 }

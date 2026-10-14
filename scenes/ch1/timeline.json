@@ -1,0 +1,3099 @@
+{
+ "fps": 24,
+ "estimated": true,
+ "note": "All times are estimates (narration ~2.3 words/s, typed dialogue ~2.8 words/s, plus pauses). Re-lock to the Ch 1 voiceover when it arrives. Coordinates are Blender metres in scenes/03-ivan-room (x east, y north, z up; desk wall y=4.8, window wall x=0); void shots use the void stage's own frame (Ivan at the origin).",
+ "duration": 231.8,
+ "aspect": "16:9 with 2.0:1 letterbox (post.js LOOK)",
+ "light_states": {
+  "3am": "existing room03 bake (lamp, screens, moon, city)",
+  "4am": "3am bake with live changes: lamp x0.6, screens x1.3, city windows -40%, exposure -0.3 EV, haze +",
+  "4am_iso": "4am with lightmap groups ROOM/WALLN/CEIL/ARCH at x0.12, DESK group full: the desk in a pool of light",
+  "day": "new bake: warm afternoon (two days earlier), sun soft through the window, screens weak, lamp off",
+  "dusk": "new bake 'evening': blue dusk, city lights coming on",
+  "evening": "same bake as dusk, a little later; lamp on",
+  "sunrise": "new bake: low sun straight through the window, mullion shadows across the bed, floor and Ivan",
+  "void": "separate black stage: no room, light only from streak and bokeh emitters"
+ },
+ "beats": [
+  {
+   "id": "B1",
+   "name": "3 AM",
+   "t0": 0.0,
+   "t1": 37.0,
+   "script": "Para 1-3: \"It's 3 AM...\" to \"Ivan keeps saying yes.\"",
+   "purpose": "Hook and setup: Ivan alone at the one lit desk, the untouched glass, the system growing. Then the joke that is the thesis: Claude builds, Ivan says yes.",
+   "feeling": "cold, compelled; a dry laugh on \"Well...\"",
+   "temperature": "low",
+   "light": "3am",
+   "sound": "room tone, laptop fan, hard fast typing; sparse synth pulse; a held breath of silence before \"Well...\"; three dry key taps on \"yes\""
+  },
+  {
+   "id": "B2",
+   "name": "Two days ago",
+   "t0": 37.0,
+   "t1": 67.6,
+   "script": "Para 4-8: \"It started two days ago.\" to \"Review and approve.\"",
+   "purpose": "Flashback: how it began. Overwhelmed, offered relief, said yes. The promise: review and approve.",
+   "feeling": "frazzled, then relief and a little delight",
+   "temperature": "low to rising",
+   "light": "day (warm afternoon)",
+   "sound": "daytime city through the glass, phone typing taps; the Claude sprite's chime (tuned to the motif); first warm statement of the motif"
+  },
+  {
+   "id": "B3",
+   "name": "Cheat code",
+   "t0": 67.6,
+   "t1": 98.2,
+   "script": "Para 9-10 (first half): \"But once the email system was working...\" to \"...now takes minutes.\"",
+   "purpose": "Escalation: one module becomes five, days blur, life gets easier. Re-hook every 3-5 s (cards, eyes, icons, time-lapse, list, smile, clock).",
+   "feeling": "momentum, delight, a private high",
+   "temperature": "rising",
+   "light": "dusk -> evening -> time-lapse cycle -> 3am",
+   "sound": "each module pop is one note of the motif; time-lapse = room tone pitched and sped up, no stock whoosh; clock ticks accelerate then stop dead"
+  },
+  {
+   "id": "B4",
+   "name": "Another frequency",
+   "t0": 98.2,
+   "t1": 114.2,
+   "script": "Para 10 (second half): \"Ivan feels like he's vibrating...\" to \"...others can't even see.\"",
+   "purpose": "The turn: the one style switch of the chapter. The room falls away into an abstract void of light; he alone vibrates; a door of light opens. Peak of the high.",
+   "feeling": "euphoric, unreal, alone",
+   "temperature": "peak",
+   "light": "void",
+   "sound": "room sound cut to nothing on the first frame of the void; music swells to its fullest; a single high tone at the door; silence on the white frame"
+  },
+  {
+   "id": "B5",
+   "name": "Barely slept",
+   "t0": 114.2,
+   "t1": 147.4,
+   "script": "Para 11-12: \"He's barely slept.\" to \"Then he'll rest.\" (+ the phone on the couch)",
+   "purpose": "The cost. Back to the real room: the girlfriend's unanswered text against his system answering everyone; he knows; he keeps going.",
+   "feeling": "hollow, fraying, guilty, stubborn",
+   "temperature": "falling",
+   "light": "3am (late)",
+   "sound": "phone buzz muffled by the duvet; a run of soft 'sent' ticks from the desk; a thin high whine under \"thinness\"; the empty bed in near silence"
+  },
+  {
+   "id": "B6",
+   "name": "4 AM",
+   "t0": 147.4,
+   "t1": 190.2,
+   "script": "Para 13: \"It's not all pleasant.\" to \"The machine does what HE told it to do.\"",
+   "purpose": "Crisis and release: dread in the dark, then the module works and the dread turns into a rush and pride.",
+   "feeling": "dread -> rush -> pride",
+   "temperature": "low -> peak",
+   "light": "4am, 4am_iso, then a green-warm spill from the screens",
+   "sound": "low pulse like a heartbeat; mug rattle; the Enter key hit (transient, body, tail); a tests-pass chord; the motif lands loud on \"HE built that\""
+  },
+  {
+   "id": "B7",
+   "name": "Sunrise",
+   "t0": 190.2,
+   "t1": 231.8,
+   "script": "Para 14-15: [Dawn at the window.] \"By sunrise...\" to \"...supposed to do now.\"",
+   "purpose": "Return with a change, and the button. Everything is done; he turns his back on the screens to the sun, and has nothing left to do.",
+   "feeling": "exhausted and wired -> empty",
+   "temperature": "release",
+   "light": "4am -> sunrise",
+   "sound": "first birds and traffic; the motif once, slow, on a soft piano; then only room tone through the final hold"
+  }
+ ],
+ "vo": [
+  {
+   "t0": 6.0,
+   "t1": 9.8,
+   "who": "VO",
+   "text": "It's 3 AM and Ivan hasn't eaten since lunch."
+  },
+  {
+   "t0": 10.5,
+   "t1": 13.8,
+   "who": "VO",
+   "text": "There's a glass of water on his desk that he poured six hours ago."
+  },
+  {
+   "t0": 14.6,
+   "t1": 15.7,
+   "who": "VO",
+   "text": "It's still full."
+  },
+  {
+   "t0": 16.2,
+   "t1": 20.3,
+   "who": "VO",
+   "text": "He's hunched over his laptop, typing furiously, eyes bloodshot."
+  },
+  {
+   "t0": 20.8,
+   "t1": 26.4,
+   "who": "VO",
+   "text": "A terminal window, a Claude chat, and a growing sprawl of Python scripts."
+  },
+  {
+   "t0": 27.0,
+   "t1": 29.0,
+   "who": "VO",
+   "text": "He's building an email automation system."
+  },
+  {
+   "t0": 29.6,
+   "t1": 30.4,
+   "who": "VO",
+   "text": "Well..."
+  },
+  {
+   "t0": 31.0,
+   "t1": 33.6,
+   "who": "VO",
+   "text": "Technically, Claude is doing the building."
+  },
+  {
+   "t0": 34.2,
+   "t1": 36.0,
+   "who": "VO",
+   "text": "Ivan keeps saying yes."
+  },
+  {
+   "t0": 37.8,
+   "t1": 40.0,
+   "who": "VO",
+   "text": "It started two days ago."
+  },
+  {
+   "t0": 41.8,
+   "t1": 45.4,
+   "who": "IVAN (typing)",
+   "text": "i have like 400 unread emails. every single one wants a reply."
+  },
+  {
+   "t0": 45.7,
+   "t1": 47.2,
+   "who": "IVAN (typing)",
+   "text": "i'm fucking drowning here!"
+  },
+  {
+   "t0": 48.6,
+   "t1": 51.8,
+   "who": "CLAUDE (on screen)",
+   "text": "That sounds genuinely exhausting - and you're definitely not alone!"
+  },
+  {
+   "t0": 52.7,
+   "t1": 57.8,
+   "who": "CLAUDE (on screen)",
+   "text": "I can write a script that sorts your inbox and drafts the replies for you."
+  },
+  {
+   "t0": 58.1,
+   "t1": 61.6,
+   "who": "CLAUDE (on screen)",
+   "text": "You just review and approve. Want me to build one?"
+  },
+  {
+   "t0": 63.2,
+   "t1": 64.6,
+   "who": "VO",
+   "text": "That was the plan."
+  },
+  {
+   "t0": 65.2,
+   "t1": 66.6,
+   "who": "VO",
+   "text": "Review and approve."
+  },
+  {
+   "t0": 69.8,
+   "t1": 72.6,
+   "who": "VO",
+   "text": "But once the email system was working,"
+  },
+  {
+   "t0": 72.9,
+   "t1": 75.2,
+   "who": "VO",
+   "text": "Ivan saw what else was possible."
+  },
+  {
+   "t0": 75.6,
+   "t1": 80.2,
+   "who": "VO",
+   "text": "Calendar management. Meeting scheduling. Document drafting. Research summaries."
+  },
+  {
+   "t0": 80.8,
+   "t1": 83.8,
+   "who": "VO",
+   "text": "Each one a few hours of coding."
+  },
+  {
+   "t0": 84.4,
+   "t1": 88.2,
+   "who": "VO",
+   "text": "Each one removing another task from his daily routine."
+  },
+  {
+   "t0": 89.0,
+   "t1": 92.4,
+   "who": "VO",
+   "text": "It's like discovering a cheat code for life."
+  },
+  {
+   "t0": 93.2,
+   "t1": 97.6,
+   "who": "VO",
+   "text": "Every problem that used to take hours now takes minutes."
+  },
+  {
+   "t0": 98.4,
+   "t1": 102.7,
+   "who": "VO",
+   "text": "Ivan feels like he's vibrating at a different frequency"
+  },
+  {
+   "t0": 102.9,
+   "t1": 104.6,
+   "who": "VO",
+   "text": "than everyone around him,"
+  },
+  {
+   "t0": 105.0,
+   "t1": 109.8,
+   "who": "VO",
+   "text": "like he's stepped through a door that others can't even see."
+  },
+  {
+   "t0": 114.6,
+   "t1": 116.0,
+   "who": "VO",
+   "text": "He's barely slept."
+  },
+  {
+   "t0": 118.4,
+   "t1": 122.2,
+   "who": "VO",
+   "text": "His girlfriend stopped texting because he wasn't responding."
+  },
+  {
+   "t0": 122.6,
+   "t1": 126.2,
+   "who": "VO",
+   "text": "Ironic, given that his system now responds to everyone else."
+  },
+  {
+   "t0": 126.6,
+   "t1": 128.8,
+   "who": "VO",
+   "text": "He knows this isn't healthy."
+  },
+  {
+   "t0": 129.4,
+   "t1": 136.4,
+   "who": "VO",
+   "text": "He can feel something fraying at the edges of his mind, a thinness to his thoughts."
+  },
+  {
+   "t0": 137.2,
+   "t1": 139.4,
+   "who": "VO",
+   "text": "But he's close to something."
+  },
+  {
+   "t0": 140.3,
+   "t1": 143.0,
+   "who": "VO",
+   "text": "One more module. One more integration."
+  },
+  {
+   "t0": 143.6,
+   "t1": 145.0,
+   "who": "VO",
+   "text": "Then he'll rest."
+  },
+  {
+   "t0": 147.8,
+   "t1": 149.5,
+   "who": "VO",
+   "text": "It's not all pleasant."
+  },
+  {
+   "t0": 150.9,
+   "t1": 153.9,
+   "who": "VO",
+   "text": "Around 4 AM, when his eyes burn"
+  },
+  {
+   "t0": 154.4,
+   "t1": 157.6,
+   "who": "VO",
+   "text": "and his hands shake from a caffeine overload,"
+  },
+  {
+   "t0": 158.2,
+   "t1": 160.6,
+   "who": "VO",
+   "text": "Ivan feels a creeping dread."
+  },
+  {
+   "t0": 162.6,
+   "t1": 167.0,
+   "who": "VO",
+   "text": "A sense that he's building something he doesn't fully understand."
+  },
+  {
+   "t0": 168.0,
+   "t1": 173.6,
+   "who": "VO",
+   "text": "That each automation takes something from him, even as it gives something back."
+  },
+  {
+   "t0": 174.3,
+   "t1": 176.6,
+   "who": "VO",
+   "text": "But then he finishes another module,"
+  },
+  {
+   "t0": 176.8,
+   "t1": 177.8,
+   "who": "VO",
+   "text": "and it works,"
+  },
+  {
+   "t0": 178.7,
+   "t1": 183.0,
+   "who": "VO",
+   "text": "and the dread dissolves into a rush of pure satisfaction."
+  },
+  {
+   "t0": 183.6,
+   "t1": 185.6,
+   "who": "VO",
+   "text": "HE... built that."
+  },
+  {
+   "t0": 186.2,
+   "t1": 189.8,
+   "who": "VO",
+   "text": "The machine does what HE told it to do."
+  },
+  {
+   "t0": 195.0,
+   "t1": 197.6,
+   "who": "VO",
+   "text": "By sunrise, Ivan has a system"
+  },
+  {
+   "t0": 198.5,
+   "t1": 204.5,
+   "who": "VO",
+   "text": "that handles his email, manages his calendar, drafts his documents, and summarizes his reading."
+  },
+  {
+   "t0": 205.2,
+   "t1": 209.2,
+   "who": "VO",
+   "text": "He leans back in his chair, exhausted and wired."
+  },
+  {
+   "t0": 210.8,
+   "t1": 212.2,
+   "who": "VO",
+   "text": "Then he realizes..."
+  },
+  {
+   "t0": 213.4,
+   "t1": 217.4,
+   "who": "VO",
+   "text": "he doesn't know what he's supposed to do now."
+  }
+ ],
+ "shots": [
+  {
+   "id": "A01",
+   "name": "Three AM",
+   "beat": "B1",
+   "t0": 0.0,
+   "t1": 2.8,
+   "dur": 2.8,
+   "f0": 0,
+   "f1": 67,
+   "script": "(pre-VO opening, no line)",
+   "location": "room",
+   "light": "3am",
+   "framing": "top-down wide, ceiling pulled",
+   "lens_mm": [
+    18,
+    19
+   ],
+   "fstop": 5.6,
+   "from": [
+    2.25,
+    2.4,
+    3.45
+   ],
+   "to": [
+    2.15,
+    2.4,
+    3.2
+   ],
+   "at0": [
+    0.85,
+    2.4,
+    0.35
+   ],
+   "at1": [
+    0.85,
+    2.42,
+    0.35
+   ],
+   "move": "slow descent, 0.27 m",
+   "focus": [
+    1.2,
+    2.4,
+    0.5
+   ],
+   "focus_plan": "fixed on the room floor plane, deep stop",
+   "action": "Ivan hunched at the desk, typing (intro performance).",
+   "screen": "intro screens",
+   "props": "existing set",
+   "board": "ref plan_topdown.jpg (no board panel)",
+   "status": "exists",
+   "why": "Straight down into his room: bed, guitar, rugs, the lamp, and at the edge of it all the one lit desk. He is small inside his world. Lens raised from 17 to 18 mm to keep inside the 18-100 mm rule.",
+   "was": "E1 (s03)"
+  },
+  {
+   "id": "A02",
+   "name": "3:04",
+   "beat": "B1",
+   "t0": 2.8,
+   "t1": 5.0,
+   "dur": 2.2,
+   "f0": 67,
+   "f1": 120,
+   "script": "(pre-VO opening, no line)",
+   "location": "room (bed)",
+   "light": "3am",
+   "framing": "insert, phone on the duvet",
+   "lens_mm": [
+    45,
+    50
+   ],
+   "fstop": 2.0,
+   "from": [
+    1.86,
+    1.74,
+    0.7
+   ],
+   "to": [
+    1.85,
+    1.77,
+    0.685
+   ],
+   "at0": [
+    1.8,
+    1.95,
+    0.53
+   ],
+   "at1": [
+    1.8,
+    1.96,
+    0.53
+   ],
+   "move": "creep in 3 cm with a slow zoom (as E2)",
+   "focus": [
+    1.8,
+    1.95,
+    0.53
+   ],
+   "focus_plan": "locked on the lock-screen clock",
+   "action": "none in frame (Ivan typing off-screen; keyboard sound only)",
+   "screen": "phone lock screen: 3:04, three unanswered texts from Sarah, Mail: 214 new",
+   "props": "phone moved from the desk to the bed (north-east corner of the duvet)",
+   "board": "gap fill (sets up C r1c2)",
+   "status": "reuse",
+   "why": "E2 re-staged on the bed: the phone lies three metres from him, face up and ignored. It is planted where it lights up again in D02.",
+   "was": "E2 (intro)"
+  },
+  {
+   "id": "A03",
+   "name": "The zone",
+   "beat": "B1",
+   "t0": 5.0,
+   "t1": 9.9,
+   "dur": 4.9,
+   "f0": 120,
+   "f1": 238,
+   "script": "\"It's 3 AM and Ivan hasn't eaten since lunch.\"",
+   "location": "room",
+   "light": "3am",
+   "framing": "wide, from the dark door corner",
+   "lens_mm": [
+    22,
+    26
+   ],
+   "fstop": 2.8,
+   "from": [
+    3.72,
+    0.4,
+    1.78
+   ],
+   "to": [
+    3.05,
+    1.45,
+    1.58
+   ],
+   "at0": [
+    1.05,
+    4.42,
+    0.92
+   ],
+   "at1": [
+    1.05,
+    4.4,
+    1.0
+   ],
+   "move": "one long slow push across the room",
+   "focus": "eyes",
+   "focus_plan": "on his eyes throughout",
+   "action": "typing, hunched (intro performance)",
+   "screen": "intro screens",
+   "props": "existing",
+   "board": "A r1c1",
+   "status": "exists",
+   "why": "One long slow push toward the only lit corner, where he works.",
+   "was": "S1 (s03)"
+  },
+  {
+   "id": "A04",
+   "name": "Still full",
+   "beat": "B1",
+   "t0": 9.9,
+   "t1": 16.0,
+   "dur": 6.1,
+   "f0": 238,
+   "f1": 384,
+   "script": "\"There's a glass of water on his desk... It's still full.\"",
+   "location": "room (desk)",
+   "light": "3am",
+   "framing": "desk height, glass foreground, Ivan behind",
+   "lens_mm": [
+    28,
+    30
+   ],
+   "fstop": 4.0,
+   "from": [
+    0.552,
+    4.453,
+    0.8
+   ],
+   "to": [
+    0.57,
+    4.44,
+    0.803
+   ],
+   "at0": [
+    1.32,
+    3.81,
+    1.07
+   ],
+   "at1": [
+    1.32,
+    3.8,
+    1.08
+   ],
+   "move": "hair-small drift",
+   "focus": [
+    [
+     9.9,
+     [
+      0.76,
+      4.33,
+      0.84
+     ]
+    ],
+    [
+     12.2,
+     [
+      0.76,
+      4.33,
+      0.84
+     ]
+    ],
+    [
+     13.2,
+     "eyes"
+    ],
+    [
+     14.0,
+     "eyes"
+    ],
+    [
+     14.7,
+     [
+      0.76,
+      4.33,
+      0.84
+     ]
+    ]
+   ],
+   "focus_plan": "glass -> Ivan typing -> glass on \"still full\"",
+   "action": "typing",
+   "screen": "intro screens",
+   "props": "the full glass (motif, frame 1 of 3)",
+   "board": "A r1c2",
+   "status": "exists",
+   "why": "The chapter's one image: the untouched glass in front of the glowing screens.",
+   "was": "S2 (s03)"
+  },
+  {
+   "id": "A05",
+   "name": "Bloodshot",
+   "beat": "B1",
+   "t0": 16.0,
+   "t1": 20.6,
+   "dur": 4.6,
+   "f0": 384,
+   "f1": 494,
+   "script": "\"He's hunched over his laptop, typing furiously, eyes bloodshot.\"",
+   "location": "room (desk, wild north wall)",
+   "light": "3am",
+   "framing": "CU face, dolly zoom",
+   "lens_mm": [
+    25,
+    54
+   ],
+   "fstop": 2.0,
+   "from": [
+    1.06,
+    4.53,
+    1.03
+   ],
+   "to": [
+    1.07,
+    5.21,
+    1.03
+   ],
+   "at0": [
+    1.04,
+    3.95,
+    1.12
+   ],
+   "at1": [
+    1.04,
+    3.95,
+    1.12
+   ],
+   "move": "dolly zoom: camera pulls back as the lens closes in",
+   "focus": "eyes",
+   "focus_plan": "on his eyes",
+   "action": "hunches deeper, typing hard",
+   "screen": "intro screens",
+   "props": "existing",
+   "board": "A r1c3",
+   "status": "exists",
+   "why": "His face holds still while the room crowds in behind him.",
+   "dolly": 43,
+   "was": "S3 (s03)"
+  },
+  {
+   "id": "A06",
+   "name": "Reading",
+   "beat": "B1",
+   "t0": 20.6,
+   "t1": 26.6,
+   "dur": 6.0,
+   "f0": 494,
+   "f1": 638,
+   "script": "\"A terminal window, a Claude chat, and a growing sprawl of Python scripts.\"",
+   "location": "room (desk)",
+   "light": "3am",
+   "framing": "over the left shoulder, close on the laptop",
+   "lens_mm": [
+    60,
+    66
+   ],
+   "fstop": 1.4,
+   "from": [
+    0.9,
+    4.13,
+    1.4
+   ],
+   "to": [
+    0.92,
+    4.16,
+    1.37
+   ],
+   "at0": "lap:300,740",
+   "at1": "lap:450,240",
+   "move": "tiny push; aim keyed along the screen (intro atKeys)",
+   "focus": "READ (intro keyed pulls, line by line)",
+   "focus_plan": "focus moves line by line like his eyes",
+   "action": "typing, reading",
+   "screen": "terminal, Claude chat streaming, file list (intro screens)",
+   "props": "existing",
+   "board": "A r1c4",
+   "status": "exists",
+   "why": "The screen read like his eyes read it. Caption text changes: the script dropped \"On the screen:\".",
+   "was": "S4 (s03)"
+  },
+  {
+   "id": "A07",
+   "name": "The pipeline",
+   "beat": "B1",
+   "t0": 26.6,
+   "t1": 31.4,
+   "dur": 4.8,
+   "f0": 638,
+   "f1": 754,
+   "script": "\"He's building an email automation system.\" + \"Well...\"",
+   "location": "room (desk)",
+   "light": "3am",
+   "framing": "behind him, head soft foreground, pipeline monitor",
+   "lens_mm": [
+    35,
+    38
+   ],
+   "fstop": 2.8,
+   "from": [
+    0.82,
+    3.73,
+    1.28
+   ],
+   "to": [
+    0.96,
+    3.66,
+    1.3
+   ],
+   "at0": [
+    1.46,
+    4.54,
+    1.07
+   ],
+   "at1": [
+    1.46,
+    4.54,
+    1.07
+   ],
+   "move": "slide sideways 15 cm",
+   "focus": "mon:800,240",
+   "focus_plan": "on the monitor",
+   "action": "typing",
+   "screen": "pipeline: inbox, classify, draft, review, send",
+   "props": "optional: hand-drawn label \"EMAIL AUTOMATION SYSTEM\" with a pointer, as drawn on the board",
+   "board": "A r2c1",
+   "status": "exists",
+   "why": "The thing he is building, named. The board adds a hand-lettered callout; see open questions.",
+   "was": "S4b (s03)"
+  },
+  {
+   "id": "A08",
+   "name": "Claude builds",
+   "beat": "B1",
+   "t0": 31.4,
+   "t1": 34.0,
+   "dur": 2.6,
+   "f0": 754,
+   "f1": 816,
+   "script": "\"Technically, Claude is doing the building.\"",
+   "location": "room (desk)",
+   "light": "3am",
+   "framing": "3/4 side MS from his left front, laptop at frame left",
+   "lens_mm": [
+    40,
+    40
+   ],
+   "fstop": 2.0,
+   "from": [
+    0.45,
+    4.15,
+    1.15
+   ],
+   "to": [
+    0.47,
+    4.17,
+    1.15
+   ],
+   "at0": [
+    1.04,
+    3.95,
+    1.12
+   ],
+   "at1": [
+    1.04,
+    3.96,
+    1.12
+   ],
+   "move": "drift 3 cm toward the desk",
+   "focus": "eyes",
+   "focus_plan": "on his eyes; the full glass soft in the low foreground",
+   "action": "Ivan sits back 5 cm from the keyboard, hands lift off the keys and rest on the desk edge; he watches, eyes tracking the text; one small nod.",
+   "screen": "laptop: Claude chat streams 'Writing classify.py... done. Writing draft_reply.py...'; the editor fills with code by itself",
+   "props": "glass (foreground)",
+   "board": "A r2c2",
+   "status": "new",
+   "why": "His hands are off the keyboard: the code writes itself. The first time we see who is really building."
+  },
+  {
+   "id": "A09",
+   "name": "Saying yes",
+   "beat": "B1",
+   "t0": 34.0,
+   "t1": 37.0,
+   "dur": 3.0,
+   "f0": 816,
+   "f1": 888,
+   "script": "\"Ivan keeps saying yes.\"",
+   "location": "room (desk)",
+   "light": "3am",
+   "framing": "macro, keyboard from the right, screen soft above",
+   "lens_mm": [
+    85,
+    85
+   ],
+   "fstop": 2.8,
+   "from": [
+    1.3,
+    4.18,
+    0.84
+   ],
+   "to": [
+    1.29,
+    4.2,
+    0.83
+   ],
+   "at0": [
+    1.1,
+    4.33,
+    0.765
+   ],
+   "at1": [
+    1.11,
+    4.33,
+    0.765
+   ],
+   "move": "creep in 2 cm",
+   "focus": [
+    1.1,
+    4.33,
+    0.765
+   ],
+   "focus_plan": "locked on the Y key",
+   "action": "Right index finger: Y, then Enter, three times, each faster (keys hit at 34.6, 35.4, 35.9 s).",
+   "screen": "soft at frame top: 'Apply 3 changes? (y/n)' -> y -> 'Add tests? (y/n)' -> y -> 'Deploy? (y/n)' -> y",
+   "props": "laptop keyboard (existing)",
+   "board": "gap fill (A r2c3)",
+   "status": "new",
+   "why": "The joke of the chapter as an action: three yeses, faster each time."
+  },
+  {
+   "id": "B01",
+   "name": "Two days ago",
+   "beat": "B2",
+   "t0": 37.0,
+   "t1": 41.6,
+   "dur": 4.6,
+   "f0": 888,
+   "f1": 998,
+   "script": "\"It started two days ago.\"",
+   "location": "room",
+   "light": "3am -> day (blend 38.0-40.4)",
+   "framing": "locked wide from the door wall: window left, desk right",
+   "lens_mm": [
+    24,
+    24
+   ],
+   "fstop": 4.0,
+   "from": [
+    3.7,
+    2.7,
+    1.55
+   ],
+   "to": [
+    3.66,
+    2.72,
+    1.55
+   ],
+   "at0": [
+    0.6,
+    3.6,
+    1.05
+   ],
+   "at1": [
+    0.6,
+    3.6,
+    1.05
+   ],
+   "move": "locked (4 cm drift)",
+   "focus": "eyes",
+   "focus_plan": "on Ivan",
+   "action": "Ivan stays hunched; the light runs backwards around him.",
+   "screen": "screens dim to daytime brightness",
+   "props": "dressing swap during the blend: mugs, wrappers and the poured glass fade out; one fresh mug in",
+   "board": "gap fill (no panel; s02 2.1 design)",
+   "status": "reuse",
+   "why": "Time told by light alone: the night drains out of the same room and it is two days earlier.",
+   "was": "s02 2.1 (concept)"
+  },
+  {
+   "id": "B02",
+   "name": "Drowning",
+   "beat": "B2",
+   "t0": 41.6,
+   "t1": 45.6,
+   "dur": 4.0,
+   "f0": 998,
+   "f1": 1094,
+   "script": "IVAN: \"i have like 400 unread emails. every single one wants a reply.\"",
+   "location": "room (desk chair, reclined)",
+   "light": "day",
+   "framing": "MS, low, from the desk end; window blown out behind him",
+   "lens_mm": [
+    35,
+    35
+   ],
+   "fstop": 2.0,
+   "from": [
+    2.2,
+    4.25,
+    1.0
+   ],
+   "to": [
+    2.12,
+    4.2,
+    0.99
+   ],
+   "at0": [
+    0.95,
+    3.55,
+    1.02
+   ],
+   "at1": [
+    0.95,
+    3.56,
+    1.02
+   ],
+   "move": "slow push 9 cm",
+   "focus": "eyes",
+   "focus_plan": "on his eyes; the chat card soft at frame right",
+   "action": "Reclined far back in the desk chair, one sock foot on the desk-pedestal edge, phone held up in the right hand, thumb-typing; mouth moves (muttering), eyebrows up in exasperation.",
+   "screen": "floating chat card (frame right, upper third, at ~[0.75, 3.90, 1.30]): his message types out letter by letter",
+   "props": "phone in hand; floating chat card",
+   "board": "A r2c4 \"complaining to claude\"",
+   "status": "new",
+   "why": "The board's frame: warm afternoon, Ivan sprawled, the chat floating beside him. He is a normal guy having a bad inbox day."
+  },
+  {
+   "id": "B03",
+   "name": "Send",
+   "beat": "B2",
+   "t0": 45.6,
+   "t1": 48.2,
+   "dur": 2.6,
+   "f0": 1094,
+   "f1": 1157,
+   "script": "IVAN: \"i'm fucking drowning here!\"",
+   "location": "room (desk chair, reclined)",
+   "light": "day",
+   "framing": "insert over his left shoulder onto the phone",
+   "lens_mm": [
+    60,
+    60
+   ],
+   "fstop": 2.0,
+   "from": [
+    0.94,
+    3.52,
+    1.08
+   ],
+   "to": [
+    0.95,
+    3.54,
+    1.085
+   ],
+   "at0": [
+    1.08,
+    3.74,
+    1.16
+   ],
+   "at1": [
+    1.08,
+    3.74,
+    1.16
+   ],
+   "move": "creep 2 cm",
+   "focus": [
+    1.08,
+    3.74,
+    1.16
+   ],
+   "focus_plan": "on the phone screen",
+   "action": "Thumb types the line, jabs Send at 47.6 s.",
+   "screen": "phone: Mail badge 412 unread at the top; Claude chat, his message, Send",
+   "props": "phone in hand",
+   "board": "gap fill",
+   "status": "new",
+   "why": "The macro insert on hands and phone (fern's device) gives the line a physical action."
+  },
+  {
+   "id": "B04",
+   "name": "Hello, Claude",
+   "beat": "B2",
+   "t0": 48.2,
+   "t1": 52.6,
+   "dur": 4.4,
+   "f0": 1157,
+   "f1": 1262,
+   "script": "CLAUDE: \"That sounds genuinely exhausting - and you're definitely not alone!\"",
+   "location": "room (desk chair, reclined)",
+   "light": "day",
+   "framing": "CU 3/4 from his right front, phone at frame left, sprite top left",
+   "lens_mm": [
+    50,
+    50
+   ],
+   "fstop": 2.0,
+   "from": [
+    1.4,
+    4.02,
+    1.18
+   ],
+   "to": [
+    1.38,
+    4.0,
+    1.18
+   ],
+   "at0": [
+    1.02,
+    3.64,
+    1.1
+   ],
+   "at1": [
+    1.02,
+    3.64,
+    1.1
+   ],
+   "move": "settle 3 cm",
+   "focus": "eyes",
+   "focus_plan": "on his eyes; the sprite is a soft glow",
+   "action": "At 48.3 s the sprite pops out above the phone; Ivan's head jerks back 3 cm, eyes up to it, mouth opens (surprise), then a short laugh breath.",
+   "screen": "phone reply bubble; the glowing yellow Claude sprite above the phone (~[1.00, 3.82, 1.32])",
+   "props": "Claude sprite",
+   "board": "A r3c1",
+   "status": "new",
+   "why": "The board's surprise beat: the help arrives as a cheerful little character. Claude is friendly before it is anything else."
+  },
+  {
+   "id": "B05",
+   "name": "The offer",
+   "beat": "B2",
+   "t0": 52.6,
+   "t1": 58.0,
+   "dur": 5.4,
+   "f0": 1262,
+   "f1": 1392,
+   "script": "CLAUDE: \"I can write a script that sorts your inbox and drafts the replies for you.\"",
+   "location": "room (desk chair, reclined)",
+   "light": "day",
+   "framing": "over his left shoulder onto the floating card",
+   "lens_mm": [
+    40,
+    40
+   ],
+   "fstop": 2.8,
+   "from": [
+    0.68,
+    3.3,
+    1.22
+   ],
+   "to": [
+    0.72,
+    3.36,
+    1.22
+   ],
+   "at0": [
+    0.8,
+    3.95,
+    1.28
+   ],
+   "at1": [
+    0.8,
+    3.95,
+    1.28
+   ],
+   "move": "push 7 cm toward the card",
+   "focus": [
+    0.75,
+    3.9,
+    1.3
+   ],
+   "focus_plan": "on the card; his head soft in the right foreground",
+   "action": "Reading; slow nod; thumb hovers.",
+   "screen": "card: Claude's reply streams in, with a small sketch of the pipeline (inbox -> sort -> draft -> you)",
+   "props": "floating chat card",
+   "board": "gap fill (A r3c2)",
+   "status": "new",
+   "why": "We read the offer with him."
+  },
+  {
+   "id": "B06",
+   "name": "yes",
+   "beat": "B2",
+   "t0": 58.0,
+   "t1": 62.8,
+   "dur": 4.8,
+   "f0": 1392,
+   "f1": 1507,
+   "script": "CLAUDE: \"You just review and approve. Want me to build one?\"",
+   "location": "room (desk chair, reclined)",
+   "light": "day",
+   "framing": "tight insert on the phone and thumb",
+   "lens_mm": [
+    85,
+    85
+   ],
+   "fstop": 2.8,
+   "from": [
+    0.96,
+    3.55,
+    1.1
+   ],
+   "to": [
+    0.97,
+    3.57,
+    1.11
+   ],
+   "at0": [
+    1.08,
+    3.74,
+    1.16
+   ],
+   "at1": [
+    1.08,
+    3.74,
+    1.16
+   ],
+   "move": "creep 2 cm",
+   "focus": [
+    1.08,
+    3.74,
+    1.16
+   ],
+   "focus_plan": "on the reply box",
+   "action": "After the question, the thumb types 'yes' (61.6-62.2 s) and sends.",
+   "screen": "reply box: 'yes' -> sent",
+   "props": "phone",
+   "board": "gap fill (A r3c3)",
+   "status": "new",
+   "why": "The first yes. A08/A09 already showed where it leads."
+  },
+  {
+   "id": "B07",
+   "name": "The plan",
+   "beat": "B2",
+   "t0": 62.8,
+   "t1": 67.6,
+   "dur": 4.8,
+   "f0": 1507,
+   "f1": 1622,
+   "script": "\"That was the plan. Review and approve.\"",
+   "location": "room (desk, wild north wall)",
+   "light": "day",
+   "framing": "CU sticky note on the back of the laptop lid, Ivan behind",
+   "lens_mm": [
+    85,
+    85
+   ],
+   "fstop": 2.0,
+   "from": [
+    1.13,
+    4.83,
+    0.93
+   ],
+   "to": [
+    1.12,
+    4.76,
+    0.935
+   ],
+   "at0": [
+    1.12,
+    4.48,
+    0.93
+   ],
+   "at1": [
+    1.07,
+    4.23,
+    1.07
+   ],
+   "move": "creeping push 7 cm, aim tilts up to his face",
+   "focus": [
+    [
+     62.8,
+     [
+      1.12,
+      4.489,
+      0.925
+     ]
+    ],
+    [
+     64.9,
+     [
+      1.12,
+      4.489,
+      0.925
+     ]
+    ],
+    [
+     66.1,
+     "eyes"
+    ]
+   ],
+   "focus_plan": "note -> his face (the focus leaves the promise)",
+   "action": "Now sitting up at the laptop, typing, pleased; does not look at the note.",
+   "screen": "laptop back only",
+   "props": "sticky note REVIEW + APPROVE (port from s02, NOTE moved by OFF)",
+   "board": "gap fill (A r3c4)",
+   "status": "reuse",
+   "why": "The promise on a sticky note; the focus slipping off it says he won't keep it.",
+   "was": "s02 2.7"
+  },
+  {
+   "id": "C00",
+   "name": "Dusk",
+   "beat": "B3",
+   "t0": 67.6,
+   "t1": 69.6,
+   "dur": 2.0,
+   "f0": 1622,
+   "f1": 1670,
+   "script": "(no line, a breath)",
+   "location": "room (window)",
+   "light": "dusk (day -> evening)",
+   "framing": "the window glass, city out of focus",
+   "lens_mm": [
+    50,
+    50
+   ],
+   "fstop": 1.4,
+   "from": [
+    0.45,
+    2.3,
+    1.55
+   ],
+   "to": [
+    0.45,
+    2.42,
+    1.55
+   ],
+   "at0": [
+    -3.0,
+    2.25,
+    1.45
+   ],
+   "at1": [
+    -3.0,
+    2.37,
+    1.45
+   ],
+   "move": "slide 12 cm along the glass",
+   "focus": [
+    0.0,
+    2.33,
+    1.52
+   ],
+   "focus_plan": "on the glass, the city is pure bokeh",
+   "action": "none",
+   "screen": "none",
+   "props": "city lights switching on (house windows, street lights, red aviation lights)",
+   "board": "B r1c1",
+   "status": "new",
+   "why": "Time passes in one breath; the city becomes bokeh, the seed of the light streaks in B4."
+  },
+  {
+   "id": "C01",
+   "name": "It works",
+   "beat": "B3",
+   "t0": 69.6,
+   "t1": 72.8,
+   "dur": 3.2,
+   "f0": 1670,
+   "f1": 1747,
+   "script": "\"But once the email system was working,\"",
+   "location": "room (desk)",
+   "light": "evening",
+   "framing": "front, floating pipeline cards sharp, Ivan soft behind",
+   "lens_mm": [
+    40,
+    40
+   ],
+   "fstop": 2.8,
+   "from": [
+    1.04,
+    4.75,
+    1.18
+   ],
+   "to": [
+    1.04,
+    4.7,
+    1.18
+   ],
+   "at0": [
+    1.04,
+    3.92,
+    1.14
+   ],
+   "at1": [
+    1.04,
+    3.92,
+    1.14
+   ],
+   "move": "push 5 cm",
+   "focus": [
+    1.04,
+    4.2,
+    1.22
+   ],
+   "focus_plan": "on the cards; Ivan soft",
+   "action": "Ivan watches, typing a little; small satisfied exhale.",
+   "screen": "floating cards: inbox stack -> gear turning -> drafts stack, an arrow looping back; cards tick green",
+   "props": "floating UI cards",
+   "board": "B r2c1 \"But once the email system\"",
+   "status": "new",
+   "why": "The system running on its own, drawn the way the board draws it."
+  },
+  {
+   "id": "C02",
+   "name": "What else",
+   "beat": "B3",
+   "t0": 72.8,
+   "t1": 75.4,
+   "dur": 2.6,
+   "f0": 1747,
+   "f1": 1810,
+   "script": "\"Ivan saw what else was possible.\"",
+   "location": "room (desk)",
+   "light": "evening",
+   "framing": "ECU both eyes through the glasses, front",
+   "lens_mm": [
+    85,
+    85
+   ],
+   "fstop": 2.0,
+   "from": [
+    1.04,
+    4.3,
+    1.16
+   ],
+   "to": [
+    1.04,
+    4.27,
+    1.16
+   ],
+   "at0": [
+    1.04,
+    3.93,
+    1.15
+   ],
+   "at1": [
+    1.04,
+    3.93,
+    1.15
+   ],
+   "move": "creep 3 cm",
+   "focus": "eyes",
+   "focus_plan": "on the eyes",
+   "action": "Eyes slide to his right (73.2 s), hold, then come back to camera and widen (74.3 s); brows lift.",
+   "screen": "reflection in the lenses: the green pipeline cards",
+   "props": "glasses reflection",
+   "board": "B r2c3 + B r2c4 (one shot); B r1c3 folded in",
+   "status": "new",
+   "why": "An idea, played in the eyes only."
+  },
+  {
+   "id": "C03",
+   "name": "Modules",
+   "beat": "B3",
+   "t0": 75.4,
+   "t1": 80.6,
+   "dur": 5.2,
+   "f0": 1810,
+   "f1": 1934,
+   "script": "\"Calendar management. Meeting scheduling. Document drafting. Research summaries.\"",
+   "location": "room (desk)",
+   "light": "evening",
+   "framing": "locked from behind: Ivan's back, desk, monitors",
+   "lens_mm": [
+    28,
+    28
+   ],
+   "fstop": 4.0,
+   "from": [
+    1.05,
+    2.55,
+    1.55
+   ],
+   "to": [
+    1.05,
+    2.6,
+    1.54
+   ],
+   "at0": [
+    1.05,
+    4.55,
+    1.05
+   ],
+   "at1": [
+    1.05,
+    4.55,
+    1.05
+   ],
+   "move": "locked (5 cm drift)",
+   "focus": [
+    1.05,
+    4.0,
+    1.1
+   ],
+   "focus_plan": "deep; everything readable",
+   "action": "Typing; at each icon his head ticks slightly toward it.",
+   "screen": "icons pop out around the monitors on each word: calendar 75.6, meeting/clock 76.8, document 78.0, research/magnifier 79.2; the monitor tiles light one by one",
+   "props": "floating icon cards (calendar, clock, docs, folders, gears)",
+   "board": "B r1c2 (start frame) -> B r3c1 (end frame)",
+   "status": "new",
+   "why": "Board B's same frame before and after: the empty desk, then the desk surrounded by his new machines."
+  },
+  {
+   "id": "C04",
+   "name": "Hours",
+   "beat": "B3",
+   "t0": 80.6,
+   "t1": 84.2,
+   "dur": 3.6,
+   "f0": 1934,
+   "f1": 2021,
+   "script": "\"Each one a few hours of coding.\"",
+   "location": "room",
+   "light": "time-lapse: evening -> 3am -> sunrise -> day -> evening",
+   "framing": "locked wide from the door corner",
+   "lens_mm": [
+    20,
+    20
+   ],
+   "fstop": 8.0,
+   "from": [
+    3.7,
+    0.45,
+    1.75
+   ],
+   "to": [
+    3.7,
+    0.45,
+    1.75
+   ],
+   "at0": [
+    1.05,
+    4.2,
+    0.95
+   ],
+   "at1": [
+    1.05,
+    4.2,
+    0.95
+   ],
+   "move": "locked",
+   "focus": [
+    1.05,
+    4.0,
+    1.0
+   ],
+   "focus_plan": "deep",
+   "action": "Ivan at 8x: typing, standing, stretching, sitting; mugs appear on the desk.",
+   "screen": "flicker of code",
+   "props": "mug count rises 1 -> 3",
+   "board": "gap fill (s02 2.10)",
+   "status": "reuse",
+   "why": "Days blur in 3.6 s, told by light.",
+   "was": "s02 2.10 (concept)"
+  },
+  {
+   "id": "C05",
+   "name": "Checked off",
+   "beat": "B3",
+   "t0": 84.2,
+   "t1": 88.6,
+   "dur": 4.4,
+   "f0": 2021,
+   "f1": 2126,
+   "script": "\"Each one removing another task from his daily routine.\"",
+   "location": "room (desk)",
+   "light": "3am",
+   "framing": "over the left shoulder on the laptop to-do list",
+   "lens_mm": [
+    60,
+    64
+   ],
+   "fstop": 1.6,
+   "from": [
+    0.9,
+    4.13,
+    1.4
+   ],
+   "to": [
+    0.92,
+    4.16,
+    1.37
+   ],
+   "at0": "lap:560,260",
+   "at1": "lap:560,520",
+   "move": "tiny push, aim down the list",
+   "focus": [
+    [
+     84.2,
+     "lap:420,200"
+    ],
+    [
+     85.4,
+     "lap:420,260"
+    ],
+    [
+     86.4,
+     "lap:420,340"
+    ],
+    [
+     87.4,
+     "lap:420,420"
+    ],
+    [
+     88.4,
+     "lap:420,500"
+    ]
+   ],
+   "focus_plan": "rack down the list as items tick",
+   "action": "Hands still; he watches.",
+   "screen": "TODO.md items check themselves off, then 'nothing left.' (s02 todo())",
+   "props": "existing",
+   "board": "gap fill (s02 2.11)",
+   "status": "reuse",
+   "why": "His routine erased line by line.",
+   "was": "s02 2.11 + S4 camera"
+  },
+  {
+   "id": "C06",
+   "name": "Cheat code",
+   "beat": "B3",
+   "t0": 88.6,
+   "t1": 93.0,
+   "dur": 4.4,
+   "f0": 2126,
+   "f1": 2232,
+   "script": "\"It's like discovering a cheat code for life.\"",
+   "location": "room (desk, wild north wall)",
+   "light": "3am",
+   "framing": "MS front, hands on the keyboard",
+   "lens_mm": [
+    50,
+    50
+   ],
+   "fstop": 2.0,
+   "from": [
+    1.06,
+    4.95,
+    1.22
+   ],
+   "to": [
+    1.06,
+    4.88,
+    1.21
+   ],
+   "at0": [
+    1.04,
+    3.92,
+    1.05
+   ],
+   "at1": [
+    1.04,
+    3.92,
+    1.05
+   ],
+   "move": "push 7 cm",
+   "focus": "eyes",
+   "focus_plan": "on his eyes",
+   "action": "Fingers spread on the keys; mouth opens to a small 'o', then a slow private smile; chin lifts 2 degrees.",
+   "screen": "screen glow only",
+   "props": "none",
+   "board": "B r2c2",
+   "status": "new",
+   "why": "Wonder, quietly. The board's open-mouthed delight."
+  },
+  {
+   "id": "C07",
+   "name": "Hours to minutes",
+   "beat": "B3",
+   "t0": 93.0,
+   "t1": 98.2,
+   "dur": 5.2,
+   "f0": 2232,
+   "f1": 2357,
+   "script": "\"Every problem that used to take hours now takes minutes.\"",
+   "location": "room (nightstand)",
+   "light": "3am",
+   "framing": "alarm clock large in the left foreground by the lamp, Ivan tiny at the lit desk far right",
+   "lens_mm": [
+    35,
+    35
+   ],
+   "fstop": 2.0,
+   "from": [
+    0.48,
+    0.5,
+    0.86
+   ],
+   "to": [
+    0.47,
+    0.52,
+    0.86
+   ],
+   "at0": [
+    0.2,
+    2.48,
+    0.88
+   ],
+   "at1": [
+    0.2,
+    2.48,
+    0.88
+   ],
+   "move": "drift 2 cm",
+   "focus": [
+    [
+     93.0,
+     [
+      0.22,
+      0.8,
+      0.78
+     ]
+    ],
+    [
+     96.8,
+     [
+      0.22,
+      0.8,
+      0.78
+     ]
+    ],
+    [
+     97.6,
+     "eyes"
+    ]
+   ],
+   "focus_plan": "clock -> Ivan as the hands stop",
+   "action": "Ivan types far away, small.",
+   "screen": "none",
+   "props": "alarm clock hands overlay: spin 9:12 PM -> 2:58 AM between 94.4 and 96.6 s, then stop",
+   "board": "gap fill (s02 2.13)",
+   "status": "new",
+   "why": "Hours collapse into seconds; the lamp and the bed he isn't using sit right beside the clock.",
+   "was": "s02 2.13 (concept)"
+  },
+  {
+   "id": "V01",
+   "name": "Frequency",
+   "beat": "B4",
+   "t0": 98.2,
+   "t1": 102.8,
+   "dur": 4.6,
+   "f0": 2357,
+   "f1": 2467,
+   "script": "\"Ivan feels like he's vibrating at a different frequency\"",
+   "location": "void (stage frame: Ivan at origin facing -y)",
+   "light": "void",
+   "framing": "wide, Ivan small just left of centre on black",
+   "lens_mm": [
+    50,
+    50
+   ],
+   "fstop": 2.8,
+   "from": [
+    0.0,
+    -6.0,
+    1.2
+   ],
+   "to": [
+    0.0,
+    -5.5,
+    1.2
+   ],
+   "at0": [
+    0.3,
+    0.0,
+    0.9
+   ],
+   "at1": [
+    0.3,
+    0.0,
+    0.9
+   ],
+   "move": "slow push 0.5 m",
+   "focus": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "focus_plan": "on Ivan",
+   "action": "Standing, hands loose, looking ahead; breathing. A faint glow pools at his feet.",
+   "screen": "none",
+   "props": "void stage; one warm streak passes low behind him at 100.5 s",
+   "board": "B r3c2",
+   "status": "new",
+   "why": "Hard cut from the room into nothing: the board's small figure on black."
+  },
+  {
+   "id": "V02",
+   "name": "Everyone around him",
+   "beat": "B4",
+   "t0": 102.8,
+   "t1": 105.0,
+   "dur": 2.2,
+   "f0": 2467,
+   "f1": 2520,
+   "script": "\"than everyone around him,\"",
+   "location": "void",
+   "light": "void",
+   "framing": "full figure, streaks in front and behind",
+   "lens_mm": [
+    35,
+    35
+   ],
+   "fstop": 1.4,
+   "from": [
+    0.0,
+    -3.2,
+    1.1
+   ],
+   "to": [
+    0.0,
+    -3.0,
+    1.1
+   ],
+   "at0": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "at1": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "move": "push 0.2 m",
+   "focus": [
+    0.0,
+    0.0,
+    1.0
+   ],
+   "focus_plan": "on Ivan; streaks are big soft blobs",
+   "action": "Still; the two ghost copies (s02 vibrate) shake around him while every streak drifts slowly.",
+   "screen": "none",
+   "props": "bokeh streaks red/orange/peach/cyan; ghost doubles",
+   "board": "B r3c3",
+   "status": "new",
+   "why": "The world drifts slowly; only he is humming fast."
+  },
+  {
+   "id": "V03",
+   "name": "The door",
+   "beat": "B4",
+   "t0": 105.0,
+   "t1": 111.6,
+   "dur": 6.6,
+   "f0": 2520,
+   "f1": 2678,
+   "script": "\"like he's stepped through a door that others can't even see.\"",
+   "location": "void",
+   "light": "void -> white",
+   "framing": "low, from behind his shoulder, a tunnel of light streaks",
+   "lens_mm": [
+    24,
+    24
+   ],
+   "fstop": 2.0,
+   "from": [
+    0.25,
+    1.6,
+    1.0
+   ],
+   "to": [
+    0.15,
+    0.9,
+    1.15
+   ],
+   "at0": [
+    0.0,
+    -8.0,
+    2.0
+   ],
+   "at1": [
+    0.0,
+    -8.0,
+    2.0
+   ],
+   "move": "push 0.7 m past his shoulder",
+   "focus": [
+    [
+     105.0,
+     [
+      0.0,
+      0.0,
+      1.5
+     ]
+    ],
+    [
+     108.6,
+     [
+      0.0,
+      0.0,
+      1.5
+     ]
+    ],
+    [
+     109.6,
+     [
+      0.0,
+      -8.0,
+      1.2
+     ]
+    ]
+   ],
+   "focus_plan": "his back -> the door",
+   "action": "He takes one step forward (107.5 s), then stands; head tilts up.",
+   "screen": "none",
+   "props": "streak tunnel rushing toward a vanishing point; at 109.0 s the streaks part into a tall slot of white light (the door); bloom to white 110.6-111.6",
+   "board": "B r3c4",
+   "status": "new",
+   "why": "The door only he can see. The peak of the high."
+  },
+  {
+   "id": "V04",
+   "name": "Back",
+   "beat": "B4",
+   "t0": 111.6,
+   "t1": 114.2,
+   "dur": 2.6,
+   "f0": 2678,
+   "f1": 2741,
+   "script": "(no line)",
+   "location": "room (desk)",
+   "light": "3am",
+   "framing": "ECU right eye through the lens",
+   "lens_mm": [
+    100,
+    100
+   ],
+   "fstop": 2.0,
+   "from": [
+    1.2,
+    4.18,
+    1.17
+   ],
+   "to": [
+    1.17,
+    4.15,
+    1.16
+   ],
+   "at0": [
+    1.02,
+    3.93,
+    1.15
+   ],
+   "at1": [
+    1.02,
+    3.93,
+    1.15
+   ],
+   "move": "creep 4 cm",
+   "focus": "eyes",
+   "focus_plan": "on the eye",
+   "action": "One slow blink; the eye refocuses.",
+   "screen": "in the lens: warm streaks slow down and turn back into lines of code",
+   "props": "glasses reflection",
+   "board": "B r4c1",
+   "status": "new",
+   "why": "Out of the white and back into his eye: the streaks were the screen all along."
+  },
+  {
+   "id": "D01",
+   "name": "Barely slept",
+   "beat": "B5",
+   "t0": 114.2,
+   "t1": 117.8,
+   "dur": 3.6,
+   "f0": 2741,
+   "f1": 2827,
+   "script": "\"He's barely slept.\"",
+   "location": "room (window, camera outside)",
+   "light": "3am",
+   "framing": "MS through the window from outside, glass reflections over him",
+   "lens_mm": [
+    50,
+    50
+   ],
+   "fstop": 2.0,
+   "from": [
+    -0.7,
+    2.05,
+    1.55
+   ],
+   "to": [
+    -0.6,
+    2.1,
+    1.55
+   ],
+   "at0": [
+    0.42,
+    2.4,
+    1.6
+   ],
+   "at1": [
+    0.42,
+    2.4,
+    1.6
+   ],
+   "move": "push 11 cm toward the glass",
+   "focus": "eyes",
+   "focus_plan": "on his eyes through the glass",
+   "action": "Standing at the window, mug in the right hand at chest height, looking out at the city; he doesn't drink.",
+   "screen": "none",
+   "props": "standing Ivan, mug in hand, window exterior face",
+   "board": "C r1c1 \"He barely slept\"",
+   "status": "new",
+   "why": "Glass between him and the world, as the board draws it. Fallback camera inside at [1.40, 3.20, 1.50] if the exterior face doesn't hold up."
+  },
+  {
+   "id": "D02",
+   "name": "Unanswered",
+   "beat": "B5",
+   "t0": 117.8,
+   "t1": 126.4,
+   "dur": 8.6,
+   "f0": 2827,
+   "f1": 3034,
+   "script": "\"His girlfriend stopped texting... Ironic, given that his system now responds to everyone else.\" + [phone lights up on the couch]",
+   "location": "room (bed -> desk)",
+   "light": "3am",
+   "framing": "low on the duvet: phone foreground, the desk and Ivan's back deep in frame",
+   "lens_mm": [
+    35,
+    35
+   ],
+   "fstop": 2.0,
+   "from": [
+    1.7,
+    1.55,
+    0.72
+   ],
+   "to": [
+    1.68,
+    1.62,
+    0.72
+   ],
+   "at0": [
+    1.7,
+    3.51,
+    0.34
+   ],
+   "at1": [
+    1.68,
+    3.55,
+    0.36
+   ],
+   "move": "push 7 cm",
+   "focus": [
+    [
+     117.8,
+     [
+      1.8,
+      1.95,
+      0.53
+     ]
+    ],
+    [
+     122.2,
+     [
+      1.8,
+      1.95,
+      0.53
+     ]
+    ],
+    [
+     123.2,
+     "mon:800,400"
+    ]
+   ],
+   "focus_plan": "phone -> the monitors as the phone goes dark",
+   "action": "Ivan at the desk, back to camera, typing; never turns.",
+   "screen": "phone wakes at 118.0 s: 'Sarah: are you ok?' (buzz), dims at 122.0 s; monitor: auto-replies fire 'Sent v' x12",
+   "props": "phone on the bed, notification glow on the duvet",
+   "board": "C r1c2 \"gf stopped texting\" + C r1c3 \"system responds to everyone\" (one shot)",
+   "status": "new",
+   "why": "One focus pull says the irony: her message in the foreground, his machine answering everyone else behind."
+  },
+  {
+   "id": "D03",
+   "name": "Thinness",
+   "beat": "B5",
+   "t0": 126.4,
+   "t1": 137.0,
+   "dur": 10.6,
+   "f0": 3034,
+   "f1": 3288,
+   "script": "\"He knows this isn't healthy. He can feel something fraying..., a thinness to his thoughts.\"",
+   "location": "room (desk)",
+   "light": "3am",
+   "framing": "CU from the desk end, past his face to the window bokeh",
+   "lens_mm": [
+    55,
+    55
+   ],
+   "fstop": 1.8,
+   "from": [
+    1.92,
+    4.36,
+    1.2
+   ],
+   "to": [
+    1.78,
+    4.3,
+    1.18
+   ],
+   "at0": [
+    1.04,
+    3.95,
+    1.12
+   ],
+   "at1": [
+    1.04,
+    3.95,
+    1.12
+   ],
+   "move": "very slow push 15 cm over 10.6 s",
+   "focus": "eyes",
+   "focus_plan": "on his eyes",
+   "action": "Mug at his lips, sips, holds it there; eyes heavy, half-lidded; at 130 s his gaze drifts off the screen to nothing.",
+   "screen": "monitor bokeh",
+   "props": "mug in hand; from 129.4 s the city bokeh behind him stretches into thin horizontal lines",
+   "board": "C r1c4 \"he knows it's not healthy\" + C r2c1 \"thinness to his thoughts\" (one shot)",
+   "status": "new",
+   "why": "Held a beat longer than comfortable; the world behind him thins out while he stays still."
+  },
+  {
+   "id": "D04",
+   "name": "Close to something",
+   "beat": "B5",
+   "t0": 137.0,
+   "t1": 140.2,
+   "dur": 3.2,
+   "f0": 3288,
+   "f1": 3365,
+   "script": "\"But he's close to something.\"",
+   "location": "room (desk)",
+   "light": "3am",
+   "framing": "OTS close, his profile left, screen bokeh right",
+   "lens_mm": [
+    60,
+    60
+   ],
+   "fstop": 1.6,
+   "from": [
+    1.25,
+    3.7,
+    1.25
+   ],
+   "to": [
+    1.24,
+    3.74,
+    1.24
+   ],
+   "at0": [
+    1.0,
+    4.15,
+    1.1
+   ],
+   "at1": [
+    1.0,
+    4.15,
+    1.1
+   ],
+   "move": "creep 4 cm",
+   "focus": [
+    1.06,
+    3.98,
+    1.1
+   ],
+   "focus_plan": "on his lips and the mug",
+   "action": "Drains the last of the coffee in one tilt, puts the mug down hard, leans in.",
+   "screen": "bokeh",
+   "props": "mug",
+   "board": "C r2c2 \"one more mode... then he'll rest\"",
+   "status": "new",
+   "why": "Decision in one gesture: finish the cup, lean in."
+  },
+  {
+   "id": "D05",
+   "name": "One more",
+   "beat": "B5",
+   "t0": 140.2,
+   "t1": 143.4,
+   "dur": 3.2,
+   "f0": 3365,
+   "f1": 3442,
+   "script": "\"One more module. One more integration.\"",
+   "location": "room (desk)",
+   "light": "3am",
+   "framing": "insert on the second monitor",
+   "lens_mm": [
+    50,
+    50
+   ],
+   "fstop": 2.8,
+   "from": [
+    1.64,
+    4.14,
+    1.1
+   ],
+   "to": [
+    1.67,
+    4.18,
+    1.09
+   ],
+   "at0": [
+    2.017,
+    4.596,
+    1.066
+   ],
+   "at1": [
+    2.017,
+    4.596,
+    1.066
+   ],
+   "move": "push 5 cm",
+   "focus": [
+    2.017,
+    4.596,
+    1.066
+   ],
+   "focus_plan": "on the editor",
+   "action": "(off-screen) typing",
+   "screen": "Monitor2 (live): new tab modules/briefing.py opens (140.6 s), then integrations/slack.py (141.9 s); 'Proceed? (y/n) y'",
+   "props": "Monitor2 needs a live canvas",
+   "board": "gap fill (C r2c3)",
+   "status": "new",
+   "why": "'One more' made literal: two new files in three seconds."
+  },
+  {
+   "id": "D06",
+   "name": "Then he'll rest",
+   "beat": "B5",
+   "t0": 143.4,
+   "t1": 147.4,
+   "dur": 4.0,
+   "f0": 3442,
+   "f1": 3538,
+   "script": "\"Then he'll rest.\"",
+   "location": "room (bed)",
+   "light": "3am",
+   "framing": "the empty bed in lamplight, from its foot",
+   "lens_mm": [
+    35,
+    35
+   ],
+   "fstop": 2.8,
+   "from": [
+    1.3,
+    2.7,
+    0.95
+   ],
+   "to": [
+    1.3,
+    2.62,
+    0.93
+   ],
+   "at0": [
+    0.95,
+    0.55,
+    0.62
+   ],
+   "at1": [
+    0.95,
+    0.55,
+    0.62
+   ],
+   "move": "slow push 8 cm",
+   "focus": [
+    1.0,
+    0.45,
+    0.6
+   ],
+   "focus_plan": "on the pillows",
+   "action": "none (typing heard off-screen)",
+   "screen": "phone dark on the duvet",
+   "props": "bed, lamp on",
+   "board": "gap fill (C r2c4)",
+   "status": "new",
+   "why": "The rest he promises, empty and waiting. Hold past the line."
+  },
+  {
+   "id": "E01",
+   "name": "Not all pleasant",
+   "beat": "B6",
+   "t0": 147.4,
+   "t1": 150.8,
+   "dur": 3.4,
+   "f0": 3538,
+   "f1": 3619,
+   "script": "\"It's not all pleasant.\"",
+   "location": "room (ceiling pulled)",
+   "light": "4am_iso",
+   "framing": "high angle: the desk alone in a pool of light, the room black",
+   "lens_mm": [
+    35,
+    35
+   ],
+   "fstop": 4.0,
+   "from": [
+    2.9,
+    2.4,
+    3.6
+   ],
+   "to": [
+    2.85,
+    2.45,
+    3.45
+   ],
+   "at0": [
+    1.1,
+    4.1,
+    0.6
+   ],
+   "at1": [
+    1.1,
+    4.1,
+    0.6
+   ],
+   "move": "slow descent 16 cm",
+   "focus": [
+    1.05,
+    3.95,
+    0.95
+   ],
+   "focus_plan": "on Ivan",
+   "action": "Typing, hunched lower than at 3 AM.",
+   "screen": "screens bright",
+   "props": "none",
+   "board": "C r3c1 \"it's not all pleasant\"",
+   "status": "new",
+   "why": "The board's isolation frame (and the dark vignette of 'Who are you?'): nothing exists but the desk."
+  },
+  {
+   "id": "E02",
+   "name": "Eyes burn",
+   "beat": "B6",
+   "t0": 150.8,
+   "t1": 154.4,
+   "dur": 3.6,
+   "f0": 3619,
+   "f1": 3706,
+   "script": "\"Around 4 AM, when his eyes burn\"",
+   "location": "room (desk)",
+   "light": "4am",
+   "framing": "low CU from the laptop, face lit from below",
+   "lens_mm": [
+    60,
+    60
+   ],
+   "fstop": 1.8,
+   "from": [
+    1.04,
+    4.38,
+    1.0
+   ],
+   "to": [
+    1.04,
+    4.35,
+    1.0
+   ],
+   "at0": [
+    1.04,
+    3.93,
+    1.14
+   ],
+   "at1": [
+    1.04,
+    3.93,
+    1.14
+   ],
+   "move": "creep 3 cm",
+   "focus": "eyes",
+   "focus_plan": "on his eyes",
+   "action": "Screws his eyes shut hard (151.6 s), opens them wide, two fast blinks; no hands to the face.",
+   "screen": "code reflected in the lenses",
+   "props": "bloodshot sclera + dark under-eyes (material variant)",
+   "board": "C r3c2 \"eyes burn\"",
+   "status": "new",
+   "why": "The laptop's view of him: what the machine sees."
+  },
+  {
+   "id": "E03",
+   "name": "Hands shake",
+   "beat": "B6",
+   "t0": 154.4,
+   "t1": 158.0,
+   "dur": 3.6,
+   "f0": 3706,
+   "f1": 3792,
+   "script": "\"and his hands shake from a caffeine overload,\"",
+   "location": "room (desk)",
+   "light": "4am",
+   "framing": "top-down over the laptop: left hand typing, right hand lifting the mug",
+   "lens_mm": [
+    40,
+    40
+   ],
+   "fstop": 2.8,
+   "from": [
+    1.2,
+    4.15,
+    1.45
+   ],
+   "to": [
+    1.19,
+    4.16,
+    1.43
+   ],
+   "at0": [
+    1.1,
+    4.28,
+    0.78
+   ],
+   "at1": [
+    1.1,
+    4.28,
+    0.78
+   ],
+   "move": "creep 2 cm",
+   "focus": [
+    1.08,
+    4.3,
+    0.77
+   ],
+   "focus_plan": "on the keys; the mug shakes into blur",
+   "action": "Left hand keeps typing; right hand lifts the mug (155.0 s) and it trembles (8-10 Hz, 3-5 mm), coffee ripples, a drop spills.",
+   "screen": "code",
+   "props": "mug in hand, coffee surface ripple, spill drop",
+   "board": "C r3c3 \"hands shake coffee\"",
+   "status": "new",
+   "why": "The body failing in one small physical detail."
+  },
+  {
+   "id": "E04",
+   "name": "Creeping dread",
+   "beat": "B6",
+   "t0": 158.0,
+   "t1": 162.4,
+   "dur": 4.4,
+   "f0": 3792,
+   "f1": 3898,
+   "script": "\"Ivan feels a creeping dread.\"",
+   "location": "room",
+   "light": "4am",
+   "framing": "wide from the dark bed side, Ivan small and lit",
+   "lens_mm": [
+    32,
+    32
+   ],
+   "fstop": 2.0,
+   "from": [
+    2.6,
+    1.3,
+    1.3
+   ],
+   "to": [
+    2.36,
+    1.78,
+    1.28
+   ],
+   "at0": [
+    1.05,
+    4.0,
+    1.05
+   ],
+   "at1": [
+    1.05,
+    4.0,
+    1.05
+   ],
+   "move": "slow creeping push 0.54 m",
+   "focus": "eyes",
+   "focus_plan": "on Ivan",
+   "action": "Stops typing (159.0 s); shoulders rise; he doesn't turn.",
+   "screen": "screens",
+   "props": "none",
+   "board": "gap fill",
+   "status": "new",
+   "why": "A01/A03's push again, now from the dark like something approaching him. The camera is the dread."
+  },
+  {
+   "id": "E05",
+   "name": "Doesn't understand",
+   "beat": "B6",
+   "t0": 162.4,
+   "t1": 167.8,
+   "dur": 5.4,
+   "f0": 3898,
+   "f1": 4027,
+   "script": "\"A sense that he's building something he doesn't fully understand.\"",
+   "location": "room (desk)",
+   "light": "4am",
+   "framing": "ECU eyes from just above, code streaming in the lenses",
+   "lens_mm": [
+    100,
+    100
+   ],
+   "fstop": 2.0,
+   "from": [
+    1.06,
+    4.22,
+    1.22
+   ],
+   "to": [
+    1.05,
+    4.2,
+    1.21
+   ],
+   "at0": [
+    1.04,
+    3.93,
+    1.15
+   ],
+   "at1": [
+    1.04,
+    3.93,
+    1.15
+   ],
+   "move": "creep 2 cm",
+   "focus": "eyes",
+   "focus_plan": "on the eyes; the reflection soft",
+   "action": "Eyes flick left-right trying to read, fall behind, slow down, stop.",
+   "screen": "lens reflection: code scrolling too fast to read",
+   "props": "glasses reflection; bloodshot variant",
+   "board": "C r3c4 \"he doesn't fully understand\"",
+   "status": "new",
+   "why": "The board's reference frame: code in his glasses, faster than he can read."
+  },
+  {
+   "id": "E06",
+   "name": "Takes and gives",
+   "beat": "B6",
+   "t0": 167.8,
+   "t1": 174.2,
+   "dur": 6.4,
+   "f0": 4027,
+   "f1": 4181,
+   "script": "\"That each automation takes something from him, even as it gives something back.\"",
+   "location": "room (desk)",
+   "light": "4am",
+   "framing": "behind his left shoulder: his face soft left, dashboard sharp right",
+   "lens_mm": [
+    50,
+    50
+   ],
+   "fstop": 2.0,
+   "from": [
+    0.62,
+    3.8,
+    1.18
+   ],
+   "to": [
+    0.64,
+    3.86,
+    1.18
+   ],
+   "at0": [
+    1.458,
+    4.545,
+    1.066
+   ],
+   "at1": [
+    1.458,
+    4.545,
+    1.066
+   ],
+   "move": "creep 6 cm",
+   "focus": [
+    [
+     167.8,
+     "mon:800,450"
+    ],
+    [
+     170.6,
+     "mon:800,450"
+    ],
+    [
+     171.6,
+     "eyes"
+    ]
+   ],
+   "focus_plan": "dashboard -> his face",
+   "action": "Still; the screen light on his face drops a stop over the shot (live key x0.5); his shoulders sink.",
+   "screen": "dashboard: 'hours saved' counter climbing 31h -> 44h",
+   "props": "none",
+   "board": "gap fill",
+   "status": "new",
+   "why": "Gain on the screen, loss on his face, linked by one focus pull."
+  },
+  {
+   "id": "E07",
+   "name": "Enter",
+   "beat": "B6",
+   "t0": 174.2,
+   "t1": 176.8,
+   "dur": 2.6,
+   "f0": 4181,
+   "f1": 4243,
+   "script": "\"But then he finishes another module,\"",
+   "location": "room (desk)",
+   "light": "4am",
+   "framing": "macro from above the keys: one finger coming down on Enter",
+   "lens_mm": [
+    85,
+    85
+   ],
+   "fstop": 2.8,
+   "from": [
+    1.18,
+    4.4,
+    0.88
+   ],
+   "to": [
+    1.18,
+    4.39,
+    0.875
+   ],
+   "at0": [
+    1.17,
+    4.31,
+    0.765
+   ],
+   "at1": [
+    1.17,
+    4.31,
+    0.765
+   ],
+   "move": "creep 1 cm",
+   "focus": [
+    1.17,
+    4.31,
+    0.765
+   ],
+   "focus_plan": "on Enter",
+   "action": "Right middle finger raised, held, comes down hard on Enter at 175.8 s.",
+   "screen": "none in frame",
+   "props": "laptop keyboard",
+   "board": "C r4c1 \"finishes another module\"",
+   "status": "new",
+   "why": "Cut on the key hit."
+  },
+  {
+   "id": "E08",
+   "name": "It works",
+   "beat": "B6",
+   "t0": 176.8,
+   "t1": 178.6,
+   "dur": 1.8,
+   "f0": 4243,
+   "f1": 4286,
+   "script": "\"and it works,\"",
+   "location": "room (desk)",
+   "light": "4am + green spill",
+   "framing": "over the left shoulder on the terminal",
+   "lens_mm": [
+    66,
+    66
+   ],
+   "fstop": 1.4,
+   "from": [
+    0.9,
+    4.13,
+    1.4
+   ],
+   "to": [
+    0.91,
+    4.15,
+    1.385
+   ],
+   "at0": "lap:400,850",
+   "at1": "lap:400,850",
+   "move": "hair push",
+   "focus": "lap:400,850",
+   "focus_plan": "on the result line",
+   "action": "(still)",
+   "screen": "terminal: tests run, '42 passed' in green at 177.0 s; the green floods the screen",
+   "props": "none",
+   "board": "gap fill (C r4c2)",
+   "status": "reuse",
+   "why": "The hit, on screen.",
+   "was": "S4 camera"
+  },
+  {
+   "id": "E09",
+   "name": "Rush",
+   "beat": "B6",
+   "t0": 178.6,
+   "t1": 183.4,
+   "dur": 4.8,
+   "f0": 4286,
+   "f1": 4402,
+   "script": "\"and the dread dissolves into a rush of pure satisfaction.\"",
+   "location": "room (desk, wild north wall)",
+   "light": "4am -> warm-green spill",
+   "framing": "CU face, reverse dolly zoom",
+   "lens_mm": [
+    52,
+    26
+   ],
+   "fstop": 2.0,
+   "from": [
+    1.07,
+    5.15,
+    1.1
+   ],
+   "to": [
+    1.06,
+    4.55,
+    1.1
+   ],
+   "at0": [
+    1.04,
+    3.95,
+    1.12
+   ],
+   "at1": [
+    1.04,
+    3.95,
+    1.12
+   ],
+   "move": "reverse dolly zoom: camera pushes in as the lens widens; the room opens out behind him",
+   "focus": "eyes",
+   "focus_plan": "on his eyes",
+   "action": "Exhale through the nose, shoulders drop, a grin spreads; eyes shine.",
+   "screen": "green light on his face, turning warmer",
+   "props": "none",
+   "board": "gap fill (C r4c3)",
+   "status": "new",
+   "why": "A05's dolly zoom reversed: then the room crowded in, now it releases him.",
+   "dolly": 43
+  },
+  {
+   "id": "E10",
+   "name": "HE built that",
+   "beat": "B6",
+   "t0": 183.4,
+   "t1": 190.2,
+   "dur": 6.8,
+   "f0": 4402,
+   "f1": 4565,
+   "script": "\"HE... built that. The machine does what HE told it to do.\"",
+   "location": "room (desk)",
+   "light": "4am (warmed)",
+   "framing": "low angle from the desk top, the full glass soft in the foreground",
+   "lens_mm": [
+    28,
+    28
+   ],
+   "fstop": 2.8,
+   "from": [
+    0.68,
+    4.46,
+    0.82
+   ],
+   "to": [
+    0.69,
+    4.44,
+    0.84
+   ],
+   "at0": [
+    1.04,
+    3.9,
+    1.25
+   ],
+   "at1": [
+    1.04,
+    3.9,
+    1.25
+   ],
+   "move": "slow rise 2 cm toward him",
+   "focus": "eyes",
+   "focus_plan": "on his eyes; the glass soft",
+   "action": "Sits up straight, chin lifts, a slow proud nod on each 'HE' (183.8 s, 186.8 s).",
+   "screen": "screens behind/below",
+   "props": "full glass (motif, frame 2 of 3)",
+   "board": "gap fill",
+   "status": "new",
+   "why": "The hero angle, with the untouched glass still in the frame."
+  },
+  {
+   "id": "F01",
+   "name": "Dawn",
+   "beat": "B7",
+   "t0": 190.2,
+   "t1": 194.8,
+   "dur": 4.6,
+   "f0": 4565,
+   "f1": 4675,
+   "script": "[Dawn at the window.] (no line)",
+   "location": "room (window)",
+   "light": "4am -> sunrise (blend 190.6-194.4)",
+   "framing": "wide on the window from inside",
+   "lens_mm": [
+    28,
+    28
+   ],
+   "fstop": 4.0,
+   "from": [
+    2.4,
+    3.2,
+    1.45
+   ],
+   "to": [
+    2.3,
+    3.05,
+    1.45
+   ],
+   "at0": [
+    0.0,
+    2.35,
+    1.55
+   ],
+   "at1": [
+    0.0,
+    2.3,
+    1.55
+   ],
+   "move": "push 18 cm",
+   "focus": [
+    0.0,
+    2.35,
+    1.55
+   ],
+   "focus_plan": "on the window",
+   "action": "none in frame",
+   "screen": "none",
+   "props": "city lights go out in waves; sky warms; sun breaks behind the towers",
+   "board": "gap fill",
+   "status": "new",
+   "why": "A wordless breath; the night ends by itself."
+  },
+  {
+   "id": "F02",
+   "name": "By sunrise",
+   "beat": "B7",
+   "t0": 194.8,
+   "t1": 198.4,
+   "dur": 3.6,
+   "f0": 4675,
+   "f1": 4762,
+   "script": "\"By sunrise, Ivan has a system\"",
+   "location": "room (desk)",
+   "light": "sunrise",
+   "framing": "locked from behind (C03's frame), now sunlit",
+   "lens_mm": [
+    28,
+    28
+   ],
+   "fstop": 4.0,
+   "from": [
+    1.05,
+    2.55,
+    1.55
+   ],
+   "to": [
+    1.05,
+    2.62,
+    1.54
+   ],
+   "at0": [
+    1.05,
+    4.55,
+    1.05
+   ],
+   "at1": [
+    1.05,
+    4.55,
+    1.05
+   ],
+   "move": "locked (7 cm drift)",
+   "focus": [
+    1.05,
+    4.0,
+    1.1
+   ],
+   "focus_plan": "deep",
+   "action": "Typing slows; stops.",
+   "screen": "monitors",
+   "props": "window-frame shadows across the floor and his back; mugs x4",
+   "board": "B r1c2 (callback)",
+   "status": "new",
+   "why": "The same frame as the montage, with the work done.",
+   "was": "C03 framing"
+  },
+  {
+   "id": "F03",
+   "name": "Four tiles",
+   "beat": "B7",
+   "t0": 198.4,
+   "t1": 204.8,
+   "dur": 6.4,
+   "f0": 4762,
+   "f1": 4915,
+   "script": "\"that handles his email, manages his calendar, drafts his documents, and summarizes his reading.\"",
+   "location": "room (desk)",
+   "light": "sunrise",
+   "framing": "insert on the dashboard monitor",
+   "lens_mm": [
+    50,
+    50
+   ],
+   "fstop": 2.8,
+   "from": [
+    1.46,
+    4.05,
+    1.1
+   ],
+   "to": [
+    1.46,
+    4.1,
+    1.1
+   ],
+   "at0": [
+    1.458,
+    4.545,
+    1.066
+   ],
+   "at1": [
+    1.458,
+    4.545,
+    1.066
+   ],
+   "move": "push 5 cm",
+   "focus": "mon:800,450",
+   "focus_plan": "on the tiles",
+   "action": "(none)",
+   "screen": "dashboard tiles tick green on each word: email 199.2, calendar 200.5, documents 202.0, reading 203.8; 'all systems running'",
+   "props": "sun glare sliding across the screen",
+   "board": "gap fill",
+   "status": "new",
+   "why": "The list on screen, ticked off on the words."
+  },
+  {
+   "id": "F04",
+   "name": "Leans back",
+   "beat": "B7",
+   "t0": 204.8,
+   "t1": 210.4,
+   "dur": 5.6,
+   "f0": 4915,
+   "f1": 5050,
+   "script": "\"He leans back in his chair, exhausted and wired.\"",
+   "location": "room (desk chair, turned to the window)",
+   "light": "sunrise",
+   "framing": "MS from the window side: sun on his front, blue screens behind him",
+   "lens_mm": [
+    40,
+    40
+   ],
+   "fstop": 2.4,
+   "from": [
+    0.36,
+    2.62,
+    1.25
+   ],
+   "to": [
+    0.33,
+    2.55,
+    1.25
+   ],
+   "at0": [
+    1.02,
+    3.5,
+    1.1
+   ],
+   "at1": [
+    1.02,
+    3.5,
+    1.1
+   ],
+   "move": "ease back 8 cm",
+   "focus": "eyes",
+   "focus_plan": "on his eyes",
+   "action": "Pushes back from the desk, swivels the chair ~130 degrees to face the window, leans back, hands behind his head (intro S5 acting), eyes half shut in the sun.",
+   "screen": "screens glowing behind him",
+   "props": "chair swivel + recline; mullion shadow cross on his chest",
+   "board": "C r4c4 (colour panel)",
+   "status": "new",
+   "why": "The board's last panel: warm sun on him, the cold screens at his back.",
+   "was": "S5 performance"
+  },
+  {
+   "id": "F05",
+   "name": "Now what",
+   "beat": "B7",
+   "t0": 210.4,
+   "t1": 218.0,
+   "dur": 7.6,
+   "f0": 5050,
+   "f1": 5232,
+   "script": "\"Then he realizes... he doesn't know what he's supposed to do now.\"",
+   "location": "room (desk chair, turned)",
+   "light": "sunrise",
+   "framing": "CU face in the sun",
+   "lens_mm": [
+    75,
+    75
+   ],
+   "fstop": 2.0,
+   "from": [
+    0.62,
+    2.95,
+    1.18
+   ],
+   "to": [
+    0.63,
+    2.97,
+    1.18
+   ],
+   "at0": [
+    1.02,
+    3.5,
+    1.12
+   ],
+   "at1": [
+    1.02,
+    3.5,
+    1.12
+   ],
+   "move": "near-locked (2 cm)",
+   "focus": "eyes",
+   "focus_plan": "on his eyes",
+   "action": "Eyes open (211.0 s); the half-smile fades; he looks to the window, then down, then at nothing; hands come down from his head slowly (215 s).",
+   "screen": "none",
+   "props": "none",
+   "board": "gap fill",
+   "status": "new",
+   "why": "The realization plays on his face in silence after the line."
+  },
+  {
+   "id": "F06",
+   "name": "Still full",
+   "beat": "B7",
+   "t0": 218.0,
+   "t1": 221.8,
+   "dur": 3.8,
+   "f0": 5232,
+   "f1": 5323,
+   "script": "(no line)",
+   "location": "room (desk)",
+   "light": "sunrise",
+   "framing": "desk height, the full glass foreground, Ivan beyond facing the window",
+   "lens_mm": [
+    30,
+    30
+   ],
+   "fstop": 2.8,
+   "from": [
+    0.552,
+    4.453,
+    0.8
+   ],
+   "to": [
+    0.57,
+    4.44,
+    0.803
+   ],
+   "at0": [
+    1.1,
+    3.6,
+    1.05
+   ],
+   "at1": [
+    1.1,
+    3.6,
+    1.05
+   ],
+   "move": "hair drift (A04's camera)",
+   "focus": [
+    0.76,
+    4.33,
+    0.84
+   ],
+   "focus_plan": "on the glass",
+   "action": "Sits still, facing the window.",
+   "screen": "none",
+   "props": "the full glass in the sun, a caustic on the desk (motif, frame 3 of 3)",
+   "board": "gap fill",
+   "status": "reuse",
+   "why": "The motif returns changed: the same full glass, now gold.",
+   "was": "S2 camera"
+  },
+  {
+   "id": "F07",
+   "name": "Sunrise room",
+   "beat": "B7",
+   "t0": 221.8,
+   "t1": 231.8,
+   "dur": 10.0,
+   "f0": 5323,
+   "f1": 5563,
+   "script": "(no line; end)",
+   "location": "room (ceiling pulled)",
+   "light": "sunrise",
+   "framing": "top-down wide, A01's frame",
+   "lens_mm": [
+    18,
+    18
+   ],
+   "fstop": 5.6,
+   "from": [
+    2.15,
+    2.4,
+    3.2
+   ],
+   "to": [
+    2.25,
+    2.4,
+    3.45
+   ],
+   "at0": [
+    0.85,
+    2.4,
+    0.35
+   ],
+   "at1": [
+    0.85,
+    2.4,
+    0.35
+   ],
+   "move": "slow rise 0.27 m (A01 in reverse)",
+   "focus": [
+    1.2,
+    2.4,
+    0.5
+   ],
+   "focus_plan": "deep",
+   "action": "Ivan small in the chair turned to the window, not moving.",
+   "screen": "screens still on",
+   "props": "window pattern of sun across the bed (plan_topdown look); fade to black 229.8-231.8",
+   "board": "ref plan_topdown.jpg + ref 05 panel 1 (gap fill)",
+   "status": "new",
+   "why": "Bookend: the room from above again, full of light now, and he has nowhere to go.",
+   "was": "E1 reversed"
+  }
+ ]
+}
