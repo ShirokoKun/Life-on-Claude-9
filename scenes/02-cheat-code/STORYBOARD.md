@@ -38,7 +38,7 @@
 |---|---|---|---|---|---|---|
 | 2.1 | 0.0–4.0 | "It started two days ago." | **Night to day.** The intro's last frame (Ivan leaning back, 3 AM) holds, then the room's light runs backwards: the window brightens, the lamp clicks off, the mugs vanish from the desk | Locked wide from the window corner (the E1 frame), so the change reads | Clean desk: one fresh mug, no take-out, the glass not yet poured | 3am → day crossfade (two lightmap sets) |
 | 2.2 | 4.0–9.5 | "Ivan was complaining to Claude about how many emails he gets—" | Over the shoulder onto the laptop | 40 mm, slow push | The inbox fills faster than he can read it: 187 → 214 → 263 unread; the phone buzzes on the desk; the monitor shows a calendar packed solid | day |
-| 2.3 | 9.5–12.5 | "—hundreds a day, most of them requiring some response." | His face, front, 3/4 | 50 mm, locked | He leans back, rubs his eyes under his glasses, exhales. The phone buzzes again | day, screen as soft fill |
+| 2.3 | 9.5–12.5 | "—hundreds a day, most of them requiring some response." | His face, front, 3/4 | 50 mm, locked | He leans back, presses the heel of his hand into his brow, exhales. The phone buzzes again | day, screen as soft fill |
 | 2.4 | 12.5–15.5 | "Claude suggested they could automate the simple ones." | Insert: the Claude chat | 65 mm, rack along the reply as it streams | "We could automate the simple ones." His cursor hovers, then he types **yes** | day |
 | 2.5 | 15.5–21.5 | "A script to parse incoming messages, classify them by type, draft appropriate replies." | Three quick inserts, one per verb | 85 mm macro on the screen, shallow focus | parse() lines scroll by → emails sort into three coloured lanes → a draft writes itself in his tone | day, screen-lit |
 | 2.6 | 21.5–24.5 | "Ivan could review and approve them in batches." | Over the shoulder, wider | 35 mm | He clicks **Approve 20**; twenty drafts fly out of the queue | day |
@@ -63,7 +63,7 @@
 
 | Beat | Pose / motion | How |
 |---|---|---|
-| Rubbing his eyes, leaning back | Seated, right hand up under the glasses | Acting system: arm IK to the face, posture curve back |
+| Hand to his brow, leaning back | Seated, the heel of the right hand on his brow (not under the glasses: the fingers would pass through the frames) | Acting system: arm IK, kept out of the head volume; posture curve back |
 | Typing **yes**, clicking **Approve** | Seated typing, a mouse click | Existing typing, plus right hand to the mouse |
 | The smile | Head still, a slight lift of the chin | Head look-at plus posture (no facial rig yet) |
 | Time-lapse | Fast typing, standing, sitting | Acting curves played at 8× speed |

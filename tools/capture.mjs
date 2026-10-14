@@ -22,7 +22,7 @@ const page = await browser.newPage({ viewport: { width: W, height: H } });
 page.on('pageerror', (e) => console.log('ERR', e.message));
 page.on('console', (m) => { if (['error', 'warning'].includes(m.type())) console.log('console', m.text().slice(0, 300)); });
 await page.goto(`${url}?render=1${arg('extra', '') ? '&' + arg('extra') : ''}`);
-await page.waitForFunction(() => window.__ready === true, null, { timeout: 900000 });
+await page.waitForFunction(() => window.__ready === true, null, { timeout: 0 });   // a heavy scene on a busy CPU can take a while
 const t0 = Date.now();
 for (const [i, n] of frames.entries()) {
   await page.evaluate((k) => window.renderFrame(k), n);

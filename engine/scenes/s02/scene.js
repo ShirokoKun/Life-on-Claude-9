@@ -30,7 +30,7 @@ export const SHOTS = [
     why: 'Over his shoulder: the inbox fills faster than he can scroll it. The monitor beside it: a calendar packed solid.' },
   { id: '2.3', name: 'Too much', t0: 9.5, t1: 12.5, mm: [45, 48], f: 2.4,
     from: [7.05, 3.70, 1.24], to: [7.04, 3.64, 1.23], at0: FACE, at1: FACE, track: 0.6, focus: 'eyes', roll: [0.3, 0.2],
-    why: 'He sits back, pushes his glasses up and rubs his eyes.' },
+    why: 'He sits back and presses the heel of his hand into his brow.' },
   { id: '2.4', name: 'Automate the simple ones', t0: 12.5, t1: 15.5, mm: [68, 72], f: 1.8,
     from: [6.80, 2.90, 1.40], to: [6.81, 2.92, 1.38], at0: 'lap:1250,560', at1: 'lap:1250,640',
     focus: [[12.5, 'lap:1180,520'], [13.4, 'lap:1180,560'], [14.2, 'lap:1180,600'], [15.0, 'lap:1180,900']], roll: [0.4, 0.3],
