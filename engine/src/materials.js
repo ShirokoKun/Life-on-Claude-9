@@ -120,19 +120,19 @@ export const LIB = {
   'Cold Noodles':   { color: '#b58a4c', rough: 0.45 },
   'Coffee Residue': { color: '#2a160a', rough: 0.3 },
   // Ivan's room (scene s03: blender/scenes/set_room03.py)
-  'Wall Green':     { key: 'plaster_wall', color: '#2e3f33', rough: 0.92, nrm: 0.5, lm: 0.9 },    // deep bottle green, limewashed; full bounce
+  'Wall Green':     { key: 'plaster_wall', color: '#3d5344', rough: 0.92, nrm: 0.5, lm: 0.9 },    // deep bottle green, limewashed (~12% albedo); full bounce
   'Floor Dark Oak': { key: 'oak_floor', color: '#4a2d1c', rough: 0.5, nrm: 0.5, coat: 0.3, coatRough: 0.3 },
   'Bed Walnut':     { key: 'walnut', color: '#3a2214', rough: 0.45, nrm: 0.35, coat: 0.3, coatRough: 0.3 },
   'Blind Slat':     { key: 'plastic', color: '#cfc8b8', rough: 0.5, mapAlbedo: false, nrm: 0.1 },
-  'Duvet Navy':     { key: 'linen', color: '#1e2948', rough: 0.95, nrm: 0.8, sheen: 0.55 },
+  'Duvet Navy':     { key: 'linen', color: '#2c3a60', rough: 0.95, nrm: 0.8, sheen: 0.55 },     // navy cotton ~8%: dark, not a hole
   'Mattress':       { key: 'linen', color: '#b9b5ac', rough: 0.95, nrm: 0.5, sheen: 0.3 },
   'Pillow Linen':   { key: 'linen', color: '#aeaa9f', rough: 0.95, nrm: 0.6, sheen: 0.4 },
-  'Rug Navy':       { key: 'rug', color: '#172241', rough: 1.0, nrm: 0.9, sheen: 0.4 },
+  'Rug Navy':       { key: 'rug', color: '#24325a', rough: 1.0, nrm: 0.9, sheen: 0.4 },
   'Lamp Ceramic':   { key: 'ceramic', color: '#6a4528', rough: 0.25, nrm: 0.1, coat: 0.5 },
   'Guitar Spruce':  { key: 'light_wood', color: '#a8682e', rough: 0.3, nrm: 0.2, coat: 0.8, coatRough: 0.1 },
   'Guitar Rosewood':{ key: 'walnut', color: '#2a140b', rough: 0.35, nrm: 0.2, coat: 0.8, coatRough: 0.1 },
   'Guitar String':  { key: 'brushed_metal', color: '#b8b3a5', rough: 0.25, metal: 1.0, nrm: 0.1 },
-  'Hoodie Grey':    { key: 'knit', color: '#262a33', rough: 0.95, nrm: 0.7, sheen: 0.6 },
+  'Hoodie Grey':    { key: 'knit', color: '#3a3f4a', rough: 0.95, nrm: 0.7, sheen: 0.6 },
   'Tee Olive':      { key: 'linen', color: '#3c3b26', rough: 0.95, nrm: 0.6, sheen: 0.5 },
 };
 
@@ -314,6 +314,9 @@ function upgrade(src) {
   // scanned assets (Poly Haven) carry their own normal and roughness maps: keep them
   if (src.normalMap) { m.normalMap = src.normalMap; m.normalScale.copy(src.normalScale); }
   if (src.roughnessMap) { m.roughnessMap = src.roughnessMap; m.roughness = src.roughness ?? 1; }
+  // glTF metalness is factor x map: without its map a scanned wood with factor 1 renders as solid metal (no diffuse,
+  // so lightmaps cannot light it, and it mirrors the environment)
+  if (src.metalnessMap) m.metalnessMap = src.metalnessMap;
   if (src.alphaTest) { m.alphaTest = src.alphaTest; m.side = THREE.DoubleSide; }
   return m;
 }

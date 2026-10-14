@@ -6,6 +6,7 @@
 import * as THREE from 'three';
 import { cameraIn, shotIn } from '../../src/shots.js';
 import * as ROOM3 from '../s03/scene.js';
+import { createRoomLight, weightsFor } from '../s03/roomlight.js';
 
 const T = await (await fetch(new URL('./timeline.json', import.meta.url))).json();
 
@@ -20,7 +21,19 @@ export const CAST_OFFSET = ROOM3.CAST_OFFSET;
 export const ENV_AT = ROOM3.ENV_AT;
 export const createLights = ROOM3.createLights;
 export const tweakMaterial = ROOM3.tweakMaterial;
-export const setup = ROOM3.setup;
+let RL = null;                                        // the room's times of day (s03/roomlight.js)
+export async function setup(args) {
+  ROOM3.setup(args);
+  RL = await createRoomLight(args);
+}
+// each shot's light field in timeline.json ("3am -> day (blend 38.0-40.4)", "time-lapse: ...") drives the room;
+// the engine asks for the exposure first in every frame, so the light is set here
+export function exposureBoost(t) {
+  if (!RL) return 0;
+  const s = shotAt(t);
+  RL.apply(weightsFor(s.light, t, s.t0, s.t1));
+  return RL.exposure;
+}
 
 const PICKS = /^(eyes|screen|(lap|mon):\d+,\d+)$/;     // focus targets the engine can resolve by name
 const focusOf = (f, s) => {

@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Ch 1 screens preview</title>
+<!-- Draws Chapter 1's screen canvases (engine/scenes/ch1/screens.js) side by side at one time.
+     http://localhost:8080/engine/scenes/ch1/screens_preview.html?t=45     (tools/screens_preview.mjs drives it) -->
+<style>
+  html, body { margin: 0; background: #050608; color: #c9ccd3; font: 13px/1.4 "Segoe UI", sans-serif; }
+  #bar { padding: 8px 12px; display: flex; gap: 12px; align-items: center; }
+  #bar input[type=range] { width: 60vw; }
+  #sheet { display: block; max-width: 100vw; }
+</style>
+<script type="importmap">
+{ "imports": { "three": "../../vendor/three/build/three.module.js", "three/addons/": "../../vendor/three/examples/jsm/" } }
+</script>
+</head>
+<body>
+<div id="bar"><span id="lab">loading…</span><input id="tt" type="range" min="0" max="232" step="0.05" value="0"></div>
+<canvas id="sheet"></canvas>
+<script type="module">
+import { MONO, SANS } from '../../src/screens.js';
+import { SCREENS, SIZES, DURATION } from './screens.js';
+
+const TL = await (await fetch('./timeline.json')).json();
+let keys = [];
+try { keys = (await (await fetch('../s03/acting.json')).json()).keys.map((k) => k[0]); } catch (e) { console.warn('no acting keys', e); }
+try { await Promise.all([document.fonts.load(`18px ${MONO}`), document.fonts.load(`16px ${SANS}`), document.fonts.load(`600 16px ${SANS}`), document.fonts.load(`700 16px ${SANS}`)]); } catch (e) { /* fall back */ }
+
+const names = ['laptop', 'monitor', 'monitor2', 'phone', 'card'];
+const cv = Object.fromEntries(names.map((n) => { const c = document.createElement('canvas'); [c.width, c.height] = SIZES[n]; return [n, c]; }));
+// the contact sheet: laptop | monitor on top; monitor2 | phone | card below
+const LAYOUT = { laptop: [0, 70], monitor: [1660, 70], monitor2: [0, 1150], phone: [1660, 1150], card: [2440, 1150] };
+const SW = 3660, SH = 2760;
+const shotAt = (t) => TL.shots.find((s) => t >= s.t0 && t < s.t1) || TL.shots[TL.shots.length - 1];
+
+function drawAt(t, scale = 0.5) {
+  SCREENS.laptop(cv.laptop.getContext('2d'), t, keys);
+  SCREENS.monitor(cv.monitor.getContext('2d'), t);
+  SCREENS.monitor2(cv.monitor2.getContext('2d'), t);
+  SCREENS.phone(cv.phone.getContext('2d'), t);
+  SCREENS.card(cv.card.getContext('2d'), t);
+  const sh = document.getElementById('sheet'); sh.width = Math.round(SW * scale); sh.height = Math.round(SH * scale);
+  const g = sh.getContext('2d'); g.setTransform(scale, 0, 0, scale, 0, 0);
+  g.fillStyle = '#050608'; g.fillRect(0, 0, SW, SH);
+  const s = shotAt(t);
+  g.fillStyle = '#e9ecf2'; g.font = `600 44px ${SANS}`; g.textBaseline = 'middle';
+  g.fillText(`t = ${t.toFixed(2)} s   ·   ${s.id} ${s.name}`, 0, 28);
+  g.font = `30px ${SANS}`; g.fillStyle = '#9aa0ad'; g.fillText(`screen: ${s.screen}`.slice(0, 150), 1150, 28);
+  for (const n of names) {
+    const [x, y] = LAYOUT[n];
+    g.fillStyle = '#8a8f99'; g.font = `600 30px ${SANS}`; g.fillText(`${n}  ${SIZES[n].join('x')}${n === 'card' ? '  (optional)' : ''}`, x, y + 2);
+    g.drawImage(cv[n], x, y + 24);
+    g.strokeStyle = '#2a2f3d'; g.lineWidth = 2; g.strokeRect(x, y + 24, SIZES[n][0], SIZES[n][1]);
+  }
+  document.getElementById('lab').textContent = `t ${t.toFixed(2)} s  ${s.id} ${s.name}`;
+  return { shot: s.id, name: s.name };
+}
+window.drawAt = drawAt;
+window.canvasURL = (n) => cv[n].toDataURL('image/png');
+window.sheetURL = () => document.getElementById('sheet').toDataURL('image/png');
+const tt = document.getElementById('tt'); tt.max = String(DURATION);
+tt.oninput = () => drawAt(+tt.value, 0.4);
+const q = new URLSearchParams(location.search);
+tt.value = q.get('t') || '0';
+drawAt(+tt.value, 0.4);
+window.__ready = true;
+</script>
+</body>
+</html>

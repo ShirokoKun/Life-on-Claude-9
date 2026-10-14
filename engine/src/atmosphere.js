@@ -4,12 +4,12 @@
 //  - lamp cone: the warm beam you see in a dusty room at night, fading with distance from the shade
 import * as THREE from 'three';
 
-const COMMON = `
+export const COMMON = `
   uniform sampler2D tDepth; uniform vec2 res; uniform float near, far;
   #include <packing>
   float sceneDist(vec2 uv) { return -perspectiveDepthToViewZ(texture2D(tDepth, uv).x, near, far); }`;
 
-export function createAtmosphere({ lamp, lampTarget, screen, count = 2200 }) {
+export function createAtmosphere({ lamp, lampTarget, screen, count = 2200, center = [6.95, 3.0], spread = 1 }) {
   const scene = new THREE.Scene();
   const time = { value: 0 };
   const shared = { tDepth: { value: null }, res: { value: new THREE.Vector2(1, 1) }, near: { value: 0.02 }, far: { value: 400 } };
@@ -20,9 +20,9 @@ export function createAtmosphere({ lamp, lampTarget, screen, count = 2200 }) {
   for (let i = 0; i < count; i++) {
     // denser around the desk, thinning out into the room
     const k = r() < 0.75 ? 0.6 : 1.6;
-    pos[i * 3] = 6.95 + (r() - 0.5) * 2.6 * k;        // Blender x
-    pos[i * 3 + 1] = 0.55 + r() * 1.7;                // height (three y)
-    pos[i * 3 + 2] = -(3.0 + (r() - 0.5) * 2.0 * k);  // -Blender y
+    pos[i * 3] = center[0] + (r() - 0.5) * 2.6 * k * spread;        // Blender x
+    pos[i * 3 + 1] = 0.55 + r() * 1.7;                              // height (three y)
+    pos[i * 3 + 2] = -(center[1] + (r() - 0.5) * 2.0 * k * spread);  // -Blender y
     seed[i * 4] = r(); seed[i * 4 + 1] = r(); seed[i * 4 + 2] = r(); seed[i * 4 + 3] = r();
   }
   const g = new THREE.BufferGeometry();
@@ -97,15 +97,18 @@ export function createAtmosphere({ lamp, lampTarget, screen, count = 2200 }) {
   beamMesh.frustumCulled = false;
   scene.add(beamMesh);
 
+  const extras = [];                    // more air from a scene (volume.js): { mesh, material, update(camera, t) }
   return {
-    scene, dust, beam,
+    scene, dust, beam, beamMesh,
+    add(x) { extras.push(x); scene.add(x.mesh); return x; },
     setTime(t) { time.value = t; },
     setLevels(lampK) { beam.uniforms.gain.value = lampK; },
     prepare(lens, renderer) {
       const sz = renderer.getDrawingBufferSize(new THREE.Vector2());
       shared.tDepth.value = lens.rt.depthTexture; shared.res.value.copy(sz);
       shared.near.value = lens.camera.near; shared.far.value = lens.camera.far;
-      for (const m of [dust, beam]) {
+      for (const x of extras) if (x.update) x.update(lens.camera, time.value);
+      for (const m of [dust, beam, ...extras.map((x) => x.material)]) {
         m.uniforms.tDepth.value = shared.tDepth.value; m.uniforms.res.value.copy(sz);
         m.uniforms.near.value = shared.near.value; m.uniforms.far.value = shared.far.value;
       }

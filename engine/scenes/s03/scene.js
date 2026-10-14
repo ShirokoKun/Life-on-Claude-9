@@ -5,6 +5,8 @@
 // The room's axes are chosen so the desk faces +y as in the flat: the intro's desk shots, Ivan's performance and
 // the screens move over by OFF unchanged. The two wide shots are new, made for this room.
 import * as THREE from 'three';
+import { createVolume } from '../../src/volume.js';
+import { COMMON } from '../../src/atmosphere.js';
 import { B, cameraIn, shotIn, SHOTS as INTRO, CAPTIONS as INTRO_CAPS, VO_OFFSET as INTRO_VO, DURATION as INTRO_LEN } from '../../src/shots.js';
 
 export const FPS = 24;
@@ -16,7 +18,8 @@ export const IVAN = 'scenes/s03/ivan.glb';    // the new Tripo Ivan, same intro 
 export const ACTING = 'scenes/s03/acting.json';
 export const OFF = [-5.90, 1.23, 0.0];        // the flat's desk zone -> this room (set_room03.OFF)
 export const CAST_OFFSET = OFF;
-export const ENV_AT = [1.3, 2.9, 1.2];        // reflections are captured from the middle of the room
+export const ENV_AT = [1.3, 2.9, 1.2];
+export const DUST = { center: [1.4, 2.8], spread: 1.5 };   // motes through the whole room, thickest in the window light        // reflections are captured from the middle of the room
 
 const shift = (p) => (Array.isArray(p) && typeof p[0] === 'number' ? [p[0] + OFF[0], p[1] + OFF[1], p[2] + OFF[2]] : p);
 const shiftFocus = (f) => (Array.isArray(f) && Array.isArray(f[0]) ? f.map(([t, p]) => [t, shift(p)]) : shift(f));
@@ -160,7 +163,12 @@ const veil = (map, color, opacity) => new THREE.MeshBasicMaterial({ map, color, 
 
 // Haze: the dark teal air that lifts the blacks a touch (fog), the glow that hangs around every practical plus the
 // lens. All additive, all soft, all in the lens (depth of field blurs them like air).
-export function setup({ scene, data }) {
+export let VOLUME = null;                     // the room's volumetric light (volume.js); times of day retune it
+export function setup({ scene, data, atmo }) {
+  if (atmo) {
+    atmo.beamMesh.visible = false;            // the intro's desk-lamp cone; this lamp is a shaded table lamp (volume below)
+    VOLUME = atmo.add(createVolume({ room: data.room, lamp: data.marks.Lamp_Shade || data.lights[0].location, COMMON }));
+  }
   scene.fog = new THREE.FogExp2(0x060a10, 0.045);
   const glow = radialTexture([[0, 1], [0.25, 0.45], [0.6, 0.12], [1, 0]]);
   const sprite = (pos, size, color, opacity) => {

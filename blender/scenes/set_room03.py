@@ -3,6 +3,7 @@
     blender -b --factory-startup -P blender/scenes/set_room03.py -- OUT_DIR [--cams top,door] [--res 1376x768] [--blend]
     blender -b --factory-startup -P blender/scenes/set_room03.py -- engine/scenes/s03/room --export
     blender -b --factory-startup -P blender/scenes/set_room03.py -- engine/scenes/s03/room --bake [--small] [--samples 64]
+    blender -b --factory-startup -P blender/scenes/set_room03.py -- engine/scenes/s03/lighting/day --bake --preset day --lm-only
 
 Without --export/--bake it renders Workbench layout frames (fast, to hold against the references); --export writes
 the unlit engine set (room.glb + lights.json); --bake adds the 3 AM rig and Cycles lightmaps (GPU). The Studio reloads.
@@ -791,41 +792,90 @@ def build():
 
 
 # ---------------------------------------------------------------------------------------------- night light (3 AM)
-def light_rig(scene):
-    """The 3 AM rig for Cycles (the bake) and lights.json (the engine's live lights).
-    Values start from the intro's 3am preset (lighting.PRESETS) so both films share one exposure."""
+# Times of day, all on the same geometry (so the engine can blend their lightmaps). The window is read as facing
+# east for the chapter's sunrise; nothing in the set changes, only where the light comes from.
+#   sun: (strength, colour, travel direction) through the window; window: the sky panel outside it (W, colour);
+#   city: the valley's lights and the sky card as light sources; screens: the monitors' and laptop's emission.
+PRESETS = {
+    "3am":     dict(world=((0.002, 0.003, 0.009), (0.02, 0.015, 0.012), 1.0), lamp=240, window=(320, (0.36, 0.46, 1.0)),
+                    moon=0.7, sun=None, sodium=1400, fill=70, city=1.0, screens=1.0, exposure=1.35),
+    "evening": dict(world=((0.03, 0.04, 0.12), (0.55, 0.28, 0.14), 1.2), lamp=240, window=(900, (1.0, 0.56, 0.36)),
+                    moon=0.0, sun=None, sodium=900, fill=70, city=0.7, screens=1.0, exposure=1.0),
+    "day":     dict(world=((0.25, 0.35, 0.60), (0.60, 0.60, 0.58), 1.5), lamp=0, window=(2600, (0.85, 0.90, 1.0)),
+                    moon=0.0, sun=(4.0, (1.0, 0.90, 0.78), (1.0, 0.30, -0.62)), sodium=0, fill=20, city=0.0, screens=0.5,
+                    exposure=0.1),
+    "sunrise": dict(world=((0.12, 0.16, 0.30), (0.90, 0.50, 0.25), 2.0), lamp=240, window=(700, (1.0, 0.68, 0.48)),
+                    moon=0.0, sun=(5.0, (1.0, 0.58, 0.32), (1.0, -0.20, -0.13)), sodium=0, fill=50, city=0.1, screens=0.8,
+                    exposure=0.6),
+}
+CITY_LIGHTS = ("Sodium Light", "Street LED", "House Window LED", "Facade City", "Aviation Red", "Sky Night")
+SCREEN_MATS = ("Laptop Screen", "Monitor Screen", "Code Screen", "Phone Screen")
+
+
+def _emission(name, k):
+    m = bpy.data.materials.get(name)
+    if not m or not m.use_nodes:
+        return
+    for n in m.node_tree.nodes:
+        if n.type == "BSDF_PRINCIPLED":
+            n.inputs["Emission Strength"].default_value *= k
+        elif n.type == "EMISSION":
+            n.inputs["Strength"].default_value *= k
+
+
+def light_rig(scene, preset="3am"):
+    """The rig for Cycles (the bake) and lights.json (the engine's live lights), per time of day.
+    3am starts from the intro's 3am preset (lighting.PRESETS) so both films share one exposure."""
     import lighting
+    p = PRESETS[preset]
     c = geo.coll("Lighting")
-    lighting.world_sky((0.002, 0.003, 0.009), (0.02, 0.015, 0.012), 1.0)
+    lighting.world_sky(*p["world"])
     for o in bpy.data.objects:                      # window panes must not block the outside light (no caustics);
-        if o.name.startswith("Window_Glass") or                 (any(c.name == "Exterior" for c in o.users_collection) and not o.name.startswith("Tree_")):
-            o.visible_shadow = False                # nor may the sky card and the far city shade the moon
+        if o.name.startswith("Window_Glass") or \
+                (any(c.name == "Exterior" for c in o.users_collection) and not o.name.startswith("Tree_")):
+            o.visible_shadow = False                # nor may the sky card and the far city shade the moon or sun
+    for n in CITY_LIGHTS:
+        _emission(n, p["city"])
+    for n in SCREEN_MATS:
+        _emission(n, p["screens"])
     lamp = Vector(scene["lamp"])
     L = lighting._light
-    L("Desk_Lamp", "POINT", tuple(lamp - Vector((0, 0, 0.06))), 240, (1.0, 0.60, 0.32), c, shadow_soft=0.12)   # the room's key: warm everywhere
+    # the room's key at night: warm everywhere (energy 0 keeps the light, so every preset has the same live list)
+    L("Desk_Lamp", "POINT", tuple(lamp - Vector((0, 0, 0.06))), max(p["lamp"], 0.001), (1.0, 0.60, 0.32), c, shadow_soft=0.12)
     bpy.context.view_layer.update()
     hinge = bpy.data.objects["Laptop_Hinge"]
-    L("Key_Laptop", "AREA", tuple(hinge.matrix_world @ Vector((0, -0.01, 0.112))), 4.0, (0.62, 0.74, 1.0), c,
+    L("Key_Laptop", "AREA", tuple(hinge.matrix_world @ Vector((0, -0.01, 0.112))), 4.0 * p["screens"], (0.62, 0.74, 1.0), c,
       size=(0.29, 0.18), target=(1.05, 3.75, 1.15))
-    # the night through the window: cool sky panel, the moon, and street lights below throwing warm light up
+    # the sky through the window: a panel outside it, coloured by the time of day
     cy = (WIN_Y0 + WIN_Y1) / 2
-    L("City_West", "AREA", (-2.6, cy, (SILL + HEAD) / 2 + 0.4), 320, (0.36, 0.46, 1.0), c, size=((WIN_Y1 - WIN_Y0) * 1.6, (HEAD - SILL) * 1.6),
-      target=(2.2, cy, 0.6))
-    moon = bpy.data.lights.new("Moon", "SUN")
-    moon.energy, moon.color, moon.angle = 0.7, (0.58, 0.70, 1.0), math.radians(9.0)   # hazy moon: a soft wash
-    mo = bpy.data.objects.new("Moon", moon)
-    c.objects.link(mo)
-    mo.rotation_euler = Vector(MOON).to_track_quat("-Z", "Y").to_euler()   # the window's pattern lands across the bed
-    for i, y in enumerate((WIN_Y0 + 0.5, WIN_Y1 - 0.6)):
-        L(f"Sodium_{i}", "SPOT", (-7.0, y, -3.0), 1400, (1.0, 0.50, 0.16), c, spot=(12, 0.7), target=(1.6, y + 0.3, H),
-          shadow_soft=0.3)
+    L("City_West", "AREA", (-2.6, cy, (SILL + HEAD) / 2 + 0.4), p["window"][0], p["window"][1], c,
+      size=((WIN_Y1 - WIN_Y0) * 1.6, (HEAD - SILL) * 1.6), target=(2.2, cy, 0.6))
+    if p["moon"]:
+        moon = bpy.data.lights.new("Moon", "SUN")
+        moon.energy, moon.color, moon.angle = p["moon"], (0.58, 0.70, 1.0), math.radians(9.0)   # hazy moon: a soft wash
+        mo = bpy.data.objects.new("Moon", moon)
+        c.objects.link(mo)
+        mo.rotation_euler = Vector(MOON).to_track_quat("-Z", "Y").to_euler()
+    if p["sun"]:                                    # through the window: mullions and blinds print on the room
+        k, col, d = p["sun"]
+        sun = bpy.data.lights.new("Sun", "SUN")
+        sun.energy, sun.color, sun.angle = k, col, math.radians(1.0)
+        so = bpy.data.objects.new("Sun", sun)
+        c.objects.link(so)
+        so.rotation_euler = Vector(d).to_track_quat("-Z", "Y").to_euler()
+    if p["sodium"]:
+        for i, y in enumerate((WIN_Y0 + 0.5, WIN_Y1 - 0.6)):
+            L(f"Sodium_{i}", "SPOT", (-7.0, y, -3.0), p["sodium"], (1.0, 0.50, 0.16), c, spot=(12, 0.7),
+              target=(1.6, y + 0.3, H), shadow_soft=0.3)
     # the room's fill: lamp light scattered off the ceiling, walls and bedding, the soft low glow every corner of
     # the reference has (shadows never fall to black). A broad, dim, warm panel just under the ceiling.
-    L("Room_Fill", "AREA", (W / 2, D / 2, H - 0.05), 70, (1.0, 0.80, 0.62), c, size=(W * 0.8, D * 0.8), target=(W / 2, D / 2, 0))
-    scene.view_settings.exposure = 1.35
+    if p["fill"]:
+        L("Room_Fill", "AREA", (W / 2, D / 2, H - 0.05), p["fill"], (1.0, 0.80, 0.62), c, size=(W * 0.8, D * 0.8),
+          target=(W / 2, D / 2, 0))
+    scene.view_settings.exposure = p["exposure"]
 
 
-def bake_and_export(out, scene, small=False, samples=64):
+def bake_and_export(out, scene, small=False, samples=64, preset="3am", lm_only=False):
     """Cycles lightmaps for the set (lightmap.py: irradiance minus the live lights), then room.glb + lights.json."""
     import bake as BK
     import export_intro as X
@@ -840,12 +890,15 @@ def bake_and_export(out, scene, small=False, samples=64):
             mw = o.matrix_world.copy()
             o.parent = None
             o.matrix_world = mw
-    light_rig(scene)
+    light_rig(scene, preset)
     groups = {"ARCH": 2048, "DESK": 2048, "ROOM": 2048, "WALLN": 512, "CEIL": 512}
     write_lights(out, scene, groups=list(groups), exposure=scene.view_settings.exposure)
     lightmap.bake_lightmaps(out / "lightmaps", sizes={g: 128 for g in groups} if small else groups,
                             samples=4 if small else samples, live_samples=2 if small else 24, device="GPU",
                             reuse="--resume" in sys.argv)
+    if lm_only:                                      # another time of day on the same geometry: lightmaps + lights.json
+        print("BAKED", preset, out, flush=True)
+        return
     X.strip_for_web()
     export_glb(out)
 
@@ -928,7 +981,8 @@ if __name__ == "__main__":
     if "--blend" in args:
         bpy.ops.wm.save_as_mainfile(filepath=str(out / "room03.blend"))
     if "--bake" in args:                             # the finished set: lightmaps + room.glb + lights.json
-        bake_and_export(out, scene, small="--small" in args, samples=int(opt("--samples", "64")))
+        bake_and_export(out, scene, small="--small" in args, samples=int(opt("--samples", "64")),
+                        preset=opt("--preset", "3am"), lm_only="--lm-only" in args)
         sys.exit(0)
     if "--export" in args:                           # layout only, unlit (fast)
         write_lights(out, scene)

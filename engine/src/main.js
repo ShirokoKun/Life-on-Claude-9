@@ -135,10 +135,11 @@ async function boot() {
   const lampShade = data.lights.find((l) => l.name === 'Desk_Lamp');
   const lampPos = B(...lampShade.location);
   atmo = createAtmosphere({ lamp: lampPos, lampTarget: lampPos.clone().add(new THREE.Vector3(lampShade.forward[0], lampShade.forward[2], -lampShade.forward[1]).multiplyScalar(0.55)),
-    screen: B(...(data.marks.Laptop_Screen || [6.95, 3.22, 0.87])), count: QUALITY === 'high' ? 900 : 500 });
+    screen: B(...(data.marks.Laptop_Screen || [6.95, 3.22, 0.87])), count: QUALITY === 'high' ? 900 : 500,
+    ...(SC.DUST ? { center: SC.DUST.center, spread: SC.DUST.spread } : {}) });   // a set's own air
   post = createPost(renderer, scene, camera, atmo);
   roomRoot = room.scene;
-  if (SC.setup) SC.setup({ scene, named, root: room.scene, THREE, camera, renderer, data });   // a set's air: fog, haze
+  if (SC.setup) await SC.setup({ scene, named, root: room.scene, THREE, camera, renderer, data, L, LM, loadEXR, roomDir: ROOM, atmo });   // a set's air, its times of day
   if (SC.light) {
     status('Loading the other times of day...');
     const sets = await TOD.loadSets(SC.SETS, loadEXR, { LM, exposure: data.exposure || 0 });
