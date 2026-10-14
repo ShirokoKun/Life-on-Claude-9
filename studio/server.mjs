@@ -57,14 +57,17 @@ const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '
 
 function sendFile(req, res, file) {
   if (!fs.existsSync(file) || !fs.statSync(file).isFile()) { res.writeHead(404); res.end('not found'); return; }
-  const size = fs.statSync(file).size, type = TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream';
+  const st = fs.statSync(file), size = st.size, type = TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream';
+  // no-cache = the browser asks every time; the ETag lets it keep its copy (304) until the file really changes
+  const etag = `W/"${size.toString(36)}-${Math.floor(st.mtimeMs).toString(36)}"`;
+  if (req.headers['if-none-match'] === etag) { res.writeHead(304, { ETag: etag, 'Cache-Control': 'no-cache' }); res.end(); return; }
   const range = /bytes=(\d*)-(\d*)/.exec(req.headers.range || '');
   if (range) {                                                 // video scrubbing
     const a = range[1] ? +range[1] : 0, b = range[2] ? +range[2] : size - 1;
     res.writeHead(206, { 'Content-Type': type, 'Content-Range': `bytes ${a}-${b}/${size}`, 'Accept-Ranges': 'bytes', 'Content-Length': b - a + 1, 'Cache-Control': 'no-cache' });
     fs.createReadStream(file, { start: a, end: b }).pipe(res); return;
   }
-  res.writeHead(200, { 'Content-Type': type, 'Content-Length': size, 'Accept-Ranges': 'bytes', 'Cache-Control': 'no-cache' });
+  res.writeHead(200, { 'Content-Type': type, 'Content-Length': size, 'Accept-Ranges': 'bytes', 'Cache-Control': 'no-cache', ETag: etag });
   fs.createReadStream(file).pipe(res);
 }
 const json = (res, data, code = 200) => { res.writeHead(code, { 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' }); res.end(JSON.stringify(data)); };
