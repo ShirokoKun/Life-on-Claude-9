@@ -1,0 +1,99 @@
+cue,kind,bus,stem,start,end,gain_db,duck_db,pan,note,anchor
+S1_city,bed,amb,amb_city_night_far.wav,0.0,16.7,-9,7.0,0.0,"the world outside, receding as we push in on Ivan",abs:a+0.00
+S1_fridge,bed,amb,amb_fridge_cycle.wav,0.0,37.76,-13,7.0,0.0,compressor cycle; its silence lands under 'still full',abs:a+0.00
+S1_room,bed,amb,amb_room_tone_3am.wav,0.0,38.16,-3,7.0,0.0,"oppressive room tone, starts the chapter",abs:a+0.00
+S1_drone,bed,music,mus_drone_isolation.wav,3.6,37.76,-12,9.0,0.0,isolation drone,V01:s+0.60
+S1_fan,bed,amb,amb_laptop_fan.wav,4.0,37.96,-12,7.0,0.0,laptop working hard,V01:s+1.00
+S1_phone_wake,shot,ui,ui_screen_wake_click.wav,4.15,4.192,-6,3.0,0.5,phone screen wakes: 3:04,V01:s+1.15
+V02_glass,shot,hits,sfx_glass_stillness.wav,9.784,15.833,-9,0.0,0.0,the untouched glass; swells through V03,V02:f+0.45
+V03_drop,shot,hits,imp_sub_drop_soft.wav,12.79,16.638,-5,0.0,0.0,BOLD  'It's still full.',V03:s-0.05
+S1_clock,bed,amb,fol_wall_clock_tick.wav,15.7,37.76,-8,7.0,0.0,wall clock (seen in the reference clip),V04:s+0.00
+V04_creak,shot,foley,fol_chair_creak_lean.wav,15.95,17.43,-10,4.0,-0.2,,V04:s+0.25
+V04_type,shot,foley,fol_typing_burst_fast.wav,16.3,21.029,-11,4.0,0.0,typing furiously,V04:s+0.60
+V05_type,shot,foley,fol_typing_burst_slow.wav,21.0,24.952,-13,4.0,0.2,,V05:s+0.00
+V05_stream,shot,ui,ui_terminal_text_stream_long.wav,21.8,26.13,-12,3.0,-0.25,terminal scrolling,V05:s+0.80
+V05_chat,shot,ui,ui_msg_receive_tick.wav,23.772,24.234,-11,3.0,0.3,Claude chat,V05:f+0.55
+V05_enter,shot,foley,fol_key_enter.wav,25.032,25.12,-10,4.0,0.0,,V05:f+0.80
+V06_ping_a,shot,ui,ui_module_ping_a.wav,27.564,29.115,-10,3.0,-0.4,DRAFT green,V06:f+0.33
+V06_ping_b,shot,ui,ui_module_ping_b.wav,28.264,29.747,-10,3.0,0.0,REVIEW green,V06:f+0.58
+V06_send,shot,ui,ui_pipeline_send_confirm.wav,28.64,30.632,-8,3.0,0.0,pipeline complete,V06:e-0.80
+V06_ping_c,shot,ui,ui_module_ping_c.wav,28.964,30.504,-10,3.0,0.4,SEND green,V06:f+0.83
+V07a_stream,shot,ui,ui_terminal_text_stream_short.wav,32.24,33.798,-12,3.0,-0.2,code writing itself,V07a:s+1.90
+V07a_chime,shot,ui,ui_claude_chime_friendly.wav,32.26,34.778,-11,3.0,0.3,Claude's motif: 'Claude is doing the building',V07a:f+0.50
+V07b_enter1,shot,foley,fol_key_enter.wav,35.43,35.518,-8,4.0,0.0,,V07b:s+0.55
+V07b_hit,shot,hits,imp_tonal_hit_minor2.wav,35.98,41.918,-8,0.0,0.0,BOLD  'Ivan keeps saying yes.',V07b:s+1.10
+V07b_enter2,shot,foley,fol_key_enter.wav,36.03,36.118,-8,4.0,0.0,,V07b:s+1.15
+T_flashback,shot,hits,trn_flashback_timeshift.wav,36.36,40.66,-9,0.0,0.0,present -> two days ago,V07b:e-0.60
+V07b_enter3,shot,foley,fol_key_enter.wav,36.58,36.668,-8,4.0,0.0,,V07b:s+1.70
+S2_daylight,bed,amb,amb_daylight_room.wav,38.06,63.78,-3,7.0,0.0,flashback room tone (daylight),V08:s-0.50
+V09_type,shot,foley,fol_typing_burst_slow.wav,42.18,46.132,-13,4.0,0.2,Ivan typing into a new chat,V09:s+0.30
+V09_send,shot,ui,ui_msg_send_tick.wav,50.13,50.454,-9,3.0,0.2,,V09:e+0.25
+V10_indicator,shot,ui,ui_typing_indicator.wav,50.18,50.75,-10,3.0,-0.2,,V10:s-0.60
+S2_wonder,bed,music,mus_wonder_pad.wav,50.28,63.58,-10,9.0,0.0,'it's working' glow under Claude's reply,V10:s-0.50
+V10_chime,shot,ui,ui_claude_chime_friendly.wav,50.63,53.148,-6,3.0,0.0,"Claude's first entrance. Friendly, human-feeling",V10:s-0.15
+V10_stream_a,shot,ui,ui_terminal_text_stream_long.wav,51.38,55.71,-16,3.0,-0.3,reply streaming in,V10:s+0.60
+V10_stream_b,shot,ui,ui_terminal_text_stream_long.wav,56.38,60.71,-17,3.0,0.3,,V10:s+5.60
+V10_stream_c,shot,ui,ui_terminal_text_stream_short.wav,60.98,62.538,-16,3.0,0.0,,V10:s+10.20
+S3_room,bed,amb,amb_room_tone_3am.wav,63.48,170.76,-3,7.0,0.0,present-day room tone for the rest of the night; dips to near-silence at the vacuum cut (V17->V18),V11:s-0.20
+V11_wake,shot,ui,ui_screen_wake_click.wav,63.58,63.622,-7,3.0,0.0,,V11:s-0.10
+S3_fan,bed,amb,amb_laptop_fan.wav,63.68,170.76,-12,7.0,0.0,,V11:s+0.00
+V11_drop,shot,hits,imp_sub_drop_soft.wav,63.68,67.528,-7,0.0,0.0,BOLD  'That was the plan. Review and approve.'  Smash back to the present,V11:s+0.00
+V12_ok,shot,ui,ui_compile_success.wav,69.696,71.022,-8,3.0,0.0,email system working,V12:f+0.30
+S3_ramp,bed,music,mus_pulse_ramp.wav,70.5,86.7,-9,9.0,0.0,nervous system warming up; peaks at the list items,V12:e-2.50
+V13a_ping,shot,ui,ui_module_ping_a.wav,73.85,75.401,-7,3.0,-0.4,Calendar management lights up,V13a:s+0.05
+V13b_ping,shot,ui,ui_module_ping_b.wav,75.54,77.023,-7,3.0,-0.15,Meeting scheduling,V13b:s+0.05
+V13c_ping,shot,ui,ui_module_ping_c.wav,77.23,78.77,-7,3.0,0.15,Document drafting,V13c:s+0.05
+V13d_ping,shot,ui,ui_module_ping_d.wav,79.16,80.626,-7,3.0,0.4,Research summaries,V13d:s+0.05
+V14a_type,shot,foley,fol_typing_burst_fast.wav,81.13,85.859,-14,4.0,0.0,hours of code...,V14a:s-0.20
+S3_hold,bed,music,mus_pulse_hold.wav,81.33,104.44,-10,9.0,0.0,132 bpm pulse = vibrating. Cut dead at the vacuum,V14a:s+0.00
+V14a_skip,shot,hits,trn_time_skip_tick.wav,81.38,84.545,-11,0.0,0.0,...compress,V14a:s+0.05
+V14b_pop1,shot,ui,ui_task_clear_pop.wav,85.331,85.592,-8,3.0,-0.3,tasks disappearing from his day,V14b:f+0.18
+V14b_pop2,shot,ui,ui_task_clear_pop.wav,86.176,86.437,-8,3.0,0.3,,V14b:f+0.40
+V14b_takegive,shot,hits,sfx_take_give.wav,86.752,90.865,-11,0.0,0.0,takes something from him even as it gives,V14b:f+0.55
+V14b_pop3,shot,ui,ui_task_clear_pop.wav,87.021,87.282,-8,3.0,-0.1,,V14b:f+0.62
+V15_rush,shot,ui,ui_module_complete_rush.wav,89.83,92.978,-4,3.0,0.0,BOLD  'a cheat code for life': the rush,V15:s+0.35
+V16_pop1,shot,ui,ui_task_clear_pop.wav,94.182,94.443,-9,3.0,-0.3,,V16:f+0.30
+V16_pop2,shot,ui,ui_task_clear_pop.wav,94.942,95.203,-9,3.0,0.3,,V16:f+0.55
+V16_ok,shot,ui,ui_compile_success.wav,95.41,96.736,-9,3.0,0.0,problems resolving in minutes,V16:e-0.90
+V17_door,shot,hits,trn_door_threshold.wav,96.46,98.6,-9,0.0,0.0,a doorway only Ivan can see,V17:s-0.35
+V17_vib,shot,hits,sfx_vibrating_frequency.wav,97.26,104.458,-8,0.0,0.0,'vibrating at a different frequency': swells then cut at the end of the line,V17:s+0.45
+T_vacuum,shot,hits,trn_vacuum_dropout.wav,104.29,106.69,-6,0.0,0.0,the high is cut off: the world empties,V17:e-0.20
+V18_buzz,shot,foley,fol_phone_buzz_couch.wav,104.79,106.628,-7,4.0,-0.6,"girlfriend's text, unanswered (lands before V18)",V17:e+0.30
+S4_drone,bed,music,mus_drone_isolation.wav,105.69,135.46,-11,9.0,0.0,isolation returns,V18:s-1.00
+V19_flurry,shot,ui,ui_auto_reply_flurry.wav,114.246,116.396,-7,3.0,0.0,'his system now responds to everyone else',V19:f+0.55
+S4_heart,bed,foley,fol_heartbeat_62bpm_loop.wav,118.51,134.96,-17,4.0,0.0,body awareness: 62 bpm,V20:s+1.50
+V20_fray,shot,hits,sfx_fraying_texture.wav,118.61,125.53,-10,0.0,0.0,'something fraying at the edge',V20:s+1.60
+V21_wake,shot,ui,ui_screen_wake_click.wav,125.49,125.532,-9,3.0,0.0,,V21:s-0.10
+V21_lean,shot,foley,fol_chair_creak_lean.wav,126.09,127.57,-11,4.0,0.2,back to the screen,V21:s+0.50
+V22_type,shot,foley,fol_typing_burst_fast.wav,128.37,133.099,-12,4.0,0.0,fingers back on keys,V22:s-0.30
+V22_ping1,shot,ui,ui_module_ping_a.wav,129.678,131.229,-11,3.0,-0.3,,V22:f+0.30
+V22_ping2,shot,ui,ui_module_ping_c.wav,131.291,132.831,-11,3.0,0.3,,V22:f+0.78
+V23_breath,shot,foley,fol_breath_exhale.wav,133.76,135.76,-9,4.0,0.0,'Then he'll rest.',V23:e-0.70
+T_timeskip,shot,hits,trn_time_skip_tick.wav,134.81,137.975,-10,0.0,0.0,hours pass: 3 AM -> 4 AM,V23:e+0.35
+S5_dread,bed,music,mus_dread_cluster.wav,134.86,158.52,-8,9.0,0.0,semitone cluster crawling up; dissolves when the module works,V23:e+0.40
+S5_clock,bed,amb,fol_wall_clock_tick.wav,134.96,164.96,-3,7.0,0.0,clock louder at 4 AM,V23:e+0.50
+S5_heart,bed,foley,fol_heartbeat_ramp.wav,138.94,156.46,-14,4.0,0.0,62 -> 100 bpm,V24:f+0.30
+V24_tremor,shot,hits,sfx_caffeine_tremor.wav,141.34,145.118,-9,0.0,0.0,'his hands shake',V24:f+0.55
+V25_stream,shot,ui,ui_terminal_text_stream_long.wav,146.96,151.29,-17,3.0,0.35,code he can no longer parse,V25:s+0.40
+V25_fray,shot,hits,sfx_fraying_texture.wav,152.512,159.432,-12,0.0,0.0,'something he doesn't fully understand',V25:f+0.62
+S5_wonder,bed,music,mus_wonder_pad.wav,158.248,170.76,-8,9.0,0.0,"relief / pride glow, too bright, a little wrong",V26:f+0.16
+V26_ok,shot,ui,ui_compile_success.wav,158.52,159.846,-6,3.0,0.0,module works: the dread dissolves,V26:f+0.20
+V26_rush,shot,ui,ui_module_complete_rush.wav,158.928,162.076,-8,3.0,0.0,,V26:f+0.26
+V26_send,shot,ui,ui_pipeline_send_confirm.wav,162.056,164.048,-10,3.0,0.0,tests pass; green,V26:f+0.72
+V27_hit,shot,hits,imp_tonal_hit_minor2.wav,164.81,170.748,-7,0.0,0.0,BOLD  'HE... built that.',V27:s+0.05
+V27_drop,shot,hits,imp_sub_drop_soft.wav,167.64,171.488,-4,0.0,0.0,BOLD  'what HE told it to do.',V27:f+0.48
+T_vacuum2,shot,hits,trn_vacuum_dropout.wav,170.71,173.11,-8,0.0,0.0,pride cut off,V27:e-0.05
+V27_chime,shot,ui,ui_claude_chime_neutral.wav,171.81,173.518,-11,3.0,0.15,"Claude's motif, one shade colder",V27:e+1.05
+S6_dawn,bed,amb,amb_dawn_hollow.wav,171.96,198.0,-5,7.0,0.0,"post-binge hollow: tinnitus-thin tone, exhausted and wired",V28:s-0.60
+T_dawn,shot,hits,trn_dawn_rise.wav,172.06,186.81,-11,0.0,0.0,sunrise,V28:s-0.50
+S6_music,bed,music,mus_hollow_dawn.wav,175.032,200.0,-8,9.0,0.0,sparse bells in a big empty room,V28:f+0.30
+V28_ping1,shot,ui,ui_module_ping_a.wav,175.032,176.583,-15,3.0,-0.4,four systems idle,V28:f+0.30
+V28_ping2,shot,ui,ui_module_ping_c.wav,176.268,177.808,-15,3.0,0.4,,V28:f+0.45
+V28_ping3,shot,ui,ui_module_ping_a.wav,177.504,179.055,-16,3.0,-0.2,,V28:f+0.60
+V28_ping4,shot,ui,ui_module_ping_c.wav,178.74,180.28,-16,3.0,0.2,,V28:f+0.75
+V29_lean,shot,foley,fol_chair_creak_lean.wav,181.9,183.38,-10,4.0,0.1,he leans back,V29:s+0.40
+V29_tremor,shot,hits,sfx_caffeine_tremor.wav,182.232,186.01,-17,0.0,0.0,,V29:f+0.15
+V29_breath,shot,foley,fol_breath_exhale.wav,184.916,186.916,-8,4.0,0.0,exhausted,V29:f+0.70
+V30_glass,shot,hits,sfx_glass_stillness.wav,187.58,193.629,-7,0.0,0.0,"the full glass, again. Swells to the last line",V30a:s-0.20
+V30_vac,shot,hits,trn_vacuum_dropout.wav,194.145,196.545,-9,0.0,0.0,cut to black,V30b:f+0.96
+V30_hook,shot,ui,ui_claude_chime_hollow.wav,194.66,199.966,-4,0.0,0.0,"BOLD  chapter-out hook: Claude's motif, hollowed out",V30b:e+0.40

@@ -1,0 +1,434 @@
+{
+ "V01": [
+  {
+   "take": "A",
+   "generation_id": "K5vWbQe53U8rAxQZkaPY",
+   "duration_s": 4.32
+  },
+  {
+   "take": "B",
+   "generation_id": "vaZmY8KprbEVMJa5AqjN",
+   "duration_s": 4.16
+  }
+ ],
+ "V02": [
+  {
+   "take": "A",
+   "generation_id": "XaTaUM1N8IaOaXHcCKbs",
+   "duration_s": 3.92
+  },
+  {
+   "take": "B",
+   "generation_id": "pNBpBEM3TBm5z3kvIDur",
+   "duration_s": 3.92
+  }
+ ],
+ "V03": [
+  {
+   "take": "A",
+   "generation_id": "GYT7zb6eRIjIJ6UJNH1a",
+   "duration_s": 1.76
+  },
+  {
+   "take": "B",
+   "generation_id": "pE9vYq6cnQugDXqC2lvk",
+   "duration_s": 1.76
+  }
+ ],
+ "V04": [
+  {
+   "take": "A",
+   "generation_id": "D8eakYnjGpAzZpSXBicN",
+   "duration_s": 4.8
+  },
+  {
+   "take": "B",
+   "generation_id": "PTg68RqiToNoIcy03yRw",
+   "duration_s": 4.72
+  }
+ ],
+ "V05": [
+  {
+   "take": "A",
+   "generation_id": "AuOcpyp336kH51lxRsnk",
+   "duration_s": 5.04
+  },
+  {
+   "take": "B",
+   "generation_id": "wNNPmbdJYPEYHVFE2k4g",
+   "duration_s": 4.96
+  }
+ ],
+ "V06": [
+  {
+   "take": "A",
+   "generation_id": "dM2kqrEUYUtO2bZU067q",
+   "duration_s": 2.8
+  },
+  {
+   "take": "B",
+   "generation_id": "NXp4d1CEetk1v5CXJ2qM",
+   "duration_s": 2.8
+  }
+ ],
+ "V07a": [
+  {
+   "take": "A",
+   "generation_id": "mcdC5anJ159KkpRDJYYX",
+   "duration_s": 3.84
+  },
+  {
+   "take": "B",
+   "generation_id": "2eqaAIY5DG7LbyrmXodI",
+   "duration_s": 3.84
+  }
+ ],
+ "V07b": [
+  {
+   "take": "A",
+   "generation_id": "BFGZ2Km54FCqiH0IXWRu",
+   "duration_s": 2.08
+  },
+  {
+   "take": "B",
+   "generation_id": "gwJPaTRDmWfo2RTC2Wg9",
+   "duration_s": 2.16
+  }
+ ],
+ "V08": [
+  {
+   "take": "A",
+   "generation_id": "N3beKLsK3uLpj2vp5jXG",
+   "duration_s": 2.32
+  },
+  {
+   "take": "B",
+   "generation_id": "pFMOFVgRnqvvTesNBKPb",
+   "duration_s": 2.32
+  }
+ ],
+ "V09": [
+  {
+   "take": "A",
+   "generation_id": "Z5XssGQG8FUGHH33lAR6",
+   "duration_s": 8.0
+  },
+  {
+   "take": "B",
+   "generation_id": "aLm7N1Tr1U10IOwWVO4L",
+   "duration_s": 7.76
+  }
+ ],
+ "V10": [
+  {
+   "take": "A",
+   "generation_id": "ttbOUbLulZYpZ2FxrYfJ",
+   "duration_s": 11.6
+  },
+  {
+   "take": "B",
+   "generation_id": "fCVeSslsCBoYXMWWpA7e",
+   "duration_s": 11.52
+  }
+ ],
+ "V11": [
+  {
+   "take": "A",
+   "generation_id": "a8SEyfHhAffhWkBetuDs",
+   "duration_s": 3.6
+  },
+  {
+   "take": "B",
+   "generation_id": "emP9atRn4DhGsMiWGqgX",
+   "duration_s": 3.68
+  }
+ ],
+ "V12": [
+  {
+   "take": "A",
+   "generation_id": "8PYQC8TMyySLED8s0m4f",
+   "duration_s": 4.72
+  },
+  {
+   "take": "B",
+   "generation_id": "BlpahcF70syZinXY9mMe",
+   "duration_s": 4.8
+  }
+ ],
+ "V13a": [
+  {
+   "take": "A",
+   "generation_id": "gOjDDPOM69FMQ8zAknak",
+   "duration_s": 1.44
+  },
+  {
+   "take": "B",
+   "generation_id": "7zD5RrTzVnbL7hOZ4KXo",
+   "duration_s": 1.44
+  }
+ ],
+ "V13b": [
+  {
+   "take": "A",
+   "generation_id": "yz3FM06k1cEdEZPCMx1y",
+   "duration_s": 1.44
+  },
+  {
+   "take": "B",
+   "generation_id": "mpIPcH8pF6J9wIKDgnBN",
+   "duration_s": 1.44
+  }
+ ],
+ "V13c": [
+  {
+   "take": "A",
+   "generation_id": "O7EuoBMCYA9FJDGK9Xn4",
+   "duration_s": 1.68
+  },
+  {
+   "take": "B",
+   "generation_id": "QYos0qze2g4tVZYhgYy8",
+   "duration_s": 1.52
+  }
+ ],
+ "V13d": [
+  {
+   "take": "A",
+   "generation_id": "AHEKwzSUmozXFtUsH8Rv",
+   "duration_s": 1.52
+  },
+  {
+   "take": "B",
+   "generation_id": "PKpeohND2RVxLHAOYVZj",
+   "duration_s": 1.52
+  }
+ ],
+ "V14a": [
+  {
+   "take": "A",
+   "generation_id": "5Zb9Gg3nYlR3bDqzfCTu",
+   "duration_s": 2.96
+  },
+  {
+   "take": "B",
+   "generation_id": "mZNf0zxY6WIOkMGpx4TB",
+   "duration_s": 2.88
+  }
+ ],
+ "V14b": [
+  {
+   "take": "A",
+   "generation_id": "iYy2kdaKdkIUiwful5iY",
+   "duration_s": 3.84
+  },
+  {
+   "take": "B",
+   "generation_id": "NfRkOGV9idIb69FJnqFg",
+   "duration_s": 3.84
+  }
+ ],
+ "V15": [
+  {
+   "take": "A",
+   "generation_id": "XVAn3cYjHY2gsPhGecoU",
+   "duration_s": 3.44
+  },
+  {
+   "take": "B",
+   "generation_id": "Ro5VpbKwTgwVTTjlkl38",
+   "duration_s": 3.36
+  }
+ ],
+ "V16": [
+  {
+   "take": "A",
+   "generation_id": "VaY46XQYAkjn03smITmK",
+   "duration_s": 3.04
+  },
+  {
+   "take": "B",
+   "generation_id": "sJPbNmyHo9s6DNfpd6xa",
+   "duration_s": 2.96
+  }
+ ],
+ "V17": [
+  {
+   "take": "A",
+   "generation_id": "6v8nFM8kEHHuU3AYYQHj",
+   "duration_s": 7.68
+  },
+  {
+   "take": "B",
+   "generation_id": "LGLways91fapDGkvr4XK",
+   "duration_s": 7.52
+  }
+ ],
+ "V18": [
+  {
+   "take": "A",
+   "generation_id": "hKZY5101YkD0aPTEyZ0x",
+   "duration_s": 4.8
+  },
+  {
+   "take": "B",
+   "generation_id": "DvSNFEsbFtDJXo98o1Oh",
+   "duration_s": 4.8
+  }
+ ],
+ "V19": [
+  {
+   "take": "A",
+   "generation_id": "NmVKPv0w6Yz2kJzzLU3N",
+   "duration_s": 3.92
+  },
+  {
+   "take": "B",
+   "generation_id": "jmCuh6zhOjO8Px4DJGny",
+   "duration_s": 4.16
+  }
+ ],
+ "V20": [
+  {
+   "take": "A",
+   "generation_id": "Hj5iXFs7sxIh0bEZT2Dw",
+   "duration_s": 7.68
+  },
+  {
+   "take": "B",
+   "generation_id": "Neik91U76w3WvwHKUGx8",
+   "duration_s": 7.52
+  }
+ ],
+ "V21": [
+  {
+   "take": "A",
+   "generation_id": "IMb57MLPV5rWbMPtyewX",
+   "duration_s": 2.48
+  },
+  {
+   "take": "B",
+   "generation_id": "5AfAXNYgV3wpTWwAJRCb",
+   "duration_s": 2.64
+  }
+ ],
+ "V22": [
+  {
+   "take": "A",
+   "generation_id": "4BzYrN9U99BN0iHPNCPZ",
+   "duration_s": 3.36
+  },
+  {
+   "take": "B",
+   "generation_id": "uXJ6hOwZam87Z5ybBf5y",
+   "duration_s": 3.2
+  }
+ ],
+ "V23": [
+  {
+   "take": "A",
+   "generation_id": "qlRINmomuwaYf1t2Agfp",
+   "duration_s": 2.08
+  },
+  {
+   "take": "B",
+   "generation_id": "BcBzXmZz1PyqxDhH8O6E",
+   "duration_s": 1.6
+  }
+ ],
+ "V24": [
+  {
+   "take": "A",
+   "generation_id": "qHglGVfqZSRSgYrdc6Sm",
+   "duration_s": 9.6
+  },
+  {
+   "take": "B",
+   "generation_id": "75ldu7WV7gcRuKKEJqPi",
+   "duration_s": 9.6
+  }
+ ],
+ "V25": [
+  {
+   "take": "A",
+   "generation_id": "NR4X7WHDkurcRuB6LglM",
+   "duration_s": 9.6
+  },
+  {
+   "take": "B",
+   "generation_id": "LJ9Fcu9Xg5X4Dtjh5c8c",
+   "duration_s": 9.04
+  }
+ ],
+ "V26": [
+  {
+   "take": "A",
+   "generation_id": "kSuZYu6rSMWIhEEY3Yuu",
+   "duration_s": 6.8
+  },
+  {
+   "take": "B",
+   "generation_id": "rlwCXWVs9wY9LVmN05TZ",
+   "duration_s": 6.88
+  }
+ ],
+ "V27": [
+  {
+   "take": "A",
+   "generation_id": "lAcvJmB3yzMuG0XSE1mN",
+   "duration_s": 6
+  },
+  {
+   "take": "B",
+   "generation_id": "mmYx75vPBKduKYdZuXOK",
+   "duration_s": 5.6
+  }
+ ],
+ "V28": [
+  {
+   "take": "A",
+   "generation_id": "zbUg6NU8cDrlKWLobAst",
+   "duration_s": 8.24
+  },
+  {
+   "take": "B",
+   "generation_id": "a0NW484xhjCUTn0wXXl1",
+   "duration_s": 8.24
+  }
+ ],
+ "V29": [
+  {
+   "take": "A",
+   "generation_id": "y5Q2TndtY0693dKGKBnR",
+   "duration_s": 4.88
+  },
+  {
+   "take": "B",
+   "generation_id": "oGn208M3akz6OiSods69",
+   "duration_s": 4.88
+  }
+ ],
+ "V30a": [
+  {
+   "take": "A",
+   "generation_id": "qrScMrOieygRRehlydUv",
+   "duration_s": 2
+  },
+  {
+   "take": "B",
+   "generation_id": "Fw8IrWvSkEjYJUcP5lf2",
+   "duration_s": 2.08
+  }
+ ],
+ "V30b": [
+  {
+   "take": "A",
+   "generation_id": "n7bZRFMyvBSCLiERI5G6",
+   "duration_s": 2.88
+  },
+  {
+   "take": "B",
+   "generation_id": "gxcnfqbPOZEPRD5dRt0T",
+   "duration_s": 2.72
+  }
+ ]
+}

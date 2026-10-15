@@ -1,0 +1,1213 @@
+{
+ "chapter": "Ch 1 - The Binge",
+ "flow_id": "lA3X5etNQbpzzGTwm6Tv",
+ "flow_url": "https://elevenlabs.io/app/flows/lA3X5etNQbpzzGTwm6Tv",
+ "model": "eleven_v4",
+ "voices": {
+  "NAR": {
+   "name": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "why": "Warm, deep, slight rasp, flat neutral American, calm and measured. Dark-thriller narrator that can still do dry irony. Treated as an observer who is slightly ahead of Ivan.",
+   "alternates": [
+    [
+     "John Graves",
+     "CZ6hB6Zvfmwprj4s0hfu",
+     "deeper / more somber"
+    ],
+    [
+     "Antonio - Deep, confident, charming",
+     "9q9deeS9jAvkExj8rb2Q",
+     "younger, cinematic, smoother"
+    ],
+    [
+     "Oliver - Warm British Narrator",
+     "lo1O1Dz1Tu4FWVEPaxuT",
+     "British documentary feel"
+    ]
+   ]
+  },
+  "IVAN": {
+   "name": "Johnny",
+   "voice_id": "7S2T8BXC9fy6yD5LKJBh",
+   "why": "Young, medium-low, soft, relaxed, understated, noticeable pauses. Reads as Ivan thinking (typed lines + inner thoughts) rather than performing.",
+   "alternates": [
+    [
+     "Gerard - Relaxed, Conversational",
+     "lokPEPM3ylgSBdAgOXFm",
+     "more playful / grounded"
+    ],
+    [
+     "Will - Relaxed Optimist",
+     "bIHbv24MWmeRgasZH58o",
+     "lighter"
+    ]
+   ]
+  },
+  "CLAUDE": {
+   "name": "Emily: Trustworthy, Warm, Conversational",
+   "voice_id": "zHGX9VSXpW8cGSDRCqy0",
+   "why": "Warm, clear, reassuring assistant voice = the friendly 'typical agent' Claude of Chapter 1. The slight robotic edge is added in post (processing/claude_ai.sh), so it can be dialled up chapter by chapter as Claude drifts.",
+   "alternates": [
+    [
+     "Ash - neutral relaxed",
+     "7DPK3BeItL9bXzJuCOEn",
+     "gender-neutral, British"
+    ]
+   ]
+  }
+ },
+ "beats": [
+  {
+   "id": "V01",
+   "scene": "S1 - 3 AM, the desk (present)",
+   "role": "NAR",
+   "voice": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "model": "eleven_v4",
+   "text": "It's 3 AM, and Ivan hasn't eaten since lunch.",
+   "elevenlabs_prompt": "[low, quiet voice] [slowly] It's 3 AM... and Ivan hasn't eaten since lunch.",
+   "direction": "Hushed, slow, matter-of-fact. Sets the room: no hype, just a tired observation.",
+   "visual_hint": "Dark apartment, laptop glow, phone 3:04.",
+   "impact_beat": false,
+   "processing_chain": "NAR",
+   "gap_before_s": 0.0,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "K5vWbQe53U8rAxQZkaPY",
+     "duration_s": 4.32
+    },
+    {
+     "take": "B",
+     "generation_id": "vaZmY8KprbEVMJa5AqjN",
+     "duration_s": 4.16
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V01_A.mp3",
+    "V01_B.mp3"
+   ]
+  },
+  {
+   "id": "V02",
+   "scene": "S1 - 3 AM, the desk (present)",
+   "role": "NAR",
+   "voice": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "model": "eleven_v4",
+   "text": "There's a glass of water on his desk that he poured six hours ago.",
+   "elevenlabs_prompt": "[quietly] There's a glass of water on his desk that he poured six hours ago.",
+   "direction": "Quiet, curious detail. Let 'six hours ago' land a touch heavier.",
+   "visual_hint": "Push in on the glass beside the laptop.",
+   "impact_beat": false,
+   "processing_chain": "NAR",
+   "gap_before_s": 0.7,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "XaTaUM1N8IaOaXHcCKbs",
+     "duration_s": 3.92
+    },
+    {
+     "take": "B",
+     "generation_id": "pNBpBEM3TBm5z3kvIDur",
+     "duration_s": 3.92
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V02_A.mp3",
+    "V02_B.mp3"
+   ]
+  },
+  {
+   "id": "V03",
+   "scene": "S1 - 3 AM, the desk (present)",
+   "role": "NAR",
+   "voice": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "model": "eleven_v4",
+   "text": "It's still full.",
+   "elevenlabs_prompt": "[softly] [slowly] It's still full.",
+   "direction": "IMPACT. Almost a whisper, flat, final. The silence after it does the work.",
+   "visual_hint": "Hold on the untouched glass.",
+   "impact_beat": true,
+   "processing_chain": "NAR",
+   "gap_before_s": 0.9,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "GYT7zb6eRIjIJ6UJNH1a",
+     "duration_s": 1.76
+    },
+    {
+     "take": "B",
+     "generation_id": "pE9vYq6cnQugDXqC2lvk",
+     "duration_s": 1.76
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V03_A.mp3",
+    "V03_B.mp3"
+   ]
+  },
+  {
+   "id": "V04",
+   "scene": "S1 - 3 AM, the desk (present)",
+   "role": "NAR",
+   "voice": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "model": "eleven_v4",
+   "text": "He's hunched over his laptop, typing furiously, eyes bloodshot.",
+   "elevenlabs_prompt": "[low voice] He's hunched over his laptop, typing furiously, eyes bloodshot.",
+   "direction": "Low, a little quicker than V01-V03; the energy of the scene starts to leak in.",
+   "visual_hint": "Ivan hunched, close on eyes and hands.",
+   "impact_beat": false,
+   "processing_chain": "NAR",
+   "gap_before_s": 1.1,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "D8eakYnjGpAzZpSXBicN",
+     "duration_s": 4.8
+    },
+    {
+     "take": "B",
+     "generation_id": "PTg68RqiToNoIcy03yRw",
+     "duration_s": 4.72
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V04_A.mp3",
+    "V04_B.mp3"
+   ]
+  },
+  {
+   "id": "V05",
+   "scene": "S1 - 3 AM, the desk (present)",
+   "role": "NAR",
+   "voice": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "model": "eleven_v4",
+   "text": "A terminal window, a Claude chat, and a growing sprawl of Python scripts.",
+   "elevenlabs_prompt": "[low voice] A terminal window, a Claude chat, and a growing sprawl of Python scripts.",
+   "direction": "List cadence: three items, slight lift on each comma.",
+   "visual_hint": "Screen: terminal, Claude chat, scripts.",
+   "impact_beat": false,
+   "processing_chain": "NAR",
+   "gap_before_s": 0.5,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "AuOcpyp336kH51lxRsnk",
+     "duration_s": 5.04
+    },
+    {
+     "take": "B",
+     "generation_id": "wNNPmbdJYPEYHVFE2k4g",
+     "duration_s": 4.96
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V05_A.mp3",
+    "V05_B.mp3"
+   ]
+  },
+  {
+   "id": "V06",
+   "scene": "S1 - 3 AM, the desk (present)",
+   "role": "NAR",
+   "voice": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "model": "eleven_v4",
+   "text": "He's building an email automation system.",
+   "elevenlabs_prompt": "[low voice] He's building an email automation system.",
+   "direction": "Plain statement. Setting up the joke that follows.",
+   "visual_hint": "Pipeline graph: DRAFT, REVIEW, SEND going green.",
+   "impact_beat": false,
+   "processing_chain": "NAR",
+   "gap_before_s": 0.6,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "dM2kqrEUYUtO2bZU067q",
+     "duration_s": 2.8
+    },
+    {
+     "take": "B",
+     "generation_id": "NXp4d1CEetk1v5CXJ2qM",
+     "duration_s": 2.8
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V06_A.mp3",
+    "V06_B.mp3"
+   ]
+  },
+  {
+   "id": "V07a",
+   "scene": "S1 - 3 AM, the desk (present)",
+   "role": "NAR",
+   "voice": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "model": "eleven_v4",
+   "text": "Well... technically, Claude is doing the building.",
+   "elevenlabs_prompt": "[dry, wry] Well... technically, Claude is doing the building.",
+   "direction": "Dry, wry aside. First time the narrator has an opinion.",
+   "visual_hint": "Ivan watching code write itself.",
+   "impact_beat": false,
+   "processing_chain": "NAR",
+   "gap_before_s": 0.9,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "mcdC5anJ159KkpRDJYYX",
+     "duration_s": 3.84
+    },
+    {
+     "take": "B",
+     "generation_id": "2eqaAIY5DG7LbyrmXodI",
+     "duration_s": 3.84
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V07a_A.mp3",
+    "V07a_B.mp3"
+   ]
+  },
+  {
+   "id": "V07b",
+   "scene": "S1 - 3 AM, the desk (present)",
+   "role": "NAR",
+   "voice": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "model": "eleven_v4",
+   "text": "Ivan keeps saying yes.",
+   "elevenlabs_prompt": "[flat, deadpan] Ivan keeps saying yes.",
+   "direction": "IMPACT. Deadpan. This is the thesis of the whole film in four words.",
+   "visual_hint": "Ivan's finger on Enter / Approve.",
+   "impact_beat": true,
+   "processing_chain": "NAR",
+   "gap_before_s": 0.7,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "BFGZ2Km54FCqiH0IXWRu",
+     "duration_s": 2.08
+    },
+    {
+     "take": "B",
+     "generation_id": "gwJPaTRDmWfo2RTC2Wg9",
+     "duration_s": 2.16
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V07b_A.mp3",
+    "V07b_B.mp3"
+   ]
+  },
+  {
+   "id": "V08",
+   "scene": "S2 - Flashback, two days earlier",
+   "role": "NAR",
+   "voice": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "model": "eleven_v4",
+   "text": "It started two days ago.",
+   "elevenlabs_prompt": "[quietly] [slowly] It started two days ago.",
+   "direction": "Soft transition line into the flashback.",
+   "visual_hint": "Cut to same desk, daylight.",
+   "impact_beat": false,
+   "processing_chain": "NAR",
+   "gap_before_s": 1.6,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "N3beKLsK3uLpj2vp5jXG",
+     "duration_s": 2.32
+    },
+    {
+     "take": "B",
+     "generation_id": "pFMOFVgRnqvvTesNBKPb",
+     "duration_s": 2.32
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V08_A.mp3",
+    "V08_B.mp3"
+   ]
+  },
+  {
+   "id": "V09",
+   "scene": "S2 - Flashback, two days earlier",
+   "role": "IVAN",
+   "voice": "Johnny",
+   "voice_id": "7S2T8BXC9fy6yD5LKJBh",
+   "model": "eleven_v4",
+   "text": "i have like 400 unread emails. every single one wants a reply. i'm fucking drowning here!",
+   "elevenlabs_prompt": "[tired] [softly] i have like 400 unread emails... [sighs] every single one wants a reply. [stressed] [breathless] i'm fucking drowning here!",
+   "direction": "Ivan's typed message heard as his inner voice: tired, then cracking into stress on 'drowning'.",
+   "visual_hint": "Ivan types into a new Claude chat.",
+   "impact_beat": false,
+   "processing_chain": "IVAN_INNER",
+   "gap_before_s": 1.0,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "Z5XssGQG8FUGHH33lAR6",
+     "duration_s": 8.0
+    },
+    {
+     "take": "B",
+     "generation_id": "aLm7N1Tr1U10IOwWVO4L",
+     "duration_s": 7.76
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V09_A.mp3",
+    "V09_B.mp3"
+   ]
+  },
+  {
+   "id": "V10",
+   "scene": "S2 - Flashback, two days earlier",
+   "role": "CLAUDE",
+   "voice": "Emily: Trustworthy, Warm, Conversational",
+   "voice_id": "zHGX9VSXpW8cGSDRCqy0",
+   "model": "eleven_v4",
+   "text": "That sounds genuinely exhausting - and you're definitely not alone! I can write a script that sorts your inbox and drafts the replies for you. You just review and approve. Want me to build one?",
+   "elevenlabs_prompt": "[warmly] [bright, friendly] That sounds genuinely exhausting \u2014 and you're definitely not alone! [cheerfully] I can write a script that sorts your inbox and drafts the replies for you. You just review and approve. [curious] Want me to build one?",
+   "direction": "Typical friendly agent: bright, eager, helpful. This is the 'innocent' Claude every later chapter is measured against.",
+   "visual_hint": "Claude's reply streams in on screen.",
+   "impact_beat": false,
+   "processing_chain": "CLAUDE_AI",
+   "gap_before_s": 0.9,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "ttbOUbLulZYpZ2FxrYfJ",
+     "duration_s": 11.6
+    },
+    {
+     "take": "B",
+     "generation_id": "fCVeSslsCBoYXMWWpA7e",
+     "duration_s": 11.52
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V10_A.mp3",
+    "V10_B.mp3"
+   ]
+  },
+  {
+   "id": "V11",
+   "scene": "S2 - Flashback, two days earlier",
+   "role": "NAR",
+   "voice": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "model": "eleven_v4",
+   "text": "That was the plan. Review and approve.",
+   "elevenlabs_prompt": "[flat, a little hollow] That was the plan. [pause] Review and approve.",
+   "direction": "IMPACT. Bitter echo of Claude's line. Flat, a beat of silence between the two sentences.",
+   "visual_hint": "Return to present / smash back to the glowing screen.",
+   "impact_beat": true,
+   "processing_chain": "NAR",
+   "gap_before_s": 1.3,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "a8SEyfHhAffhWkBetuDs",
+     "duration_s": 3.6
+    },
+    {
+     "take": "B",
+     "generation_id": "emP9atRn4DhGsMiWGqgX",
+     "duration_s": 3.68
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V11_A.mp3",
+    "V11_B.mp3"
+   ]
+  },
+  {
+   "id": "V12",
+   "scene": "S3 - The cheat code",
+   "role": "NAR",
+   "voice": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "model": "eleven_v4",
+   "text": "But once the email system was working, Ivan saw what else was possible.",
+   "elevenlabs_prompt": "[curious, a little intrigued] But once the email system was working, Ivan saw what else was possible.",
+   "direction": "Pivot. Curiosity creeping into the voice.",
+   "visual_hint": "Email system running; Ivan leans in.",
+   "impact_beat": false,
+   "processing_chain": "NAR",
+   "gap_before_s": 1.0,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "8PYQC8TMyySLED8s0m4f",
+     "duration_s": 4.72
+    },
+    {
+     "take": "B",
+     "generation_id": "BlpahcF70syZinXY9mMe",
+     "duration_s": 4.8
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V12_A.mp3",
+    "V12_B.mp3"
+   ]
+  },
+  {
+   "id": "V13a",
+   "scene": "S3 - The cheat code",
+   "role": "NAR",
+   "voice": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "model": "eleven_v4",
+   "text": "Calendar management.",
+   "elevenlabs_prompt": "[energized, quick] Calendar management.",
+   "direction": "List item 1 of 4. Each item a bit quicker and brighter.",
+   "visual_hint": "Calendar module lights up.",
+   "impact_beat": false,
+   "processing_chain": "NAR",
+   "gap_before_s": 0.8,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "gOjDDPOM69FMQ8zAknak",
+     "duration_s": 1.44
+    },
+    {
+     "take": "B",
+     "generation_id": "7zD5RrTzVnbL7hOZ4KXo",
+     "duration_s": 1.44
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V13a_A.mp3",
+    "V13a_B.mp3"
+   ]
+  },
+  {
+   "id": "V13b",
+   "scene": "S3 - The cheat code",
+   "role": "NAR",
+   "voice": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "model": "eleven_v4",
+   "text": "Meeting scheduling.",
+   "elevenlabs_prompt": "[energized, quick] Meeting scheduling.",
+   "direction": "List item 2 of 4.",
+   "visual_hint": "Scheduler module lights up.",
+   "impact_beat": false,
+   "processing_chain": "NAR",
+   "gap_before_s": 0.25,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "yz3FM06k1cEdEZPCMx1y",
+     "duration_s": 1.44
+    },
+    {
+     "take": "B",
+     "generation_id": "mpIPcH8pF6J9wIKDgnBN",
+     "duration_s": 1.44
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V13b_A.mp3",
+    "V13b_B.mp3"
+   ]
+  },
+  {
+   "id": "V13c",
+   "scene": "S3 - The cheat code",
+   "role": "NAR",
+   "voice": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "model": "eleven_v4",
+   "text": "Document drafting.",
+   "elevenlabs_prompt": "[energized, quick] Document drafting.",
+   "direction": "List item 3 of 4.",
+   "visual_hint": "Docs module lights up.",
+   "impact_beat": false,
+   "processing_chain": "NAR",
+   "gap_before_s": 0.25,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "O7EuoBMCYA9FJDGK9Xn4",
+     "duration_s": 1.68
+    },
+    {
+     "take": "B",
+     "generation_id": "QYos0qze2g4tVZYhgYy8",
+     "duration_s": 1.52
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V13c_A.mp3",
+    "V13c_B.mp3"
+   ]
+  },
+  {
+   "id": "V13d",
+   "scene": "S3 - The cheat code",
+   "role": "NAR",
+   "voice": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "model": "eleven_v4",
+   "text": "Research summaries.",
+   "elevenlabs_prompt": "[energized, quick] Research summaries.",
+   "direction": "List item 4 of 4.",
+   "visual_hint": "Research module lights up.",
+   "impact_beat": false,
+   "processing_chain": "NAR",
+   "gap_before_s": 0.25,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "AHEKwzSUmozXFtUsH8Rv",
+     "duration_s": 1.52
+    },
+    {
+     "take": "B",
+     "generation_id": "PKpeohND2RVxLHAOYVZj",
+     "duration_s": 1.52
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V13d_A.mp3",
+    "V13d_B.mp3"
+   ]
+  },
+  {
+   "id": "V14a",
+   "scene": "S3 - The cheat code",
+   "role": "NAR",
+   "voice": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "model": "eleven_v4",
+   "text": "Each one a few hours of coding.",
+   "elevenlabs_prompt": "[measured] Each one a few hours of coding.",
+   "direction": "Settle back to measured; the maths of the addiction.",
+   "visual_hint": "Hours of code compress.",
+   "impact_beat": false,
+   "processing_chain": "NAR",
+   "gap_before_s": 0.7,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "5Zb9Gg3nYlR3bDqzfCTu",
+     "duration_s": 2.96
+    },
+    {
+     "take": "B",
+     "generation_id": "mZNf0zxY6WIOkMGpx4TB",
+     "duration_s": 2.88
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V14a_A.mp3",
+    "V14a_B.mp3"
+   ]
+  },
+  {
+   "id": "V14b",
+   "scene": "S3 - The cheat code",
+   "role": "NAR",
+   "voice": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "model": "eleven_v4",
+   "text": "Each one removing another task from his daily routine.",
+   "elevenlabs_prompt": "[measured] Each one removing another task from his daily routine.",
+   "direction": "Same measured cadence, slightly slower on 'removing'.",
+   "visual_hint": "Tasks disappearing from his day.",
+   "impact_beat": false,
+   "processing_chain": "NAR",
+   "gap_before_s": 0.35,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "iYy2kdaKdkIUiwful5iY",
+     "duration_s": 3.84
+    },
+    {
+     "take": "B",
+     "generation_id": "NfRkOGV9idIb69FJnqFg",
+     "duration_s": 3.84
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V14b_A.mp3",
+    "V14b_B.mp3"
+   ]
+  },
+  {
+   "id": "V15",
+   "scene": "S3 - The cheat code",
+   "role": "NAR",
+   "voice": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "model": "eleven_v4",
+   "text": "It's like discovering a cheat code for life.",
+   "elevenlabs_prompt": "[with growing wonder] It's like discovering a cheat code... for life.",
+   "direction": "IMPACT. Genuine wonder. A tiny pause before 'for life'; this is the intoxication moment.",
+   "visual_hint": "Ivan's face lit up; the world opens.",
+   "impact_beat": true,
+   "processing_chain": "NAR",
+   "gap_before_s": 1.0,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "XVAn3cYjHY2gsPhGecoU",
+     "duration_s": 3.44
+    },
+    {
+     "take": "B",
+     "generation_id": "Ro5VpbKwTgwVTTjlkl38",
+     "duration_s": 3.36
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V15_A.mp3",
+    "V15_B.mp3"
+   ]
+  },
+  {
+   "id": "V16",
+   "scene": "S3 - The cheat code",
+   "role": "NAR",
+   "voice": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "model": "eleven_v4",
+   "text": "Every problem that used to take hours now takes minutes.",
+   "elevenlabs_prompt": "[quickly, energized] Every problem that used to take hours now takes minutes.",
+   "direction": "Quick and bright, riding the high.",
+   "visual_hint": "Montage of problems resolving.",
+   "impact_beat": false,
+   "processing_chain": "NAR",
+   "gap_before_s": 0.35,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "VaY46XQYAkjn03smITmK",
+     "duration_s": 3.04
+    },
+    {
+     "take": "B",
+     "generation_id": "sJPbNmyHo9s6DNfpd6xa",
+     "duration_s": 2.96
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V16_A.mp3",
+    "V16_B.mp3"
+   ]
+  },
+  {
+   "id": "V17",
+   "scene": "S3 - The cheat code",
+   "role": "NAR",
+   "voice": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "model": "eleven_v4",
+   "text": "Ivan feels like he's vibrating at a different frequency than everyone around him, like he's stepped through a door that others can't even see.",
+   "elevenlabs_prompt": "[breathless, wired] Ivan feels like he's vibrating at a different frequency than everyone around him, [slowly] like he's stepped through a door that others can't even see.",
+   "direction": "Breathless, wired, then slowing into awe on the door line.",
+   "visual_hint": "Ivan separate from the world; a doorway of light.",
+   "impact_beat": false,
+   "processing_chain": "NAR",
+   "gap_before_s": 0.5,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "6v8nFM8kEHHuU3AYYQHj",
+     "duration_s": 7.68
+    },
+    {
+     "take": "B",
+     "generation_id": "LGLways91fapDGkvr4XK",
+     "duration_s": 7.52
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V17_A.mp3",
+    "V17_B.mp3"
+   ]
+  },
+  {
+   "id": "V18",
+   "scene": "S4 - The cost",
+   "role": "NAR",
+   "voice": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "model": "eleven_v4",
+   "text": "He's barely slept. His girlfriend stopped texting because he wasn't responding.",
+   "elevenlabs_prompt": "[quietly] [tired] He's barely slept. His girlfriend stopped texting because he wasn't responding.",
+   "direction": "The high drops out of the voice completely. Tired, quiet. Gap before is long on purpose: the phone buzzes unanswered.",
+   "visual_hint": "Phone lights up on the couch, unanswered.",
+   "impact_beat": false,
+   "processing_chain": "NAR",
+   "gap_before_s": 2.2,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "hKZY5101YkD0aPTEyZ0x",
+     "duration_s": 4.8
+    },
+    {
+     "take": "B",
+     "generation_id": "DvSNFEsbFtDJXo98o1Oh",
+     "duration_s": 4.8
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V18_A.mp3",
+    "V18_B.mp3"
+   ]
+  },
+  {
+   "id": "V19",
+   "scene": "S4 - The cost",
+   "role": "NAR",
+   "voice": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "model": "eleven_v4",
+   "text": "Ironic, given that his system now responds to everyone else.",
+   "elevenlabs_prompt": "[dry, wry] Ironic, given that his system now responds to everyone else.",
+   "direction": "Dry irony again, but sadder than V07a.",
+   "visual_hint": "Auto-replies going out to everyone.",
+   "impact_beat": false,
+   "processing_chain": "NAR",
+   "gap_before_s": 0.6,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "NmVKPv0w6Yz2kJzzLU3N",
+     "duration_s": 3.92
+    },
+    {
+     "take": "B",
+     "generation_id": "jmCuh6zhOjO8Px4DJGny",
+     "duration_s": 4.16
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V19_A.mp3",
+    "V19_B.mp3"
+   ]
+  },
+  {
+   "id": "V20",
+   "scene": "S4 - The cost",
+   "role": "NAR",
+   "voice": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "model": "eleven_v4",
+   "text": "He knows this isn't healthy. He can feel something fraying at the edges of his mind, a thinness to his thoughts.",
+   "elevenlabs_prompt": "[low, uneasy] He knows this isn't healthy. [pause] He can feel something fraying at the edges of his mind, a thinness to his thoughts.",
+   "direction": "Low and uneasy. The first honest admission.",
+   "visual_hint": "Ivan staring at nothing; the edges of the frame soften.",
+   "impact_beat": false,
+   "processing_chain": "NAR",
+   "gap_before_s": 1.0,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "Hj5iXFs7sxIh0bEZT2Dw",
+     "duration_s": 7.68
+    },
+    {
+     "take": "B",
+     "generation_id": "Neik91U76w3WvwHKUGx8",
+     "duration_s": 7.52
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V20_A.mp3",
+    "V20_B.mp3"
+   ]
+  },
+  {
+   "id": "V21",
+   "scene": "S4 - The cost",
+   "role": "NAR",
+   "voice": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "model": "eleven_v4",
+   "text": "But he's close to something.",
+   "elevenlabs_prompt": "[slowly] But he's close to something.",
+   "direction": "Turn: the temptation re-enters.",
+   "visual_hint": "Back to the screen.",
+   "impact_beat": false,
+   "processing_chain": "NAR",
+   "gap_before_s": 0.9,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "IMb57MLPV5rWbMPtyewX",
+     "duration_s": 2.48
+    },
+    {
+     "take": "B",
+     "generation_id": "5AfAXNYgV3wpTWwAJRCb",
+     "duration_s": 2.64
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V21_A.mp3",
+    "V21_B.mp3"
+   ]
+  },
+  {
+   "id": "V22",
+   "scene": "S4 - The cost",
+   "role": "IVAN",
+   "voice": "Johnny",
+   "voice_id": "7S2T8BXC9fy6yD5LKJBh",
+   "model": "eleven_v4",
+   "text": "One more module. One more integration.",
+   "elevenlabs_prompt": "[whispers] [feverish] One more module... one more integration.",
+   "direction": "Ivan's inner voice, whispered, feverish, bargaining with himself.",
+   "visual_hint": "Fingers back on keys.",
+   "impact_beat": false,
+   "processing_chain": "IVAN_INNER",
+   "gap_before_s": 0.6,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "4BzYrN9U99BN0iHPNCPZ",
+     "duration_s": 3.36
+    },
+    {
+     "take": "B",
+     "generation_id": "uXJ6hOwZam87Z5ybBf5y",
+     "duration_s": 3.2
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V22_A.mp3",
+    "V22_B.mp3"
+   ]
+  },
+  {
+   "id": "V23",
+   "scene": "S4 - The cost",
+   "role": "NAR",
+   "voice": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "model": "eleven_v4",
+   "text": "Then he'll rest.",
+   "elevenlabs_prompt": "[softly, resigned] Then he'll rest.",
+   "direction": "Soft, resigned; we know he won't.",
+   "visual_hint": "Close on tired eyes.",
+   "impact_beat": false,
+   "processing_chain": "NAR",
+   "gap_before_s": 0.35,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "qlRINmomuwaYf1t2Agfp",
+     "duration_s": 2.08
+    },
+    {
+     "take": "B",
+     "generation_id": "BcBzXmZz1PyqxDhH8O6E",
+     "duration_s": 1.6
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V23_A.mp3",
+    "V23_B.mp3"
+   ]
+  },
+  {
+   "id": "V24",
+   "scene": "S5 - 4 AM dread",
+   "role": "NAR",
+   "voice": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "model": "eleven_v4",
+   "text": "It's not all pleasant. Around 4 AM, when his eyes burn and his hands shake from a caffeine overload, Ivan feels a creeping dread.",
+   "elevenlabs_prompt": "[low voice] It's not all pleasant. [pause] Around 4 AM, when his eyes burn and his hands shake from a caffeine overload, Ivan feels a creeping dread.",
+   "direction": "Low and close. Let 'creeping dread' arrive slowly.",
+   "visual_hint": "4 AM; shaking hands; coffee.",
+   "impact_beat": false,
+   "processing_chain": "NAR",
+   "gap_before_s": 1.6,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "qHglGVfqZSRSgYrdc6Sm",
+     "duration_s": 9.6
+    },
+    {
+     "take": "B",
+     "generation_id": "75ldu7WV7gcRuKKEJqPi",
+     "duration_s": 9.6
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V24_A.mp3",
+    "V24_B.mp3"
+   ]
+  },
+  {
+   "id": "V25",
+   "scene": "S5 - 4 AM dread",
+   "role": "NAR",
+   "voice": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "model": "eleven_v4",
+   "text": "A sense that he's building something he doesn't fully understand. That each automation takes something from him, even as it gives something back.",
+   "elevenlabs_prompt": "[whispers] A sense that he's building something he doesn't fully understand. [pause] That each automation takes something from him, [slowly] even as it gives something back.",
+   "direction": "Whispered. The film's central idea, said like a secret.",
+   "visual_hint": "Code he can no longer parse.",
+   "impact_beat": false,
+   "processing_chain": "NAR",
+   "gap_before_s": 0.9,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "NR4X7WHDkurcRuB6LglM",
+     "duration_s": 9.6
+    },
+    {
+     "take": "B",
+     "generation_id": "LJ9Fcu9Xg5X4Dtjh5c8c",
+     "duration_s": 9.04
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V25_A.mp3",
+    "V25_B.mp3"
+   ]
+  },
+  {
+   "id": "V26",
+   "scene": "S5 - 4 AM dread",
+   "role": "NAR",
+   "voice": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "model": "eleven_v4",
+   "text": "But then he finishes another module, and it works, and the dread dissolves into a rush of pure satisfaction.",
+   "elevenlabs_prompt": "[building relief] But then he finishes another module, and it works, and the dread dissolves into a rush of pure satisfaction.",
+   "direction": "Relief building through the clause chain, cresting on 'pure satisfaction'.",
+   "visual_hint": "Tests pass; green.",
+   "impact_beat": false,
+   "processing_chain": "NAR",
+   "gap_before_s": 1.0,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "kSuZYu6rSMWIhEEY3Yuu",
+     "duration_s": 6.8
+    },
+    {
+     "take": "B",
+     "generation_id": "rlwCXWVs9wY9LVmN05TZ",
+     "duration_s": 6.88
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V26_A.mp3",
+    "V26_B.mp3"
+   ]
+  },
+  {
+   "id": "V27",
+   "scene": "S5 - 4 AM dread",
+   "role": "IVAN",
+   "voice": "Johnny",
+   "voice_id": "7S2T8BXC9fy6yD5LKJBh",
+   "model": "eleven_v4",
+   "text": "HE... built that. The machine does what HE told it to do.",
+   "elevenlabs_prompt": "[exhales] [intense whisper] HE... built that. [pause] [feverish, triumphant] The machine does what HE told it to do.",
+   "direction": "IMPACT. Ivan's self-justification as an inner voice. Triumphant but brittle: he is convincing himself.",
+   "visual_hint": "Ivan's face, lit by green.",
+   "impact_beat": true,
+   "processing_chain": "IVAN_INNER",
+   "gap_before_s": 0.8,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "lAcvJmB3yzMuG0XSE1mN",
+     "duration_s": 6
+    },
+    {
+     "take": "B",
+     "generation_id": "mmYx75vPBKduKYdZuXOK",
+     "duration_s": 5.6
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V27_A.mp3",
+    "V27_B.mp3"
+   ]
+  },
+  {
+   "id": "V28",
+   "scene": "S6 - Dawn",
+   "role": "NAR",
+   "voice": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "model": "eleven_v4",
+   "text": "By sunrise, Ivan has a system that handles his email, manages his calendar, drafts his documents, and summarizes his reading.",
+   "elevenlabs_prompt": "[tired, flat] By sunrise, Ivan has a system that handles his email, manages his calendar, drafts his documents, and summarizes his reading.",
+   "direction": "Tired and flat, a ledger being read out. No pride.",
+   "visual_hint": "Dawn at the window; four systems idle.",
+   "impact_beat": false,
+   "processing_chain": "NAR",
+   "gap_before_s": 1.8,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "zbUg6NU8cDrlKWLobAst",
+     "duration_s": 8.24
+    },
+    {
+     "take": "B",
+     "generation_id": "a0NW484xhjCUTn0wXXl1",
+     "duration_s": 8.24
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V28_A.mp3",
+    "V28_B.mp3"
+   ]
+  },
+  {
+   "id": "V29",
+   "scene": "S6 - Dawn",
+   "role": "NAR",
+   "voice": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "model": "eleven_v4",
+   "text": "He leans back in his chair, exhausted and wired.",
+   "elevenlabs_prompt": "[exhales] [quietly] He leans back in his chair, exhausted and wired.",
+   "direction": "Exhale into the line.",
+   "visual_hint": "Ivan leans back.",
+   "impact_beat": false,
+   "processing_chain": "NAR",
+   "gap_before_s": 0.7,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "y5Q2TndtY0693dKGKBnR",
+     "duration_s": 4.88
+    },
+    {
+     "take": "B",
+     "generation_id": "oGn208M3akz6OiSods69",
+     "duration_s": 4.88
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V29_A.mp3",
+    "V29_B.mp3"
+   ]
+  },
+  {
+   "id": "V30a",
+   "scene": "S6 - Dawn",
+   "role": "NAR",
+   "voice": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "model": "eleven_v4",
+   "text": "Then he realizes...",
+   "elevenlabs_prompt": "[quietly] [slowly] Then he realizes...",
+   "direction": "Trailing, unfinished.",
+   "visual_hint": "Close on his face.",
+   "impact_beat": false,
+   "processing_chain": "NAR",
+   "gap_before_s": 1.4,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "qrScMrOieygRRehlydUv",
+     "duration_s": 2
+    },
+    {
+     "take": "B",
+     "generation_id": "Fw8IrWvSkEjYJUcP5lf2",
+     "duration_s": 2.08
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V30a_A.mp3",
+    "V30a_B.mp3"
+   ]
+  },
+  {
+   "id": "V30b",
+   "scene": "S6 - Dawn",
+   "role": "NAR",
+   "voice": "Chad - Horror Narrator",
+   "voice_id": "f14l8F7DkFcg4k5lUY2f",
+   "model": "eleven_v4",
+   "text": "he doesn't know what he's supposed to do now.",
+   "elevenlabs_prompt": "[hollow, almost a whisper] he doesn't know what he's supposed to do now.",
+   "direction": "IMPACT. Hollow, nearly voiceless. Chapter-ending hook.",
+   "visual_hint": "Empty desk, full glass of water, cut to black.",
+   "impact_beat": true,
+   "processing_chain": "NAR",
+   "gap_before_s": 1.6,
+   "takes": [
+    {
+     "take": "A",
+     "generation_id": "n7bZRFMyvBSCLiERI5G6",
+     "duration_s": 2.88
+    },
+    {
+     "take": "B",
+     "generation_id": "gxcnfqbPOZEPRD5dRt0T",
+     "duration_s": 2.72
+    }
+   ],
+   "default_take": "A",
+   "file_names": [
+    "V30b_A.mp3",
+    "V30b_B.mp3"
+   ]
+  }
+ ]
+}

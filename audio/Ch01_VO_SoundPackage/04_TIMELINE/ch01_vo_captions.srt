@@ -1,0 +1,144 @@
+1
+00:00:03,000 --> 00:00:07,320
+It's 3 AM, and Ivan hasn't eaten since lunch.
+
+2
+00:00:08,020 --> 00:00:11,940
+There's a glass of water on his desk that he poured six hours ago.
+
+3
+00:00:12,840 --> 00:00:14,600
+It's still full.
+
+4
+00:00:15,700 --> 00:00:20,500
+He's hunched over his laptop, typing furiously, eyes bloodshot.
+
+5
+00:00:21,000 --> 00:00:26,040
+A terminal window, a Claude chat, and a growing sprawl of Python scripts.
+
+6
+00:00:26,640 --> 00:00:29,440
+He's building an email automation system.
+
+7
+00:00:30,340 --> 00:00:34,180
+Well... technically, Claude is doing the building.
+
+8
+00:00:34,880 --> 00:00:36,960
+Ivan keeps saying yes.
+
+9
+00:00:38,560 --> 00:00:40,880
+It started two days ago.
+
+10
+00:00:41,880 --> 00:00:49,880
+i have like 400 unread emails. every single one wants a reply. i'm fucking drowning here!
+
+11
+00:00:50,780 --> 00:01:02,380
+That sounds genuinely exhausting - and you're definitely not alone! I can write a script that sorts your inbox and drafts the replies for you. You just review and approve. Want me to build one?
+
+12
+00:01:03,680 --> 00:01:07,280
+That was the plan. Review and approve.
+
+13
+00:01:08,280 --> 00:01:13,000
+But once the email system was working, Ivan saw what else was possible.
+
+14
+00:01:13,800 --> 00:01:15,240
+Calendar management.
+
+15
+00:01:15,490 --> 00:01:16,930
+Meeting scheduling.
+
+16
+00:01:17,180 --> 00:01:18,860
+Document drafting.
+
+17
+00:01:19,110 --> 00:01:20,630
+Research summaries.
+
+18
+00:01:21,330 --> 00:01:24,290
+Each one a few hours of coding.
+
+19
+00:01:24,640 --> 00:01:28,480
+Each one removing another task from his daily routine.
+
+20
+00:01:29,480 --> 00:01:32,920
+It's like discovering a cheat code for life.
+
+21
+00:01:33,270 --> 00:01:36,310
+Every problem that used to take hours now takes minutes.
+
+22
+00:01:36,810 --> 00:01:44,490
+Ivan feels like he's vibrating at a different frequency than everyone around him, like he's stepped through a door that others can't even see.
+
+23
+00:01:46,690 --> 00:01:51,490
+He's barely slept. His girlfriend stopped texting because he wasn't responding.
+
+24
+00:01:52,090 --> 00:01:56,010
+Ironic, given that his system now responds to everyone else.
+
+25
+00:01:57,010 --> 00:02:04,690
+He knows this isn't healthy. He can feel something fraying at the edges of his mind, a thinness to his thoughts.
+
+26
+00:02:05,590 --> 00:02:08,070
+But he's close to something.
+
+27
+00:02:08,670 --> 00:02:12,030
+One more module. One more integration.
+
+28
+00:02:12,380 --> 00:02:14,460
+Then he'll rest.
+
+29
+00:02:16,060 --> 00:02:25,660
+It's not all pleasant. Around 4 AM, when his eyes burn and his hands shake from a caffeine overload, Ivan feels a creeping dread.
+
+30
+00:02:26,560 --> 00:02:36,160
+A sense that he's building something he doesn't fully understand. That each automation takes something from him, even as it gives something back.
+
+31
+00:02:37,160 --> 00:02:43,960
+But then he finishes another module, and it works, and the dread dissolves into a rush of pure satisfaction.
+
+32
+00:02:44,760 --> 00:02:50,760
+HE... built that. The machine does what HE told it to do.
+
+33
+00:02:52,560 --> 00:03:00,800
+By sunrise, Ivan has a system that handles his email, manages his calendar, drafts his documents, and summarizes his reading.
+
+34
+00:03:01,500 --> 00:03:06,380
+He leans back in his chair, exhausted and wired.
+
+35
+00:03:07,780 --> 00:03:09,780
+Then he realizes...
+
+36
+00:03:11,380 --> 00:03:14,260
+he doesn't know what he's supposed to do now.
+

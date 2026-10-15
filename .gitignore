@@ -13,3 +13,9 @@ engine/assets/lighting/*/lightmaps/*_full.exr
 engine/assets/lighting/*/lightmaps/*_live.exr
 # CC0 Poly Haven models: node tools/polyhaven.mjs <id> fetches them again
 blender/assets/props/
+
+# Ch 1 VO + sound package (134 MB, from the six Ch01_part*.zip): the guide, timeline and cue sheet are tracked,
+# the audio is not. Re-create with: unzip each Ch01_part*.zip into audio/
+audio/Ch01_VO_SoundPackage/03_SOUND_DESIGN/stems/
+audio/Ch01_VO_SoundPackage/03_SOUND_DESIGN/buses/
+audio/Ch01_VO_SoundPackage/03_SOUND_DESIGN/mixes/

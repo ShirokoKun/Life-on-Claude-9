@@ -1,0 +1,37 @@
+id,scene,role,start_s,end_s,impact,text
+V01,"S1 - 3 AM, the desk (present)",NAR,3.0,7.32,0,"It's 3 AM, and Ivan hasn't eaten since lunch."
+V02,"S1 - 3 AM, the desk (present)",NAR,8.02,11.94,0,There's a glass of water on his desk that he poured six hours ago.
+V03,"S1 - 3 AM, the desk (present)",NAR,12.84,14.6,1,It's still full.
+V04,"S1 - 3 AM, the desk (present)",NAR,15.7,20.5,0,"He's hunched over his laptop, typing furiously, eyes bloodshot."
+V05,"S1 - 3 AM, the desk (present)",NAR,21.0,26.04,0,"A terminal window, a Claude chat, and a growing sprawl of Python scripts."
+V06,"S1 - 3 AM, the desk (present)",NAR,26.64,29.44,0,He's building an email automation system.
+V07a,"S1 - 3 AM, the desk (present)",NAR,30.34,34.18,0,"Well... technically, Claude is doing the building."
+V07b,"S1 - 3 AM, the desk (present)",NAR,34.88,36.96,1,Ivan keeps saying yes.
+V08,"S2 - Flashback, two days earlier",NAR,38.56,40.88,0,It started two days ago.
+V09,"S2 - Flashback, two days earlier",IVAN,41.88,49.88,0,i have like 400 unread emails. every single one wants a reply. i'm fucking drowning here!
+V10,"S2 - Flashback, two days earlier",CLAUDE,50.78,62.38,0,That sounds genuinely exhausting - and you're definitely not alone! I can write a script that sorts your inbox and drafts the replies for you. You just review and approve. Want me to build one?
+V11,"S2 - Flashback, two days earlier",NAR,63.68,67.28,1,That was the plan. Review and approve.
+V12,S3 - The cheat code,NAR,68.28,73.0,0,"But once the email system was working, Ivan saw what else was possible."
+V13a,S3 - The cheat code,NAR,73.8,75.24,0,Calendar management.
+V13b,S3 - The cheat code,NAR,75.49,76.93,0,Meeting scheduling.
+V13c,S3 - The cheat code,NAR,77.18,78.86,0,Document drafting.
+V13d,S3 - The cheat code,NAR,79.11,80.63,0,Research summaries.
+V14a,S3 - The cheat code,NAR,81.33,84.29,0,Each one a few hours of coding.
+V14b,S3 - The cheat code,NAR,84.64,88.48,0,Each one removing another task from his daily routine.
+V15,S3 - The cheat code,NAR,89.48,92.92,1,It's like discovering a cheat code for life.
+V16,S3 - The cheat code,NAR,93.27,96.31,0,Every problem that used to take hours now takes minutes.
+V17,S3 - The cheat code,NAR,96.81,104.49,0,"Ivan feels like he's vibrating at a different frequency than everyone around him, like he's stepped through a door that others can't even see."
+V18,S4 - The cost,NAR,106.69,111.49,0,He's barely slept. His girlfriend stopped texting because he wasn't responding.
+V19,S4 - The cost,NAR,112.09,116.01,0,"Ironic, given that his system now responds to everyone else."
+V20,S4 - The cost,NAR,117.01,124.69,0,"He knows this isn't healthy. He can feel something fraying at the edges of his mind, a thinness to his thoughts."
+V21,S4 - The cost,NAR,125.59,128.07,0,But he's close to something.
+V22,S4 - The cost,IVAN,128.67,132.03,0,One more module. One more integration.
+V23,S4 - The cost,NAR,132.38,134.46,0,Then he'll rest.
+V24,S5 - 4 AM dread,NAR,136.06,145.66,0,"It's not all pleasant. Around 4 AM, when his eyes burn and his hands shake from a caffeine overload, Ivan feels a creeping dread."
+V25,S5 - 4 AM dread,NAR,146.56,156.16,0,"A sense that he's building something he doesn't fully understand. That each automation takes something from him, even as it gives something back."
+V26,S5 - 4 AM dread,NAR,157.16,163.96,0,"But then he finishes another module, and it works, and the dread dissolves into a rush of pure satisfaction."
+V27,S5 - 4 AM dread,IVAN,164.76,170.76,1,HE... built that. The machine does what HE told it to do.
+V28,S6 - Dawn,NAR,172.56,180.8,0,"By sunrise, Ivan has a system that handles his email, manages his calendar, drafts his documents, and summarizes his reading."
+V29,S6 - Dawn,NAR,181.5,186.38,0,"He leans back in his chair, exhausted and wired."
+V30a,S6 - Dawn,NAR,187.78,189.78,0,Then he realizes...
+V30b,S6 - Dawn,NAR,191.38,194.26,1,he doesn't know what he's supposed to do now.

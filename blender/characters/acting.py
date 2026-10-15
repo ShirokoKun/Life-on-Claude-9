@@ -126,7 +126,33 @@ SCENE_S02 = {
     "nod": (51.0, 51.9),
 }
 
-SCENES = {"intro": SCENE, "s02": SCENE_S02}
+# ---------------------------------------------------------------------------------------------
+# Scene 4, "Two days ago" (scenes/04-two-days-ago/DIRECTION.md): the flashback, V08-V11 of the Ch 1 voiceover.
+# Scene seconds; 0 = chapter 36.96 s (the end of V07b). VO: V08 1.60-3.92, V09 4.92-12.92, Claude's chime 13.67,
+# V10 13.82-25.42, V11 (back at 3 AM) 26.72-30.32.
+SCENE_S04 = {
+    # night hunch; the light runs backwards and the night drains out of him too (upright, fresh); leans in to type
+    # the first sentence; shoves back, fed up; attacks the keys for "drowning"; sits back when Claude answers; leans
+    # in to read; at the smash cut he is hunched at 3 AM again
+    "hunch": [(0, 0.62), (1.0, 0.60), (3.6, 0.22), (4.9, 0.25), (5.4, 0.45), (8.5, 0.48), (9.1, -0.35), (9.8, -0.38),
+              (10.3, 0.50), (13.4, 0.50), (13.9, 0.05), (16.0, 0.08), (18.4, 0.22), (22.0, 0.32), (24.8, 0.30),
+              (25.5, 0.40), (26.70, 0.40), (26.72, 0.78), (31.4, 0.80)],
+    "typing": [(0.2, 3.0, 4.5), (5.1, 8.5, 5.5), (10.4, 12.8, 6.5), (25.7, 26.15, 7.5), (26.9, 31.2, 5.5)],
+    "gaze": [(0.0, 3.4, "screen", "type"), (3.4, 5.0, "screen", "read"), (5.0, 8.6, "screen", "type"),
+             (8.6, 10.0, "away", "still"), (10.0, 13.6, "screen", "type"),
+             (13.6, 15.4, "beyond", "still"),     # up at Claude's spark as it pops out of the laptop
+             (15.4, 24.8, "chat", "read"), (24.8, 31.4, "screen", "type")],
+    # the inbox scrolled with the mouse (412 unread); fed up, hands behind his head; hands off the keys while
+    # Claude talks
+    "mouse": [(3.3, 4.8)],
+    "clicks": [3.9, 4.4, 13.0, 26.3],             # two scroll clicks; Enter on his message; Enter on 'yes'
+    "hands_behind": [(0, 0), (8.6, 0), (9.2, 1), (9.7, 1), (10.2, 0), (31.4, 0)],
+    "hands_rest": [(0, 0), (13.55, 0), (13.9, 1), (24.9, 1), (25.4, 0), (31.4, 0)],
+    "exhale": (14.3, 15.2),                       # a short laugh breath: someone answered
+    "nod": (21.4, 22.2),                          # "...drafts the replies for you": yes, that
+}
+
+SCENES = {"intro": SCENE, "s02": SCENE_S02, "s04": SCENE_S04}
 
 
 class Actor:

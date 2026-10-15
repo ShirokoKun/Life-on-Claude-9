@@ -124,7 +124,13 @@ export async function createRoomLight({ scene, root, renderer, data, loadEXR, LM
         if (s.sun) sunC.add(new THREE.Color(s.sunColor).multiplyScalar(k * s.sun));
       }
       blendMaps(wb);
-      for (const g of groups) for (const u of users[g]) u.m.lightMapIntensity = u.k * (g === 'DESK' ? Math.max(room, 0.85) : room);
+      // the Look editor scales a group by writing the intensity itself: a value that changed since we wrote it is
+      // taken as the group's new level, so the look's baked-light balance survives the times of day
+      for (const g of groups) for (const u of users[g]) {
+        const r = g === 'DESK' ? Math.max(room, 0.85) : room;
+        if (u.w !== undefined && Math.abs(u.m.lightMapIntensity - u.w) > 1e-6 && u.r > 1e-3) u.k = u.m.lightMapIntensity / u.r;
+        u.m.lightMapIntensity = u.w = u.k * r; u.r = r;
+      }
       for (const o of outside.sky) { o.m.emissive.setRGB(o.c.r * sky.r, o.c.g * sky.g, o.c.b * sky.b); o.m.emissiveIntensity = o.k * skyK; }
       for (const o of outside.city) o.m.emissiveIntensity = o.k * city;
       for (const o of outside.trees) o.m.emissive.copy(tree);

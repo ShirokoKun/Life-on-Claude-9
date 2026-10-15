@@ -6,7 +6,7 @@
     {
       "id": "ch1",
       "number": 0,
-      "title": "Chapter 1 \u00b7 The Binge",
+      "title": "Chapter 1 · The Binge",
       "module": "engine/scenes/ch1/scene.js",
       "folder": "scenes/ch1",
       "voiceover": null,
@@ -36,7 +36,16 @@
       "title": "Ivan's room",
       "module": "engine/scenes/s03/scene.js",
       "folder": "scenes/03-ivan-room",
-      "voiceover": null,
+      "voiceover": "engine/assets/voiceover.wav",
+      "stage": "final"
+    },
+    {
+      "id": "s04",
+      "number": 4,
+      "title": "Two days ago",
+      "module": "engine/scenes/s04/scene.js",
+      "folder": "scenes/04-two-days-ago",
+      "voiceover": "engine/scenes/s04/sound.wav",
       "stage": "draft"
     }
   ]
