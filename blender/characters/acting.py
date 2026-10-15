@@ -152,7 +152,31 @@ SCENE_S04 = {
     "nod": (21.4, 22.2),                          # "...drafts the replies for you": yes, that
 }
 
-SCENES = {"intro": SCENE, "s02": SCENE_S02, "s04": SCENE_S04}
+# ---------------------------------------------------------------------------------------------
+# Scene 3, "Ivan's room" on the Ch 1 VO package clock (scenes/03-ivan-room/DIRECTION.md): V01-V07b, chapter seconds
+# 0-37.9. Real VO: V01 3.00, V02 8.06, V03 12.93 (sub drop 12.88), V04 15.84 (chair creak 16.09), V05 21.17 (Enter
+# 25.20), V06 26.84 (pings 27.76 / 28.46 / 29.16), V07a 30.58 (Claude's chime 32.50), V07b 35.15 (Enter 35.70, 36.30,
+# 36.85; hit 36.25).
+SCENE_S03 = {
+    # typing at the desk; leans in on the creak for "hunched... typing furiously"; eases out to read; sits back for
+    # "Well... technically, Claude is doing the building" (his hands are off the keys); leans in again to say yes
+    "hunch": [(0, 0.55), (15.6, 0.60), (16.1, 0.62), (17.6, 0.95), (20.4, 1.0), (21.4, 0.85), (26.6, 0.78),
+              (30.4, 0.74), (31.4, 0.50), (34.4, 0.48), (35.0, 0.64), (37.9, 0.66)],
+    # a pause under the sub drop ("It's still full."): the room stops with the water
+    "typing": [(0.4, 5.6, 4.5), (6.2, 9.4, 5.0), (10.0, 12.6, 4.5), (13.8, 15.4, 4.0), (16.3, 19.7, 7.5),
+               (21.3, 22.5, 3.5), (23.0, 24.9, 4.0), (29.6, 30.4, 6.0)],
+    "gaze": [(0.0, 15.4, "screen", "type"), (15.4, 16.2, "chat", "read"), (16.2, 19.8, "screen", "type"),
+             (19.8, 21.2, "screen", "still"), (21.2, 22.6, "screen", "read"), (22.6, 23.9, "screen", "type"),
+             (23.9, 26.7, "chat", "read"), (26.7, 30.2, "monitor", "still"), (30.2, 30.6, "screen", "type"),
+             (30.6, 34.6, "chat", "read"), (34.6, 37.9, "screen", "still")],
+    "hands_rest": [(0, 0), (30.5, 0), (31.0, 1), (34.5, 1), (35.0, 0), (37.9, 0)],
+    "hands_behind": [(0, 0), (37.9, 0)],
+    "clicks": [25.20, 35.70, 36.30, 36.85],       # Enter on the prompt; then y, y, y: he keeps saying yes
+    "exhale": (31.0, 31.9),                       # "Well..."
+    "nod": (33.2, 33.9),                          # Claude builds; he approves of it
+}
+
+SCENES = {"intro": SCENE, "s02": SCENE_S02, "s03": SCENE_S03, "s04": SCENE_S04}
 
 
 class Actor:

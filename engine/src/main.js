@@ -17,6 +17,7 @@ import { createAtmosphere } from './atmosphere.js';
 import { createPost, LOOK } from './post.js';
 import { createScreens } from './screens.js';
 import * as TOD from './timeofday.js';
+import { applySkin } from './skin.js';
 import { B } from './shots.js';
 
 const Q = new URLSearchParams(location.search);
@@ -186,6 +187,7 @@ async function loadCast(url) {
         if (src.normalMap) o.material.normalScale.set(0.9, 0.9);
         o.material.color.setScalar(0.84);            // off-white stays off-white instead of clipping under the keys
         o.material.envMapIntensity = 0.15;          // key-to-fill ~8:1 like the references: the shadow side falls off
+        if (SCENE !== 'intro' && SC.SKIN !== false) applySkin(o.material, o, SC.SKIN || {});   // skin.js: every scene but the old intro
       }
       o.castShadow = !/Lens/.test(o.material.name); o.receiveShadow = true; o.frustumCulled = false;
     }
@@ -263,11 +265,12 @@ function setTime(t) {
   } else c = cameraAt(tNow, pick);
   if (!controls.enabled) {
     // a slow drift of a few millimetres on top of the move: the camera is never perfectly still
+    // (a shot marked still: true is locked off: no drift, no breathing)
     const dr = new THREE.Vector3(Math.sin(tNow * 0.31) * 0.004 + Math.sin(tNow * 0.83 + 1.3) * 0.002,
-      Math.sin(tNow * 0.27 + 2.0) * 0.003, Math.sin(tNow * 0.41 + 0.7) * 0.003);
+      Math.sin(tNow * 0.27 + 2.0) * 0.003, Math.sin(tNow * 0.41 + 0.7) * 0.003).multiplyScalar(c.shot.still ? 0 : 1);
     camera.position.copy(c.pos).add(dr); camera.up.set(0, 1, 0); camera.lookAt(c.at);
     // operator breathing behind the camera: low-frequency, sub-degree
-    const a = c.shot.id === 'S2' ? 0.0010 : 0.0022, tt = tNow;
+    const a = c.shot.still ? 0 : c.shot.id === 'S2' ? 0.0010 : 0.0022, tt = tNow;
     camera.rotateX(a * (Math.sin(tt * 0.9) * 0.6 + Math.sin(tt * 2.3 + 1) * 0.25));
     camera.rotateY(a * (Math.sin(tt * 0.7 + 2) * 0.6 + Math.sin(tt * 1.9) * 0.2));
     camera.rotateZ(c.roll + a * 0.3 * Math.sin(tt * 0.5));

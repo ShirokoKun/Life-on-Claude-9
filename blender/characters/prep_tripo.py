@@ -77,11 +77,176 @@ def load(path):
             img.scale(4096, 4096)
     rigid_head(rig, body)
     add_glasses(rig, body)
+    bake_shading(rig, body)
     return rig, body
 
 
+def bake_shading(rig, body, samples=96, distance=0.06):
+    """A per-vertex colour 'Shade' the engine's skin shader reads (engine/src/skin.js):
+    R = ambient occlusion baked in Cycles in the rest pose (the inside of every curl, eye sockets, nostrils, under the
+        chin, behind the ears). The Tripo mesh carries none, which is half of why he read as clean clay.
+    G = hair mask, from the head's measured landmarks (the mesh is ~3000 fragments and hair and skin share hues in the
+        texture, so neither the pieces nor the colours separate them): above the front hairline, above the ears at the
+        temples, and the back of the head down to the nape. Soft-edged over ~1 cm.
+    B = 1."""
+    import numpy as np
+    me = body.data
+    sc = bpy.context.scene
+    sc.render.engine = "CYCLES"
+    sc.cycles.samples = samples
+    sc.cycles.device = "CPU"
+    if not sc.world:
+        sc.world = bpy.data.worlds.new("bake")
+    sc.world.light_settings.distance = distance
+    attr = me.color_attributes.new("Shade", "FLOAT_COLOR", "POINT")
+    me.color_attributes.active_color = attr
+    sc.render.bake.target = "VERTEX_COLORS"
+    hidden = [o for o in bpy.data.objects if o is not body and o.type == "MESH"]
+    for o in hidden:                                  # the glasses must not darken the face
+        o.hide_render = True
+    bpy.ops.object.select_all(action="DESELECT")
+    body.select_set(True)
+    bpy.context.view_layer.objects.active = body
+    bpy.ops.object.bake(type="AO")
+    for o in hidden:
+        o.hide_render = False
+    n = len(me.vertices)
+    c = np.zeros(n * 4, dtype=np.float32)
+    attr.data.foreach_get("color", c)
+    c = c.reshape(n, 4)
+    L = rig.matrix_world @ rig.data.bones[P + "Head"].head_local
+    co = np.array([body.matrix_world @ v.co for v in me.vertices])
+    z, y = co[:, 2] - L.z, co[:, 1] - L.y                            # relative to the Head bone (see add_glasses)
+    s = lambda v, w=0.01: np.clip(v / w + 0.5, 0, 1)                  # a soft step, ~1 cm wide
+    # the hairline runs diagonally from the forehead (z +0.108, y -0.078) down and back to above the ear (z +0.070,
+    # y -0.019); behind the ears the hair comes down to the nape (z -0.006)
+    front = s(z - (0.070 + 0.65 * np.clip(-0.0188 - y, 0, 0.059)))
+    back = s(z + 0.006) * s(y - 0.026)
+    hair = np.maximum(front, back)
+    c[:, 1] = hair
+    c[:, 2] = 1.0
+    attr.data.foreach_set("color", c.ravel())
+    print(f"shade: AO mean {c[:, 0].mean():.3f}  hair verts {(hair > 0.5).sum()}", flush=True)
+
+
 def add_glasses(rig, body):
-    """Thin round wire frames (the character sheet), fitted to the generated face and parented to the head."""
+    """Round acetate frames (the character sheet, Oct 2026): thick dark rims, a keyhole bridge resting on the nose,
+    hinges at the rim's outer edge, temples running straight back to the ear root and hooking down behind the ear.
+    Fitted from the face: the nasion (deepest point of the nose bridge) and the eye line. Parented to the head."""
+    import bmesh
+    import numpy as np
+    # Landmarks of ivan_tripo_v3, read off orthographic front and side renders with 1 cm markers, relative to the Head
+    # bone. (This face's nose bridge is too shallow and the fringe curls hang too low for a reliable automatic search.)
+    #   pupils z +0.0534, ~58 mm apart; nasion (where the bridge rests) y -0.0928; temples in front of the ears +-0.060;
+    #   ear root y -0.0098 (just above the ear, where the temple sits), the helix top z +0.0604
+    L = rig.matrix_world @ rig.data.bones[P + "Head"].head_local
+    f = 1.0                                                                               # scale to another head
+    cx, eye_z, ny, half_w = 0.0, L.z + 0.0534, L.y - 0.0928, 0.060
+    print(f"glasses: eye z {eye_z:.4f}  nasion y {ny:.4f}  temples +-{half_w:.3f}", flush=True)
+
+    # the frame, in metres (a 39-mm round, slim rims as on the sheet; the lens centres sit on the pupils)
+    r_in, rim, depth = 0.0195 * f, 0.0024 * f, 0.0036 * f        # lens radius, rim face width, rim depth (front-back)
+    R = r_in + rim
+    gap = 2 * (0.0290 * f - R)                                   # between the rims: lens centres 58 mm apart
+    plane_y = ny - 0.0030 * f                                    # rim centre plane: the bridge's back rests on the nose
+    tilt, wrap = math.radians(7), math.radians(4)                # pantoscopic tilt (bottom in), face-form wrap
+    centres = [Vector((cx + sx * (gap / 2 + R), plane_y, eye_z + 0.0015 * f)) for sx in (-1, 1)]
+
+    bm = bmesh.new()
+
+    def lens_frame(c, sx):
+        """Lens space -> world: x across, y the lens axis (toward the face), z up; tilted and wrapped."""
+        rot = Matrix.Rotation(-sx * wrap, 4, "Z") @ Matrix.Rotation(-tilt, 4, "X")
+        return Matrix.Translation(c) @ rot
+
+    def ring(M, segs=72):
+        """A round rim: a rounded rectangle (radial x axial) spun about the lens axis."""
+        b = 0.0009 * f                                           # edge round-over
+        prof2 = [(r_in, -depth / 2 + b), (r_in + b, -depth / 2), (R - b, -depth / 2), (R, -depth / 2 + b),
+                 (R, depth / 2 - b), (R - b, depth / 2), (r_in + b, depth / 2), (r_in, depth / 2 - b)]
+        rows = []
+        for i in range(segs):
+            a = 2 * math.pi * i / segs
+            rows.append([bm.verts.new(M @ Vector((r * math.cos(a), ax, r * math.sin(a)))) for r, ax in prof2])
+        for i in range(segs):
+            A, Bv = rows[i], rows[(i + 1) % segs]
+            for j in range(len(prof2)):
+                bm.faces.new((A[j], A[(j + 1) % len(prof2)], Bv[(j + 1) % len(prof2)], Bv[j]))
+
+    def sweep(pts, w, h, up=Vector((0, 0, 1))):
+        """A bar with a rounded-rectangle section (w across, h tall) along a polyline; ends capped."""
+        pts = [Vector(p) for p in pts]
+        sec = [(-w / 2, -h / 2), (w / 2, -h / 2), (w / 2, h / 2), (-w / 2, h / 2)]
+        rows = []
+        for i, p in enumerate(pts):
+            t = (pts[min(i + 1, len(pts) - 1)] - pts[max(i - 1, 0)]).normalized()
+            side = t.cross(up).normalized()
+            u = side.cross(t).normalized()
+            rows.append([bm.verts.new(p + side * a + u * b) for a, b in sec])
+        for A, Bv in zip(rows, rows[1:]):
+            for j in range(4):
+                bm.faces.new((A[j], A[(j + 1) % 4], Bv[(j + 1) % 4], Bv[j]))
+        bm.faces.new(rows[0][::-1]); bm.faces.new(rows[-1])
+
+    Ms = [lens_frame(c, sx) for c, sx in zip(centres, (-1, 1))]
+    for M in Ms:
+        ring(M)
+    # keyhole bridge: an arch from rim to rim over the nose, its back face resting on the nasion
+    bz = 0.42 * R
+    a0 = Ms[0] @ Vector((R * math.cos(math.radians(22)), 0, R * math.sin(math.radians(22))))
+    a1 = Ms[1] @ Vector((-R * math.cos(math.radians(22)), 0, R * math.sin(math.radians(22))))
+    arch = [a0.lerp(a1, u) + Vector((0, 0, 0.0032 * f * math.sin(math.pi * u))) for u in np.linspace(0, 1, 9)]
+    sweep(arch, 0.0030 * f, 0.0030 * f, up=Vector((0, -1, 0)))
+    # hinges and temples: from the rim's outer edge, 10 degrees above the lens centre, straight back to the ear root,
+    # then down behind the ear. The temples splay to clear the temples of the head by ~3 mm.
+    ear_y = ny + 0.083 * f                                       # the ear root, ~8 cm behind the nasion
+    for M, c, sx in zip(Ms, centres, (-1, 1)):
+        a = math.radians(8)
+        edge = M @ Vector((sx * R * math.cos(a), 0, R * math.sin(a)))
+        hinge_back = edge + Vector((sx * 0.0012 * f, 0.0085 * f, 0))
+        sweep([edge - Vector((0, 0.0012 * f, 0)), hinge_back], 0.0030 * f, 0.0038 * f)          # endpiece block
+        ear = Vector((cx + sx * (half_w + 0.0075 * f), ear_y, eye_z + 0.007 * f))
+        hook = [ear + Vector((-sx * 0.0012 * f, 0.010 * f, -0.004 * f)), ear + Vector((-sx * 0.0035 * f, 0.022 * f, -0.016 * f)),
+                ear + Vector((-sx * 0.0055 * f, 0.030 * f, -0.030 * f))]
+        sweep([hinge_back, hinge_back.lerp(ear, 0.5), ear] + hook, 0.0018 * f, 0.0032 * f)
+    me = bpy.data.meshes.new("Ivan_Glasses")
+    bm.to_mesh(me); bm.free()
+    for p in me.polygons:
+        p.use_smooth = True
+    frame = bpy.data.objects.new("Ivan_Glasses", me)
+    bpy.context.collection.objects.link(frame)
+    mat_f = bpy.data.materials.new("Glasses Frame")
+    mat_f.use_nodes = True
+    mat_f.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = (0.012, 0.009, 0.008, 1)
+    mat_f.node_tree.nodes["Principled BSDF"].inputs["Roughness"].default_value = 0.28
+    me.materials.append(mat_f)
+    mod = frame.modifiers.new("smooth", "WEIGHTED_NORMAL")
+    mod.keep_sharp = False
+    objs = [frame]
+    mat_l = bpy.data.materials.new("Glasses Lens")
+    mat_l.use_nodes = True
+    bl = mat_l.node_tree.nodes["Principled BSDF"]
+    bl.inputs["Transmission Weight"].default_value = 1.0
+    bl.inputs["Roughness"].default_value = 0.0
+    bl.inputs["IOR"].default_value = 1.02
+    for M in Ms:                                                 # the lenses, seated in the rim's groove
+        bpy.ops.mesh.primitive_cylinder_add(radius=r_in + 0.0006 * f, depth=0.0010 * f, vertices=72)
+        lens = bpy.context.active_object
+        lens.matrix_world = M @ Matrix.Rotation(math.pi / 2, 4, "X")
+        lens.data.materials.append(mat_l)
+        lens.name = "Ivan_GlassesLens"
+        objs.append(lens)
+    mw = {o: o.matrix_world.copy() for o in objs}
+    for o in objs:
+        o.parent = rig
+        o.parent_type = "BONE"
+        o.parent_bone = P + "Head"
+        bpy.context.view_layer.update()
+        o.matrix_world = mw[o]
+
+
+def add_glasses_wire(rig, body):
+    """The first frames: thin round wire, fitted for the earlier Ivan. Kept for reference; not used."""
     import bmesh
     import numpy as np
     head = rig.data.bones[P + "Head"]
@@ -324,7 +489,8 @@ def export(rig, out, frames):
     sc.frame_start, sc.frame_end = 1, frames
     bpy.ops.export_scene.gltf(filepath=str(out), export_format="GLB", export_animations=True, export_skins=True,
                               export_force_sampling=True, export_frame_range=True, export_morph=False,
-                              export_image_format="JPEG", export_jpeg_quality=92, export_yup=True)
+                              export_image_format="JPEG", export_jpeg_quality=92, export_yup=True,
+                              export_vertex_color="NAME", export_vertex_color_name="Shade")
     print("EXPORTED", out, Path(out).stat().st_size / 1e6, "MB", flush=True)
 
 

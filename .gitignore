@@ -19,3 +19,13 @@ blender/assets/props/
 audio/Ch01_VO_SoundPackage/03_SOUND_DESIGN/stems/
 audio/Ch01_VO_SoundPackage/03_SOUND_DESIGN/buses/
 audio/Ch01_VO_SoundPackage/03_SOUND_DESIGN/mixes/
+
+# Bake intermediates (blender/lib/lightmap.py writes them next to each time-of-day's lightmaps; the engine loads only
+# the merged lm_*.exr)
+engine/scenes/*/lighting/*/lightmaps/*_full.exr
+engine/scenes/*/lighting/*/lightmaps/*_live.exr
+# Renders stay out of the repo: tools/render_mp4.mjs makes them again (the older tracked deliveries stay as they are)
+deliver/*.mp4
+deliver/*.srt
+# scratch probes
+tools/_probe*.mjs

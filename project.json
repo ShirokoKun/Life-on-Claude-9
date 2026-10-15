@@ -36,7 +36,7 @@
       "title": "Ivan's room",
       "module": "engine/scenes/s03/scene.js",
       "folder": "scenes/03-ivan-room",
-      "voiceover": "engine/assets/voiceover.wav",
+      "voiceover": "engine/scenes/s03/sound.wav",
       "stage": "final"
     },
     {
