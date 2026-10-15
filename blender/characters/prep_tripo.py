@@ -245,6 +245,479 @@ def add_glasses(rig, body):
         o.matrix_world = mw[o]
 
 
+# Eye openings of ivan_tripo_v3 (staging, --eyes): the painted lid margins, traced on texture-only orthographic front
+# renders at 40 px/mm, relative to the Head bone head (x across, z up; the model faces -Y), in order around the
+# opening. The top follows the lower edge of the painted lash line, so the lashes stay on the lid. Centres are the
+# painted pupils (55 mm apart, 0.2 mm above the glasses' eye line).
+EYE_LIDS = {
+    "Right": [(-0.0407, 0.0519), (-0.0394, 0.0538), (-0.0382, 0.0542), (-0.0369, 0.0545), (-0.0354, 0.0547),
+              (-0.0332, 0.0549), (-0.0307, 0.0549), (-0.0282, 0.0549), (-0.0264, 0.0547), (-0.0249, 0.0544),
+              (-0.0237, 0.0539), (-0.0226, 0.0533), (-0.0217, 0.0521), (-0.0224, 0.0513), (-0.0234, 0.0506),
+              (-0.0244, 0.0501), (-0.0269, 0.0491), (-0.0294, 0.0486), (-0.0319, 0.0484), (-0.0344, 0.0486),
+              (-0.0369, 0.0492), (-0.0387, 0.0500), (-0.0399, 0.0509)],
+    "Left": [(0.0169, 0.0523), (0.0181, 0.0531), (0.0193, 0.0538), (0.0211, 0.0546), (0.0231, 0.0550),
+             (0.0251, 0.0550), (0.0271, 0.0548), (0.0291, 0.0545), (0.0311, 0.0539), (0.0326, 0.0534),
+             (0.0337, 0.0529), (0.0344, 0.0524), (0.0337, 0.0517), (0.0326, 0.0511), (0.0311, 0.0504),
+             (0.0286, 0.0497), (0.0261, 0.0494), (0.0236, 0.0494), (0.0211, 0.0498), (0.0193, 0.0505),
+             (0.0181, 0.0513)],
+}
+EYE_CENTRES = {"Right": (-0.0304, 0.0536), "Left": (0.0247, 0.0537)}
+
+
+def _closed_spline(pts, n=72):
+    """Closed Catmull-Rom through the traced points, resampled to n points, then made convex (the cut needs a
+    convex opening; a traced almond is convex up to the tracing noise)."""
+    import numpy as np
+    P = np.array(pts, float)
+    out = []
+    m = len(P)
+    for i in range(m):
+        p0, p1, p2, p3 = P[(i - 1) % m], P[i], P[(i + 1) % m], P[(i + 2) % m]
+        for t in np.linspace(0, 1, max(2, n // m + 1), endpoint=False):
+            t2, t3 = t * t, t * t * t
+            out.append(0.5 * ((2 * p1) + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 + (-p0 + 3 * p1 - 3 * p2 + p3) * t3))
+    out = np.array(out)
+    # convex hull (monotone chain), counter-clockwise
+    pts_ = sorted(map(tuple, out))
+    cross = lambda o, a, b: (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+    lower, upper = [], []
+    for p in pts_:
+        while len(lower) >= 2 and cross(lower[-2], lower[-1], p) <= 0:
+            lower.pop()
+        lower.append(p)
+    for p in reversed(pts_):
+        while len(upper) >= 2 and cross(upper[-2], upper[-1], p) <= 0:
+            upper.pop()
+        upper.append(p)
+    return np.array(lower[:-1] + upper[:-1])
+
+
+def _eye_texture(name, r, iris_r, pupil_r, size=2048, seed=5):
+    """Sclera, iris and pupil for a sphere UV-mapped by angle from the front pole: the texture's centre is the
+    pupil, its radius pi (the back of the eye). sRGB values; iris colours from the painted eyes (warm hazel-brown)."""
+    import numpy as np
+    rng = np.random.default_rng(seed)
+    yy, xx = np.mgrid[0:size, 0:size]
+    u = (xx + 0.5) / size - 0.5
+    v = (yy + 0.5) / size - 0.5
+    th = np.hypot(u, v) * 2 * math.pi                       # angle from the gaze axis
+    ph = np.arctan2(v, u)
+    th_i, th_p = math.asin(iris_r / r), math.asin(pupil_r / r)
+    s = np.clip((th - th_p) / (th_i - th_p), 0, 1)           # 0 at the pupil edge, 1 at the limbus
+    # iris: a golden collarette round the pupil, warm brown stroma, a dark limbal ring; radial fibres and crypts
+    def lerp(a, b, t):
+        return np.array(a)[None, None] * (1 - t[..., None]) + np.array(b)[None, None] * t[..., None]
+    col = lerp((150, 104, 52), (118, 80, 48), np.clip(s / 0.35, 0, 1))
+    col = np.where((s > 0.35)[..., None], lerp((118, 80, 48), (92, 60, 40), np.clip((s - 0.35) / 0.45, 0, 1)), col)
+    col = np.where((s > 0.8)[..., None], lerp((92, 60, 40), (40, 27, 22), np.clip((s - 0.8) / 0.2, 0, 1)), col)
+    k = np.arange(1, 90)
+    amp = rng.normal(0, 1, len(k)) / np.sqrt(k)
+    phase = rng.uniform(0, 2 * math.pi, len(k))
+    fib = sum(a * np.sin(kk * ph + p + 2.5 * s) for a, kk, p in zip(amp, k, phase))
+    fib = fib / np.abs(fib).max()
+    col *= (1 + 0.22 * fib * (0.4 + 0.6 * np.sin(math.pi * np.clip(s, 0, 1))))[..., None]
+    ring = np.exp(-((s - 0.33) / 0.05) ** 2)                 # the collarette's ridge
+    col *= (1 + 0.18 * ring)[..., None]
+    # sclera: warm off-white, greyer and pinker toward the corners, faint vessels from the periphery
+    t_sc = np.clip((th - th_i) / math.radians(70), 0, 1)
+    scl = lerp((222, 212, 198), (196, 168, 158), t_sc ** 1.3)
+    veins = np.zeros_like(th)
+    for _ in range(26):
+        a0 = rng.uniform(-math.pi, math.pi)
+        a = a0 + 0.0
+        pts = []
+        t_ = math.radians(rng.uniform(75, 95))
+        while t_ > th_i + math.radians(rng.uniform(8, 25)):
+            pts.append((t_, a))
+            t_ -= math.radians(0.8)
+            a += rng.normal(0, 0.02)
+        for t_, a in pts[::2]:
+            px = int((0.5 + 0.5 * (t_ / math.pi) * math.cos(a)) * size)
+            py = int((0.5 + 0.5 * (t_ / math.pi) * math.sin(a)) * size)
+            veins[max(py - 1, 0):py + 2, max(px - 1, 0):px + 2] = np.maximum(
+                veins[max(py - 1, 0):py + 2, max(px - 1, 0):px + 2], np.clip((t_ - th_i) / math.radians(60), 0, 1))
+    try:
+        from scipy.ndimage import gaussian_filter
+        veins = gaussian_filter(veins, 1.2)
+    except ImportError:
+        pass
+    scl = scl * (1 - 0.35 * veins[..., None]) + np.array((170, 70, 60))[None, None] * 0.35 * veins[..., None]
+    # limbus: the iris melts into the sclera over ~0.4 mm
+    lim = np.clip((th - th_i) / (0.4 / (r * 1000)), 0, 1)[..., None]
+    col = np.where((th > th_i)[..., None], col * (1 - lim) + scl * lim, col)
+    pupil = np.clip((th - th_p) / math.radians(1.2), 0, 1)[..., None]
+    col = col * pupil + np.array((7, 6, 6))[None, None] * (1 - pupil)
+    rgba = np.concatenate([np.clip(col / 255.0, 0, 1), np.ones((size, size, 1))], axis=2)
+    img = bpy.data.images.new(name, size, size, alpha=False)
+    img.pixels.foreach_set(rgba.astype(np.float32).ravel())          # row 0 = v 0 (Blender images start bottom-left)
+    img.pack()
+    return img
+
+
+def add_eyes(rig, body, radius=0.0105, iris_r=0.0054, pupil_r=0.0019, bulge=0.0005):
+    """Real eyeballs in the painted sockets (staging, --eyes). Run after the performance, before export.
+    1. The mesh is cut exactly along each traced lid opening (EYE_LIDS): vertical planes through the outline's edges
+       split the triangles they cross (UVs, weights and the baked Shade interpolate), and the faces inside are removed.
+       The lid rim is extruded back into the eyeball (a lid margin, darker Shade) so no gap shows at grazing angles.
+       Custom normals are carried over from the original triangles.
+    2. Two spheres (radius from the face's scale: painted iris 10-11 mm wide and 55 mm between the pupils, ~0.9 of an
+       average adult, so 11 mm not 12) with a slight corneal bulge, a generated sclera/iris/pupil texture and a glossy
+       clear coat. Each is set as far forward as the lids allow (no skin vertex within radius + bulge of its centre).
+    3. Bones mixamorig:LeftEye / mixamorig:RightEye, children of Head, head at the eyeball centre, +Y straight out
+       of the eye, +Z up (rest = looking straight ahead); each eyeball is weighted 100% to its bone."""
+    import bmesh
+    import numpy as np
+    me = body.data
+    M = rig.matrix_world.inverted() @ body.matrix_world               # body local -> armature space
+    assert all(abs(M[i][j] - (i == j)) < 1e-6 for i in range(4) for j in range(4)), "body must sit in armature space"
+    Lh = rig.data.bones[P + "Head"].head_local.copy()
+    fwd, up = Vector((0, -1, 0)), Vector((0, 0, 1))                    # rest: the model faces -Y
+    front_y = Lh.y - 0.066                                              # the face shell over the eyes (the painted eye ~ -0.078)
+    deep_y = Lh.y - 0.050                                               # the scan's folds inside the socket (the skin over the eye: front_y)
+    # (an inner shell of the scan sits ~14 mm behind the face above the eyes; it is hidden and ignored)
+
+    # -- 1. the openings ---------------------------------------------------------------------------------------
+    nl = len(me.loops)
+    cn = np.zeros(nl * 3, np.float32)
+    me.corner_normals.foreach_get("vector", cn)
+    cn = cn.reshape(-1, 3)
+    co0 = np.zeros(len(me.vertices) * 3, np.float32)
+    me.vertices.foreach_get("co", co0)
+    co0 = co0.reshape(-1, 3)
+    tri_v = np.array([[me.loops[i].vertex_index for i in p.loop_indices] for p in me.polygons])   # all triangles
+    tri_n = np.array([[cn[i] for i in p.loop_indices] for p in me.polygons])
+    tri_p = co0[tri_v]
+
+    bm = bmesh.new()
+    bm.from_mesh(me)
+    orig = bm.faces.layers.int.new("eye_orig")
+    flange_l = bm.faces.layers.int.new("eye_flange")
+    pos0 = bm.verts.layers.float_vector.new("eye_pos0")
+    roll_l = bm.verts.layers.float.new("eye_roll")
+    for f in bm.faces:
+        f[orig] = f.index
+    for v in bm.verts:
+        v[pos0] = v.co
+    shade = bm.verts.layers.float_color.get("Shade")
+    uvl = bm.loops.layers.uv.active
+    eyes = {}
+    for side in ("Right", "Left"):
+        poly = _closed_spline([(Lh.x + x, Lh.z + z) for x, z in EYE_LIDS[side]])
+        a_, b_ = poly, np.roll(poly, -1, 0)
+        lo, hi = poly.min(0) - 0.004, poly.max(0) + 0.004
+        cand = {f for f in bm.faces if f.calc_center_median().y < front_y + 0.004 and
+                lo[0] < f.calc_center_median().x < hi[0] and lo[1] < f.calc_center_median().z < hi[1]}
+        for A, B in zip(a_, b_):
+            d = B - A
+            nrm = Vector((-d[1], 0.0, d[0])).normalized()                # in x-z: the line's normal (y is the view axis)
+            pc = Vector((A[0], 0.0, A[1]))
+            sb_lo, sb_hi = np.minimum(A, B) - 0.0003, np.maximum(A, B) + 0.0003
+            hit = []
+            for f in cand:
+                if not f.is_valid:
+                    continue
+                xs = [v.co.x for v in f.verts]
+                zs = [v.co.z for v in f.verts]
+                if max(xs) < sb_lo[0] or min(xs) > sb_hi[0] or max(zs) < sb_lo[1] or min(zs) > sb_hi[1]:
+                    continue
+                sd = [(v.co - pc).dot(nrm) for v in f.verts]
+                if min(sd) < -1e-7 and max(sd) > 1e-7:
+                    hit.append(f)
+            if not hit:
+                continue
+            geom = list(hit) + list({e for f in hit for e in f.edges}) + list({v for f in hit for v in f.verts})
+            ret = bmesh.ops.bisect_plane(bm, geom=geom, dist=1e-7, plane_co=pc, plane_no=nrm)
+            cand |= {g for g in ret["geom"] if isinstance(g, bmesh.types.BMFace)}
+        cand = {f for f in cand if f.is_valid}
+
+        def inside(x, z, eps=0.0):
+            cr = (b_[:, 0] - a_[:, 0]) * (z - a_[:, 1]) - (b_[:, 1] - a_[:, 1]) * (x - a_[:, 0])
+            return bool((cr > eps).all())                              # counter-clockwise polygon
+
+        def on_edge(x, z, tol=3e-6):
+            ap = np.c_[x - a_[:, 0], z - a_[:, 1]]
+            d = b_ - a_
+            t = np.clip((ap * d).sum(1) / (d * d).sum(1), 0, 1)
+            return float(np.min(np.hypot(*(ap - d * t[:, None]).T))) < tol
+        kill = [f for f in bm.faces if f.calc_center_median().y < deep_y and inside(f.calc_center_median().x, f.calc_center_median().z)]
+        ys = [f.calc_center_median().y for f in kill]
+        print(f"eyes: {side} opening {np.ptp(poly[:, 0]) * 1000:.1f} x {np.ptp(poly[:, 1]) * 1000:.1f} mm, "
+              f"{len(kill)} faces removed (y {min(ys):.4f}..{max(ys):.4f})", flush=True)
+        surf = np.array([v.co[:] for f in kill if f.calc_center_median().y < front_y for v in f.verts])
+        bmesh.ops.delete(bm, geom=kill, context="FACES")
+        rim = [e for e in bm.edges if e.is_boundary and all(on_edge(v.co.x, v.co.z) for v in e.verts)
+               and all(v.co.y < front_y + 0.004 for v in e.verts)]
+        rim_v = {v for e in rim for v in e.verts}
+        # the eyeball centre: the painted pupil in x-z, as far forward as the lids over the iris allow
+        cx, cz = Lh.x + EYE_CENTRES[side][0], Lh.z + EYE_CENTRES[side][1]
+        reach = math.asin(min(0.99, (iris_r + 0.0006) / radius)) + math.radians(20)   # the cornea, gazing 20 deg off
+        def need(p):                                                    # how far the skin must stay from the centre
+            d2 = math.hypot(p.x - cx, p.z - cz)
+            return radius + 0.00015 + (bulge if d2 < radius * math.sin(reach) else 0.0)
+        # only the outer skin counts: the scan also has the lids' back surfaces, a shell curving back into the socket
+        # from the lid margins (it ends up inside the eyeball, hidden). Outer = not behind other skin seen from the front.
+        from mathutils.bvhtree import BVHTree
+        bvh = BVHTree.FromBMesh(bm)
+        outer = []
+        for v in bm.verts:
+            p = v.co
+            if p.y < deep_y and math.hypot(p.x - cx, p.z - cz) < radius + bulge + 0.001:
+                hit = bvh.ray_cast(Vector((p.x, p.y - 0.05, p.z)), Vector((0, 1, 0)), 0.05)
+                if hit[0] is None or hit[0].y > p.y - 0.0015:
+                    outer.append(v)
+        cy = -1.0
+        for v in outer:                                                 # the lids over the iris set the depth
+            p = v.co
+            rr = need(p) ** 2 - (p.x - cx) ** 2 - (p.z - cz) ** 2
+            if math.hypot(p.x - cx, p.z - cz) < 0.6 * radius and rr > 0:
+                cy = max(cy, p.y + math.sqrt(rr))
+        C = Vector((cx, cy, cz))
+        # the lids roll onto the eyeball: every rim vertex moves along the eyeball's radius onto its surface (plus the
+        # cornea where it can reach, plus 0.15 mm), and the skin within 2.5 mm of the rim follows smoothly. The shift
+        # is interpolated in x-z only, so the scan's hidden inner shell moves with the skin in front of it.
+        from mathutils.kdtree import KDTree
+        rim_pts = [(v.co.x, v.co.z, (v.co - C).normalized() * (need(v.co) - (v.co - C).length)) for v in rim_v]
+        kd = KDTree(len(rim_pts))
+        for i, (x, z, _) in enumerate(rim_pts):
+            kd.insert((x, 0.0, z), i)
+        kd.balance()
+        roll = 0.0025
+        moved = 0
+        for v in bm.verts:
+            p = v.co
+            if p.y > deep_y or math.hypot(p.x - cx, p.z - cz) > radius + roll + 0.002:
+                continue
+            hits = kd.find_n((p.x, 0.0, p.z), 8)
+            dmin = hits[0][2]
+            if dmin > roll:
+                continue
+            g = [1.0 / (h[2] + 1e-4) ** 2 for h in hits]
+            sh = sum((rim_pts[h[1]][2] * gi for gi, h in zip(g, hits)), Vector()) / sum(g)
+            w = 1 - dmin / roll
+            w = w * w * (3 - 2 * w)
+            v.co = p + sh * w
+            v[roll_l] = max(v[roll_l], w)
+            moved += 1
+        sh_all = [t[2].length * (1 if t[2].y > 0 else -1) for t in rim_pts]
+        print(f"eyes: {side} lids rolled onto the eyeball: rim moved {min(sh_all) * 1000:+.2f}..{max(sh_all) * 1000:+.2f} mm "
+              f"(+ = in, toward the eye centre), {moved} verts", flush=True)
+        # anything of the outer skin still inside the eyeball (the corners curl tighter than a real eye) is eased out
+        deficit = [(v.co.copy(), need(v.co) - (v.co - C).length) for v in outer]
+        deficit = [(p, d) for p, d in deficit if d > 0]
+        if deficit:
+            DP = np.array([[p.x, p.z] for p, _ in deficit])
+            DD = np.array([d for _, d in deficit])
+            moved = 0
+            for v in bm.verts:
+                p = v.co
+                if p.y > deep_y or math.hypot(p.x - cx, p.z - cz) > radius + 0.005:
+                    continue
+                dist = np.hypot(DP[:, 0] - p.x, DP[:, 1] - p.z)
+                w = np.clip(1 - dist / 0.0025, 0, 1)
+                push = float(np.max(DD * w * w * (3 - 2 * w)))
+                if push > 1e-6:
+                    v.co = p + (p - C).normalized() * push
+                    moved += 1
+            left = [need(v.co) - (v.co - C).length for v in outer]
+            print(f"eyes: {side} skin eased out of the eyeball: max {DD.max() * 1000:.2f} mm, {moved} verts; "
+                  f"worst remaining {max(left) * 1000:+.2f} mm", flush=True)
+        rim_y = np.mean([v.co.y for v in rim_v])
+        print(f"eyes: {side} centre ({cx:.4f}, {cy:.4f}, {cz:.4f}); pole {(cy - radius - np.median(surf[:, 1])) * 1000:+.2f} mm "
+              f"behind the painted surface, {(cy - radius - rim_y) * 1000:+.2f} mm behind the rim (mean); rim edges {len(rim)}",
+              flush=True)
+        # lid margin: the rim extruded back into the eyeball
+        ext = bmesh.ops.extrude_edge_only(bm, edges=rim)
+        new_v = [g for g in ext["geom"] if isinstance(g, bmesh.types.BMVert)]
+        new_f = [g for g in ext["geom"] if isinstance(g, bmesh.types.BMFace)]
+        src = {}
+        for nv in new_v:
+            for e in nv.link_edges:
+                o = e.other_vert(nv)
+                if o in rim_v:
+                    src[nv] = o
+        for nv in new_v:
+            d = nv.co - C
+            dl = d.length
+            nv.co = C + d / dl * min(dl, radius - 0.0004)
+            if shade:
+                c = nv[shade]
+                nv[shade] = (c[0] * 0.35, c[1], c[2], c[3])
+        rim_uv = {}
+        for v in rim_v:
+            for lp in v.link_loops:
+                if not lp.face[flange_l] and lp.face not in new_f:
+                    rim_uv[v] = lp[uvl].uv.copy()
+                    break
+        for f in new_f:
+            f[flange_l] = 1
+            for lp in f.loops:
+                s = src.get(lp.vert, lp.vert)
+                if s in rim_uv:
+                    lp[uvl].uv = rim_uv[s]
+        eyes[side] = C
+    bm.normal_update()
+    bm.verts.index_update()
+    bm.faces.index_update()
+    bm.to_mesh(me)
+    bm.free()
+
+    # custom normals: each corner's normal interpolated from its original triangle; the lid margin takes the
+    # normal of the rim vertex it grew from
+    co1 = np.zeros(len(me.vertices) * 3, np.float32)
+    me.attributes["eye_pos0"].data.foreach_get("vector", co1)          # positions before the corners were eased out
+    co1 = co1.reshape(-1, 3)
+    o_attr = np.zeros(len(me.polygons), np.int32)
+    me.attributes["eye_orig"].data.foreach_get("value", o_attr)
+    fl_attr = np.zeros(len(me.polygons), np.int32)
+    me.attributes["eye_flange"].data.foreach_get("value", fl_attr)
+    lv = np.zeros(len(me.loops), np.int32)
+    me.loops.foreach_get("vertex_index", lv)
+    lp_face = np.zeros(len(me.loops), np.int32)
+    for p in me.polygons:
+        lp_face[p.loop_start:p.loop_start + p.loop_total] = p.index
+    o = o_attr[lp_face]
+    P_ = co1[lv]
+    a, b, c = tri_p[o, 0], tri_p[o, 1], tri_p[o, 2]
+    v0, v1, v2 = b - a, c - a, P_ - a
+    d00, d01, d11 = (v0 * v0).sum(1), (v0 * v1).sum(1), (v1 * v1).sum(1)
+    d20, d21 = (v2 * v0).sum(1), (v2 * v1).sum(1)
+    den = d00 * d11 - d01 * d01
+    den[den == 0] = 1e-30
+    wb = (d11 * d20 - d01 * d21) / den
+    wc = (d00 * d21 - d01 * d20) / den
+    wa = 1 - wb - wc
+    W = np.clip(np.c_[wa, wb, wc], 0, None)
+    W /= W.sum(1, keepdims=True)
+    N = (tri_n[o] * W[:, :, None]).sum(1)
+    # flange corners: the normal of the nearest rim corner (its source vertex, by position along the extrusion)
+    fl = fl_attr[lp_face] == 1
+    if fl.any():
+        ok = ~fl
+        from mathutils.kdtree import KDTree
+        rim_corners = np.nonzero(ok)[0]
+        kd = KDTree(len(rim_corners))
+        for i, li in enumerate(rim_corners):
+            kd.insert(P_[li], i)
+        kd.balance()
+        for li in np.nonzero(fl)[0]:
+            # the flange's outer verts sit on the rim; inner verts take the normal of the closest rim corner
+            _, i, _ = kd.find(P_[li])
+            N[li] = N[rim_corners[i]]
+    N /= np.linalg.norm(N, axis=1, keepdims=True)
+    # where the lids were rolled onto the eyeball, turn the normals with the new surface: the deformed geometry's
+    # normals, welded across the scan's split seams (by position), blended in by the roll weight
+    rw = np.zeros(len(me.vertices), np.float32)
+    me.attributes["eye_roll"].data.foreach_get("value", rw)
+    wl = rw[lv]
+    if (wl > 0).any():
+        co2 = np.zeros(len(me.vertices) * 3, np.float32)
+        me.vertices.foreach_get("co", co2)
+        co2 = co2.reshape(-1, 3)
+        fn = np.zeros((len(me.polygons), 3))
+        for p in me.polygons:
+            vs = co2[list(p.vertices)]
+            fn[p.index] = np.cross(vs[1] - vs[0], vs[2] - vs[0])          # area-weighted
+        key = np.round(co2 / 0.00005).astype(np.int64)
+        kid = {}
+        vkey = np.array([kid.setdefault(tuple(k), len(kid)) for k in key])
+        acc = np.zeros((len(kid), 3))
+        lfn = fn[lp_face] * np.sign((fn[lp_face] * N).sum(1, keepdims=True) + 1e-30)   # scan winding is not consistent
+        np.add.at(acc, vkey[lv], lfn)
+        G = acc[vkey[lv]]
+        G /= np.maximum(np.linalg.norm(G, axis=1, keepdims=True), 1e-12)
+        sel = wl > 0
+        N[sel] = N[sel] * (1 - wl[sel, None]) + G[sel] * wl[sel, None]
+        N /= np.linalg.norm(N, axis=1, keepdims=True)
+    me.normals_split_custom_set(N.tolist())
+    for nm in ("eye_orig", "eye_flange", "eye_pos0", "eye_roll"):
+        me.attributes.remove(me.attributes[nm])
+
+    # -- 2. eyeballs and 3. bones ------------------------------------------------------------------------------
+    img = _eye_texture("Ivan_Eye", radius, iris_r, pupil_r)
+    mat = bpy.data.materials.new("Ivan Eye")
+    mat.use_nodes = True
+    nt = mat.node_tree
+    bs = nt.nodes["Principled BSDF"]
+    tex = nt.nodes.new("ShaderNodeTexImage")
+    tex.image = img
+    nt.links.new(tex.outputs["Color"], bs.inputs["Base Color"])
+    bs.inputs["Roughness"].default_value = 0.3
+    bs.inputs["Coat Weight"].default_value = 1.0
+    bs.inputs["Coat Roughness"].default_value = 0.03
+    bs.inputs["Coat IOR"].default_value = 1.376
+    th_c = math.asin(min(0.99, (iris_r + 0.0006) / radius))            # the cornea spans the iris and its rim
+    thetas = np.unique(np.r_[np.linspace(0, th_c, 18), np.linspace(th_c, math.pi, 34)])
+    segs = 64
+    bpy.ops.object.mode_set(mode="OBJECT") if bpy.context.object and bpy.context.object.mode != "OBJECT" else None
+    bpy.ops.object.select_all(action="DESELECT")
+    rig.select_set(True)
+    bpy.context.view_layer.objects.active = rig
+    bpy.ops.object.mode_set(mode="EDIT")
+    ebs = rig.data.edit_bones
+    for side, C in eyes.items():
+        eb = ebs.new(f"{P}{side}Eye")
+        eb.head = C
+        eb.tail = C + fwd * 0.012
+        eb.align_roll(up)
+        eb.parent = ebs[P + "Head"]
+        eb.use_connect = False
+        eb.use_deform = True
+    bpy.ops.object.mode_set(mode="OBJECT")
+    right = fwd.cross(up)                                               # fwd x up: +X (his left) in rest
+    for side, C in eyes.items():
+        bm = bmesh.new()
+        uv = bm.loops.layers.uv.new("UVMap")
+        rows = []
+        for th in thetas:
+            s_ = th / th_c
+            rho = radius + (bulge * (1 - s_ * s_) ** 2 if s_ < 1 else 0.0)
+            if th == 0 or th == thetas[-1]:
+                rows.append([bm.verts.new(C + (fwd if th == 0 else -fwd) * rho)])
+                continue
+            rows.append([bm.verts.new(C + (fwd * math.cos(th) + (right * math.cos(p) + up * math.sin(p)) * math.sin(th)) * rho)
+                         for p in np.linspace(0, 2 * math.pi, segs, endpoint=False)])
+        def uvof(th, p):
+            return (0.5 + 0.5 * th / math.pi * math.cos(p), 0.5 + 0.5 * th / math.pi * math.sin(p))
+        phis = np.linspace(0, 2 * math.pi, segs + 1)
+        for i in range(len(rows) - 1):
+            A, B = rows[i], rows[i + 1]
+            for j in range(segs):
+                if len(A) == 1:
+                    vs, uvs = (A[0], B[j], B[(j + 1) % segs]), (uvof(thetas[i], (phis[j] + phis[j + 1]) / 2),
+                                                                  uvof(thetas[i + 1], phis[j]), uvof(thetas[i + 1], phis[j + 1]))
+                elif len(B) == 1:
+                    vs, uvs = (A[j], B[0], A[(j + 1) % segs]), (uvof(thetas[i], phis[j]),
+                                                                  uvof(thetas[i + 1], (phis[j] + phis[j + 1]) / 2), uvof(thetas[i], phis[j + 1]))
+                else:
+                    vs = (A[j], B[j], B[(j + 1) % segs], A[(j + 1) % segs])
+                    uvs = (uvof(thetas[i], phis[j]), uvof(thetas[i + 1], phis[j]), uvof(thetas[i + 1], phis[j + 1]), uvof(thetas[i], phis[j + 1]))
+                f = bm.faces.new(vs)
+                for lp, t in zip(f.loops, uvs):
+                    lp[uv].uv = t
+        bm.normal_update()
+        for f in bm.faces:                                              # outward
+            if f.normal.dot(f.calc_center_median() - C) < 0:
+                f.normal_flip()
+        em = bpy.data.meshes.new(f"Ivan_Eye_{side}")
+        bm.to_mesh(em)
+        bm.free()
+        em.shade_smooth()
+        em.materials.append(mat)
+        ob = bpy.data.objects.new(f"Ivan_Eye_{side}", em)
+        bpy.context.collection.objects.link(ob)
+        ob.parent = rig
+        ob.matrix_parent_inverse = Matrix.Identity(4)
+        ob.matrix_basis = Matrix.Identity(4)
+        vg = ob.vertex_groups.new(name=f"{P}{side}Eye")
+        vg.add(list(range(len(em.vertices))), 1.0, "REPLACE")
+        mod = ob.modifiers.new("Armature", "ARMATURE")
+        mod.object = rig
+        hl = C - Lh
+        print(f"eyes: {P}{side}Eye at Head {tuple(round(x, 4) for x in hl)} (armature space), radius {radius * 1000:.1f} mm", flush=True)
+    bpy.context.view_layer.update()
+    return eyes
+
+
 def add_glasses_wire(rig, body):
     """The first frames: thin round wire, fitted for the earlier Ivan. Kept for reference; not used."""
     import bmesh
@@ -495,7 +968,7 @@ def export(rig, out, frames):
 
 
 if __name__ == "__main__":
-    a = sys.argv[1:]
+    a = sys.argv[sys.argv.index("--") + 1:] if "--" in sys.argv else sys.argv[1:]   # blender -b -P prep_tripo.py -- ...
     rig, body = load(a[0])
     if "--stand" in a:                                # standing still at x,y facing +Y (scene 2, the doorway)
         import acting
@@ -513,6 +986,8 @@ if __name__ == "__main__":
         actor.reset_upper()
         actor.calibrate_fingers()
         actor.perform_stand(frames, Vector((x, y + 6.0, 1.75)))
+        if "--eyes" in a:                             # staging: real eyeballs and eye bones (after the performance)
+            add_eyes(rig, body)
         if "--blend" in a:
             bpy.ops.wm.save_as_mainfile(filepath=a[a.index("--blend") + 1])
         export(rig, a[1], frames)
@@ -541,6 +1016,8 @@ if __name__ == "__main__":
             with open(a[a.index("--events") + 1], "w") as fh:
                 json.dump({"fps": FPS, "keys": [[round(t, 3), s[0], f[0]] for t, s, f in actor.events],
                            "typing": actor.sc["typing"], "gaze": actor.sc["gaze"]}, fh)
+    if "--eyes" in a:                                 # staging: real eyeballs and eye bones (after the performance)
+        add_eyes(rig, body)
     if "--blend" in a:
         bpy.ops.wm.save_as_mainfile(filepath=a[a.index("--blend") + 1])
     export(rig, a[1], frames)

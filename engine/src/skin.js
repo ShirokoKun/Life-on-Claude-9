@@ -58,13 +58,13 @@ export function applySkin(m, mesh, opts = {}) {
     });
     const pars = THREE.ShaderChunk.lights_physical_pars_fragment
       .replace('float dotNL = saturate( dot( geometryNormal, directLight.direction ) );\n\tvec3 irradiance = dotNL * directLight.color;',
-        `vec3 lcol = mix( vec3( dot( directLight.color, ${LUM} ) ), directLight.color, uLightSat );
+        `vec3 lcol = max( mix( vec3( dot( directLight.color, ${LUM} ) ), directLight.color, uLightSat ), 0.0 );   // max: a saturated light pushed past 1 goes negative -> NaN in AgX
 	float nl = dot( geometryNormal, directLight.direction );
 	float dotNL = saturate( nl );
 	vec3 irradiance = dotNL * lcol;
 	float wrapNL = saturate( ( nl + 0.5 ) / 1.5 );
 	reflectedLight.directDiffuse += max( wrapNL - dotNL, 0.0 ) * lcol * uSSS * ( 1.0 - sHair ) * BRDF_Lambert( material.diffuseColor );`)
-      .replace('vec3 lightColor = rectAreaLight.color;', `vec3 lightColor = mix( vec3( dot( rectAreaLight.color, ${LUM} ) ), rectAreaLight.color, uLightSat );`);
+      .replace('vec3 lightColor = rectAreaLight.color;', `vec3 lightColor = max( mix( vec3( dot( rectAreaLight.color, ${LUM} ) ), rectAreaLight.color, uLightSat ), 0.0 );`);
     sh.fragmentShader = `uniform float uLightSat, uMicroK, uAO, uHairK;
 uniform vec3 uSSS;
 uniform sampler2D uMicro;
@@ -73,7 +73,7 @@ float sHair = 0.0, sAO = 1.0;
       .replace('#include <lights_physical_pars_fragment>', pars)
       // the baked Shade instead of a plain vertex-colour multiply
       .replace('#include <color_fragment>', `#if defined( USE_COLOR )
-        sHair = vColor.g * uHairK;
+        sHair = clamp( vColor.g * uHairK, 0.0, 1.0 );   // clamp: above 1, (1 - sHair) goes negative, the SSS subtracts light and AgX's log makes NaN
         sAO = mix( 1.0, pow( clamp( vColor.r, 0.0, 1.0 ), mix( 1.6, 2.4, sHair ) ), uAO );
         float l = dot( diffuseColor.rgb, ${LUM} );
         vec3 skinCol = mix( vec3( l ), diffuseColor.rgb, 1.12 );                      // AgX eats skin's colour: give it back
