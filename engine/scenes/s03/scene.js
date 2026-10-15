@@ -156,7 +156,7 @@ export function createLights(scene, data, { quality = 'high' } = {}) {
   // the hazy moon over the valley: baked as a soft wash; live only as a faint cool edge on Ivan (no hard shadows)
   L.moon = new THREE.DirectionalLight(0x9db4ff, baked ? 0.06 : 0.6);
   L.moon.position.copy(B(-8.4, 5.1, 8.0)); L.moon.target.position.copy(B(1.6, 1.6, 0.5));   // set_room03.MOON
-  scene.add(L.moon, L.moon.target);
+  L.moon.name = 'Moon'; scene.add(L.moon, L.moon.target);
 
   // the window as a soft source: night sky over the bed and the floor (baked: in the lightmaps)
   if (!baked) {
@@ -174,7 +174,7 @@ export function createLights(scene, data, { quality = 'high' } = {}) {
     const s = new THREE.RectAreaLight(new THREE.Color(...key.color), 0.22 * key.energy_w / (Math.PI * w * h), w, h);
     // aimed from the screen at his face and chest (lights.json once exported this light pointing at the floor)
     s.position.copy(B(...key.location)); s.lookAt(B(1.05, 3.75, 1.15));
-    scene.add(s); L.screens.push({ s, base: s.intensity });
+    s.name = 'Laptop screen'; scene.add(s); L.screens.push({ s, base: s.intensity });
   }
   for (const n of baked ? [] : ['Monitor_Screen', 'Monitor2_Screen', 'Laptop_Screen']) {
     const p = data.marks[n]; if (!p) continue;
@@ -188,7 +188,7 @@ export function createLights(scene, data, { quality = 'high' } = {}) {
     // a soft side key, no shadow map: hands and arms must not print hard shapes on his face (S5)
     L.monitor = new THREE.SpotLight(0x86b8ff, 1.9, 1.9, THREE.MathUtils.degToRad(34), 0.95, 1.5);
     L.monitor.position.copy(B(...mon)); L.monitor.target.position.copy(FACE);
-    scene.add(L.monitor, L.monitor.target);
+    L.monitor.name = 'Monitor key'; scene.add(L.monitor, L.monitor.target);
   }
   // what the dark green walls give back: barely anything, a little blue (baked: the environment capture does it)
   // baked: a faint warm fill keeps live-lit things (Ivan, plants, books) from falling to pure black, as in the ref
@@ -199,13 +199,22 @@ export function createLights(scene, data, { quality = 'high' } = {}) {
   // ?amb=<k> tunes it for look-dev.
   else {
     const k = +(new URLSearchParams(location.search).get('amb') ?? 0.9);
-    L.fill = new THREE.HemisphereLight(0x22325a, 0x140e0a, k); scene.add(L.fill);
+    L.fill = new THREE.HemisphereLight(0x22325a, 0x140e0a, k); L.fill.name = 'Night ambient'; scene.add(L.fill);
   }
 
+  // the desk lamp as a live light (the arm lamp's head over the keyboard): the "Desk lamp" control drives it; the
+  // room's lamps stay baked. Soft shadows from his hands and the laptop.
+  if (baked) {
+    const head = B(0.77, 4.56, 1.31), aim = B(1.10, 4.30, 0.75);
+    L.lamp = new THREE.SpotLight(0xffc48a, 2.2, 3, THREE.MathUtils.degToRad(38), 0.8, 2);
+    L.lamp.position.copy(head); L.lamp.target.position.copy(aim);
+    L.lamp.castShadow = true; L.lamp.shadow.mapSize.set(1024, 1024); L.lamp.shadow.radius = 5; L.lamp.shadow.bias = -0.0004;
+    L.lamp.name = 'Desk lamp (live)'; scene.add(L.lamp, L.lamp.target); L.lampBase = L.lamp.intensity;
+  }
   L.apply = ({ lamp: lk = 1, screen: sk = 1 } = {}) => {
     L.lamp.intensity = L.lampBase * lk;
     for (const { s, base } of L.screens) s.intensity = base * sk;
-    if (L.monitor) L.monitor.intensity = 1.9 * sk;
+    if (L.monitor) L.monitor.intensity = (L.monitorBase ?? 1.9) * sk;
   };
   return L;
 }
@@ -241,7 +250,9 @@ export function tweakMaterial(m, o) {
     if (!/Glass/.test(n)) return;
     m.opacity = 0.04;                                              // clean glass: the city, not a grey film
   }
-  if (/^ClassicNightstand/.test(n)) { m.color.multiplyScalar(4); m.roughness = Math.max(m.roughness, 0.6); }   // its scan reads 0.6% albedo: black
+  // the bookshelf scan read cheap and grey-worn: a dark oiled walnut, satin, no metal sheen
+  if (/^wooden_bookshelf_worn/.test(n)) { m.color.setRGB(0.42, 0.27, 0.18); m.roughness = 0.62; m.metalness = 0; m.metalnessMap = null; m.envMapIntensity = 0.25; m.needsUpdate = true; }
+  else if (/^ClassicNightstand/.test(n)) { m.color.multiplyScalar(4); m.roughness = Math.max(m.roughness, 0.6); }   // its scan reads 0.6% albedo: black
   else if (/^Trim$/.test(n) && m.normalScale) m.normalScale.multiplyScalar(0.25);   // door and trim: smooth paint, no plank grooves
   else if (/^Desk Walnut$/.test(n)) Object.assign(m, { clearcoat: 0, roughness: m.roughness * 1.3 });   // satin desk, not lacquer
   else if (/Laptop Alu/.test(n)) Object.assign(m, { roughness: 0.55, metalness: 0.6, clearcoat: 0, envMapIntensity: 0.35 });
@@ -319,7 +330,7 @@ export const LM_FLIP = new URLSearchParams(location.search).get('lmflip') !== '0
 
 export function setup({ scene, data, atmo, LM, L, root, post, renderer }) {
   if (LM && LM_FLIP) for (const t of Object.values(LM)) flipV(t);
-  applyLook({ post, root, LM, L, renderer });       // ?look= mood preset (looks.js)
+  applyLook({ post, root, LM, L, renderer, scene });       // ?look= mood preset (looks.js)
   if (atmo) {
     atmo.beamMesh.visible = false;            // the intro's desk-lamp cone; this lamp is a shaded table lamp
     // the volume (volume.js) is off until it is redone soft (LOOK_REVIEW.md G); dust stays

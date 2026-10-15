@@ -217,6 +217,8 @@ def _mats():
         "led_green": M.emission("LED Green", (0.25, 1.0, 0.45), 5.0),
         "printer_screen": M.emission("Printer Screen", (1.0, 0.5, 0.15), 2.5),
         "sole": M.plastic("Sole White", (0.78, 0.77, 0.73), 0.7),
+        "fairy": M.emission("Fairy Bulb", (1.0, 0.70, 0.40), 40.0),
+        "led_teal": M.emission("LED Strip Teal", (0.20, 0.85, 0.80), 6.0),
         "can_red": M.brushed_metal("Can Red", (0.5, 0.03, 0.02), 0.25),
         "can_silver": M.brushed_metal("Can Silver Blue", (0.25, 0.35, 0.6), 0.25),
         "cloth_grey": M.fabric("Hoodie Grey", (0.09, 0.10, 0.12), 0.95, weave=900.0),
@@ -453,7 +455,7 @@ def rumpled_duvet(name, cx, hw, v0, v1, top, mat, coll, seed=3):
     (a quarter circle, then straight down), the head edge turned back into a soft roll, one corner flung open."""
     rng = random.Random(seed)
     waves = [(rng.uniform(4, 9), rng.uniform(3, 8), rng.uniform(0, 6.3), rng.uniform(0.006, 0.014)) for _ in range(5)]
-    hang, r, base = 0.24, 0.06, top + 0.035
+    hang, r, base = min(0.24, top - 0.02), 0.06, top + 0.035
     q = r * math.pi / 2
 
     def roll(e):                                     # distance past the edge -> (out, down)
@@ -519,20 +521,16 @@ def build_bed(m):
     x0, x1, y0, y1 = 0.48, 2.10, 0.04, 2.16          # frame footprint (1.62 x 2.12)
     cx, cy = (x0 + x1) / 2, (y0 + y1) / 2 + 0.03
     wood = m["bedwood"]
-    geo.box("Bed_Headboard", (x1 - x0 + 0.04, 0.07, 0.95), (cx, y0 + 0.035, 0.0), wood, c, bev=0.012)
-    geo.box("Bed_Frame", (x1 - x0, y1 - y0 - 0.07, 0.20), (cx, cy, 0.08), wood, c, bev=0.012)   # the platform's sides
-    for sx in (x0 + 0.06, x1 - 0.06):
-        for sy in (y0 + 0.12, y1 - 0.06):
-            geo.box(f"Bed_Leg_{sx:.1f}_{sy:.1f}", (0.06, 0.06, 0.08), (sx, sy, 0.0), wood, c, bev=0.006)
+    # no furniture: a mattress straight on the floor (bed_window.jpg), its head against the wall
     mw, md = x1 - x0 - 0.04, y1 - y0 - 0.11          # the mattress sits inside the frame, 2 cm proud on each side
-    sheet = geo.rounded_slab("Bed_Mattress", (mw, md, 0.24), 0.07, (cx, cy, 0.24), m["sheet"], c)
+    sheet = geo.rounded_slab("Bed_Mattress", (mw, md, 0.22), 0.07, (cx, cy, 0.0), m["sheet"], c)
     geo.subsurf(sheet, 1)
     geo.smooth(sheet, 80)
     # duvet: slept in and pushed back. A rumpled sheet over the lower two thirds, hanging over the sides and the foot,
     # its top edge turned back, one corner thrown open toward the room (look_target, the ref's soft quilt folds)
-    rumpled_duvet("Bed_Duvet", cx, mw / 2 + 0.03, y0 + 0.78, y1 + 0.01, 0.48, m["duvet"], c)
+    rumpled_duvet("Bed_Duvet", cx, mw / 2 + 0.03, y0 + 0.78, y1 + 0.01, 0.22, m["duvet"], c)
     for i, px in enumerate((cx - 0.38, cx + 0.38)):
-        p = geo.rounded_slab(f"Bed_Pillow_{i}", (0.66, 0.42, 0.13), 0.065, (px, y0 + 0.36, 0.47), m["pillow"], c,
+        p = geo.rounded_slab(f"Bed_Pillow_{i}", (0.66, 0.42, 0.13), 0.065, (px, y0 + 0.36, 0.21), m["pillow"], c,
                              rot=(8, 0, 3 if i else -2))
         geo.subsurf(p, 2)
         geo.smooth(p, 80)
@@ -625,15 +623,12 @@ def build_desk_props(m):
     for o in c.objects:
         if o.parent is None:
             o.location += OFF
-    # the second screen, right of the first (left of the laptop is the glass shot's camera): code in an editor, static
-    mx, my, rot = 2.02, 4.60, -40
-    a = math.radians(rot)
-    geo.box("Monitor2_Foot", (0.24, 0.19, 0.012), (mx, my + 0.02, TOP), m["black"], c, rot=(0, 0, rot), bev=0.004)
-    geo.box("Monitor2_Neck", (0.05, 0.03, 0.30), (mx - math.sin(a) * 0.05, my + math.cos(a) * 0.05, TOP + 0.01),
-            m["black"], c, rot=(0, 0, rot), bev=0.006)
-    body = geo.box("Monitor2_Body", (0.62, 0.035, 0.37), (mx, my, TOP + 0.13), m["black"], c, rot=(-4, 0, rot), bev=0.006)
-    s = geo.plane("Monitor2_Screen", (0.596, 0.336), (0, -0.0182, 0.185), m["code"], c, rot=(90, 0, 0))
-    s.parent = body
+    piv, turn = Vector((1.46, 4.55, 0.0)), math.radians(-20)
+    for o in [o for o in c.objects if o.parent is None and o.name.startswith("Monitor_")]:
+        d = o.location - piv
+        o.location = piv + Vector((d.x * math.cos(turn) - d.y * math.sin(turn), d.x * math.sin(turn) + d.y * math.cos(turn), d.z))
+        o.location += Vector((0.10, -0.06, 0.0))
+        o.rotation_euler.z += turn
     return c
 
 
@@ -715,6 +710,7 @@ def build_story_wall(m):
     geo.cyl("Story_Lamp_Base", 0.06, 0.20, (lx, ly, top), m["lamp_ceramic"] if "lamp_ceramic" in m else m["black"], c, seg=32)
     geo.cyl("Story_Lamp_Shade", 0.11, 0.16, (lx, ly, top + 0.20), m["shade"], c, r_top=0.08, cap=False, seg=48)
     geo.cyl("Lamp_Bulb_Story", 0.02, 0.03, (lx, ly, top + 0.25), m["bulb"], c, seg=16)
+    geo.box("Console_LED_Strip", (0.008, cy1 - cy0 - 0.10, 0.008), (xw - 0.012, ccy, top + 0.01), m["led_teal"], c, bev=0)
     # the wall above: a film poster, the corkboard with notes and pinned plans
     geo.plane("Poster_Film", (0.62, 0.87), (xw - 0.004, 2.80, 1.62), m["poster_film"], c, rot=face)
     geo.box("Corkboard", (0.015, 0.70, 0.48), (xw - 0.0075, 3.55, 1.30), m["cork"], c, bev=0.002)
@@ -746,6 +742,23 @@ def build_story_wall(m):
     return (lx, ly, top + 0.25)
 
 
+def build_fairy_lights(m):
+    """String lights across the bed wall: small warm points and the glow they leave on the wall (ref: a soft wash
+    under a sagging string). The dark side of the room gets its own light without a lamp stealing focus."""
+    from props_clutter import catenary
+    c = geo.coll("FairyLights")
+    y = 0.012
+    anchors = [Vector((0.30, y, 2.46)), Vector((0.95, y, 2.50)), Vector((1.65, y, 2.46)), Vector((2.40, y, 2.50))]
+    bulbs = []
+    for a, b in zip(anchors, anchors[1:]):
+        pts = catenary(a, b, 0.12, 14)
+        geo.tube(f"Fairy_Wire_{a.x:.2f}", [p.copy() for p in pts[::2]] + [pts[-1].copy()], 0.0012, m["black"], c)
+        bulbs += pts[1:-1:2]
+    for i, p in enumerate(bulbs):
+        geo.cyl(f"Fairy_Bulb_{i}", 0.008, 0.016, (p.x, p.y + 0.008, p.z - 0.014), m["fairy"], c, seg=10)
+    return c
+
+
 def build_dressing(m):
     """Everything from the top-down ref that makes the room lived-in."""
     c = geo.coll("Props")
@@ -773,8 +786,9 @@ def build_dressing(m):
     ph("potted_plant_04", (2.12, 4.62, TOP), rot=15, name="Plant_DeskSmall")
     # east wall: a chest of drawers by the door
     # wall art: a band poster over the bed, a dev print by the door side, a retro print by the window (portrait 5:7)
-    for i, (x, z, w_, mat) in enumerate(((0.88, 1.62, 0.50, "poster_band"), (2.55, 1.55, 0.44, "poster_dev"))):
-        geo.plane(f"Poster_{i}", (w_, w_ * 1.4), (x, 0.004, z), m[mat], c, rot=(90, 0, 180))
+    for i, (x, w_, mat) in enumerate(((0.98, 0.46, "poster_band"), (1.60, 0.46, "poster_dev"))):
+        h_ = w_ * 1.4
+        geo.plane(f"Poster_{i}", (w_, h_), (x, 0.004, 1.95 - h_ / 2), m[mat], c, rot=(90, 0, 180))
     geo.plane("Poster_Window", (0.42, 0.59), (0.004, 0.50, 1.70), m["poster_hello"], c, rot=(90, 0, -90))
     # one rug, under the bed's foot and the desk chair (navy, look_target)
     geo.plane("Rug", (2.5, 2.2), (1.45, 3.25, 0.008), m["rug_oat"], c, rot=(0, 0, 0))
@@ -787,8 +801,16 @@ def build_dressing(m):
     for k, dx in enumerate((-0.07, 0.07)):
         geo.cyl(f"Headphones_Cup_{k}", 0.045, 0.035, (hx + dx * 0.35, hy + dx, TOP), m["black"], c, rot=(0, 0, 20),
                 seg=32, bev=0.006)
-    geo.cyl("Energy_Can", 0.033, 0.155, (2.22, 4.28, TOP), m["can_silver"], c, seg=32)
-    geo.cyl("Energy_Can_2", 0.033, 0.155, (2.30, 4.38, TOP), m["can_silver"], c, seg=32)
+    geo.cyl("Energy_Can", 0.033, 0.155, (2.16, 4.30, TOP), m["can_silver"], c, seg=32)
+    geo.cyl("Energy_Can_2", 0.033, 0.155, (2.25, 4.36, TOP), m["can_silver"], c, seg=32)
+    geo.cyl("Energy_Can_Down", 0.033, 0.155, (2.05, 4.47, TOP + 0.033), m["can_red"], c, rot=(90, 0, 35), seg=32)
+    # takeaway coffee: a tapered paper cup, a lid, a sleeve
+    geo.lathe("Coffee_Cup", [(0.0, 0.0), (0.030, 0.0), (0.042, 0.13), (0.0, 0.13)], (1.92, 4.30, TOP), m["note"], c)
+    geo.cyl("Coffee_Cup_Lid", 0.045, 0.014, (1.92, 4.30, TOP + 0.13), m["cable_white"], c, seg=40, bev=0.003)
+    geo.cyl("Coffee_Cup_Sleeve", 0.040, 0.045, (1.92, 4.30, TOP + 0.05), m["cork"], c, r_top=0.043, seg=40, cap=False)
+    # a stack of notebooks under the arm of the lamp's reach
+    for k, (dz, rz, mat) in enumerate(((0.0, 4, "note"), (0.018, -7, "poster_dev"), (0.034, 12, "cork"))):
+        geo.box(f"Notebook_Stack_{k}", (0.21, 0.28, 0.016), (2.05, 4.62, TOP + dz), m[mat], c, rot=(0, 0, rz), bev=0.002)
     ph("rubber_duck_toy", (1.66, 4.66, TOP), rot=-150, scale=0.30, name="Rubber_Duck")
     ph("standing_picture_frame_02", (2.24, 4.62, TOP), rot=-140, scale=0.85, name="Photo_Sarah")
     for k, (p0, p1) in enumerate((((1.46, 4.66, TOP), (1.58, 4.76, 0.01)), ((2.02, 4.70, TOP), (1.70, 4.77, 0.01)),
@@ -803,8 +825,8 @@ def build_dressing(m):
     ph("cardboard_box_01", (3.62, 0.40, 0), rot=8, scale=1.25, name="Moving_Box")
     props_clutter.cloth_heap("Hoodie_Floor", (2.32, 1.62, 0.04), (0.24, 0.18, 0.05), m["cloth_grey"], c, seed=2)
     # the phone, charging on the bed, its cable over the edge to the nightstand
-    geo.rounded_slab("Phone_Bed", (0.0715, 0.147, 0.0078), 0.009, (0.92, 0.66, 0.482), m["black"], c, rot=(0, 0, 28))
-    geo.tube("Phone_Cable", [Vector((0.95, 0.60, 0.484)), Vector((0.70, 0.58, 0.49)), Vector((0.50, 0.60, 0.47)),
+    geo.rounded_slab("Phone_Bed", (0.0715, 0.147, 0.0078), 0.009, (0.92, 0.66, 0.222), m["black"], c, rot=(0, 0, 28))
+    geo.tube("Phone_Cable", [Vector((0.95, 0.60, 0.224)), Vector((0.70, 0.58, 0.23)), Vector((0.50, 0.60, 0.21)),
                              Vector((0.40, 0.62, 0.62)), Vector((0.36, 0.64, 0.70))], 0.0025, m["cable_white"], c)
     return lamp
 
@@ -970,6 +992,7 @@ def build():
     build_desk_props(m)
     lamp = build_dressing(m)
     scene["story_lamp"] = list(build_story_wall(m))
+    build_fairy_lights(m)
     build_exterior(m)
     scene["lamp"] = list(lamp)
     return scene, add_cams()
@@ -982,7 +1005,7 @@ def build():
 #   city: the valley's lights and the sky card as light sources; screens: the monitors' and laptop's emission.
 PRESETS = {
     "3am":     dict(world=((0.004, 0.006, 0.016), (0.03, 0.03, 0.05), 1.0), lamp=105, window=(140, (0.36, 0.46, 1.0)),
-                    moon=0.0, sun=None, sodium=0, fill=0, city=1.0, screens=1.0, desk=9, story=14, exposure=1.35),
+                    moon=0.0, sun=None, sodium=0, fill=0, city=1.0, screens=1.0, desk=9, story=3, fairy=12, teal=3, exposure=1.35),
     "evening": dict(world=((0.03, 0.04, 0.12), (0.55, 0.28, 0.14), 1.2), lamp=240, window=(900, (1.0, 0.56, 0.36)),
                     moon=0.0, sun=None, sodium=0, fill=0, city=0.7, screens=1.0, desk=18, exposure=1.0),
     "day":     dict(world=((0.25, 0.35, 0.60), (0.60, 0.60, 0.58), 1.5), lamp=0, window=(2600, (0.85, 0.90, 1.0)),
@@ -1026,6 +1049,12 @@ def light_rig(scene, preset="3am"):
     L = lighting._light
     # the room's key at night: warm everywhere (energy 0 keeps the light, so every preset has the same live list)
     L("Desk_Lamp", "POINT", tuple(lamp - Vector((0, 0, 0.06))), max(p["lamp"], 0.001), (1.0, 0.66, 0.42), c, shadow_soft=0.20)
+    if p.get("fairy"):                              # the string lights' wash on the bed wall
+        L("Fairy_Wash", "AREA", (1.35, 0.22, 2.36), p["fairy"], (1.0, 0.68, 0.40), c, size=(2.1, 0.12),
+          target=(1.35, -0.4, 2.05))
+    if p.get("teal"):                               # the LED strip's wash up the story wall
+        L("Teal_Wash", "AREA", (W - 0.10, 3.0, 0.62), p["teal"], (0.25, 0.85, 0.80), c, size=(1.3, 0.06),
+          target=(W + 0.5, 3.0, 1.4))
     if p.get("story"):                              # the console lamp on the story wall: a small amber pool behind Ivan
         L("Story_Lamp", "POINT", tuple(Vector(scene["story_lamp"])), p["story"], (1.0, 0.64, 0.40), c, shadow_soft=0.12)
     # a fabric shade glows and lets light through; as an opaque blocker its rim cut hard shapes into the wall, the
@@ -1125,6 +1154,7 @@ def write_lights(out, scene, groups=None, exposure=0.0):
                   {"name": "Key_Laptop", "type": "AREA", "energy_w": 4, "color": [0.62, 0.74, 1.0], "location": at("Laptop_Screen"),
                    "forward": [0, -1, 0], "size": [0.29, 0.18]}]
     marks = {n: at(n) for n in ("Lamp_Shade", "Laptop_Screen", "Monitor_Screen", "Monitor2_Screen", "Water_Glass", "Phone")
+             if n in ob
              if n in ob}
     marks["Window"] = [-0.17, (WIN_Y0 + WIN_Y1) / 2, (SILL + HEAD) / 2]
     out.mkdir(parents=True, exist_ok=True)
