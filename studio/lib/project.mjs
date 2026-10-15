@@ -22,6 +22,21 @@ export function readSceneModule(ROOT, scene) {
   if (!fs.existsSync(file)) return { fps: 24, duration: 0, voOffset: 0, shots: [], captions: [], missing: true };
   const src = fs.readFileSync(file, 'utf8');
   const out = { fps: num(src, 'FPS', 24), duration: num(src, 'DURATION', 0), voOffset: num(src, 'VO_OFFSET', 0), shots: [], captions: [] };
+  // a scene can take its timing from another module (s03: DURATION = INTRO_LEN, SHOTS = INTRO.map(...) imported from
+  // shots.js): follow those imports, or the Studio sees 0 frames and a render stops after one
+  const from = {};
+  for (const m of src.matchAll(/import \{([^}]+)\} from '(\.[^']+)'/g)) {
+    for (const part of m[1].split(',')) {
+      const [name, alias] = part.trim().split(/\s+as\s+/);
+      if (name) from[(alias || name).trim()] = [name.trim(), path.relative(ROOT, path.resolve(path.dirname(file), m[2]))];
+    }
+  }
+  const via = (name) => { const m = new RegExp(`export const ${name} = (\\w+)`).exec(src); return m && from[m[1]] ? from[m[1]] : null; };
+  const borrowed = {};
+  const other = (name) => { const v = via(name); if (!v) return null; const k = v[1]; if (!borrowed[k]) borrowed[k] = readSceneModule(ROOT, { module: k }); return borrowed[k]; };
+  for (const [key, name] of [['fps', 'FPS'], ['duration', 'DURATION'], ['voOffset', 'VO_OFFSET']]) {
+    if (!new RegExp(`export const ${name} = [\\d.]+`).test(src) && other(name)) out[key] = other(name)[key];
+  }
   const block = (name) => { const i = src.indexOf(`export const ${name} = [`); if (i < 0) return ''; const j = src.indexOf('\n];', i); return src.slice(i, j); };
   for (const e of block('SHOTS').split(/\n\s*\{ id: /).slice(1)) {
     const g = (re) => { const m = re.exec(e); return m ? m[1] : null; };
@@ -33,6 +48,8 @@ export function readSceneModule(ROOT, scene) {
       why: unq(g(/why: '((?:[^'\\]|\\.)*)'/) || ''),
     });
   }
+  if (!out.shots.length) { const v = /export const SHOTS = (\w+)\.map/.exec(src); if (v && from[v[1]]) out.shots = readSceneModule(ROOT, { module: from[v[1]][1] }).shots; }
+  if (!block('CAPTIONS') && other('CAPTIONS')) out.captions = other('CAPTIONS').captions;
   for (const m of block('CAPTIONS').matchAll(/\[([\d.]+), ([\d.]+), (['"])((?:(?!\3)[^\\]|\\.)*)\3\]/g)) out.captions.push([+m[1], +m[2], unq(m[4])]);
   return out;
 }

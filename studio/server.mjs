@@ -105,6 +105,16 @@ let running = null;
 const saveJobs = () => fs.writeFileSync(JOBS_FILE, JSON.stringify(jobs.slice(0, 200), null, 2));
 const pub = (j) => { const { proc, ...rest } = j; return rest; };
 
+// exp/lampK/scrK numbers, fx 0|1, look a word: only these reach the render URL
+function settingsQuery(st) {
+  if (!st || typeof st !== 'object') return '';
+  const q = new URLSearchParams();
+  for (const k of ['exp', 'lampK', 'scrK']) if (Number.isFinite(+st[k])) q.set(k, String(+st[k]));
+  if (st.fx === 0 || st.fx === '0') q.set('fx', '0');
+  if (typeof st.look === 'string' && /^\w{1,32}$/.test(st.look)) q.set('look', st.look);
+  return q.toString();
+}
+
 async function commandFor(j) {
   const node = process.execPath, s = sceneById(j.scene);
   if (j.kind === 'render') {
@@ -114,6 +124,8 @@ async function commandFor(j) {
     if (!config.gpu) a.push('--soft');
     if (j.deliver) a.push('--deliver');
     if (j.subs) a.push('--subs');
+    const q = settingsQuery(j.settings);              // the player's current settings: the export renders what you see
+    if (q) a.push('--extra', q);
     return [node, a];
   }
   if (j.kind === 'stills') {                                    // one frame per shot (or the given times) for the board
@@ -216,7 +228,7 @@ function changed(rel) {
 }
 function flush() {
   const files = [...pending.keys()]; pending.clear();
-  const engine = files.some((f) => /^engine[\\/]/.test(f));
+  const engine = files.some((f) => /^engine[\\/]/.test(f) && !/(camera|look)\.json$/.test(f));   // camera/look saves: no reload
   const frames = files.filter((f) => /\.png$/.test(f) && /renders/.test(f)).length;
   const shown = files.filter((f) => !/\.png$/.test(f));
   if (shown.length) feed('files', shown.length === 1 ? `changed ${shown[0]}` : `${shown.length} files changed`, { files: shown.slice(0, 30) });
@@ -286,6 +298,32 @@ const routes = {
   'POST /api/config': async (b) => { config = { ...config, ...b, follow: { ...config.follow, ...(b.follow || {}) } }; saveConfig(); if (b.follow?.enabled) follow(true); return config; },
   'GET /api/jobs': async () => jobs.map(pub),
   'POST /api/jobs': async (b) => pub(addJob(b)),
+  // the Look editor's versions: engine/scenes/<id>/look.json ({ active, versions: { name: state } })
+  'POST /api/look': async (b) => {
+    const s = sceneById(b.scene);
+    if (s.id === 'intro') throw new Error('the intro look is locked');
+    const d = b.data || {}, versions = d.versions || {};
+    if (typeof versions !== 'object' || Object.keys(versions).some((n) => !/^[\w-]{1,32}$/.test(n))) throw new Error('bad version names');
+    const out = JSON.stringify({ active: typeof d.active === 'string' ? d.active : null, versions }, null, 1);
+    if (out.length > 2e6) throw new Error('look too large');
+    const f = path.join(ROOT, path.dirname(s.module), 'look.json');
+    fs.writeFileSync(f, out);
+    return { ok: true, file: path.relative(ROOT, f) };
+  },
+  // the player's camera keyframe overrides: engine/scenes/<id>/camera.json (the intro: engine/assets/camera.json)
+  'POST /api/camera': async (b) => {
+    const s = sceneById(b.scene);
+    const shots = (b.data && b.data.shots) || {}, ok = {};
+    const vec = (v) => Array.isArray(v) && v.length === 3 && v.every(Number.isFinite);
+    const key = (k) => k && vec(k.pos) && vec(k.at) && Number.isFinite(k.mm) && Number.isFinite(k.f);
+    for (const [id, o] of Object.entries(shots)) {
+      if (!/^[\w-]{1,16}$/.test(id) || !key(o.a) || (o.b && !key(o.b))) throw new Error('bad keyframe for ' + id);
+      ok[id] = o.b ? { a: o.a, b: o.b } : { a: o.a };
+    }
+    const f = s.id === 'intro' ? path.join(ROOT, 'engine', 'assets', 'camera.json') : path.join(ROOT, path.dirname(s.module), 'camera.json');
+    fs.writeFileSync(f, JSON.stringify({ shots: ok }, null, 1));
+    return { ok: true, file: path.relative(ROOT, f), shots: Object.keys(ok) };
+  },
   'POST /api/jobs/cancel': async (b) => { cancelJob(b.id); return { ok: true }; },
   'POST /api/jobs/clear': async () => { jobs = jobs.filter((j) => j.state === 'running' || j.state === 'queued'); saveJobs(); return jobs.map(pub); },
   'GET /api/log': async (b, q) => { const j = jobs.find((x) => x.id === q.get('id')); if (!j?.log) return { text: '' };

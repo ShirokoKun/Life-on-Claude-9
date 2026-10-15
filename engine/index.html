@@ -23,6 +23,7 @@ aside { position: fixed; right: 12px; top: 12px; width: 260px; max-height: calc(
   border: 1px solid var(--line); border-radius: 6px; padding: 12px; display: grid; gap: 12px; backdrop-filter: blur(6px); }
 aside h1 { margin: 0; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; }
 aside h1 b { color: var(--tally); font-weight: 400; }
+details { border-top: 1px solid #ffffff14; padding: 6px 0; } summary { cursor: pointer; font-size: 12px; opacity: .85; } .le-light { padding: 4px 0 6px; border-bottom: 1px dashed #ffffff10; } input[type=color] { width: 44px; height: 22px; border: 0; background: none; }
 .row { display: grid; grid-template-columns: 1fr auto; gap: 4px 8px; align-items: center; }
 .row input[type=range] { grid-column: 1 / -1; width: 100%; accent-color: var(--amber); }
 output { font: 11px var(--mono); color: var(--mute); }
@@ -43,6 +44,12 @@ body.render aside, body.render #slate, body.render #hide, body.render #status { 
   <div class="chips"><button id="play" type="button">▶ Play</button><button id="free" type="button" aria-pressed="false">Free camera</button></div>
   <div class="row"><label for="time">Timeline</label><output id="timeOut">0.0 s</output><input id="time" type="range" min="0" max="32" step="0.0417" value="0"></div>
   <div><div class="note" style="margin-bottom:6px">Shots</div><div class="chips" id="shotChips"></div></div>
+  <div id="camBox"><div class="note" style="margin-bottom:6px">Camera keyframes · <b id="camShot">–</b> · <span id="camState"></span></div>
+    <div class="chips"><button id="camEdit" type="button">Frame it</button><button id="camA" type="button">Set START</button><button id="camB" type="button">Set END</button><button id="camPreview" type="button">Play shot</button><button id="camClear" type="button">Original</button></div>
+    <div class="row"><label for="camMM">Lens</label><output id="camMMo">35 mm</output><input id="camMM" type="range" min="12" max="135" step="1" value="35"></div>
+    <div class="row"><label for="camF">Aperture</label><output id="camFo">f/2.8</output><input id="camF" type="range" min="1.4" max="16" step="0.1" value="2.8"></div>
+    <div class="note" id="camMsg">Pick a shot, click Frame it, move the view, set START (and END for a move). Saved per shot; export uses it.</div></div>
+  <div id="lookEd"></div>
   <div id="lookBox" hidden><div class="note" style="margin-bottom:6px">Look (mood preset)</div><div class="chips" id="lookChips"></div></div>
   <label class="t"><input id="fx" type="checkbox" checked> Lens and film look</label>
   <label class="t"><input id="caps" type="checkbox"> Captions</label>

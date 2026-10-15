@@ -1,0 +1,90 @@
+{
+ "active": "main",
+ "versions": {
+  "main": {
+   "grade": {
+    "lift": 0,
+    "gamma": 1.08,
+    "gain": 1.06,
+    "contrast": 0.77,
+    "sat": 1.24,
+    "temp": 0.1,
+    "shadowCol": "#525252",
+    "highCol": "#b19d1b",
+    "vignette": 0.53,
+    "bloom": 0.16,
+    "halation": 0.42,
+    "grain": 0.006,
+    "tint": -0.16
+   },
+   "lights": {
+    "Point 1": {
+     "on": true,
+     "k": 1.86
+    },
+    "Moon": {
+     "on": true,
+     "k": 4,
+     "c": "#499fbc"
+    },
+    "Laptop screen": {
+     "on": true,
+     "k": 0.42,
+     "c": "#2a74fe"
+    },
+    "Night ambient": {
+     "on": true,
+     "k": 0.82
+    },
+    "Guitar kicker": {
+     "on": true,
+     "k": 1.33
+    },
+    "Desk lamp (live)": {
+     "c": "#ffaf24",
+     "soft": 6.5,
+     "k": 0.83
+    },
+    "Window rim": {
+     "k": 2.13,
+     "c": "#706e57"
+    },
+    "Monitor key": {
+     "soft": 7,
+     "k": 1.61
+    }
+   },
+   "lm": {
+    "ARCH": 0.1,
+    "CEIL": 0.46,
+    "PROPS": 2.06,
+    "WALLN": 0.64,
+    "ROOM": 0.05,
+    "DESK": 1.13
+   },
+   "glow": {
+    "shade": {
+     "k": 0.85
+    },
+    "bulb": {
+     "k": 0.3
+    },
+    "led": {
+     "k": 2.77
+    },
+    "fairy": {
+     "k": 1.06
+    },
+    "screens": {
+     "k": 1.25
+    },
+    "city": {
+     "k": 1.71
+    },
+    "sky": {
+     "k": 0.77
+    }
+   }
+  }
+ }
+}

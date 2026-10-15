@@ -332,7 +332,11 @@ function Renders(s, body) {
   const subs = h('input', { type: 'checkbox', checked: false });
   const go = run(async () => {
     const [, w, hh] = PRESETS[+preset.value];
-    await api('/api/jobs', { kind: 'render', scene: s.id, w, h: hh, frames: range.value === 'all' ? null : range.value, step: +step.value, take: take.value.trim().replace(/[^\w-]/g, '_') || undefined, deliver: deliver.checked, subs: subs.checked });
+    // the player's current settings (live player, else the scene's last saved settings): the export matches the preview
+    let settings = null;
+    try { settings = $('iframe')?.contentWindow?.studio?.state?.().scene === s.id ? $('iframe').contentWindow.studio.settings() : null; } catch { /* */ }
+    if (!settings) try { settings = JSON.parse(localStorage.getItem(`claude9.settings.${s.id}`) || 'null'); } catch { /* */ }
+    await api('/api/jobs', { kind: 'render', scene: s.id, w, h: hh, frames: range.value === 'all' ? null : range.value, step: +step.value, take: take.value.trim().replace(/[^\w-]/g, '_') || undefined, deliver: deliver.checked, subs: subs.checked, settings });
     toast('Render queued. Watch it in Renders & jobs.');
   });
   const draw = () => body.replaceChildren(h('div.two', { style: { marginTop: '18px' } },

@@ -20,10 +20,36 @@ import * as TOD from './timeofday.js';
 import { applySkin } from './skin.js';
 import { B } from './shots.js';
 
+// Scene settings: one source of truth = the URL query (exp, lampK, scrK, fx, look). The player restores the last
+// values of a scene from localStorage into the URL, every control writes back to both, and the Studio's export
+// passes the same query to the renderer, so preview and export always use the same settings.
+const SETTING_KEYS = ['exp', 'lampK', 'scrK', 'fx', 'look'];
 const Q = new URLSearchParams(location.search);
 const SCENE = Q.get('scene') || 'intro';
+const STORE = `claude9.settings.${SCENE}`;
+if (Q.get('render') !== '1') {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORE) || '{}');
+    let changed = false;
+    for (const k of SETTING_KEYS) if (!Q.has(k) && saved[k] != null) { Q.set(k, saved[k]); changed = true; }
+    if (changed) history.replaceState(null, '', `${location.pathname}?${Q}`);
+  } catch { /* storage blocked: URL only */ }
+}
 const SC = SCENE === 'intro' ? await import('./shots.js') : await import(`../scenes/${SCENE}/scene.js`);
 const { FPS, DURATION, VO_OFFSET, SHOTS, CAPTIONS, cameraAt, shotAt } = SC;
+// Camera keyframe overrides, per shot (the player's Camera section writes them through the Studio): a START and an
+// optional END view (position, target, lens, aperture), eased over the shot. Preview and export both read this file;
+// shots without an entry keep their authored animation.
+const CAM_URL = SCENE === 'intro' ? 'assets/camera.json' : `scenes/${SCENE}/camera.json`;
+let CAM = { shots: {} };
+try { const r = await fetch(`${CAM_URL}?v=${Date.now()}`); if (r.ok) CAM = { shots: {}, ...(await r.json()) }; } catch { /* none */ }
+function withOverride(c, t) {
+  const o = CAM.shots[c.shot.id]; if (!o || !o.a) return c;
+  const s = c.shot, u = Math.min(1, Math.max(0, (t - s.t0) / Math.max(1e-3, s.t1 - s.t0))), e = u * u * (3 - 2 * u);
+  const b = o.b || o.a, V = (v) => new THREE.Vector3(...v);
+  const pos = V(o.a.pos).lerp(V(b.pos), e), at = V(o.a.at).lerp(V(b.at), e);
+  return { ...c, pos, at, mm: o.a.mm + (b.mm - o.a.mm) * e, f: o.a.f + (b.f - o.a.f) * e, focus: pos.distanceTo(at), roll: 0 };
+}
 const RENDER = Q.get('render') === '1';
 const PREVIEW = RENDER ? null : { balanced: { scale: 0.75 }, fast: { scale: 0.5, tex: 1024 } }[Q.get('pq')] || null;
 const QUALITY = Q.get('q') || (PREVIEW ? 'med' : 'high');
@@ -161,12 +187,19 @@ async function boot() {
     for (const name of Object.keys(SC.LOOKS)) {
       const b = document.createElement('button'); b.type = 'button'; b.textContent = name;
       b.setAttribute('aria-pressed', String(name === SC.LOOK_NAME));
-      b.addEventListener('click', () => { const q = new URLSearchParams(location.search); q.set('look', name); location.search = q.toString(); });
+      b.addEventListener('click', () => { persist(); Q.set('look', name); try { localStorage.setItem(STORE, JSON.stringify({ ...settings(), look: name })); } catch { /* */ } location.search = Q.toString(); });
       $('lookChips').appendChild(b);
     }
   }
   setTime(0);
   $('status').hidden = true;
+  // the settings from the URL take effect before the first frame (preview and render alike); defaults leave the rig as is
+  if (L && L.apply && (+$('lampK').value !== 1 || +$('scrK').value !== 1)) { L.apply({ lamp: +$('lampK').value, screen: +$('scrK').value }); atmo.setLevels(+$('lampK').value); }
+  if (SCENE !== 'intro' && LM && Object.keys(LM).length) {     // the Look editor (look.json: preview and export alike)
+    const { createLookEditor } = await import('./lookeditor.js');
+    window.__lookEd = await createLookEditor({ scene, root: room.scene, LM, L, post, renderer, sceneId: SCENE,
+      url: `scenes/${SCENE}/look.json`, mount: RENDER ? null : $('lookEd'), onChange: () => { if (window.__ready) setTime(tNow); } });
+  }
   window.__scene = scene; window.__camera = camera; window.__THREE = THREE; window.__post = post; window.__L = L; window.__renderer = renderer; window.__screens = screens; window.__ready = true;
 }
 
@@ -251,10 +284,14 @@ if (audio && SC.VOICEOVER !== undefined) { if (SC.VOICEOVER) audio.src = SC.VOIC
 function setTime(t) {
   tNow = Math.max(0, Math.min(DURATION - 1 / FPS, t));
   if (cast.length || SC.ivanVisible) {
-    for (const c of cast) { c.root.visible = tNow >= c.t0 && tNow < c.t1; if (c.mixer) c.mixer.setTime(Math.max(0, tNow - c.t0)); }
+    // a cast entry may bring its own visibility and clock (a keyframe board holds one pose of a performance)
+    for (const c of cast) {
+      c.root.visible = c.visible ? c.visible(tNow) : tNow >= c.t0 && tNow < c.t1;
+      if (c.mixer) c.mixer.setTime(c.time ? c.time(tNow) : Math.max(0, tNow - c.t0));
+    }
     if (ivan.root) ivan.root.visible = SC.ivanVisible ? SC.ivanVisible(tNow) : true;
   }
-  if (mixer) { mixer.setTime(tNow); scene.updateMatrixWorld(true); }
+  if (mixer) { mixer.setTime(SC.ivanTime ? SC.ivanTime(tNow) : tNow); scene.updateMatrixWorld(true); }   // ivanTime: hold a pose
   const fixed = window.__cam || Q.get('cam');            // window.__cam: set from a script for look-dev
   let c;
   if (fixed) {
@@ -262,7 +299,8 @@ function setTime(t) {
     const pos = B(v[0], v[1], v[2]), at = B(v[3], v[4], v[5]);
     const e = pick('eyes'); const fp = e.distanceTo(at) < 0.4 ? e : at;
     c = { pos, at, mm: v[6], f: v[7] || 8, focus: pos.distanceTo(fp), roll: 0, shot: shotAt(tNow) };
-  } else c = cameraAt(tNow, pick);
+  } else c = withOverride(cameraAt(tNow, pick), tNow);
+  if (!RENDER) camUI(c.shot);
   if (!controls.enabled) {
     // a slow drift of a few millimetres on top of the move: the camera is never perfectly still
     // (a shot marked still: true is locked off: no drift, no breathing)
@@ -280,7 +318,7 @@ function setTime(t) {
   renderer.toneMappingExposure = Math.pow(2, exposureEV + LOOK.exposure + Number($('exp').value) + (SC.exposureBoost ? SC.exposureBoost(tNow) : 0));
   if (tod) applyTOD(SC.light(tNow));
   life(tNow);
-  if (SC.props) SC.props(tNow, { named, root: roomRoot, scene, THREE, ivan: ivan.root });
+  if (SC.props) SC.props(tNow, { named, root: roomRoot, scene, THREE, ivan: ivan.root, cast, camera });
   if (screens) screens.update(tNow);
   atmo.setTime(SC.atmoTime ? SC.atmoTime(tNow) : tNow);          // a scene can freeze the air
   const fade = Math.min(1, tNow / 0.8, SC.FADE_OUT === false ? 1 : (DURATION - tNow) / 1.2);
@@ -338,14 +376,56 @@ SHOTS.forEach((s) => {
 function exitFree() { controls.enabled = false; $('free').setAttribute('aria-pressed', 'false'); }
 $('free').addEventListener('click', () => {
   controls.enabled = !controls.enabled; $('free').setAttribute('aria-pressed', String(controls.enabled));
-  if (controls.enabled) { controls.target.copy(cameraAt(tNow, pick).at); post.lens.fstop = 64; } else setTime(tNow);
+  post.lens.on = !controls.enabled && $('fx').checked;          // framing runs without the depth-of-field pass: no lag
+  if (controls.enabled) { controls.target.copy(withOverride(cameraAt(tNow, pick), tNow).at); post.lens.fstop = 64; } else setTime(tNow);
 });
+// ---- Camera keyframes: frame a shot in free camera, set its START / END, save (camera.json, used by export too)
+function camUI(shot) {
+  if (!$('camShot')) return;
+  $('camShot').textContent = `${shot.id} · ${shot.name || ''}`;
+  $('camState').textContent = CAM.shots[shot.id] ? (CAM.shots[shot.id].b ? 'custom (start → end)' : 'custom (start only)') : 'original';
+}
+function lensFromSlider() {
+  const mm = +$('camMM').value; $('camMMo').textContent = `${mm} mm`; $('camFo').textContent = `f/${(+$('camF').value).toFixed(1)}`;
+  if (controls.enabled) { camera.fov = THREE.MathUtils.radToDeg(2 * Math.atan(18 / mm / camera.aspect)); camera.updateProjectionMatrix(); }
+}
+async function saveCam(msg) {
+  try {
+    const r = await fetch('/api/camera', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ scene: SCENE, data: CAM }) });
+    if (!r.ok) throw new Error(await r.text());
+    $('camMsg').textContent = `${msg} Saved to ${CAM_URL}; preview and export use it.`;
+  } catch (e) { $('camMsg').textContent = `Not saved: ${e.message.slice(0, 120)} (open the player through the Studio).`; }
+  camUI(shotAt(tNow));
+}
+function camKey(which) {
+  const shot = shotAt(tNow), id = shot.id;
+  if (!controls.enabled) { $('camMsg').textContent = 'Click "Frame it" first, move the view, then set START / END.'; return; }
+  const k = { pos: camera.position.toArray().map((v) => +v.toFixed(4)), at: controls.target.toArray().map((v) => +v.toFixed(4)),
+    mm: +$('camMM').value, f: +$('camF').value };
+  CAM.shots[id] = { ...(CAM.shots[id] || {}), [which]: k };
+  if (which === 'b' && !CAM.shots[id].a) CAM.shots[id].a = k;
+  saveCam(`${id}: ${which === 'a' ? 'START' : 'END'} set.`);
+}
+if ($('camBox')) {
+  $('camEdit').addEventListener('click', () => {
+    const c = withOverride(cameraAt(tNow, pick), tNow);
+    $('camMM').value = Math.round(c.mm); $('camF').value = c.f || 2.8;
+    if (!controls.enabled) $('free').click();
+    lensFromSlider();
+    $('camMsg').textContent = `Framing ${c.shot.id}: drag to orbit, right-drag to pan, scroll to dolly; set the lens, then START (and END for a move).`;
+  });
+  $('camA').addEventListener('click', () => camKey('a'));
+  $('camB').addEventListener('click', () => camKey('b'));
+  $('camClear').addEventListener('click', () => { const id = shotAt(tNow).id; delete CAM.shots[id]; saveCam(`${id}: back to the original camera.`); setTime(tNow); });
+  for (const id of ['camMM', 'camF']) $(id).addEventListener('input', lensFromSlider);
+  $('camPreview').addEventListener('click', () => { exitFree(); const s = shotAt(tNow); setTime(s.t0 + 0.01); if (!playing) $('play').click(); });
+}
 $('play').addEventListener('click', () => { playing = !playing; $('play').textContent = playing ? '❚❚ Pause' : '▶ Play'; last = performance.now(); syncAudio(); });
 $('time').addEventListener('input', () => { setTime(+$('time').value); syncAudio(); });
-$('fx').addEventListener('change', () => post.setEnabled($('fx').checked));
+$('fx').addEventListener('change', () => { post.setEnabled($('fx').checked); persist(); setTime(tNow); });
 $('caps').addEventListener('change', () => setTime(tNow));
 ['exp', 'lampK', 'scrK'].forEach((id) => $(id).addEventListener('input', () => {
-  L.apply({ lamp: +$('lampK').value, screen: +$('scrK').value }); atmo.setLevels(+$('lampK').value); setTime(tNow);
+  L.apply({ lamp: +$('lampK').value, screen: +$('scrK').value }); atmo.setLevels(+$('lampK').value); setTime(tNow); persist();
 }));
 // Studio (studio/): the player embedded in the Studio is driven from the parent page through this
 window.studio = {
@@ -358,6 +438,19 @@ window.studio = {
 if (Q.get('panel') === '0') document.body.classList.add('collapsed');
 if (Q.get('caps') === '1') $('caps').checked = true;
 if (Q.get('fx') === '0') { $('fx').checked = false; }
+for (const k of ['exp', 'lampK', 'scrK']) if (Q.has(k) && Number.isFinite(+Q.get(k))) $(k).value = Q.get(k);
+function settings() {
+  return { exp: +$('exp').value, lampK: +$('lampK').value, scrK: +$('scrK').value, fx: $('fx').checked ? 1 : 0,
+    look: SC.LOOK_NAME || Q.get('look') || undefined };
+}
+function persist() {                         // write the current settings back to the URL and the scene's store
+  if (RENDER) return;
+  const st = settings();
+  for (const k of SETTING_KEYS) { if (st[k] == null) Q.delete(k); else Q.set(k, String(st[k])); }
+  history.replaceState(null, '', `${location.pathname}?${Q}`);
+  try { localStorage.setItem(STORE, JSON.stringify(st)); } catch { /* storage blocked */ }
+}
+window.studio.settings = settings;
 if (RENDER) $('caps').checked = Q.get('caps') === '1';
 
 function resize() {
