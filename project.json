@@ -47,6 +47,15 @@
       "folder": "scenes/04-two-days-ago",
       "voiceover": "engine/scenes/s04/sound.wav",
       "stage": "draft"
+    },
+    {
+      "id": "kf1",
+      "number": 5,
+      "title": "Chapter 1 · Keyframes",
+      "module": "engine/scenes/kf1/scene.js",
+      "folder": "scenes/ch1-keyframes",
+      "voiceover": "engine/scenes/kf1/ch01_full_mix.mp3",
+      "stage": "keyframes"
     }
   ]
 }
