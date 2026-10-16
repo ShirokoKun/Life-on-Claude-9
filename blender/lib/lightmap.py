@@ -213,7 +213,7 @@ def bake_lightmaps(out_dir, sizes=None, samples=64, live_samples=24, reuse=False
     scene.cycles.device = device
     if device == "GPU":                              # OptiX (or CUDA) on the laptop's GTX 1650
         prefs = bpy.context.preferences.addons["cycles"].preferences
-        for kind in ("OPTIX", "CUDA"):
+        for kind in ("OPTIX", "CUDA", "METAL"):             # METAL: the Mac
             try:
                 prefs.compute_device_type = kind
                 prefs.get_devices()
