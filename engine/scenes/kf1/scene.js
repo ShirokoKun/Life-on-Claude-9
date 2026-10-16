@@ -55,8 +55,8 @@ const STAND = [1.04, 3.85];                                                  // 
 // refl (lens reflections), cross (window-bar light), board (the storyboard panel), tr (the transition into the shot).
 // Round 14 (room.js, day and sunrise only): rays (god-ray strength, 1 = default), dust (sunlit motes), sunK (live sun).
 export const SHOTS = [
-  { id: 'K01', name: 'Three AM', t0: 0, t1: 3.0, mm: [18, 18], f: 5.6,
-    from: [2.10, 3.88, 3.40], to: [2.07, 3.88, 3.32], at0: [0.95, 3.92, 0.60], at1: [0.95, 3.92, 0.60], focus: [1.05, 3.95, 0.90], roll: [0, 0],   // round 14: Ivan in the centre (was: the room centred, him at the edge)
+  { id: 'K01', name: 'Three AM', t0: 0, t1: 3.0, mm: [16, 16], f: 5.6,
+    from: [2.15, 3.30, 3.40], to: [2.12, 3.30, 3.32], at0: [0.95, 3.40, 0.50], at1: [0.95, 3.40, 0.50], focus: [1.05, 3.95, 0.90], roll: [0, 0],   // round 14: Ivan toward the centre with the bed, the rug and the desk all in
     fadeIn: [0.0, 1.0], light: '3am', iv: ['s03', 0.6, 3.6], scr: 4, top: true, beat: 'pre-roll', board: '(establishing)', tr: 'fade up from black',
     why: 'Pre-roll, room tone. Straight down into his room: the bed he is not in, the lamp, the one lit desk. The first of three top-downs (night, day, dawn).' },
   { id: 'K02', name: 'Hasn’t eaten since lunch', t0: 3.0, t1: 7.8, mm: [85, 85], f: 11,
@@ -98,8 +98,8 @@ export const SHOTS = [
     cl: { at: [1.70, 4.05, 1.06], face: [0.70, 4.72, 1.08], s: 1.3, mood: 'warm', pose: 'hover', glow: 0.8, lightK: 0.5 },
     why: 'V07b “Ivan keeps saying yes.” His finger on the keys, the y/n prompt above, Claude a warm blur behind, waiting for the next yes.' },
 
-  { id: 'K11', name: 'Two days ago', t0: 37.9, t1: 41.9, mm: [18, 18], f: 5.6,
-    from: [2.10, 3.88, 3.40], to: [2.07, 3.88, 3.32], at0: [0.95, 3.92, 0.60], at1: [0.95, 3.92, 0.60], focus: [1.05, 3.95, 0.90], roll: [0, 0],   // round 14: Ivan in the centre (was: the room centred, him at the edge)
+  { id: 'K11', name: 'Two days ago', t0: 37.9, t1: 41.9, mm: [16, 16], f: 5.6,
+    from: [2.15, 3.30, 3.40], to: [2.12, 3.30, 3.32], at0: [0.95, 3.40, 0.50], at1: [0.95, 3.40, 0.50], focus: [1.05, 3.95, 0.90], roll: [0, 0],   // round 14: Ivan toward the centre with the bed, the rug and the desk all in
     light: 'day', iv: ['s04', 5.1, 8.5], s4: 4.2, glass: false, top: true, beat: 'V08', board: 'r1c7 (flashback)', tr: 'match on K01: the same top-down, the night drains into day',
     why: 'V08 “It started two days ago.” The K01 top-down in afternoon light, no glass poured. Clean: the same room, the same man, two days earlier; the only change is the light.' },
   { id: 'K12', name: '400 unread', t0: 41.9, t1: 46.4, mm: [30, 30], f: 2.0,
@@ -291,8 +291,8 @@ export const SHOTS = [
     from: [0.46, 3.96, 0.93], to: [0.46, 3.96, 0.93], at0: WATER, at1: [0.76, 4.33, 0.845], focus: WATER, roll: [0, 0],
     fadeIn: [172.4, 0.8], light: 'sunrise', iv: ['s03', 36.6], scr: 200.7, beat: 'V28 a', board: 'r4c7 (MOTION GRAPHICS)', tr: 'the vacuum (171.94), then dawn rises (173.28) on the K04 frame',
     why: 'V28 “By sunrise,” The K04 glass at dawn, gold now: still full.' },
-  { id: 'K48', name: 'By sunrise', t0: 175.2, t1: 177.8, mm: [18, 18], f: 5.6,
-    from: [2.10, 3.88, 3.40], to: [2.13, 3.88, 3.48], at0: [0.95, 3.92, 0.60], at1: [0.95, 3.92, 0.60], focus: [1.05, 3.95, 0.90], roll: [0, 0],   // round 14: the K01 framing, Ivan centred
+  { id: 'K48', name: 'By sunrise', t0: 175.2, t1: 177.8, mm: [16, 16], f: 5.6,
+    from: [2.15, 3.30, 3.40], to: [2.18, 3.30, 3.48], at0: [0.95, 3.40, 0.50], at1: [0.95, 3.40, 0.50], focus: [1.05, 3.95, 0.90], roll: [0, 0],   // round 14: the K01 framing
     grade: { con: 0.25, sat: 1.05 }, light: 'sunrise', iv: ['s03', 30.75, 33.3], scr: 200.7, top: true, ev: 0.3, amber: 0.5, beat: 'V28 b', board: 'r4c7', tr: 'match on K01 / K11: the third top-down',
     why: 'V28 “...Ivan has a system that handles his email,” The third top-down: the room gold, the bed untouched.' },
   // round 14 (V1): the white icons' focus and glow more prominent: the lens on the wall of icons (f/2.8, Ivan soft in
