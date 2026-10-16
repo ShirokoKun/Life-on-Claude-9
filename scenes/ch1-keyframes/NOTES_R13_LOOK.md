@@ -133,3 +133,34 @@ is the 3 AM present, where Claude is already the character, so it stays the char
 | K15 The offer | the spark, its rays starting to break into pixels at the tips |
 | K17–K20 (review, the pipeline runs, 3 AM) | a glowing core inside a forming voxel shell: half spark, half character |
 | K21a onward (the voids) and the present (K09, K42, K49) | the full voxel character, in the new holographic, deep-glow treatment |
+
+## 7. Status (2026-10-16): keyframes only, board `board/ch1_keyframes_r13.jpg`
+**Done** (each step shown as a before/after board in `renders/kf1/r13/`):
+1. **Glitches:**
+   - K40: the mug is held by its handle in front of his chest (it was reversed and deformed), with a new angle and a push;
+   - K35: a 3/4 view (cheek, ear, mug);
+   - the ghost glass at his feet and the ring in K13 are gone;
+   - K44 no longer blows out;
+   - K32's envelopes form one readable stream;
+   - K25 no longer has a slab and wash (rays never cross the lens);
+   - K26 no longer opens on an empty frame;
+   - K50–K52 have a natural hands-behind-head pose.
+2. **The deep glow** (`glow.js`): a saturated halo added after the tone mapper.
+3. **The mood layer:** the colour script per light preset and zone (bounce, practicals, split-tone grade).
+4. **The magic back:**
+   - Claude is a light again (light x3, a breathing halo, dust that catches its light);
+   - **the spark** (`spark.js`) is Claude's first form in K12, K14 and K15;
+   - K14 is restaged as the profile two-shot.
+5. **Holographic icons:** redesigned (11x11, a 7-tone palette); deep, not luminous; voxel bevels, scanlines, a faint see-through.
+6. **The worlds:**
+   - K24: a violet-magenta horizon and a glowing grid;
+   - K25: a cool pool;
+   - K46: a long shadow;
+   - the balcony: amber key, cool rim, creamy city.
+
+**Open:**
+- K37: mid-pan is very dark (a moonlight key?).
+- The day window still has a light band and a navy sky (K11/K12).
+- The sleeves are bulky in K50 (the scan's shirt: a cloth fix in Blender).
+- Claude's evolution beats after K15 (a half-spark, half-voxel stage in K17–K20) are not built yet.
+- An anamorphic streak (in `glow.js`, off) is waiting for a shot that wants it (K44 flare, K43 Enter).
