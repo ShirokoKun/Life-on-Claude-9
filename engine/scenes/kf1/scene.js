@@ -663,6 +663,10 @@ const moodOf = (s) => MOOD[s.mood] || ZMOOD[s.zone] || MOOD[(String(s.light || '
 export function exposureBoost(t) {
   if (!RL) return 0;
   const s = kf(t), w = weightsFor(s.light, t, s.t0, s.t1);
+  // round 14: give roomlight back its own lightmap levels before it runs. It reads any change since its last write as a
+  // Look-editor edit and re-bases on it, so our dim (props, below) compounded frame after frame: a film rendered in
+  // order grew darker the longer it ran, while a board or a preview seek (cold) did not. Preview and render now agree.
+  if (lmUsers) for (const m of lmUsers) if (m.userData.lmw !== undefined && Math.abs(m.lightMapIntensity - m.userData.lmw) < 1e-6) m.lightMapIntensity = m.userData.lm0;
   RL.apply(w);
   const night = (w['3am'] || 0) + (w['4am'] || 0) + (w['4am_iso'] || 0) + 0.6 * (w.evening || 0) + 0.5 * (w.sunrise || 0) + (w.void || 0);
   if (rig) {

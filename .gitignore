@@ -29,3 +29,4 @@ deliver/*.mp4
 deliver/*.srt
 # (the probe tools in tools/_probe*.mjs are tracked: the notes use them)
 .DS_Store
+.claude/worktrees/
