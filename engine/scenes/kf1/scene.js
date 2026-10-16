@@ -769,7 +769,7 @@ export function props(t, ctx) {
   if (named.Baked_ROOM) named.Baked_ROOM.children.forEach((c) => { c.visible = !zone || c.name === 'Baked_ROOM_21'; });   // in a void only his chair stays (he must sit on something)
   stage.setFigure(new THREE.Vector3(STAND[0], STAND[1], 0));
   let z0 = s; for (let k = 0; k < 8; k++) { const p = prevShot(z0); if (!p || p === z0 || p.zone !== s.zone) break; z0 = p; }
-  stage.set(zone, t, { ...(s.zopt || {}), rise: s.rise, age: t - (s.zoneAt ?? z0.zoneAt ?? z0.t0), camV: camPos(t), cam: ctx.camera });
+  stage.set(zone, t, { ...(s.zopt || {}), rise: s.rise, age: t - (s.zoneAt ?? z0.zoneAt ?? z0.t0), camV: camPos(t), camObj: ctx.camera });   // camObj: the live camera (zopt.cam is K13's own camera mark)
   if (glowPass) glowPass.params.gain = ({ dome: 0.6, door: 0.7, down: 0.8 })[zone] ?? 1.45;   // the ray worlds: dozens of sources, gentler halos
   // the desk falls away (K24 into K25): a plane sweeps it off from the top while the camera is overhead
   DESK_SWEEP.constant = s.deskAway ? 1.7 - 1.85 * ramp(t, s.deskAway[0], s.deskAway[1]) : 99;

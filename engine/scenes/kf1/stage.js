@@ -772,7 +772,7 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
     door.visible = mode === 'door';
     door.position.copy(B(C[0], C[1] + 15, 1.15));
     pool.visible = false;   // round 14: R5 has no floor light under him
-    fgGroup.visible = mode === 'down' && !!opts.cam; if (fgGroup.visible) layFg(opts.cam, age);
+    fgGroup.visible = mode === 'down' && !!opts.camObj; if (fgGroup.visible) layFg(opts.camObj, age);
     pool.position.copy(B(F.x, F.y, 0.004));
     shaft.visible = mode === 'cheat' && !!opts.shaft; shaft.position.copy(B(F.x, F.y, 2.75));   // (K25 tried it: from overhead it read as a flat wedge; K24 sees it from the front)
     if (shaft.visible) shaft.material.opacity = opts.shaft * (0.35 + 0.65 * (opts._lit ?? 1));
