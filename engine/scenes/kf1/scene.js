@@ -189,7 +189,7 @@ export const SHOTS = [
     from: [1.04, 4.95, 2.85], to: [1.04, 4.918, 2.793], at0: [1.04, 3.90, 0.95], at1: [1.04, 3.9, 0.95], focus: 'eyes', roll: [0, 0],
     light: 'void', iv: ['s03', 8.0], stand: true, look: 40, zone: 'down', beat: 'V16', board: 'r2c7 (B r3c3; render ref Group 6/7)', tr: 'the desk drops away; he is standing in the dark',
     why: 'V16 “Every problem that used to take hours now takes minutes.” From high above, he stands in the dark looking up at us; soft bars of red, orange, peach and cyan drift around him at every depth.' },
-  { id: 'K26', name: 'A different frequency', t0: 97.4, t1: 100.9, mm: [28, 28], f: 1.4,
+  { id: 'K26', name: 'A different frequency', t0: 97.4, t1: 100.9, mm: [28, 28], f: 2.0,
     from: [1.04, 2.85, 1.05], to: [1.04, 2.85, 1.05], at0: [1.04, 8.0, 3.2], at1: [1.04, 8.0, 3.2], focus: [1.04, 3.85, 1.25], flow: 'F4', roll: [0, 0],
     zoneAt: 96.4, light: 'void', iv: ['s03', 8.0], stand: true, look: 18, zone: 'dome', beat: 'V17 a', board: 'r2c8 (B r3c4; render refs Group 5, 10)', tr: 'cut: from above to below and behind',
     why: 'V17 “Ivan feels like he’s vibrating at a different frequency” Low behind him: rings of light streaking around him like a long exposure, teal and orange, his hair edged with light.' },

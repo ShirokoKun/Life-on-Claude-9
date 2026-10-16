@@ -170,6 +170,64 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
   motes.geometry.setAttribute('position', new THREE.BufferAttribute(moP, 3)); motes.geometry.setAttribute('color', new THREE.BufferAttribute(moC, 3));
   motes.frustumCulled = false; motes.visible = false; group.add(motes);
 
+  // round 14 (K26-K27, ref R5 frame 3): a tunnel of light round him. Short curved streaks, warm (amber, orange, cream,
+  // a few pale cool whites), each a piece of a helix about an axis running from his head forward and a little up:
+  // they swirl round the axis and stream back along it. From behind him (K26) the swirl reads as curves round him;
+  // as the camera comes round to his profile (flow F4, K27) the axial run takes over and they straighten into lines.
+  // Some pass close to the lens, where the lens melts them. Each streak is a camera-facing ribbon bent in the shader.
+  const NT = 900, SEG = 14;
+  const tunGeo = new THREE.InstancedBufferGeometry();
+  { const pos = [], idx = [];
+    for (let k = 0; k <= SEG; k++) { pos.push(k / SEG, -1, 0, k / SEG, 1, 0); if (k < SEG) { const a = k * 2; idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); } }
+    tunGeo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); tunGeo.setIndex(idx); }
+  const tA = new Float32Array(NT * 4), tB = new Float32Array(NT * 4), tC = new Float32Array(NT * 3);
+  const TUN_COL = [['#ff8a3a', '#ffe2c0'], ['#ffb062', '#fff1dc'], ['#ff6a2a', '#ffc890'], ['#ffd29a', '#fff8ee'], ['#9fdcff', '#eef8ff'], ['#ff9a4d', '#ffe7cf']];
+  for (let i = 0; i < NT; i++) {
+    const r = 0.55 + Math.pow(rnd(i * 2.3), 0.65) * 4.6;                    // radius about the axis
+    tA.set([rnd(i * 1.7) * Math.PI * 2, r, rnd(i * 3.1), 0.16 + rnd(i * 4.3) * 0.3], i * 4);   // theta0, r, s0 (0..1), dTheta: mostly round the axis (curves from behind, edge-on lines from the side)
+    tB.set([0.25 + rnd(i * 5.7) * 0.8, (0.008 + rnd(i * 6.1) * 0.02) * (0.6 + r * 0.25), 0.35 + Math.pow(rnd(i * 7.3), 2.0) * 1.6, rnd(i * 8.9)], i * 4);   // most dim, a few hot   // dS (m), half-width (m), gain, seed
+    const ci = rnd(i * 11.3) > 0.93 ? 4 : Math.floor(rnd(i * 12.7) * 6) % 6 === 4 ? 0 : Math.floor(rnd(i * 12.7) * 6) % 6;
+    tC.set([ci, 0, 0], i * 3);
+  }
+  tunGeo.setAttribute('aA', new THREE.InstancedBufferAttribute(tA, 4)); tunGeo.setAttribute('aB', new THREE.InstancedBufferAttribute(tB, 4)); tunGeo.setAttribute('aC', new THREE.InstancedBufferAttribute(tC, 3));
+  tunGeo.instanceCount = NT;
+  const tunMat = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: true, blending: THREE.AdditiveBlending, fog: false, side: THREE.DoubleSide,
+    uniforms: { uT: { value: 0 }, uO: { value: new THREE.Vector3() }, uD: { value: new THREE.Vector3(0, 0, -1) }, uU: { value: new THREE.Vector3(1, 0, 0) }, uV: { value: new THREE.Vector3(0, 1, 0) },
+      uS0: { value: -3 }, uS1: { value: 26 }, uVs: { value: 2.2 }, uVa: { value: 0.35 }, uK: { value: 1 },
+      uEdge: { value: TUN_COL.map((c) => new THREE.Color(c[0])) }, uCore: { value: TUN_COL.map((c) => new THREE.Color(c[1])) } },
+    vertexShader: `attribute vec4 aA, aB; attribute vec3 aC; uniform float uT, uS0, uS1, uVs, uVa; uniform vec3 uO, uD, uU, uV;
+      varying vec2 vQ; varying float vF, vCi, vK;
+      vec3 P(float u, float s, float th) { float a = th + u * aA.w; return uO + uD * (s + u * aB.x) + (uU * cos(a) + uV * sin(a)) * aA.y; }
+      void main() {
+        float L = uS1 - uS0, sp = uVs * (0.55 + 0.9 * aB.w);
+        float s = uS0 + mod(aA.z * L - uT * sp, L);                                   // streaming back toward us
+        float th = aA.x + uT * uVa * (0.6 + 0.8 * aB.w) / max(aA.y, 0.6);             // the swirl, faster near the axis
+        float u = position.x;
+        vec3 p = P(u, s, th), q = P(min(u + 0.04, 1.0), s, th) - P(max(u - 0.04, 0.0), s, th);
+        vec3 tg = normalize(q), vw = normalize(cameraPosition - p);
+        vec3 side = cross(tg, vw); float sl = length(side); side = sl > 1e-4 ? side / sl : uU;
+        float taper = sin(3.14159 * clamp(u, 0.0, 1.0));
+        float dc = distance(p, cameraPosition);
+        float nearK = smoothstep(0.18, 0.45, dc);                                     // never a slab across the lens
+        float ends = smoothstep(uS0, uS0 + 2.0, s) * (1.0 - smoothstep(uS1 - 6.0, uS1, s));
+        p += side * position.y * aB.y * (0.35 + 0.65 * taper) * nearK;
+        vQ = vec2(u, position.y); vF = ends * nearK; vCi = aC.x; vK = aB.z;
+        gl_Position = projectionMatrix * viewMatrix * vec4(p, 1.0);
+      }`,
+    fragmentShader: `uniform vec3 uEdge[6], uCore[6]; uniform float uK; varying vec2 vQ; varying float vF, vCi, vK;
+      void main() {
+        int ci = int(vCi + 0.5); vec3 e = uEdge[0], c = uCore[0];
+        for (int i = 0; i < 6; i++) if (i == ci) { e = uEdge[i]; c = uCore[i]; }
+        float x = abs(vQ.y), prof = exp(-x * x * 3.2), core = exp(-x * x * 14.0);
+        float along = pow(max(vQ.x, 0.0), 0.7) * (1.0 - smoothstep(0.88, 1.0, vQ.x) * 0.6);   // a trail: bright head, fading tail
+        vec3 col = mix(e, c, core) * prof * along * vK * vF * uK;
+        if (max(col.r, max(col.g, col.b)) < 0.004) discard;
+        gl_FragColor = vec4(col, 1.0);
+      }`,
+  });
+  const tunnel = new THREE.Mesh(tunGeo, tunMat); tunnel.frustumCulled = false; tunnel.visible = false; tunnel.userData.glow = 0.5; group.add(tunnel);
+
   // the door: a slot of white light, 0.95 x 2.3 m
   const doorMat = voxelMaterial({ color: [1, 1, 1], glow: 9 });
   const door = new THREE.Mesh(new THREE.BoxGeometry(0.95, 2.3, 0.06), doorMat);
@@ -595,7 +653,16 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
 
     // streaks: light rays in motion. They slide in (scale and travel from nothing), start slow and accelerate, stretch
     // into trails with speed, and now and then a ray glitches (a frame-hard jump and a flash). `age` drives all of it.
-    streaks.visible = ['dome', 'door'].includes(mode);   // round 14: K25 (down) has no rays at his depth, only the bars on the lens
+    streaks.visible = mode === 'door';   // round 14: K25 (down) has no rays at his depth (bars on the lens); K26-K27 (dome) have the tunnel
+    tunnel.visible = mode === 'dome';
+    if (tunnel.visible) {
+      const u = tunMat.uniforms, T = opts.tunnel || {};
+      u.uT.value = age; u.uK.value = T.k ?? 0.8; tunGeo.instanceCount = Math.min(NT, T.n ?? 560);
+      u.uO.value.copy(B(F.x, F.y + (T.o ?? 0.6), T.z ?? 1.62));
+      u.uD.value.copy(B(...(T.dir || [0, 1, 0.3]))).normalize();
+      u.uU.value.set(1, 0, 0); u.uV.value.crossVectors(u.uD.value, u.uU.value).normalize(); u.uU.value.crossVectors(u.uV.value, u.uD.value).normalize();
+      u.uS0.value = T.s0 ?? -3; u.uS1.value = T.s1 ?? 26; u.uVs.value = T.vs ?? 2.2; u.uVa.value = T.va ?? 0.35;
+    }
     const up = new THREE.Vector3(0, 1, 0);
     const v0 = 0.25, acc = 1.4, vmax = 6.0;                                        // m/s, m/s^2: slow, then fast
     const tv = Math.min(age, (vmax - v0) / acc), travel = v0 * tv + 0.5 * acc * tv * tv + vmax * Math.max(0, age - tv), speed = Math.min(vmax, v0 + acc * age);
@@ -674,7 +741,7 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
     }
     door.visible = mode === 'door';
     door.position.copy(B(C[0], C[1] + 15, 1.15));
-    pool.visible = mode === 'dome';
+    pool.visible = false;   // round 14: R5 has no floor light under him
     fgGroup.visible = mode === 'down' && !!opts.cam; if (fgGroup.visible) layFg(opts.cam, age);
     pool.position.copy(B(F.x, F.y, 0.004));
     shaft.visible = mode === 'cheat' && !!opts.shaft; shaft.position.copy(B(F.x, F.y, 2.75));   // (K25 tried it: from overhead it read as a flat wedge; K24 sees it from the front)
