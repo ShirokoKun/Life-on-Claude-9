@@ -19,7 +19,7 @@ const rnd = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return 
 
 const SKY = {
   iso:      { top: '#000000', mid: '#000000', low: '#000000', k: 1, band: 4 },
-  cheat:    { top: '#010103', mid: '#120630', low: '#6a22c4', k: 1.15, band: 14 },   // round 13: a violet-magenta horizon glow (wonder), the sky above stays near black
+  cheat:    { top: '#000000', mid: '#0a0418', low: '#1e0a3a', k: 1.0, band: 14 },   // round 14: black into a very dark violet (the round 13 magenta horizon read as a stage backdrop)
   down:     { top: '#000000', mid: '#010203', low: '#030507', k: 1, band: 6 },
   dome:     { top: '#000000', mid: '#020304', low: '#05080a', k: 1, band: 6 },
   door:     { top: '#010205', mid: '#03111a', low: '#0a2a33', k: 1.2, band: 8 },
@@ -80,6 +80,95 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
   streakMat.uniforms.uLevels.value = 32;
   const streaks = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), streakMat, NK); streaks.userData.glow = 1;
   streaks.frustumCulled = false; group.add(streaks);
+
+  // round 14 (K25, ref R5): two or three bars of code light passing right under the lens, between us and him, so close
+  // that the lens melts them (focus far, on his face): a red-orange band with lighter lines of code inside, the code
+  // smeared sideways as if moving. Laid out in the camera's own frame (screen row, distance from the lens), so they
+  // stay where the frame needs them; they write depth (the lens blurs them as the near things they are).
+  const FG = [
+    // v: screen row (-1 bottom .. 1 top), d: metres from the lens, x: centre (-1 left .. 1 right), len / th: frame widths / heights, sp: frame widths a second
+    { v: -0.30, d: 0.30, x: -0.10, len: 1.55, th: 0.13, sp: 0.020, k: 1.0, seed: 1 },
+    { v: -0.96, d: 0.26, x: 0.25, len: 1.85, th: 0.10, sp: -0.014, k: 0.85, seed: 2 },
+    { v: 0.50, d: 0.34, x: -1.05, len: 0.62, th: 0.07, sp: 0.026, k: 0.6, seed: 3 },
+  ];
+  const CODE = ['const day = automate(inbox, calendar, docs);', 'for (const task of life) task.done = true;', 'if (hours > minutes) return claude.build(next);',
+    'await sort(drafts).then(review).then(approve);', 'export default function cheat(code) { return code; }', 'while (awake) ship(module++);'];
+  const fgGroup = new THREE.Group(); fgGroup.visible = false; group.add(fgGroup);
+  const fgBars = FG.map((b, i) => {
+    const c = document.createElement('canvas'); c.width = 2048; c.height = 96; const g = c.getContext('2d');
+    // segments ("statements") of three kinds, as in R5: hot (a peach-white core in an orange band), warm (orange, a
+    // lighter core) and dim red; darker gaps between them. The large-scale variation is what survives the lens blur.
+    const KIND = [['rgba(255,70,30,', 'rgba(255,150,90,', 'rgba(255,236,214,'], ['rgba(240,60,26,', 'rgba(255,110,52,', 'rgba(255,190,140,'], ['rgba(170,26,14,', 'rgba(220,48,24,', 'rgba(255,96,52,']];
+    let x = -40 * rnd(b.seed), k = 0;
+    while (x < 2048) {
+      const w = 220 + rnd(b.seed * 31 + k) * 700, gap = 18 + rnd(b.seed * 17 + k) * 90, r = rnd(b.seed * 13 + k);
+      const K = KIND[r > 0.62 ? 0 : r > 0.25 ? 1 : 2], a0 = 0.75 + 0.25 * rnd(b.seed * 7 + k);
+      const band = g.createLinearGradient(0, 0, 0, 96);
+      band.addColorStop(0, K[0] + '0)'); band.addColorStop(0.22, K[0] + (0.8 * a0) + ')'); band.addColorStop(0.4, K[1] + a0 + ')');
+      band.addColorStop(0.5, K[2] + a0 + ')'); band.addColorStop(0.6, K[1] + a0 + ')'); band.addColorStop(0.78, K[0] + (0.8 * a0) + ')'); band.addColorStop(1, K[0] + '0)');
+      g.fillStyle = band; g.fillRect(x, 0, w, 96);
+      // the code inside: lighter, drawn several times shifted sideways (a motion smear)
+      g.save(); g.beginPath(); g.rect(x + 8, 0, w - 16, 96); g.clip();
+      g.font = 'bold 54px "Courier New", monospace'; g.textBaseline = 'middle';
+      const line = CODE[(b.seed * 3 + k) % CODE.length];
+      for (let s2 = 0; s2 < 6; s2++) { g.globalAlpha = 0.3 * (1 - s2 / 7); g.fillStyle = K === KIND[2] ? '#ff9a6a' : '#fff4ea'; g.fillText(line, x + 12 + s2 * 9, 50); }
+      g.restore(); g.globalAlpha = 1;
+      x += w + gap; k++;
+    }
+    g.globalAlpha = 1;
+    const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = 4;
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: tex, transparent: true, depthWrite: true, alphaTest: 0.12,
+      color: new THREE.Color(1, 1, 1).multiplyScalar(0.9 * b.k), fog: false, side: THREE.DoubleSide, toneMapped: true }));
+    m.frustumCulled = false; m.renderOrder = 2; fgGroup.add(m);   // (no deep glow: the bars flooded the frame red)
+    return m;
+  });
+  const _q = new THREE.Quaternion(), _v = new THREE.Vector3();
+  function layFg(cam, age) {
+    const tanH = Math.tan(THREE.MathUtils.degToRad(cam.fov) / 2), right = new THREE.Vector3(1, 0, 0).applyQuaternion(cam.quaternion),
+      upv = new THREE.Vector3(0, 1, 0).applyQuaternion(cam.quaternion), fwd = new THREE.Vector3(0, 0, -1).applyQuaternion(cam.quaternion);
+    FG.forEach((b, i) => {
+      const hh = b.d * tanH, hw = hh * cam.aspect, m = fgBars[i];
+      const x = b.x + b.sp * age;
+      m.position.copy(cam.position).addScaledVector(fwd, b.d).addScaledVector(upv, b.v * hh).addScaledVector(right, x * hw);
+      m.quaternion.copy(cam.quaternion); m.scale.set(b.len * 2 * hw, b.th * 2 * hh, 1);
+    });
+  }
+
+  // round 14 (K24 "a cheat code for life", rebuilt): he has figured it out. Not his room: he stands alone in a night
+  // void (black into a very dark violet, stars), lit from straight above by the code he solved. The six life-ups fly
+  // in from the dark and snap into their slots on a ring round his waist, one by one; each snap turns the light above
+  // him up a step; when the last one locks, a dotted line runs round the ring and joins them (the puzzle solved).
+  // the ring: 'h' lies round his waist; 'v' stands upright just behind him, facing the lens (he is framed inside it)
+  let RING = { o: 'v', r: 1.22, rz: 0.82, z: 1.18, back: 0.30 };
+  const LIFE_A0 = Math.PI / 2;
+  const ringAt = (a) => RING.o === 'v' ? [figure.x + Math.cos(a) * RING.r, figure.y - RING.back, RING.z + Math.sin(a) * (RING.rz ?? RING.r)]
+    : [figure.x + Math.cos(a) * RING.r, figure.y + Math.sin(a) * RING.r, RING.z];
+  const lifeSlot = (i, n = 6) => ringAt(LIFE_A0 + (i + 0.5) / n * Math.PI * 2);   // 'v': none at the top or bottom (behind his legs)
+  const NR = 96;
+  const ringDots = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), voxelMaterial({ color: [1, 1, 1], glow: 2.2 }), NR); ringDots.userData.glow = 0.8;
+  ringDots.frustumCulled = false; ringDots.visible = false; group.add(ringDots);
+  const top = new THREE.SpotLight(0xffe9d2, 0, 9, THREE.MathUtils.degToRad(17), 0.85, 1.4);
+  group.add(top, top.target);
+  // a halo of the solved code over him: a faint ring of light high above, the source of the top light (just in frame)
+  const crownTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d');
+    const gr = g.createRadialGradient(128, 128, 0, 128, 128, 128); gr.addColorStop(0, 'rgba(255,240,226,0.55)'); gr.addColorStop(0.18, 'rgba(255,226,200,0.2)');
+    gr.addColorStop(0.5, 'rgba(176,140,255,0.05)'); gr.addColorStop(1, 'rgba(120,90,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, 256, 256); return new THREE.CanvasTexture(c); })();
+  const crown = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 1.8), new THREE.MeshBasicMaterial({ map: crownTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false, side: THREE.DoubleSide }));
+  crown.visible = false; group.add(crown);
+  // the place he stands: two thin white circles on nothing (a spawn point, R3's outline language), lit by the light above
+  const padTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 512; const g = c.getContext('2d');
+    const gr = g.createRadialGradient(256, 256, 0, 256, 256, 256); gr.addColorStop(0, 'rgba(255,236,214,0.30)'); gr.addColorStop(0.35, 'rgba(255,220,190,0.10)'); gr.addColorStop(0.7, 'rgba(160,130,255,0.02)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, 512, 512);
+    g.strokeStyle = 'rgba(255,255,255,0.9)'; g.lineWidth = 3; g.beginPath(); g.arc(256, 256, 150, 0, Math.PI * 2); g.stroke();
+    g.strokeStyle = 'rgba(255,255,255,0.45)'; g.lineWidth = 2; g.setLineDash([10, 14]); g.beginPath(); g.arc(256, 256, 214, 0, Math.PI * 2); g.stroke();
+    return new THREE.CanvasTexture(c); })();
+  const pad = new THREE.Mesh(new THREE.PlaneGeometry(1.7, 1.7), new THREE.MeshBasicMaterial({ map: padTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
+  pad.rotation.x = -Math.PI / 2; pad.visible = false; group.add(pad);
+  // motes: a few hundred fine specks of light hanging round him, white and violet, drifting up (the magic is small)
+  const NMO = 420, moP = new Float32Array(NMO * 3), moC = new Float32Array(NMO * 3);
+  const motes = new THREE.Points(new THREE.BufferGeometry(), new THREE.PointsMaterial({ size: 0.022, map: (() => { const c = document.createElement('canvas'); c.width = c.height = 32; const g = c.getContext('2d'); const gr = g.createRadialGradient(16, 16, 0, 16, 16, 16); gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.35, 'rgba(255,255,255,0.4)'); gr.addColorStop(1, 'rgba(255,255,255,0)'); g.fillStyle = gr; g.fillRect(0, 0, 32, 32); return new THREE.CanvasTexture(c); })(), vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, fog: false }));
+  motes.geometry.setAttribute('position', new THREE.BufferAttribute(moP, 3)); motes.geometry.setAttribute('color', new THREE.BufferAttribute(moC, 3));
+  motes.frustumCulled = false; motes.visible = false; group.add(motes);
 
   // the door: a slot of white light, 0.95 x 2.3 m
   const doorMat = voxelMaterial({ color: [1, 1, 1], glow: 9 });
@@ -488,13 +577,13 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
     skyMat.uniforms.k.value = s.k; skyMat.uniforms.band.value = s.band;
     const [gc, gk] = GRID[mode] || GRID.dome;
     gridMat.uniforms.col.value.set(gc); gridMat.uniforms.k.value = gk; gridMat.uniforms.base.value.set(mode === 'monolith' ? 0x000000 : 0x000000);
-    grid.visible = !['monolith', 'iso', 'balcony', 'drown'].includes(mode);
+    grid.visible = !['monolith', 'iso', 'balcony', 'drown', 'cheat', 'down'].includes(mode);   // round 14: no grid under him in K24 (nor K25)
     const age = opts.age ?? 99;                                                    // seconds since this world appeared
     gridMat.uniforms.rev.value = mode === 'cheat' ? 0.5 + Math.pow(Math.max(0, age), 1.6) * 9 : 1e4;
     const F = figure;
 
     // shards
-    shards.visible = mode === 'cheat';                              // the tower keeps to its stack: no drifting debris on the lens
+    shards.visible = false;                                         // round 14: the drifting gems went (K24 read cheap); motes carry the air
     const pal = (shardPal[mode] || shardPal.cheat).map((h) => new THREE.Color(h));
     for (let i = 0; i < NS; i++) {
       const a = rnd(i) * Math.PI * 2, r = 2.5 + rnd(i + 1) * 22, z = 0.6 + rnd(i + 2) * (mode === 'cheat' ? 9 : 6);
@@ -506,7 +595,7 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
 
     // streaks: light rays in motion. They slide in (scale and travel from nothing), start slow and accelerate, stretch
     // into trails with speed, and now and then a ray glitches (a frame-hard jump and a flash). `age` drives all of it.
-    streaks.visible = ['down', 'dome', 'door'].includes(mode);
+    streaks.visible = ['dome', 'door'].includes(mode);   // round 14: K25 (down) has no rays at his depth, only the bars on the lens
     const up = new THREE.Vector3(0, 1, 0);
     const v0 = 0.25, acc = 1.4, vmax = 6.0;                                        // m/s, m/s^2: slow, then fast
     const tv = Math.min(age, (vmax - v0) / acc), travel = v0 * tv + 0.5 * acc * tv * tv + vmax * Math.max(0, age - tv), speed = Math.min(vmax, v0 + acc * age);
@@ -550,11 +639,46 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
     }
     streaks.instanceMatrix.needsUpdate = true; streaks.instanceColor.needsUpdate = true;
 
+    // K24: the solved ring (see lifeSlot above)
+    const cheat = mode === 'cheat';
+    ringDots.visible = pad.visible = crown.visible = motes.visible = cheat; top.intensity = 0;
+    if (cheat) {
+      if (opts.ring) RING = { ...RING, ...opts.ring };
+      const snaps = opts.snaps || [], cl = (x) => Math.min(1, Math.max(0, x)), sm = (x) => { x = cl(x); return x * x * (3 - 2 * x); };
+      const SNAP = 0.5, lock = snaps.length ? snaps[snaps.length - 1] + SNAP : -1e9;
+      const lit = snaps.reduce((a, b) => a + sm((t - b - SNAP + 0.06) / 0.12), 0) / Math.max(1, snaps.length);   // each snap turns it up a step
+      const draw = sm((t - lock) / 0.55), flash = Math.exp(-Math.max(0, t - lock - 0.55) * 3) * sm((t - lock - 0.45) / 0.1);
+      const ta = opts.topAt || [0, 0, RING.o === 'h' ? RING.z : 4.4]; top.position.copy(B(F.x + ta[0], F.y + ta[1], ta[2])); top.target.position.copy(B(F.x, F.y, 1.2)); top.target.updateMatrixWorld();
+      top.intensity = (opts.topK ?? 1) * (40 + 160 * lit + 80 * flash);
+      crown.visible = !!opts.crown; crown.position.copy(B(F.x, F.y, RING.o === 'h' ? RING.z + 0.02 : 3.35)); crown.rotation.set(-Math.PI / 2, 0, 0); crown.scale.setScalar(opts.crown || 1); crown.material.opacity = 0.35 + 0.65 * lit + 0.6 * flash;
+      pad.position.copy(B(F.x, F.y, 0.003)); pad.material.opacity = 0.25 + 0.75 * lit;
+      // the dotted ring: drawn round from slot 0 once the last life-up locks, gaps where the icons sit
+      const n = snaps.length || 6;
+      for (let i = 0; i < NR; i++) {
+        const u = i / NR, a = LIFE_A0 + u * Math.PI * 2, slot = (u * n) % 1;
+        const near = Math.abs(slot - 0.5) < 0.17;
+        const on = !near && u < draw;
+        const s = on ? (RING.dot || 0.016) : 0;
+        m4.compose(B(...ringAt(a)), q0, new THREE.Vector3(s, s, s)); ringDots.setMatrixAt(i, m4);
+        ringDots.setColorAt(i, col.setRGB(1, 0.97, 0.93).multiplyScalar(0.8 + 1.6 * flash));
+      }
+      ringDots.instanceMatrix.needsUpdate = true; ringDots.instanceColor.needsUpdate = true;
+      for (let i = 0; i < NMO; i++) {
+        const a = rnd(i * 1.3) * Math.PI * 2, r = 0.6 + Math.pow(rnd(i * 2.1), 0.7) * 3.2, z = ((rnd(i * 3.7) * 3.4 + t * (0.04 + 0.05 * rnd(i))) % 3.4);
+        const v = B(F.x + Math.cos(a) * r, F.y + Math.sin(a) * r, z);
+        moP[i * 3] = v.x; moP[i * 3 + 1] = v.y; moP[i * 3 + 2] = v.z;
+        const w = rnd(i * 5.1) > 0.75 ? [0.7, 0.55, 1.0] : [1, 0.95, 0.9], k = (0.25 + 0.75 * rnd(i * 4.4)) * (0.6 + 0.4 * Math.sin(t * (1 + rnd(i) * 2) + i)) * Math.min(1, z / 0.4, (3.4 - z) / 0.6);
+        for (let c = 0; c < 3; c++) moC[i * 3 + c] = w[c] * k;
+      }
+      motes.geometry.attributes.position.needsUpdate = true; motes.geometry.attributes.color.needsUpdate = true;
+    }
     door.visible = mode === 'door';
     door.position.copy(B(C[0], C[1] + 15, 1.15));
-    pool.visible = mode === 'down' || mode === 'dome';
+    pool.visible = mode === 'dome';
+    fgGroup.visible = mode === 'down' && !!opts.cam; if (fgGroup.visible) layFg(opts.cam, age);
     pool.position.copy(B(F.x, F.y, 0.004));
-    shaft.visible = false; shaft.position.copy(B(F.x, F.y, 2.75));   // (tried: from the overhead camera it read as a flat wedge, not light)
+    shaft.visible = mode === 'cheat' && !!opts.shaft; shaft.position.copy(B(F.x, F.y, 2.75));   // (K25 tried it: from overhead it read as a flat wedge; K24 sees it from the front)
+    if (shaft.visible) shaft.material.opacity = opts.shaft * (0.35 + 0.65 * (opts._lit ?? 1));
     crowd.visible = !!opts.crowd;
     crowd.children.forEach((f, i) => { const [l, r] = f.userData.legs; l.rotation.x = 0.35 * Math.sin(t * 2 + i); r.rotation.x = -l.rotation.x; });
     tower.visible = mode === 'tower';
@@ -596,5 +720,5 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
     if (opts.codeAt) { code.position.copy(B(...opts.codeAt)); code.lookAt(B(...opts.codeFace)); }
     for (const m of [shardMat, streakMat, towerMat, flowMat, doorMat, figMat]) m.uniforms.uTime.value = t;
   }
-  return { group, set, setFigure, door, tower };
+  return { group, set, setFigure, door, tower, lifeSlot };
 }
