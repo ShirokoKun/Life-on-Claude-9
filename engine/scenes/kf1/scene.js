@@ -12,7 +12,7 @@ import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { B, cameraIn, shotIn } from '../../src/shots.js';
 import * as ROOM3 from '../s03/scene.js';
 import { createRoomLight, weightsFor } from '../s03/roomlight.js';
-import { SCREENS as CH1, phoneGlow } from '../ch1/screens.js';
+import { SCREENS as CH1, phoneGlow, sentToasts, outbox } from '../ch1/screens.js';
 import { SCREENS as S4 } from '../s04/scene.js';
 import { createClaude } from './claude.js';
 import { createStage } from './stage.js';
@@ -135,10 +135,11 @@ export const SHOTS = [
     pipe: { born: [56.2, 57.0, 58.1, 59.2], state: 'review', off: [60.0, 60.45], review: 60.55, approve: 61.35, bright: 2.4, light: 0.08 }, beat: 'V11 *', board: 'r1c9', tr: 'no cut: a slow zoom in to the review and approve icons',
     why: 'V11 “That was the plan. Review and approve.” Still the K15 frame, now closing in on the two icons over his head: that was all he was meant to do.' },
 
-  { id: 'K18', name: 'Once the email system was working', t0: 68.5, t1: 71.2, mm: [40, 40], f: 2.8,
-    from: [1.04, 4.98, 1.14], to: [1.04, 4.951, 1.138], at0: [1.04, 4.00, 1.06], at1: [1.04, 4.0, 1.06], focus: [1.04, 4.56, 1.01], roll: [0, 0],
-    dimIn: [0.0, 0.6], light: 'evening', dim: 0.16, iv: ['s03', 31.9], scr: 71.5, pipe: { ticks: [69.2, 69.55, 69.9, 70.25], state: 'done', front: true }, beat: 'V12 a', board: 'r2c1 (B r2c1)', tr: 'dissolve by light: the room sinks to dusk, the pipeline lights',
-    why: 'V12 “But once the email system was working,” Dusk; the room sinks into the dark and the pipeline runs on its own across the bottom of the frame, every stage ticked green. Ivan soft behind it.' },
+  // round 14: the laptop screen is the frame (from just over his hands, his eye line): 'email sent' toasts stacking
+  { id: 'K18', name: 'Once the email system was working', t0: 68.5, t1: 71.2, mm: [35, 35], f: 2.8,
+    from: [1.085, 4.12, 1.01], to: [1.081, 4.145, 1.0], at0: [1.075, 4.456, 0.866], at1: [1.075, 4.456, 0.866], focus: 'lap:1130,420', mv: [68.5, 71.2], roll: [0, 0],
+    dimIn: [0.0, 0.6], light: 'evening', dim: 0.16, iv: ['s03', 31.9], scr: 71.5, lap: 'toasts', beat: 'V12 a', board: 'r2c1 (B r2c1)', tr: 'dissolve by light: the room sinks to dusk; on the laptop the sends start',
+    why: 'V12 “But once the email system was working,” Dusk; the laptop screen fills the frame and "email sent" notifications pop in one after another, faster and faster, each with a tick, who it went to and the subject. A slow push in.' },
   { id: 'K19', name: 'Hands on the keys', t0: 71.2, t1: 72.6, mm: [50, 50], f: 2.0,
     from: [1.06, 4.95, 1.02], to: [1.059, 4.92, 1.019], at0: [1.04, 3.95, 1.00], at1: [1.04, 3.95, 1.0], focus: 'eyes', roll: [0, 0],
     gaze: [[71.2, 'screen'], [71.9, [1.06, 5.6, 1.25]]], light: 'evening', iv: ['s03', 8.0, 9.4], scr: 72, look: 12, beat: 'V12 b', board: 'r2c2 (B r2c2)', tr: 'cut: the pipeline clears, the same axis',
@@ -197,37 +198,39 @@ export const SHOTS = [
   // An extreme close-up of his eye and glasses: the camera orbits from the right side of his face round to the front
   // (arc about his head), while the reflected lines slide across the lenses left to right (refl.slide)
   { id: 'K29', name: 'A door others can’t see', t0: 102.3, t1: 105.35, mm: [60, 60], f: 4.0,
-    from: [1.262, 4.150, 1.372], to: [1.07, 4.262, 1.372], at0: [1.07, 4.015, 1.375], at1: [1.07, 4.015, 1.375], focus: 'eyes', mv: [102.3, 105.15], arc: [1.07, 4.015], roll: [0, 0],
-    cutBlack: 105.15, light: 'void', iv: ['s03', 8.0], stand: true, look: 22, zone: 'iso', refl: { kind: 'lines', uv: true, flipV: true, tile: 1, k: 1.5, tint: 0.14, off: [0, 0], slide: [[102.3, -0.55], [105.15, 0.55]] }, key: { at: [1.08, 4.50, 1.15], color: 0xff6a35, k: 0.6 }, imag: { k: 1, duo: 0.4, poster: 5, stip: 0.65 }, ev: -0.4, beat: 'V17 c+d', board: 'r2c9 (B r4c1: the eye)', tr: 'cut in to the eye from the rings (K27); cut dead at the vacuum (105.15)',
+    from: [1.262, 4.150, 1.372], to: [1.07, 4.262, 1.372], at0: [1.07, 4.015, 1.392], at1: [1.07, 4.015, 1.392], focus: 'eyes', mv: [102.3, 105.15], arc: [1.07, 4.015], roll: [0, 0],
+    cutBlack: 105.15, light: 'void', iv: ['s03', 8.0], stand: true, look: 22, zone: 'iso', refl: { kind: 'lines', k: 1.5, tint: 0.1, slide: [[102.3, -0.55], [105.15, 0.55]] }, key: { at: [1.08, 4.50, 1.15], color: 0xff6a35, k: 0.6 }, imag: { k: 1, duo: 0.4, poster: 5, stip: 0.65 }, ev: -0.4, beat: 'V17 c+d', board: 'r2c9 (B r4c1: the eye)', tr: 'cut in to the eye from the rings (K27); cut dead at the vacuum (105.15)',
     why: 'V17 “like he’s stepped through a door that others can’t even see.” Extreme close on his eye through the glasses, the glowing lines reflected in the lenses sliding left to right as the camera comes round from the side of his face to the front. Then the vacuum cut.' },
 
   { id: 'K30', name: 'He’s barely slept', t0: 105.35, t1: 109.9, mm: [45, 45], f: 4.0,
     from: [1.62, 2.88, 1.42], to: [1.565, 2.856, 1.42], at0: [1.20, 3.84, 1.22], at1: [1.145, 3.816, 1.22], focus: [1.21, 3.82, 1.37], roll: [0, 0],
     fadeIn: [105.65, 0.5], light: 'void', iv: ['s03', 8.0], stand: true, yaw: -100, look: -4, zone: 'balcony', zopt: { spill: 3.0 }, hand: { side: 'L', to: 'mouth', prop: 'mug', sip: [[105.35, 0.0], [107.0, 0.0], [107.9, 1.0], [108.5, 1.0], [109.3, 0.25]] }, pix: false, pixable: true,
-    beat: 'V18 a', board: 'r3c1 (C r1c1; render ref Group 12)', tr: 'from black (the vacuum): the phone buzz (105.65) brings the night back, outside',
+    refl: { kind: 'warm', k: 0.8, tint: 0.04 }, beat: 'V18 a', board: 'r3c1 (C r1c1; render ref Group 12)', tr: 'from black (the vacuum): the phone buzz (105.65) brings the night back, outside',
     why: 'V18 “He’s barely slept.” On the balcony at night, mug in hand, the warm light of the flat on his face and the city behind him. He is starting to break into facets.' },
-  { id: 'K31', name: 'She stopped texting', t0: 109.9, t1: 112.8, mm: [40, 40], f: 2.0,
-    from: [1.80, 3.98, 1.02], to: [1.849, 4.184, 1.16], at0: [1.45, 4.20, 0.78], at1: [1.45, 4.20, 0.78], focus: PHONE, mv: [109.9, 112.8], arc: [1.50, 4.16], roll: [0, 0],
-    light: '3am', iv: ['s03', 19.8], scr: 118.2, phoneLit: true, beat: 'V18 b', board: 'r3c2 (C r1c2)', tr: 'cut: inside, the phone on the desk',
-    why: 'V18 “His girlfriend stopped texting because he wasn’t responding.” The phone lit on the desk beside the laptop: 3:33, Sarah’s last messages, unanswered.' },
+  { id: 'K31', name: 'She stopped texting', t0: 109.9, t1: 112.8, mm: [40, 40], f: 2.8,
+    // round 14: no orbit, a straight push in on the phone; its screen sleeps after "stopped texting" (dim at 111.35, black by 111.8)
+    from: [1.80, 3.98, 1.02], to: [1.665, 4.063, 0.928], at0: [1.50, 4.16, 0.758], at1: [1.50, 4.16, 0.758], focus: PHONE, mv: [109.9, 112.8], ease: 'lin', roll: [0, 0],
+    light: '3am', iv: ['s03', 19.8], scr: 118.2, phoneLit: { sleep: [111.35, 111.8] }, beat: 'V18 b', board: 'r3c2 (C r1c2)', tr: 'cut: inside, the phone on the desk',
+    why: 'V18 “His girlfriend stopped texting because he wasn’t responding.” The phone lit on the desk beside the laptop: 3:33, Sarah’s last messages, unanswered. We push in on it; after “stopped texting” the screen dims and goes black.' },
   { id: 'K32', name: 'Responds to everyone else', t0: 112.8, t1: 117.7, mm: [32, 32], f: 2.8,
-    from: [1.86, 3.90, 1.16], to: [1.83, 3.95, 1.15], at0: [1.18, 4.38, 1.02], at1: [1.18, 4.38, 1.02], focus: [1.10, 4.42, 0.92], roll: [0, 0],
-    light: '3am', iv: ['s03', 10.0, 14.9], scr: 121, env: 'send', beat: 'V19', board: 'r3c3 (C r1c3)', tr: 'focus pull: phone to laptop (same frame)',
-    why: 'V19 “Ironic, given that his system now responds to everyone else.” The same frame, focus pulled off the dark phone to the laptop full of code, a stream of green-ticked envelopes leaving it.' },
+    // round 14: no Ivan; the laptop alone at work, its Sent box firing replies in step with the envelopes leaving it
+    from: [1.44, 3.96, 1.26], to: [1.40, 4.01, 1.24], at0: [0.95, 4.45, 0.98], at1: [0.95, 4.45, 0.98], focus: 'lap:900,420', mv: [112.8, 117.7], roll: [0, 0],
+    light: '3am', iv: null, scr: 121, lap: 'outbox', env: 'send', beat: 'V19', board: 'r3c3 (C r1c3)', tr: 'cut: the laptop alone',
+    why: 'V19 “Ironic, given that his system now responds to everyone else.” Nobody at the desk: the laptop on its own, its Sent box filling with replies (Sending..., then Sent ✓), one envelope leaving the screen with each.' },
   { id: 'K33', name: 'He knows', t0: 117.7, t1: 121.6, mm: [50, 50], f: 2.8,
     from: [1.54, 3.11, 1.36], to: [1.54, 3.11, 1.36], at0: [1.20, 3.84, 1.32], at1: [1.20, 3.84, 1.32], focus: [1.21, 3.82, 1.37], flow: 'F6', roll: [0, 0],
     light: 'void', iv: ['s03', 8.0], stand: true, yaw: -100, look: 0, zone: 'balcony', zopt: { spill: 3.0 }, hand: { side: 'L', to: 'mouth', prop: 'mug', sip: [[117.7, 1.0], [119.2, 1.0], [121.6, 0.45]] }, pix: false, pixable: true,
-    beat: 'V20 a', board: 'r3c4 (C r1c4; render ref Group 8)', tr: 'cut: back out on the balcony, close',
+    refl: { kind: 'warm', k: 0.8, tint: 0.04 }, beat: 'V20 a', board: 'r3c4 (C r1c4; render ref Group 8)', tr: 'cut: back out on the balcony, close',
     why: 'V20 “He knows this isn’t healthy.” Close, mug at his lips, dark under his eyes, the city in bokeh behind; his face in facets.' },
   { id: 'K34', name: 'A thinness to his thoughts', t0: 121.6, t1: 126.3, mm: [50, 50], f: 2.8,
     from: [1.56, 3.10, 1.36], to: [1.56, 3.10, 1.36], at0: [1.20, 3.84, 1.32], at1: [1.20, 3.84, 1.32], focus: [1.21, 3.82, 1.37], flow: 'F6', roll: [0, 0],
     light: 'void', iv: ['s03', 8.0], stand: true, yaw: -100, look: 0, zone: 'balcony', zopt: { spill: 3.0 }, hand: { side: 'L', to: 'mouth', prop: 'mug', sip: [[121.6, 0.45], [123.4, 0.25], [126.3, 0.25]] }, pix: false, pixable: true, thin: true,
-    beat: 'V20 b', board: 'r3c5 (C r2c1; render ref Group 7 bottom)', tr: 'the same frame: the city stretches into lines',
+    refl: { kind: 'warm', k: 0.8, tint: 0.04 }, beat: 'V20 b', board: 'r3c5 (C r2c1; render ref Group 7 bottom)', tr: 'the same frame: the city stretches into lines',
     why: 'V20 “something fraying at the edges of his mind, a thinness to his thoughts.” The same close; behind him the city has stretched into thin horizontal lines.' },
   { id: 'K35', name: 'Close to something', t0: 126.3, t1: 129.4, mm: [35, 35], f: 2.4,
     from: [0.95, 4.55, 1.38], to: [0.91, 4.50, 1.38], at0: [1.88, 3.30, 1.31], at1: [1.88, 3.30, 1.31], focus: 'iris', roll: [0, 0],
     light: 'void', iv: ['s03', 8.0], stand: true, yaw: -100, look: 0, zone: 'balcony', zopt: { spill: 3.0 }, hand: { side: 'L', to: 'mouth', prop: 'mug', sip: [[126.3, 0.3], [127.4, 1.0], [128.4, 1.0], [129.4, 0.6]] }, pix: false, pixable: true, amber: 0.35,
-    beat: 'V21', board: 'r3c6 (C r2c2; render ref Group 8 bottom)', tr: 'cut: round behind his left shoulder (ref Group 8 bottom): ear, glasses arm, mug at the lips, the city low',
+    refl: { kind: 'warm', k: 0.8, tint: 0.04 }, beat: 'V21', board: 'r3c6 (C r2c2; render ref Group 8 bottom)', tr: 'cut: round behind his left shoulder (ref Group 8 bottom): ear, glasses arm, mug at the lips, the city low',
     why: 'V21 “But he’s close to something.” Behind his shoulder as he drinks, the city lights in bokeh beyond the rail.' },
   // round 14 (B3): K37 is gone; K36 runs to its end. Not the typing shot: close on his mouth at the mug, locked there,
   // one gulp on "One more module" and one on "One more integration", then held through "Then he'll rest"
@@ -248,10 +251,11 @@ export const SHOTS = [
     from: [0.80, 4.90, 1.30], to: [0.806, 4.854, 1.281], at0: [0.90, 4.15, 0.93], at1: [0.90, 4.15, 0.93], focus: [0.92, 4.34, 0.90], roll: [0, 0],
     light: '4am', iv: ['s03', 16.4, 19.4], scr: 152, hand: { side: 'L', to: [0.80, 4.18, 0.90], lat: 0.09, prop: 'mug', sip: [[143.4, 0.5], [145.8, 0.6], [147.4, 0.64]], shake: true }, beat: 'V24 c', board: 'r3c9 (C r3c3)', tr: 'cut: top-down',
     why: 'V24 “and his hands shake from a caffeine overload, Ivan feels a creeping dread.” Top-down: one hand typing, the other lifting a mug that won’t keep still.' },
-  { id: 'K41', name: 'Doesn’t fully understand', t0: 147.4, t1: 152.4, mm: [100, 100], f: 2.0,
-    from: [1.06, 4.86, 1.06], to: [1.03, 4.861, 1.06], at0: [1.04, 3.97, 1.10], at1: [1.01, 3.971, 1.1], focus: 'iris', roll: [0, 0],
-    light: '4am', iv: ['s03', 13.0], scr: 155, refl: { kind: 'code', at: [1.05, 4.27, 1.078], uv: true, flipV: true, tile: 1, k: 1.3, tint: 0.1 }, beat: 'V25 a', board: 'r4c1 (C r3c4)', tr: 'cut in: his eyes',
-    why: 'V25 “A sense that he’s building something he doesn’t fully understand.” His eyes behind the glasses, lines of code reflected across both lenses.' },
+  // round 14: tighter, only the eyes and the glasses (brow to the bridge of the nose); the code in the lenses encrypts
+  { id: 'K41', name: 'Doesn’t fully understand', t0: 147.4, t1: 152.4, mm: [135, 135], f: 11,
+    from: [1.058, 4.75, 1.084], to: [1.040, 4.752, 1.084], at0: [1.049, 4.22, 1.080], at1: [1.047, 4.22, 1.080], focus: 'bone:Ivan_GlassesLens', roll: [0, 0],
+    light: '4am', iv: ['s03', 13.0], scr: 155, refl: { kind: 'code', scr: [148.2, 151.9], k: 1.6, tint: 0.06 }, beat: 'V25 a', board: 'r4c1 (C r3c4)', tr: 'cut in: his eyes',
+    why: 'V25 “A sense that he’s building something he doesn’t fully understand.” Only his eyes behind the glasses; in both lenses the code he is running (def send_reply(email): ...) breaks down letter by letter into symbols, then into solid blocks, like an encrypted message.' },
   { id: 'K42', name: 'It takes something from him', t0: 152.4, t1: 158.0, mm: [20, 20], f: 4.0,
     from: [2.70, 1.20, 0.55], to: [2.7, 1.2, 0.55], at0: [1.30, 5.50, 2.55], at1: [1.3, 5.5, 2.9], focus: [1.05, 3.95, 1.0], mv: [153.4, 157.6], roll: [0, 0],
     light: '4am', iv: ['s03', 0.4, 5.6], scr: 156, zone: 'tower', beat: 'V25 b', board: 'r4c2 (W.I.P.; experimental, kept)', tr: 'the walls fall away again, cold',
@@ -417,14 +421,27 @@ function tapEnter(root, t, s) {
   }
   root.updateMatrixWorld(true);
 }
+// how lit the desk phone is (0..1). phoneLit: true (on), or { sleep: [a, b] }: the screen sleeps as a phone does, a
+// dim to a third at a, held, then black by b (round 14, K31: it goes dark after "stopped texting")
+function phoneLitAt(s, t) {
+  const P = s.phoneLit; if (!P) return 0; if (P === true || !P.sleep) return 1;
+  const [a, b] = P.sleep, m = a + (b - a) * 0.55;
+  return t < m ? 1 - 0.68 * ramp(t, a, a + 0.12) : 0.32 * (1 - ramp(t, m, b));
+}
 const scrT = (s, t, k) => (s[k] ?? 4) + (s.scrHold ? 0 : Math.max(0, t - s.t0));
 export const SCREENS = {
-  laptop(g, t, keys = []) { const s = kf(t); if (s.s4 !== undefined) return S4.laptop(g, scrT(s, t, 's4'), keys); return CH1.laptop(g, scrT(s, t, 'scr'), keys); },
+  laptop(g, t, keys = []) {
+    const s = kf(t);
+    if (s.lap === 'toasts') return sentToasts(g, t - s.t0, { bgT: s.scr });          // round 14 (K18): 'email sent' notifications stacking
+    if (s.lap === 'outbox') return outbox(g, t - s.t0, { clock: s.scr });           // round 14 (K32): the Sent box firing replies
+    if (s.s4 !== undefined) return S4.laptop(g, scrT(s, t, 's4'), keys); return CH1.laptop(g, scrT(s, t, 'scr'), keys);
+  },
   monitor(g, t) { const s = kf(t); return CH1.monitor(g, s.s4 !== undefined ? 38 + scrT(s, t, 's4') : scrT(s, t, 'scr')); },
   monitor2(g, t) { const s = kf(t); return CH1.monitor2(g, s.s4 !== undefined ? 38 + scrT(s, t, 's4') : scrT(s, t, 'scr')); },
   phone(g, t) {
     const s = kf(t);
-    if (s.phoneLit) return CH1.phone(g, PHONE_LIT_T);
+    const lit = phoneLitAt(s, t);
+    if (lit > 0.001) { CH1.phone(g, PHONE_LIT_T); if (lit < 1) { g.fillStyle = `rgba(0,0,0,${1 - lit})`; g.fillRect(0, 0, 720, 1560); } return; }
     g.fillStyle = '#000'; g.fillRect(0, 0, 720, 1560);
   },
 };
@@ -558,11 +575,13 @@ export async function setup(args) {
   for (let i = 0; i < 2; i++) { const g = makeMug(); g.traverse((o) => { if (o.isMesh) { o.material = o.material.clone(); o.material.transparent = true; o.material.opacity = 0.28; o.material.depthWrite = false; } }); scene.add(g); mugGhosts.push(g); }
   phone = makePhone(phoneCanvas); scene.add(phone);
 
-  // reflections in the lenses (K29 streaks, K41 code): drawn on a canvas, shown only on the lens meshes
+  // reflections in the lenses (K29 streaks, K41 code, the balcony's warm glow): drawn on a canvas, shown only on the
+  // lens meshes. Round 14: the canvas is both lenses side by side (left half = the lens on the camera's left), laid out
+  // as the camera sees them, so a streak can slide from one lens into the other and text can be drawn mirrored
   refl = new THREE.Group(); refl.visible = false; refl.name = 'Lens reflections'; scene.add(refl);
-  const rc = document.createElement('canvas'); rc.width = 512; rc.height = 512; refl.userData.canvas = rc;
+  const rc = document.createElement('canvas'); rc.width = 1024; rc.height = 512; refl.userData.canvas = rc;
   refl.userData.tex = new THREE.CanvasTexture(rc); refl.userData.tex.colorSpace = THREE.SRGBColorSpace;
-  refl.userData.tex.wrapS = refl.userData.tex.wrapT = THREE.RepeatWrapping;
+  refl.userData.tex.wrapS = refl.userData.tex.wrapT = THREE.ClampToEdgeWrapping; refl.userData.tex.anisotropy = 8;
   // the imagined frames (the zones, the eye) get their own texture, apart from the room: a stipple grain that lives in
   // the mid-tones, a soft posterise, and for the eye a rust duotone (ref: the eye with the light in its glasses);
   // saturated highlights (the streaks, the pixel glows) keep their colour. k = 0 leaves the frame untouched.
@@ -612,16 +631,19 @@ export async function setup(args) {
       gl_FragColor.rgb = min(gl_FragColor.rgb, vec3(1.2));                       // HDR reflections must not turn the glass into a lamp
       gl_FragColor.a = clamp(0.02 + 0.28 * fr, 0.0, 0.3);`);
   };
-  lensMat = new THREE.ShaderMaterial({ transparent: true, depthWrite: false,
-    uniforms: { map: { value: refl.userData.tex }, uTile: { value: 0.22 }, uOff: { value: new THREE.Vector2() }, tint: { value: 0.55 }, useUv: { value: 0 }, flipV: { value: 0 }, uRes: { value: new THREE.Vector2(1280, 720) }, k: { value: 2.6 } },
+  // one material per side (uSide: 0 the camera-left lens, 1 the right); uFlip turns each lens's flat map so that u runs
+  // to the camera's right and v up (set per frame from the camera, so it holds from any angle). The rim fades softly.
+  const LU = { map: { value: refl.userData.tex }, uOff: { value: new THREE.Vector2() }, tint: { value: 0.55 }, k: { value: 2.6 } };
+  lensMat = [0, 1].map((side) => new THREE.ShaderMaterial({ transparent: true, depthWrite: true,   // depth: the lens blur must see the reflection on the glass, not the face behind it
+    uniforms: { ...LU, uSide: { value: side }, uFlip: { value: new THREE.Vector2() } },
     vertexShader: 'attribute vec2 lensUv; varying vec2 vUv; void main(){ vUv = lensUv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
-    fragmentShader: 'uniform sampler2D map; uniform float uTile, k, tint, useUv, flipV; uniform vec2 uRes, uOff; varying vec2 vUv; void main(){ vec2 lu = vec2(vUv.x, mix(vUv.y, 1.0 - vUv.y, flipV)); vec2 uv = mix(gl_FragCoord.xy / (uRes.x * uTile), lu / uTile, useUv) + uOff; vec3 c = texture2D(map, uv).rgb * k; float l = max(c.r, max(c.g, c.b)); gl_FragColor = vec4(c, clamp(tint + l, 0.0, 1.0)); }' });
-  args.renderer.getDrawingBufferSize(lensMat.uniforms.uRes.value);
-  for (const sx of [-1, 1]) {
-    const d = new THREE.Mesh(new THREE.CircleGeometry(0.021, 32), new THREE.MeshBasicMaterial({ map: refl.userData.tex, transparent: true,
-      blending: THREE.AdditiveBlending, depthWrite: false, depthTest: false, color: new THREE.Color(1.6, 1.6, 1.6), toneMapped: true }));
-    d.position.x = sx * 0.032; refl.add(d);
-  }
+    fragmentShader: `uniform sampler2D map; uniform float k, tint, uSide; uniform vec2 uOff, uFlip; varying vec2 vUv;
+      void main(){
+        vec2 lu = mix(vUv, 1.0 - vUv, uFlip);
+        vec2 uv = vec2((lu.x + uSide) * 0.5, lu.y) + uOff;
+        vec3 c = texture2D(map, uv).rgb * k; float l = max(c.r, max(c.g, c.b));
+        float e = length(lu - 0.5) * 2.0, rim = 1.0 - 0.45 * smoothstep(0.55, 1.0, e);
+        gl_FragColor = vec4(c * rim, clamp((tint + l) * rim, 0.0, 1.0)); }` }));
 
   // the window as a light source by day and at dawn; the window bars across him at sunrise (a cookie on a spot)
   winLight = new THREE.RectAreaLight(0xffa060, 0, 2.8, 1.56);
@@ -692,7 +714,7 @@ function follow(o, key, st, k) {
 // ---------------------------------------------------------------- what is in the frame
 const KEEP_IN_ZONE = /^(Baked_DESK|Laptop_Hinge|Laptop_Screen|Monitor_Screen|Water|Water_Bubbles|Water_Glass|Ring_Stain_\d|Lamp_Bulb_Desk)$/;
 const FIGURE_ZONES = ['down', 'dome', 'door', 'balcony', 'monolith'];          // he stands; no desk
-let roomVis = null, outside = null, lmUsers = null;
+let roomVis = null, outside = null, lmUsers = null, menS03 = null;
 const DESK_SWEEP = new THREE.Plane(new THREE.Vector3(0, -1, 0), 99);   // keeps y < constant
 const SHELF_CUT = new THREE.Plane(new THREE.Vector3(1, 0, 0), -0.41);       // keeps x > 0.41 (three x = Blender x)
 export function props(t, ctx) {
@@ -738,6 +760,11 @@ export function props(t, ctx) {
 
   for (const k of ['Water', 'Water_Bubbles', 'Water_Glass']) if (named[k]) named[k].visible = s.glass !== false && (!zone || ['cheat', 'tower', 'iso'].includes(zone));
   if (named.Water_Glass) for (const d of named.Water_Glass.userData.details || []) d.visible = named.Water_Glass.visible;   // rim, base, meniscus (left floating in the voids before)
+  // round 14 (K04): s03 adds its own meniscus, an OPAQUE dark ring at the waterline. Here the clear water refracts the
+  // opaque scene, so that ring was drawn twice: on the waterline and again, smaller, inside the water's surface (the
+  // "circles on top of the water"). kf1 has its own meniscus (refineGlass), so s03's is hidden in this scene only.
+  if (!menS03) scene.traverse((o) => { if (o.name === 'Meniscus' && o.parent === scene) menS03 = o; });
+  if (menS03) menS03.visible = false;
 
   // Ivan: held pose, then standing, placing, feet, head, hands, the faceted look
   begin();
@@ -945,7 +972,7 @@ export function props(t, ctx) {
       bar.position.x = d.x0 - Math.sign(d.v) * d.len * 0.5 * (1 - g) + d.v * u;   // grows along its direction of travel
     }
   }
-  phoneLight.intensity = s.phoneLit ? 0.16 : 0;
+  phoneLight.intensity = 0.16 * phoneLitAt(s, t);
   greenLight.intensity = (s.green || 0) * 0.9;
   keyLight.intensity = s.key && !s.black ? s.key.k : 0;
   if (s.key) { keyLight.position.copy(B(...s.key.at)); keyLight.color.set(s.key.color || 0xff7040); }
@@ -993,9 +1020,13 @@ export function props(t, ctx) {
   // lens reflections: on the glass itself
   refl.visible = false;
   const R = s.refl && !s.black ? s.refl : null;
-  if (R) { drawRefl(refl.userData.canvas, R.kind, t); refl.userData.tex.needsUpdate = true; lensMat.uniforms.uTile.value = R.tile || 0.22; lensMat.uniforms.uOff.value.set(...(R.off || [0, 0])); lensMat.uniforms.k.value = R.k || 2.6; lensMat.uniforms.tint.value = R.tint ?? 0.55; lensMat.uniforms.useUv.value = R.uv ? 1 : 0; lensMat.uniforms.flipV.value = R.flipV ? 1 : 0; }
+  if (R) { drawRefl(refl.userData.canvas, R, t); refl.userData.tex.needsUpdate = true; LU_SET(R); }
+  const cam = ctx.camera; if (cam) cam.updateMatrixWorld();
+  const cR = new THREE.Vector3(1, 0, 0), cU = new THREE.Vector3(0, 1, 0);
+  if (cam) { cR.applyQuaternion(cam.quaternion); cU.applyQuaternion(cam.quaternion); }
   for (const r of [ctx.ivan, ...cast.map((c) => c.root)]) {
     if (!r) continue;
+    const lenses = [];
     r.traverse((o) => {
       if (!o.isMesh) return;
       const m0 = o.userData.lens0 || (/Glasses Lens/.test(o.material.name) ? o.material : null);
@@ -1006,12 +1037,24 @@ export function props(t, ctx) {
         const sz = g.boundingBox.getSize(new THREE.Vector3()), ax = [0, 1, 2].sort((i, j) => sz.getComponent(j) - sz.getComponent(i));
         const lu = new Float32Array(P.count * 2), mn = g.boundingBox.min;
         for (let i = 0; i < P.count; i++) for (const [k, a] of [[0, ax[0]], [1, ax[1]]]) lu[i * 2 + k] = (P.getComponent(i, a) - mn.getComponent(a)) / sz.getComponent(a);
-        g.setAttribute('lensUv', new THREE.BufferAttribute(lu, 2));
+        g.setAttribute('lensUv', new THREE.BufferAttribute(lu, 2)); g.userData.lensAx = ax;
       }
-      o.material = R && r.visible ? lensMat : clearLens;
+      o.material = clearLens; lenses.push(o);
+    });
+    if (!R || !r.visible || !lenses.length) continue;
+    // which lens is on the camera's left, and which way its flat map runs on screen
+    const ctr = lenses.map((o) => { o.updateWorldMatrix(true, false); return new THREE.Box3().setFromObject(o).getCenter(new THREE.Vector3()); });
+    const mid = ctr.reduce((a, b) => a.add(b), new THREE.Vector3()).multiplyScalar(1 / ctr.length);
+    lenses.forEach((o, i) => {
+      const side = ctr[i].clone().sub(mid).dot(cR) < 0 ? 0 : 1, m = lensMat[side];
+      const ax = o.geometry.userData.lensAx || [0, 2, 1], A = (k) => new THREE.Vector3().setComponent(ax[k], 1).transformDirection(o.matrixWorld);
+      m.uniforms.uFlip.value.set(A(0).dot(cR) < 0 ? 1 : 0, A(1).dot(cU) < 0 ? 1 : 0);
+      o.material = m;
     });
   }
 }
+// the lens look per shot: brightness (k), the see-through floor (tint), an offset of the map
+function LU_SET(R) { const u = lensMat[0].uniforms; u.k.value = R.k ?? 1.4; u.tint.value = R.tint ?? 0.1; u.uOff.value.set(...(R.off || [0, 0])); }
 
 // the camera's position at t (for things that face it)
 const camPos = (t) => { const c = cameraAt(t, () => new THREE.Vector3()); return c.pos; };
@@ -1023,41 +1066,86 @@ function eyesOf(root) {
   const fwd = B(0, 1, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), yaw);
   return h.getWorldPosition(new THREE.Vector3()).add(fwd.multiplyScalar(0.09)).add(new THREE.Vector3(0, 0.065, 0));
 }
-function drawRefl(c, kind, t) {
-  const g = c.getContext('2d'); g.clearRect(0, 0, 512, 512); g.fillStyle = '#000'; g.fillRect(0, 0, 512, 512);
+// the lens canvas (1024 x 512): the left half is the lens on the camera's left, the right half the other one, each
+// half one whole lens as the camera sees it (x to the right, y down). R: the shot's refl { kind, ... }
+const REFL_CODE = ['def send_reply(email):', '  text = draft(email)', '  if confident(text):', '    send(text)',
+  "  log('replied')", 'for email in inbox:', '  send_reply(email)'];
+const REFL_KW = /^(def|if|for|in|return)$/;
+const REFL_SYM = '#$%&@*+=<>/\\{}[]|~^!?;:';
+function reflColours(line) {
+  // one colour per character: keywords violet, a name called with ( blue, a quoted string green, the rest white
+  const out = [], re = /[A-Za-z_]+|'[^']*'|./g; let m;
+  while ((m = re.exec(line))) {
+    const tk = m[0], next = line[m.index + tk.length];
+    const c = REFL_KW.test(tk) ? '#d39af0' : tk[0] === "'" ? '#a8d88a' : /^[A-Za-z_]/.test(tk) && next === '(' ? '#7fc0ff' : '#e6ebf2';
+    for (let i = 0; i < tk.length; i++) out.push(c);
+  }
+  return out;
+}
+const REFL_COL = REFL_CODE.map(reflColours);
+function drawRefl(c, R, t) {
+  const kind = R.kind, g = c.getContext('2d');
+  g.setTransform(1, 0, 0, 1, 0, 0); g.globalAlpha = 1; g.filter = 'none'; g.fillStyle = '#000'; g.fillRect(0, 0, 1024, 512);
   const rnd = (n) => { const x = Math.sin(n * 91.7) * 43758.5; return x - Math.floor(x); };
   if (kind === 'code') {
-    // syntax-coloured lines low in the lens (the eye stays clear above them), as on a dark editor
-    const SY = ['#7dffb0', '#9fd8ff', '#ffb46b', '#e6f0ff', '#c79bff', '#ff7a6a'];
-    g.filter = 'blur(1px)';
-    for (let i = 0; i < 13; i++) {
-      let x = 40 + (i % 4) * 22; const y = 255 + i * 17;
-      for (let k = 0; k < 5; k++) { const w = 18 + rnd(i * 7 + k) * 70; g.fillStyle = SY[Math.floor(rnd(i * 5 + k * 3) * SY.length)]; g.fillRect(x, y, w, 7); x += w + 12; }
+    // K41: the laptop's code reflected in each lens (mirrored, as a reflection is; R.mirror false reads it straight).
+    // Over the shot it encrypts: letter by letter, in a wave down the lines, each one flickers through symbols and then
+    // sets into a solid block (R.scr: [start, end] of the scramble on the VO clock)
+    const [s0, s1] = R.scr || [148.2, 151.8], mirror = R.mirror !== false;
+    const FS = R.fs || 27, CW = FS * 0.6, LH = FS * 1.4, BW = Math.max(...REFL_CODE.map((l) => l.length)) * CW, BH = REFL_CODE.length * LH;
+    g.font = `${FS}px "DejaVu Sans Mono", Menlo, Consolas, monospace`; g.textBaseline = 'middle';
+    for (const half of [0, 1]) {
+      g.save(); g.beginPath(); g.rect(half * 512, 0, 512, 512); g.clip();
+      if (mirror) { g.translate(half * 512 + 512, 0); g.scale(-1, 1); } else g.translate(half * 512, 0);
+      const x0 = (512 - BW) / 2 + (R.x0 ?? 0) + (half ? -10 : 10), y0 = (512 - BH) / 2 + LH * 0.5 + (R.y0 ?? 20) + (half ? 5 : 0);   // each lens sees the screen from a little apart
+      REFL_CODE.forEach((line, li) => {
+        for (let j = 0; j < line.length; j++) {
+          const ch = line[j]; if (ch === ' ') continue;
+          const x = x0 + j * CW, y = y0 + li * LH, n = li * 41 + j;
+          const w = (li / REFL_CODE.length) * 0.6 + (j / 24) * 0.25 + rnd(n) * 0.3;          // the wave: top-left first
+          const ta = s0 + (s1 - s0 - 1.1) * Math.min(1, w), tb = ta + 0.55 + rnd(n + 7) * 0.55;
+          if (t >= tb) {                                                   // a block: sealed
+            const k = Math.min(1, (t - tb) / 0.2);
+            g.globalAlpha = 0.6 + 0.4 * (1 - k); g.fillStyle = k < 1 ? '#ffffff' : '#bfe0ff';
+            g.fillRect(x + 1, y - FS * 0.48, CW - 1, FS * 0.92); g.globalAlpha = 1;
+          } else if (t >= ta) {                                            // symbols, flickering
+            const q = Math.floor(t * 14 + rnd(n) * 9);
+            g.fillStyle = '#ffc27a'; g.fillText(REFL_SYM[Math.floor(rnd(n * 3 + q) * REFL_SYM.length)], x, y);
+          } else { g.fillStyle = REFL_COL[li][j]; g.fillText(ch, x, y); }
+        }
+      });
+      g.restore();
     }
-    g.filter = 'none';
-  } else if (kind === 'prism') {
-    // blurred pills slanting up to the right, warm / white / teal / red, each with a hot core: light from a screen
-    // smeared across the glass; the band sits low in the lens, the eye stays readable above it
-    const C = ['#ffb23c', '#fff1d8', '#ff7a2a', '#3fe4dc', '#ffd34a', '#ff3b2a', '#ffffff', '#ff9a4a', '#5ff0e0', '#ffc070'];
-    g.save(); g.translate(256, 345); g.rotate(-0.55); g.lineCap = 'round';
-    // rows of bars with gaps between them (no pile-up into cream); a few carry a hot white core
-    let i = 0;
-    for (let row = 0; row < 7; row++) {
-      const y = -105 + row * 33 + (rnd(row) - 0.5) * 8;
-      for (let x = -330 + rnd(row + 9) * 60; x < 240; i++) {
-        const w = 40 + rnd(i + 2) * 110, col = C[Math.floor(rnd(i * 3.3) * C.length)];
-        g.filter = 'blur(4px)'; g.globalAlpha = 0.95; g.strokeStyle = col; g.lineWidth = 15 + rnd(i + 3) * 8;
-        g.beginPath(); g.moveTo(x, y); g.lineTo(x + w, y); g.stroke();
-        if (rnd(i + 7) > 0.65) { g.filter = 'blur(1.5px)'; g.globalAlpha = 0.7; g.strokeStyle = '#fffaf0'; g.lineWidth = 4;
-          g.beginPath(); g.moveTo(x + 6, y); g.lineTo(x + w - 6, y); g.stroke(); }
-        x += w + 28 + rnd(i + 5) * 40;
+  } else if (kind === 'lines') {
+    // K29: the glowing lines of the worlds he just saw (the K25-K27 bars: orange, warm white, a little teal), blurred
+    // horizontal streaks sliding left to right across both lenses (R.slide: [[t, offset], ...], offset in lens pairs)
+    const off = R.slide ? keyedP(R.slide.map(([kt, v]) => [kt, [v]]), t)[0] : 0;
+    const C = ['#ff7a2a', '#ffb070', '#fff1d8', '#ff9a4a', '#3fd8e0', '#ffd9a8', '#ff6a2a', '#ffc890'];
+    g.lineCap = 'round';
+    for (let i = 0; i < 26; i++) {
+      const p = -0.65 + rnd(i + 1) * 2.3, len = 0.18 + rnd(i + 2) * 0.55, y = 110 + rnd(i + 3) * 300;
+      const x = (p + off) * 1024, w = len * 1024, col = C[Math.floor(rnd(i * 3.7) * C.length)];
+      if (x > 1100 || x + w < -80) continue;
+      g.filter = 'blur(6px)'; g.globalAlpha = 0.85; g.strokeStyle = col; g.lineWidth = 12 + rnd(i + 4) * 16;
+      g.beginPath(); g.moveTo(x, y); g.lineTo(x + w, y); g.stroke();
+      if (rnd(i + 5) > 0.45) { g.filter = 'blur(2px)'; g.globalAlpha = 0.8; g.strokeStyle = '#fff6ea'; g.lineWidth = 4;
+        g.beginPath(); g.moveTo(x + 10, y); g.lineTo(x + w - 10, y); g.stroke(); }
+    }
+    g.filter = 'none'; g.globalAlpha = 1;
+  } else if (kind === 'warm') {
+    // the balcony (R4): the flat's warm light and the city in the lenses, a soft amber glow with a few bokeh points
+    for (const half of [0, 1]) {
+      const cx = half * 512 + 256 + (R.hx ?? -40), cy = 200 + (R.hy ?? 0);
+      const gr = g.createRadialGradient(cx, cy, 10, cx, cy, 300);
+      gr.addColorStop(0, 'rgba(255,190,120,0.95)'); gr.addColorStop(0.35, 'rgba(255,140,60,0.6)'); gr.addColorStop(1, 'rgba(120,50,20,0.0)');
+      g.fillStyle = gr; g.fillRect(half * 512, 0, 512, 512);
+      g.filter = 'blur(7px)';
+      for (let i = 0; i < 9; i++) {
+        const n = i + half * 3, x = half * 512 + 70 + rnd(n + 11) * 380, y = 250 + rnd(n + 12) * 200, r = 10 + rnd(n + 13) * 18;
+        g.fillStyle = rnd(n + 14) > 0.78 ? 'rgba(90,220,230,0.55)' : 'rgba(255,200,130,0.65)';
+        g.beginPath(); g.arc(x, y, r, 0, 7); g.fill();
       }
-    }
-    g.restore(); g.filter = 'none'; g.globalAlpha = 1;
-  } else {
-    for (let i = 0; i < 30; i++) {
-      g.fillStyle = ['#ff7a2a', '#ffd9c4', '#3fd8e0', '#ffb070'][i % 4];
-      g.fillRect(rnd(i) * 300, rnd(i + 1) * 480, 120 + rnd(i + 2) * 200, 6 + rnd(i + 3) * 10);
+      g.filter = 'none';
     }
   }
 }
@@ -1168,8 +1256,12 @@ function refineGlass(named, scene) {
   add(new THREE.TorusGeometry(r - 0.0012, 0.0013, 8, 64), rimM, gb.max.y - 0.0008);                                   // the lip
   const baseM = fresnelGlass(0.12, 0.8, 1.8);
   add(new THREE.CylinderGeometry(r - 0.003, r - 0.004, 0.011, 48), baseM, gb.min.y + 0.0055, 0);                      // the heavy base
-  add(new THREE.TorusGeometry(wr - 0.0004, 0.0005, 6, 64),
-      new THREE.MeshBasicMaterial({ color: new THREE.Color(1.0, 1.05, 1.1), transparent: true, opacity: 0.45, depthWrite: false }), wb.max.y - 0.0004);   // the meniscus
+  // the meniscus: one crisp bright line where the water climbs the wall (round 14: a little stronger, so with s03's
+  // opaque ring gone the glass still reads full). Transparent, so the water's refraction never draws it a second time.
+  // (renderOrder 2, before the glass: the shell writes depth and drawn after it the line failed the depth test; it
+  // writes depth itself, or the lens blur smears it like the wall behind)
+  add(new THREE.TorusGeometry(wr - 0.0004, 0.00035, 6, 128),
+      new THREE.MeshBasicMaterial({ color: new THREE.Color(0.85, 0.92, 1.0), transparent: true, opacity: 0.42, depthWrite: true }), wb.max.y - 0.0003).renderOrder = 2;
 }
 
 // a prop in his hand: two-bone IK to a point (the mouth, the chest, the phone's place, or a mark), then the prop
