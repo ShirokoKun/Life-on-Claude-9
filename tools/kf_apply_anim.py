@@ -7,7 +7,7 @@ import os, re
 ROOT = os.path.join(os.path.dirname(__file__), '..')
 P = os.path.join(ROOT, 'engine', 'scenes', 'kf1', 'scene.js')
 s = open(P, encoding='utf8').read()
-FIELDS = ['gaze', 'lookK', 'leanK', 'press', 'grade', 'ghostTicks', 'deskAway', 'fadeIn', 'cutBlack', 'zoneAt', 'dimIn', 'rise', 'breath', 'iconsBorn', 'lifeBorn', 'lifeShrink', 'weaveT0', 'evTo', 'lacedRamp', 'flick', 'tapKey']
+FIELDS = ['gaze', 'lookK', 'leanK', 'press', 'grade', 'ghostTicks', 'deskAway', 'fadeIn', 'cutBlack', 'zoneAt', 'dimIn', 'rise', 'breath', 'iconsBorn', 'lifeBorn', 'lifeShrink', 'weaveT0', 'evTo', 'lacedRamp', 'flick', 'tapKey', 'mood']
 CL_FIELDS = ['born', 'bornDur', 'exit', 'path']
 
 def block(sid):
@@ -39,6 +39,7 @@ ANIM = {
     'K22': {'ghostTicks': '[82.07, 82.62, 83.72]'},
     'K24': {'deskAway': '[93.3, 93.8]', 'zoneAt': '90.59', 'lifeBorn': '[91.3, 91.5, 91.75, 92.0, 92.25, 92.5]', 'lifeShrink': '93.4', 'cl': {'born': 90.7}},
     'K26': {'zoneAt': '96.4'},   # round 13: the rays already streaming at the cut (the first second was an empty black frame)
+    'K37': {'mood': "'3am_soft'"},
     'K29': {'cutBlack': '105.15'},
     'K30': {'fadeIn': '[105.65, 0.5]'},
     'K42': {'cl': {'born': 156.0, 'bornDur': 1.2}},

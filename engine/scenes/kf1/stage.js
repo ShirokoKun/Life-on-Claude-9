@@ -544,7 +544,9 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
         q.setFromAxisAngle(up, ang);
         k = 2.2;
       }
-      m4.compose(p, q, sc); streaks.setMatrixAt(i, m4); streaks.setColorAt(i, col.setRGB(...c).multiplyScalar(k * (glitch ? 1.8 : 1) * (0.3 + 0.7 * born)));
+      // round 13: a ray never crosses the lens (one passing the camera filled K25 with a slab and, with the deep glow, a wash)
+      let near = 1; if (opts.camV) { const d = p.distanceTo(opts.camV), x = Math.min(1, Math.max(0, (d - 0.9) / 1.4)); near = x * x * (3 - 2 * x); sc.multiplyScalar(Math.max(near, 0.001)); }
+      m4.compose(p, q, sc); streaks.setMatrixAt(i, m4); streaks.setColorAt(i, col.setRGB(...c).multiplyScalar(k * (glitch ? 1.8 : 1) * (0.3 + 0.7 * born) * near));
     }
     streaks.instanceMatrix.needsUpdate = true; streaks.instanceColor.needsUpdate = true;
 

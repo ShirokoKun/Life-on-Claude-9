@@ -89,7 +89,7 @@ export const SHOTS = [
   { id: 'K09', name: 'Claude is doing the building', t0: 30.3, t1: 34.9, mm: [35, 35], f: 4.0,
     from: [1.584, 4.042, 1.065], to: [1.575, 4.053, 1.058], at0: [1.27, 4.40, 0.82], at1: [1.27, 4.4, 0.82], focus: [1.30, 4.38, 0.82], roll: [0, 0],
     weaveT0: 31.3, light: '3am', iv: ['s03', 31.9], scr: 32.6, beat: 'V07a', board: 'r1c6 (experimental, kept)', tr: 'cut: down to desk level on the chime',
-    cl: { at: [1.30, 4.38, 0.75], face: [1.584, 4.042, 1.065], s: 1.3, mood: 'warm', pose: 'hold', glow: 1.0, lightK: 0.3, born: 30.35 }, blocks: 'build',
+    cl: { at: [1.30, 4.38, 0.75], face: [1.584, 4.042, 1.065], s: 1.3, pose: 'hold', glow: 1.0, lightK: 0.3, born: 30.35 }, blocks: 'build',
     why: 'V07a “Well... technically, Claude is doing the building.” On the desk a small glowing Claude builds: a half-ring wall of code bricks rising round it course by course, a brick lifted over its head, more flying in from the laptop. Ivan, soft behind, only watches the screen.' },
   { id: 'K10', name: 'Ivan keeps saying yes', t0: 34.9, t1: 37.9, mm: [35, 35], f: 2.8,
     from: [0.70, 4.72, 1.08], to: [0.633, 4.676, 1.08], at0: [1.07, 4.16, 1.00], at1: [1.003, 4.116, 1.0], focus: 'eyes', mv: [34.9, 36.25], roll: [0, 0],
@@ -104,7 +104,7 @@ export const SHOTS = [
   { id: 'K12', name: '400 unread', t0: 41.9, t1: 46.4, mm: [30, 30], f: 2.0,
     from: [2.10, 3.92, 1.16], to: [2.042, 4.391, 1.16], at0: [1.00, 3.98, 1.20], at1: [1.00, 3.98, 1.20], focus: 'eyes', mv: [45.6, 46.4], ease: 'in', arc: [1.05, 4.03], roll: [0, 0],
     lookK: [[41.9, -16, -15], [46.4, -18, -18]], breath: 0.32, gaze: 'phone', light: 'day', iv: ['s04', 14.8], s4: 8.0, glass: false, lean: 10, look: 2, hand: { side: 'R', to: 'phone', prop: 'phone', ph: 44.0 },
-    cl: { at: [0.92, 4.30, 1.20], face: [1.05, 4.02, 1.15], s: 1.7, mood: 'warm', pose: 'hover', glow: 0.7, lightK: 0.4, form: 'spark', born: 42.2, exit: 46.1, path: [[42.2, [1.30, 4.28, 1.18]], [43.2, [1.10, 4.55, 1.32]], [44.0, [0.66, 4.12, 1.36]], [44.8, [0.98, 3.70, 1.30]], [45.6, [0.92, 4.30, 1.20]]] }, beat: 'V09 a', board: 'r1c7 (A r2c4 “complaining to claude”)', tr: 'push down from the top-down into him',
+    cl: { at: [0.92, 4.30, 1.20], face: [1.05, 4.02, 1.15], s: 1.7, pose: 'hover', glow: 0.7, lightK: 0.4, form: 'spark', born: 42.2, exit: 46.1, path: [[42.2, [1.30, 4.28, 1.18]], [43.2, [1.10, 4.55, 1.32]], [44.0, [0.66, 4.12, 1.36]], [44.8, [0.98, 3.70, 1.30]], [45.6, [0.92, 4.30, 1.20]]] }, beat: 'V09 a', board: 'r1c7 (A r2c4 “complaining to claude”)', tr: 'push down from the top-down into him',
     why: 'V09 IVAN “i have like 400 unread emails. every single one wants a reply.” Leaning back in the afternoon light, talking into the phone held up near his face. Claude, small and warm, circles him and drifts round in front of him as he talks (the orbit is animated: it starts behind his shoulder and ends between him and the phone).' },
   { id: 'K13', name: 'Drowning here!', t0: 46.4, t1: 51.01, mm: [40, 40], f: 2.2,
     from: [1.923, 5.472, 1.08], to: [0.82, 5.70, 1.08], at0: [1.06, 4.05, 1.02], at1: [1.06, 4.05, 1.02], focus: 'eyes', mv: [46.4, 47.6], ease: 'out', arc: [1.05, 4.03], roll: [0, 0],
@@ -115,12 +115,12 @@ export const SHOTS = [
   { id: 'K14', name: 'Hello, Claude', t0: 51.01, t1: 55.3, mm: [40, 40], f: 2.0,
     from: [1.66, 4.40, 1.22], to: [1.64, 4.37, 1.22], at0: [1.08, 4.23, 1.20], at1: [1.08, 4.23, 1.20], focus: 'iris', roll: [0, 0],
     lookK: [[51.0, -18, -15], [51.9, -18, -15], [53.8, 8, -22]], gaze: [[51.0, 'phone'], [52.0, 'phone'], [52.7, 'claude']], light: 'day', ev: -0.9, iv: ['s04', 14.8], s4: 14.4, glass: false, hand: { side: 'R', to: 'phone', prop: 'phone', ph: 50.0 }, beat: 'V10 a', board: 'r1c8 (A r3c1)', tr: 'cut on the chime (51.01)',
-    cl: { at: [1.15, 4.41, 1.17], face: [1.05, 4.06, 1.20], s: 1.1, mood: 'warm', pose: 'wave', glow: 0.9, lightK: 1.4, form: 'spark', born: 51.01, bornDur: 0.6, path: [[51.01, [1.10, 4.26, 1.04]], [52.1, [1.11, 4.31, 1.22]], [55.3, [1.11, 4.30, 1.24]]] },
+    cl: { at: [1.15, 4.41, 1.17], face: [1.05, 4.06, 1.20], s: 1.1, pose: 'wave', glow: 0.9, lightK: 1.4, form: 'spark', born: 51.01, bornDur: 0.6, path: [[51.01, [1.10, 4.26, 1.04]], [52.1, [1.11, 4.31, 1.22]], [55.3, [1.11, 4.30, 1.24]]] },
     why: 'V10 CLAUDE “That sounds genuinely exhausting...” Claude pops out of the phone and waves; its warm light on his face as he looks up at it.' },
   { id: 'K15', name: 'The offer', t0: 55.3, t1: 60.0, mm: [28, 28], f: 2.8,
     from: [1.28, 3.30, 1.42], to: [1.339, 3.311, 1.42], at0: [1.05, 4.55, 1.28], at1: [1.109, 4.561, 1.28], focus: [1.05, 4.50, 1.30], roll: [0, 0],
     lookK: [[55.3, 6, 12], [59.6, 8, -12]], dimIn: [1.0, 1.0], gaze: [[55.3, [0.70, 4.50, 1.30]], [59.5, [1.40, 4.50, 1.30]]], light: 'day', iv: ['s04', 24.9], s4: 19.5, glass: false, dim: 0.16, ev: -1.7, hide: ['Baked_DESK_8', 'Baked_DESK_9'], pipe: { born: [56.2, 57.0, 58.1, 59.2], state: 'offer', bright: 2.4, light: 0.08 }, beat: 'V10 b', board: 'r1c9 (MOTION GRAPHICS)', tr: 'the room dims (not to a void: about a sixth of its light) as the offer builds module by module in the air; the dim carries on into K18 and the V13 void',
-    cl: { at: [0.42, 4.30, 1.08], face: [1.28, 3.30, 1.42], s: 1.5, mood: 'warm', pose: 'present', glow: 2.2, lightK: 0.25, form: 'spark', evo: 0.3 },
+    cl: { at: [0.42, 4.30, 1.08], face: [1.28, 3.30, 1.42], s: 1.5, pose: 'present', glow: 2.2, lightK: 0.25, form: 'spark', evo: 0.3 },
     why: 'V10 CLAUDE “I can write a script that sorts your inbox and drafts the replies for you.” The afternoon room dims and the offer assembles above the desk as pixel objects: inbox, sort, draft, you. Claude presents it like a salesman; Ivan reads it from his chair.' },
   { id: 'K16', name: 'Want me to build one?', t0: 60.0, t1: 64.11, mm: [60, 60], f: 5.6,
     from: [0.72, 4.06, 1.00], to: [0.745, 4.029, 1.0], at0: [1.02, 4.30, 0.80], at1: [1.045, 4.269, 0.8], focus: [1.00, 4.28, 0.80], mv: [60.0, 64.05], roll: [0, 0],
@@ -146,22 +146,22 @@ export const SHOTS = [
   { id: 'K21a', name: 'Calendar management', t0: 74.1, t1: 75.9, mm: [28, 28], f: 4.0,
     from: ISO_CAM, to: ISO_CAM, at0: ISO_AT, at1: ISO_AT, focus: [1.10, 4.10, 1.00], flow: 'F2', roll: [0, 0],
     dimIn: [1.0, 1.7], iconsBorn: [74.35, 76.09, 77.83, 79.80], light: '4am_iso', iv: ['s03', 0.6, 2.4], scr: 76.0, icons: 1, beat: 'V13a', board: 'r2c5 (B r3c1; render ref Group 9)', tr: 'the room fades to black around the desk',
-    cl: { at: [0.62, 4.62, 1.38], face: ISO_CAM, s: 1.2, mood: 'warm', pose: 'cheer', born: 74.2 },
+    cl: { at: [0.62, 4.62, 1.38], face: ISO_CAM, s: 1.2, pose: 'cheer', born: 74.2 },
     why: 'V13a “Calendar management.” (ping 74.35) High, from behind his right shoulder: the room is going dark around the desk, and the first module lights in the air above it.' },
   { id: 'K21b', name: 'Meeting scheduling', t0: 75.9, t1: 77.65, mm: [28, 28], f: 4.0,
     from: ISO_CAM, to: ISO_CAM, at0: ISO_AT, at1: ISO_AT, focus: [1.10, 4.10, 1.00], flow: 'F2', roll: [0, 0],
     iconsBorn: [74.35, 76.09, 77.83, 79.80], light: '3am', zone: 'iso', iv: ['s03', 2.4, 4.15], scr: 77.0, icons: 2, beat: 'V13b', board: 'r2c5', tr: 'the same frame: the room is gone',
-    cl: { at: [1.12, 4.70, 1.56], face: ISO_CAM, s: 1.2, mood: 'warm', pose: 'cheer', path: [[75.85, [0.62, 4.62, 1.38]], [76.35, [1.12, 4.70, 1.56]]] },
+    cl: { at: [1.12, 4.70, 1.56], face: ISO_CAM, s: 1.2, pose: 'cheer', path: [[75.85, [0.62, 4.62, 1.38]], [76.35, [1.12, 4.70, 1.56]]] },
     why: 'V13b “Meeting scheduling.” (ping 76.09) The room is gone: desk, chair, screens and Ivan in black. A second module.' },
   { id: 'K21c', name: 'Document drafting', t0: 77.65, t1: 79.6, mm: [28, 28], f: 4.0,
     from: ISO_CAM, to: ISO_CAM, at0: ISO_AT, at1: ISO_AT, focus: [1.10, 4.10, 1.00], flow: 'F2', roll: [0, 0],
     iconsBorn: [74.35, 76.09, 77.83, 79.80], light: '3am', zone: 'iso', iv: ['s03', 4.15, 6.1], scr: 78.5, icons: 3, beat: 'V13c', board: 'r2c5', tr: 'the same frame',
-    cl: { at: [1.66, 4.66, 1.48], face: ISO_CAM, s: 1.2, mood: 'warm', pose: 'cheer', path: [[77.6, [1.12, 4.70, 1.56]], [78.1, [1.66, 4.66, 1.48]]] },
+    cl: { at: [1.66, 4.66, 1.48], face: ISO_CAM, s: 1.2, pose: 'cheer', path: [[77.6, [1.12, 4.70, 1.56]], [78.1, [1.66, 4.66, 1.48]]] },
     why: 'V13c “Document drafting.” (ping 77.83) Three.' },
   { id: 'K21d', name: 'Research summaries', t0: 79.6, t1: 81.8, mm: [28, 28], f: 4.0,
     from: ISO_CAM, to: ISO_CAM, at0: ISO_AT, at1: ISO_AT, focus: [1.10, 4.10, 1.00], flow: 'F2', roll: [0, 0],
     iconsBorn: [74.35, 76.09, 77.83, 79.80], light: '3am', zone: 'iso', iv: ['s03', 6.1, 8.3], scr: 80.5, icons: 4, beat: 'V13d', board: 'r2c5', tr: 'the same frame',
-    cl: { at: [2.10, 4.40, 1.30], face: ISO_CAM, s: 1.2, mood: 'warm', pose: 'cheer', path: [[79.55, [1.66, 4.66, 1.48]], [80.05, [2.10, 4.40, 1.30]]], exit: 81.5 },
+    cl: { at: [2.10, 4.40, 1.30], face: ISO_CAM, s: 1.2, pose: 'cheer', path: [[79.55, [1.66, 4.66, 1.48]], [80.05, [2.10, 4.40, 1.30]]], exit: 81.5 },
     why: 'V13d “Research summaries.” (ping 79.80) Four modules glowing over a desk floating in black.' },
   { id: 'K22', name: 'A few hours of coding', t0: 81.8, t1: 85.2, mm: [28, 28], f: 4.0,
     from: ISO_CAM, to: [2.45, 2.7, 2.3], at0: ISO_AT, at1: [1.18, 4.3, 1.02], focus: [1.10, 4.10, 1.00], roll: [0, 0],
@@ -174,7 +174,7 @@ export const SHOTS = [
   { id: 'K24', name: 'A cheat code for life', t0: 89.9, t1: 93.8, mm: [24, 24], f: 4.0,
     from: [0.92, 5.55, 1.12], to: [0.92, 5.55, 1.12], at0: [0.98, 3.95, 1.32], at1: [0.98, 3.95, 1.32], focus: 'eyes', flow: 'F3', roll: [0, 0],
     deskAway: [93.3, 93.8], zoneAt: 90.59, lifeBorn: [91.3, 91.5, 91.75, 92.0, 92.25, 92.5], lifeShrink: 93.4, gaze: [[89.9, 'screen'], [91.1, [1.0, 6.5, 3.2]]], light: '3am', iv: ['s03', 31.9], scr: 90.6, zone: 'cheat', zopt: { codeAt: [1.04, -5.0, 5.2], codeFace: [0.98, 5.55, 1.22] }, lifeUps: true, beat: 'V15 *', board: 'r2c6 (experimental, kept; night void: black to dark violet, white grid, stars)', tr: 'the walls fall away on the rush (90.59)',
-    cl: { at: [1.36, 4.30, 1.30], face: [0.98, 5.55, 1.22], s: 1.5, mood: 'bright', pose: 'cheer', born: 90.7 },
+    cl: { at: [1.36, 4.30, 1.30], face: [0.98, 5.55, 1.22], s: 1.5, pose: 'cheer', born: 90.7 },
     why: 'V15 “It’s like discovering a cheat code for life.” The room falls away: his desk floats in a teal-and-orange retro world, the four modules orbit him like power-ups, the code is written across the sky.' },
   { id: 'K25', name: 'Hours into minutes', t0: 93.8, t1: 97.4, mm: [24, 24], f: 1.4,
     from: [1.04, 4.95, 2.85], to: [1.04, 4.918, 2.793], at0: [1.04, 3.90, 0.95], at1: [1.04, 3.9, 0.95], focus: [1.04, 3.95, 1.40], roll: [0, 0],
@@ -232,7 +232,7 @@ export const SHOTS = [
     why: 'V22 IVAN “One more module. One more integration.” His fingers back on the keys, fast.' },
   { id: 'K37', name: 'Then he’ll rest', t0: 133.2, t1: 136.9, mm: [28, 28], f: 4.0,
     from: [2.40, 2.60, 1.30], to: [2.40, 2.60, 1.30], at0: [1.05, 4.10, 1.00], at1: [1.10, 1.00, 0.45], focus: [[133.2, [1.05, 4.10, 1.00]], [134.2, [1.05, 4.10, 1.00]], [136.4, [1.10, 1.00, 0.45]]], mv: [133.6, 136.6], roll: [0, 0],
-    light: '3am', iv: ['s03', 24.0], scr: 143, beat: 'V23', board: 'r3c6', tr: 'cut: reverse, the bed',
+    mood: '3am_soft', light: '3am', iv: ['s03', 24.0], scr: 143, beat: 'V23', board: 'r3c6', tr: 'cut: reverse, the bed',
     why: 'V23 “Then he’ll rest.” The bed in the lamp light, three metres behind him. He won’t go.' },
 
   { id: 'K38', name: 'It’s not all pleasant', t0: 136.9, t1: 140.0, mm: [38, 38], f: 4.0,
@@ -254,7 +254,7 @@ export const SHOTS = [
   { id: 'K42', name: 'It takes something from him', t0: 152.4, t1: 158.0, mm: [20, 20], f: 4.0,
     from: [2.70, 1.20, 0.55], to: [2.7, 1.2, 0.55], at0: [1.30, 5.50, 2.55], at1: [1.3, 5.5, 2.9], focus: [1.05, 3.95, 1.0], mv: [153.4, 157.6], roll: [0, 0],
     light: '4am', iv: ['s03', 0.4, 5.6], scr: 156, zone: 'tower', beat: 'V25 b', board: 'r4c2 (W.I.P.; experimental, kept)', tr: 'the walls fall away again, cold',
-    cl: { at: [1.55, 6.6, 4.55], face: [2.70, 1.20, 0.55], s: 18, mood: 'cold', pose: 'idle', born: 156.0, bornDur: 1.2 },
+    cl: { at: [1.55, 6.6, 4.55], face: [2.70, 1.20, 0.55], s: 18, pose: 'idle', born: 156.0, bornDur: 1.2 },
     why: 'V25 “each automation takes something from him, even as it gives something back.” His desk small at the foot of the thing he built, a tower of modules in the dark, Claude huge and cold on it. His warm light streams up into it.' },
   { id: 'K43', name: 'Finishes another module', t0: 158.0, t1: 162.2, mm: [70, 70], f: 8,
     from: [1.36, 4.46, 0.86], to: [1.352, 4.455, 0.857], at0: [1.163, 4.326, 0.78], at1: [1.163, 4.326, 0.78], focus: 'bone:mixamorigRightHandIndex4', mv: [158.0, 160.2], roll: [0, 0],
@@ -284,7 +284,7 @@ export const SHOTS = [
   { id: 'K49', name: 'Calendar, documents, reading', t0: 177.8, t1: 182.5, mm: [28, 28], f: 4.0,
     from: BEHIND, to: [1.17, 2.55, 1.55], at0: BEHIND_AT, at1: [1.17, 4.55, 1.24], focus: [1.05, 4.4, 1.3], roll: [0, 0],
     grade: { con: 0.35, sat: 1.12 }, iconsBorn: [177.9, 178.6, 179.7, 181.1], light: 'sunrise', iv: ['s03', 32.0, 33.3], scr: 204.6, icons: 4, iconsIdle: true, iconsWall: true, beat: 'V28 c', board: 'r4c7', tr: 'cut: from behind, the desk wall',
-    cl: { at: [1.58, 4.48, 1.235], face: BEHIND, s: 1.8, mood: 'warm', pose: 'sit', glow: 0.6, born: 177.9, bornDur: 0.9 },
+    cl: { at: [1.58, 4.48, 1.235], face: BEHIND, s: 1.8, pose: 'sit', glow: 0.6, born: 177.9, bornDur: 0.9 },
     why: 'V28 “...manages his calendar, drafts his documents, and summarizes his reading.” From behind at dawn: the four modules idle and dim over the desk, Claude sitting on the monitor with nothing to do.' },
   { id: 'K50', name: 'Exhausted and wired', t0: 182.5, t1: 188.8, mm: [35, 35], f: 2.2,
     from: [1.32, 4.75, 1.12], to: [1.309, 4.718, 1.122], at0: [1.05, 3.95, 1.16], at1: [1.05, 3.95, 1.16], focus: [1.06, 4.04, 1.21], roll: [0, 0],
@@ -649,6 +649,7 @@ function voxels_check() { return checkMark({ size: 0.012, glow: 3 }); }
 // screens) and their colour, and the grade (contrast, saturation, a split tone: lo = shadows tint, hi = highlights tint)
 const MOOD = {
   '3am':     { room: 0.38, lamp: 1.6, mon: 2.5, scr: 1.6, monCol: 0x5ea2ff, beam: 1.8, con: 0.26, sat: 1.16, lo: [-0.014, 0.004, 0.028], hi: [0.03, 0.014, -0.012] },
+  '3am_soft':{ room: 0.75, lamp: 1.3, mon: 1.8, scr: 1.4, monCol: 0x6aa6ff, beam: 1.2, con: 0.22, sat: 1.1, lo: [-0.012, 0.004, 0.03], hi: [0.02, 0.012, 0.0] },   // K37: the moonlit bed must read
   '4am':     { room: 0.3, lamp: 0.9, mon: 2.9, scr: 1.8, monCol: 0x5a96ff, beam: 1.2, con: 0.3, sat: 1.08, lo: [-0.018, 0.0, 0.034], hi: [0.0, 0.012, 0.024] },
   '4am_iso': { room: 0.3, lamp: 1.2, mon: 2.0, scr: 1.6, monCol: 0x78aaff, con: 0.26, sat: 1.1, lo: [-0.014, 0.0, 0.03], hi: [0.02, 0.01, 0.0] },
   day:       { room: 0.95, lamp: 1.0, mon: 1.2, scr: 1.2, monCol: 0xcfe6ff, con: 0.12, sat: 0.97, lo: [-0.01, 0.012, 0.006], hi: [0.004, 0.01, 0.0] },
@@ -715,7 +716,8 @@ export function props(t, ctx) {
   if (named.Baked_ROOM) named.Baked_ROOM.children.forEach((c) => { c.visible = !zone || c.name === 'Baked_ROOM_21'; });   // in a void only his chair stays (he must sit on something)
   stage.setFigure(new THREE.Vector3(STAND[0], STAND[1], 0));
   let z0 = s; for (let k = 0; k < 8; k++) { const p = prevShot(z0); if (!p || p === z0 || p.zone !== s.zone) break; z0 = p; }
-  stage.set(zone, t, { ...(s.zopt || {}), rise: s.rise, age: t - (s.zoneAt ?? z0.zoneAt ?? z0.t0) });
+  stage.set(zone, t, { ...(s.zopt || {}), rise: s.rise, age: t - (s.zoneAt ?? z0.zoneAt ?? z0.t0), camV: camPos(t) });
+  if (glowPass) glowPass.params.gain = ({ dome: 0.6, door: 0.7, down: 0.8 })[zone] ?? 1.45;   // the ray worlds: dozens of sources, gentler halos
   // the desk falls away (K24 into K25): a plane sweeps it off from the top while the camera is overhead
   DESK_SWEEP.constant = s.deskAway ? 1.7 - 1.85 * ramp(t, s.deskAway[0], s.deskAway[1]) : 99;
   const clips = (zone ? [SHELF_CUT] : []).concat(s.deskAway && t > s.deskAway[0] ? [DESK_SWEEP] : []);
