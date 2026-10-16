@@ -22,7 +22,7 @@ import { createSpark } from './spark.js';
 import { icon, envelope, codeBlock, pipeIcon, pixelArrow, checkMark, MODULE_ORDER, PIPE_ORDER, lifeUp, LIFE_UPS } from './props.js';
 import { captureRest, stand, plantFeet, lookUp, reach, grip, handWorld, bones, makeMug, makePhone, begin, end, orientHand, curl, gripPoint, touch, pointIndex, curlAnat, palmFrame } from './rig.js';
 import { setPix } from './pix.js';
-import { bodyGrip, gulpAt, tremor, typeHands } from './grip.js';
+import { bodyGrip, gulpAt, tremor, typeHands, phoneGrip } from './grip.js';
 import { addKeyLegends } from './keys.js';
 export { LOOKS, LOOK_NAME } from '../s03/looks.js';
 
@@ -1137,13 +1137,34 @@ function handsBehindHead(root, w = 1) {
   }
 }
 
-// both forearms along the chair's arms, hands resting over their front ends, fingers loose
-const ARMREST = { L: [0.94, 4.34, 0.68], R: [1.15, 4.34, 0.68] };   // forward on the thighs: the elbows bend, the arms rest   // hands together, resting in his lap   // the chair has no arms: hands rest on his thighs
+// hands resting on his thighs (the chair has no arms). Round 14 (K13, director: the left wrist bent weirdly): the hand
+// was IK'd to a point in front of the knee and hung off it, the wrist flexed ~70 deg. Now the palm lies ON the top of
+// the thigh, 60% of the way to the knee, the hand in line with the forearm and the thigh (wrist neutral, a few degrees
+// of extension), palm down, the fingers draped loosely over the thigh's side; the elbow hangs down and a little out
 function armsOnChair(root, sides = ['L', 'R']) {
+  const b = bones(root), W = (o) => o.getWorldPosition(new THREE.Vector3()), up = new THREE.Vector3(0, 1, 0);
   for (const side of sides) {
-    const out = new THREE.Vector3(side === 'L' ? -1 : 1, 0, 0);
-    reach(root, side, B(...ARMREST[side]), new THREE.Vector3(0, -0.8, 0.3).addScaledVector(out, 0.9).normalize());   // elbows soft, out to the sides
-    curlAnat(root, side, { Index: [14, 22, 12], Middle: [16, 26, 14], Ring: [20, 30, 16], Pinky: [24, 32, 18] }, [6, 10, 6]);   // relaxed, draped over the knee
+    const S = side === 'L' ? 'Left' : 'Right', hip = b[S + 'UpLeg'], knee = b[S + 'Leg'];
+    if (!hip || !knee) continue;
+    root.updateMatrixWorld(true);
+    const H = W(hip), K = W(knee), thigh = K.clone().sub(H);
+    const along = thigh.clone().addScaledVector(up, -thigh.dot(up)).normalize();          // the thigh's run, level
+    const inward = new THREE.Vector3().crossVectors(up, along).normalize().multiplyScalar(side === 'L' ? -1 : 1);   // toward his midline
+    const goal = H.clone().lerp(K, 0.6).addScaledVector(up, 0.082).addScaledVector(inward, -0.012);
+    const fdir = along.clone().addScaledVector(up, -0.12).addScaledVector(inward, 0.18).normalize();   // fingers down the thigh, a touch inward
+    const across = inward.clone();                                                          // index - pinky: the index on the inner side
+    const pole = new THREE.Vector3(0, -1, 0).addScaledVector(inward, -0.6).addScaledVector(along, -0.2).normalize();
+    const wrist = goal.clone().addScaledVector(along, -0.07);
+    for (let it = 0; it < 8; it++) {
+      reach(root, side, wrist, pole);
+      orientHand(root, side, fdir, across);
+      const P = palmFrame(root, side); if (!P) break;
+      const miss = goal.clone().sub(P.centre); wrist.add(miss);
+      if (miss.length() < 0.0008 && it > 2) break;
+    }
+    reach(root, side, wrist, pole);
+    orientHand(root, side, fdir, across);
+    curlAnat(root, side, { Index: [10, 18, 10], Middle: [12, 20, 12], Ring: [14, 22, 12], Pinky: [16, 24, 14] }, [6, 10, 6]);   // relaxed, draped
   }
 }
 
@@ -1285,26 +1306,31 @@ function holdProp(s, who, ctx, t = 0) {
     const P0 = h.to === 'phone' ? eye.clone().addScaledVector(fwd, 0.27).addScaledVector(up, -0.17).addScaledVector(right, 0.03 * side) : target.clone();
     const n = eye.clone().sub(P0).normalize();                                   // the screen faces his eyes
     const u = up.clone().addScaledVector(n, -up.dot(n)).normalize();             // the phone's long axis, upright on the screen plane
-    const rp = right.clone().addScaledVector(n, -right.dot(n)).normalize();
-    // the fingers continue the forearm (a wrist barely bends sideways), turned a little across the back of the phone
-    const across = rp.clone().multiplyScalar(-side);
-    const spin = new THREE.Vector3().crossVectors(across, u).normalize();              // rotates across -> u (palm to his face)
-    const S2 = h.side === 'L' ? 'Left' : 'Right', foB = b[S2 + 'ForeArm'], haB = b[S2 + 'Hand'];
-    let fingerDir = u.clone().addScaledVector(across, 0.6).normalize();
-    const palmAt = P0.clone().addScaledVector(n, -0.019).addScaledVector(u, -0.04);
     const sipPole = new THREE.Vector3(0, -1, 0).addScaledVector(right, 0.6 * side).addScaledVector(fwd, -0.2).normalize();
-    let wrist = palmAt.clone().addScaledVector(up, -0.07).addScaledVector(fwd, -0.02);
-    for (let it = 0; it < 6; it++) {
-      reach(who, h.side, wrist, sipPole);
-      const F = haB.getWorldPosition(new THREE.Vector3()).sub(foB.getWorldPosition(new THREE.Vector3())).normalize();
-      const Fp = F.clone().addScaledVector(n, -F.dot(n)).normalize();
-      fingerDir = Fp.clone().addScaledVector(across, 0.45).normalize();
-      orientHand(who, h.side, fingerDir, new THREE.Vector3().crossVectors(spin, fingerDir).normalize());
-      const PF = palmFrame(who, h.side); if (!PF) break;
-      wrist.add(palmAt.clone().sub(PF.centre));
+    if ((h.grip ?? 'cradle') === 'cradle') {
+      // round 14 (K12: the phone overlapped the hand): the cradle grip, the back of the phone on the fingers (grip.js)
+      phoneGrip(who, h.side, P0, n, u, { pole: sipPole, ...(h.pg || {}) });
+    } else {
+      const rp = right.clone().addScaledVector(n, -right.dot(n)).normalize();
+      // the fingers continue the forearm (a wrist barely bends sideways), turned a little across the back of the phone
+      const across = rp.clone().multiplyScalar(-side);
+      const spin = new THREE.Vector3().crossVectors(across, u).normalize();              // rotates across -> u (palm to his face)
+      const S2 = h.side === 'L' ? 'Left' : 'Right', foB = b[S2 + 'ForeArm'], haB = b[S2 + 'Hand'];
+      let fingerDir = u.clone().addScaledVector(across, 0.6).normalize();
+      const palmAt = P0.clone().addScaledVector(n, -0.019).addScaledVector(u, -0.04);
+      let wrist = palmAt.clone().addScaledVector(up, -0.07).addScaledVector(fwd, -0.02);
+      for (let it = 0; it < 6; it++) {
+        reach(who, h.side, wrist, sipPole);
+        const F = haB.getWorldPosition(new THREE.Vector3()).sub(foB.getWorldPosition(new THREE.Vector3())).normalize();
+        const Fp = F.clone().addScaledVector(n, -F.dot(n)).normalize();
+        fingerDir = Fp.clone().addScaledVector(across, 0.45).normalize();
+        orientHand(who, h.side, fingerDir, new THREE.Vector3().crossVectors(spin, fingerDir).normalize());
+        const PF = palmFrame(who, h.side); if (!PF) break;
+        wrist.add(palmAt.clone().sub(PF.centre));
+      }
+      reach(who, h.side, wrist, sipPole); orientHand(who, h.side, fingerDir, new THREE.Vector3().crossVectors(spin, fingerDir).normalize());
+      curlAnat(who, h.side, { Index: [22, 48, 30], Middle: [26, 52, 32], Ring: [30, 56, 34], Pinky: [36, 60, 36] }, [14, 12, 8]);
     }
-    reach(who, h.side, wrist, sipPole); orientHand(who, h.side, fingerDir, new THREE.Vector3().crossVectors(spin, fingerDir).normalize());
-    curlAnat(who, h.side, { Index: [22, 48, 30], Middle: [26, 52, 32], Ring: [30, 56, 34], Pinky: [36, 60, 36] }, [14, 12, 8]);
     CH1.phone(phoneG, h.ph ?? 47); phone.userData.tex.needsUpdate = true;
     phone.visible = true;
     phone.position.copy(P0); phone.up.copy(u); phone.lookAt(P0.clone().add(n));

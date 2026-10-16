@@ -106,6 +106,51 @@ export function tremor(t, { amp = 0.0022, fine = 0.00025, hz = 1.4 } = {}) {
   return new THREE.Vector3(a(0), a(1.9) * 0.8, a(3.7));
 }
 
+// Round 14 (K12, director: "the phone overlaps the hand"): the cradle grip of a phone held up to read. The phone's back
+// lies on the fingers and palm, the palm behind its thumb-side edge, the four fingers run across the back and curl round
+// the far edge (their tips just reaching its front), the knuckles stacked up its long side, the thumb resting over the
+// lower corner of the screen. P0: the phone's centre; n: its screen normal (toward his eyes); u: its long axis (up).
+const PHONE = { w: 0.072, h: 0.152, d: 0.008 };
+export function phoneGrip(who, side, P0, n, u, o = {}) {
+  const b = bones(who), S = side === 'L' ? 'Left' : 'Right', sg = side === 'L' ? -1 : 1;
+  const e = new THREE.Vector3().crossVectors(u, n).normalize().multiplyScalar(sg);       // toward the hand's own edge (u x n: his right)
+  // the palm faces the phone's back-and-edge corner (a deg from the back): its normal Np; the fingers run across the
+  // back toward the far edge (f, knuckles up the long side): for the right hand palm = cross(u, f), so f = Np x u
+  const a = THREE.MathUtils.degToRad(o.a ?? 50);
+  const Np = n.clone().multiplyScalar(Math.cos(a)).addScaledVector(e, -Math.sin(a)).normalize();
+  const f = side === 'L' ? new THREE.Vector3().crossVectors(u, Np) : new THREE.Vector3().crossVectors(Np, u);
+  const goal = P0.clone().addScaledVector(e, PHONE.w / 2 - (o.edge ?? 0.004)).addScaledVector(n, -PHONE.d / 2).addScaledVector(Np, -(o.palm ?? 0.02)).addScaledVector(u, -(o.low ?? 0.025));
+  const pole = o.pole;
+  const wrist = goal.clone().addScaledVector(e, 0.05).addScaledVector(u, -0.06);
+  for (let it = 0; it < 8; it++) {
+    reach(who, side, wrist, pole);
+    orientHand(who, side, f.clone().addScaledVector(u, o.diag ?? 0.2).normalize(), u);
+    const P = palmFrame(who, side); if (!P) break;
+    const miss = goal.clone().sub(P.centre); wrist.add(miss);
+    if (miss.length() < 0.0008 && it > 2) break;
+  }
+  reach(who, side, wrist, pole);
+  orientHand(who, side, f.clone().addScaledVector(u, o.diag ?? 0.2).normalize(), u);
+  // each finger curls until its tip comes round the far edge to the front (n = 0 at the screen's plane)
+  const sc = { Index: 30, Middle: 30, Ring: 30, Pinky: 30 }, lo = { Index: 0, Middle: 0, Ring: 0, Pinky: 0 }, hi = { Index: 80, Middle: 80, Ring: 80, Pinky: 80 };
+  const pat = [1.0, 0.55, 0.35], thumb = o.thumb || [14, 12, 8];
+  const apply = () => curlAnat(who, side, Object.fromEntries(Object.keys(sc).map((k) => [k, pat.map((x) => x * sc[k])])), thumb);
+  for (let it = 0; it < 9; it++) {
+    apply();
+    for (const k of Object.keys(sc)) {
+      const tip = b[`${S}Hand${k}4`] || b[`${S}Hand${k}3`]; if (!tip) continue;
+      const tp = W(tip).sub(P0);
+      // past the far edge (along f beyond w/2) the tip must come forward to the front; short of it, it stays behind
+      const across = -tp.dot(e), depth = tp.dot(n);
+      const want = across > PHONE.w / 2 - 0.004 ? -0.0005 : -(PHONE.d / 2 + 0.006);
+      if (depth < want) lo[k] = sc[k]; else hi[k] = sc[k];                       // still behind: curl more
+      sc[k] = (lo[k] + hi[k]) / 2;
+    }
+  }
+  apply();
+  closeFingers(who, side, 0.5);
+}
+
 // Round 14 (K07, director: "hand placements on the keyboard more open and aligned with the keys"): touch-typing hands.
 // Each hand rests over its home keys (A S D F / J K L ;): the palm floats behind and above them, the hand slopes down
 // to the keys, each finger is turned toward its own key and curled just enough to rest on it. Typing: keystrokes at
