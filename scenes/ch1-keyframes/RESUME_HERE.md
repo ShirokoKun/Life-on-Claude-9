@@ -1,4 +1,30 @@
-# Resume here (2026-10-16): round 11 done, final 1080p render
+# Resume here (2026-10-16, evening): round 13, the look overhaul (keyframes only)
+
+**Start with `scenes/ch1-keyframes/NOTES_R13_LOOK.md`.** It has:
+- the reference study (OpenKnight);
+- the audit of the r12 final;
+- the colour script;
+- the icon brief;
+- Claude's arc (spark, then character);
+- what's done and what's open (section 7).
+
+**Board:** `scenes/ch1-keyframes/board/ch1_keyframes_r13.jpg`.
+
+**Rules for this round (director):** work in keyframes; no bake, preview or film render until asked; show before/after boards (`node tools/kf_board.mjs --take <x> --gpu --url http://localhost:8791/index.html`, or `tools/_probe_frames.mjs`).
+
+**New in round 13:**
+- `kf1/glow.js`: the deep glow, after the tone mapper.
+- `kf1/spark.js`: Claude's first form.
+- `voxel.js`: `holoVoxels` for the holographic icons.
+- `MOOD` / `ZMOOD` in `kf1/scene.js`: the colour script per preset and zone.
+- `pick('iris')` / `pick('bone:...')` focus targets.
+- The `tapEnter` IK.
+
+**Checkpoint before round 13:** git tag `ch1-checkpoint-r12` (the r12 film is in `../checkpoints/ch1-r12/` on the PC; on a new machine, re-render it from the tag).
+
+---
+
+## Earlier: 2026-10-16, round 11 and 12, the 1080p final
 
 **Latest state (read first):**
 - Round 11 (the director's notes on the `anim2` preview): every note and its fix is in `NOTES_R11.md`. Checked in stills; the 720p
