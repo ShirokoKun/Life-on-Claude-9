@@ -17,6 +17,7 @@ import { SCREENS as S4 } from '../s04/scene.js';
 import { createClaude } from './claude.js';
 import { createStage } from './stage.js';
 import { GlowPass } from './glow.js';
+import { createSpark } from './spark.js';
 import { icon, envelope, codeBlock, pipeIcon, pixelArrow, checkMark, MODULE_ORDER, PIPE_ORDER, lifeUp, LIFE_UPS } from './props.js';
 import { captureRest, stand, plantFeet, lookUp, reach, grip, handWorld, bones, makeMug, makePhone, begin, end, orientHand, curl, gripPoint, touch, pointIndex, curlAnat, palmFrame } from './rig.js';
 import { setPix } from './pix.js';
@@ -102,7 +103,7 @@ export const SHOTS = [
   { id: 'K12', name: '400 unread', t0: 41.9, t1: 46.4, mm: [30, 30], f: 2.0,
     from: [2.10, 3.92, 1.16], to: [2.042, 4.391, 1.16], at0: [1.00, 3.98, 1.20], at1: [1.00, 3.98, 1.20], focus: 'eyes', mv: [45.6, 46.4], ease: 'in', arc: [1.05, 4.03], roll: [0, 0],
     lookK: [[41.9, -16, -15], [46.4, -18, -18]], breath: 0.32, gaze: 'phone', light: 'day', iv: ['s04', 14.8], s4: 8.0, glass: false, lean: 10, look: 2, hand: { side: 'R', to: 'phone', prop: 'phone', ph: 44.0 },
-    cl: { at: [0.92, 4.30, 1.20], face: [1.05, 4.02, 1.15], s: 0.8, mood: 'warm', pose: 'hover', glow: 0.7, lightK: 0.4, born: 42.2, exit: 46.1, path: [[42.2, [1.30, 4.28, 1.18]], [43.2, [1.10, 4.55, 1.32]], [44.0, [0.66, 4.12, 1.36]], [44.8, [0.98, 3.70, 1.30]], [45.6, [0.92, 4.30, 1.20]]] }, beat: 'V09 a', board: 'r1c7 (A r2c4 “complaining to claude”)', tr: 'push down from the top-down into him',
+    cl: { at: [0.92, 4.30, 1.20], face: [1.05, 4.02, 1.15], s: 1.7, mood: 'warm', pose: 'hover', glow: 0.7, lightK: 0.4, form: 'spark', born: 42.2, exit: 46.1, path: [[42.2, [1.30, 4.28, 1.18]], [43.2, [1.10, 4.55, 1.32]], [44.0, [0.66, 4.12, 1.36]], [44.8, [0.98, 3.70, 1.30]], [45.6, [0.92, 4.30, 1.20]]] }, beat: 'V09 a', board: 'r1c7 (A r2c4 “complaining to claude”)', tr: 'push down from the top-down into him',
     why: 'V09 IVAN “i have like 400 unread emails. every single one wants a reply.” Leaning back in the afternoon light, talking into the phone held up near his face. Claude, small and warm, circles him and drifts round in front of him as he talks (the orbit is animated: it starts behind his shoulder and ends between him and the phone).' },
   { id: 'K13', name: 'Drowning here!', t0: 46.4, t1: 51.01, mm: [40, 40], f: 2.2,
     from: [1.923, 5.472, 1.08], to: [0.82, 5.70, 1.08], at0: [1.06, 4.05, 1.02], at1: [1.06, 4.05, 1.02], focus: 'eyes', mv: [46.4, 47.6], ease: 'out', arc: [1.05, 4.03], roll: [0, 0],
@@ -110,15 +111,15 @@ export const SHOTS = [
     key: { at: [0.85, 4.80, 1.70], color: 0xffc090, k: 1.4 }, ev: -0.3,
     beat: 'V09 b', board: 'r1c7 (director ref: the man in his chair inside a storm of paper)', tr: 'the room drops away around his chair as the pages rise; out: snap back to the daylit desk (K14)',
     why: 'V09 IVAN “i’m fucking drowning here!” The imagined moment: the room is gone, he sits in his chair in a dark void, hundreds of glowing pages hang around him at every depth, the near ones soft and huge past the lens, a fine snow of specks between them.' },
-  { id: 'K14', name: 'Hello, Claude', t0: 51.01, t1: 55.3, mm: [27, 27], f: 2.8,
-    from: [0.70, 4.45, 1.22], to: [0.709, 4.478, 1.22], at0: [1.12, 4.31, 1.10], at1: [1.129, 4.338, 1.1], focus: 'eyes', roll: [0, 0],
-    lookK: [[51.0, -18, -15], [51.9, -18, -15], [53.8, 8, -22]], gaze: [[51.0, 'phone'], [52.0, 'phone'], [52.7, 'claude']], light: 'day', ev: -0.5, iv: ['s04', 14.8], s4: 14.4, glass: false, hand: { side: 'R', to: 'phone', prop: 'phone', ph: 50.0 }, beat: 'V10 a', board: 'r1c8 (A r3c1)', tr: 'cut on the chime (51.01)',
-    cl: { at: [1.15, 4.41, 1.17], face: [1.05, 4.06, 1.20], s: 1.1, mood: 'warm', pose: 'wave', glow: 0.75, lightK: 0.3, born: 51.01 },
+  { id: 'K14', name: 'Hello, Claude', t0: 51.01, t1: 55.3, mm: [40, 40], f: 2.0,
+    from: [1.66, 4.40, 1.22], to: [1.64, 4.37, 1.22], at0: [1.08, 4.23, 1.20], at1: [1.08, 4.23, 1.20], focus: 'iris', roll: [0, 0],
+    lookK: [[51.0, -18, -15], [51.9, -18, -15], [53.8, 8, -22]], gaze: [[51.0, 'phone'], [52.0, 'phone'], [52.7, 'claude']], light: 'day', ev: -0.9, iv: ['s04', 14.8], s4: 14.4, glass: false, hand: { side: 'R', to: 'phone', prop: 'phone', ph: 50.0 }, beat: 'V10 a', board: 'r1c8 (A r3c1)', tr: 'cut on the chime (51.01)',
+    cl: { at: [1.15, 4.41, 1.17], face: [1.05, 4.06, 1.20], s: 1.1, mood: 'warm', pose: 'wave', glow: 0.9, lightK: 1.4, form: 'spark', born: 51.01, bornDur: 0.6, path: [[51.01, [1.10, 4.26, 1.04]], [52.1, [1.11, 4.31, 1.22]], [55.3, [1.11, 4.30, 1.24]]] },
     why: 'V10 CLAUDE “That sounds genuinely exhausting...” Claude pops out of the phone and waves; its warm light on his face as he looks up at it.' },
   { id: 'K15', name: 'The offer', t0: 55.3, t1: 60.0, mm: [28, 28], f: 2.8,
     from: [1.28, 3.30, 1.42], to: [1.339, 3.311, 1.42], at0: [1.05, 4.55, 1.28], at1: [1.109, 4.561, 1.28], focus: [1.05, 4.50, 1.30], roll: [0, 0],
     lookK: [[55.3, 6, 12], [59.6, 8, -12]], dimIn: [1.0, 1.0], gaze: [[55.3, [0.70, 4.50, 1.30]], [59.5, [1.40, 4.50, 1.30]]], light: 'day', iv: ['s04', 24.9], s4: 19.5, glass: false, dim: 0.16, ev: -1.7, hide: ['Baked_DESK_8', 'Baked_DESK_9'], pipe: { born: [56.2, 57.0, 58.1, 59.2], state: 'offer', bright: 2.4, light: 0.08 }, beat: 'V10 b', board: 'r1c9 (MOTION GRAPHICS)', tr: 'the room dims (not to a void: about a sixth of its light) as the offer builds module by module in the air; the dim carries on into K18 and the V13 void',
-    cl: { at: [0.42, 4.30, 1.08], face: [1.28, 3.30, 1.42], s: 1.5, mood: 'warm', pose: 'present', glow: 2.2, lightK: 0.25 },
+    cl: { at: [0.42, 4.30, 1.08], face: [1.28, 3.30, 1.42], s: 1.5, mood: 'warm', pose: 'present', glow: 2.2, lightK: 0.25, form: 'spark', evo: 0.3 },
     why: 'V10 CLAUDE “I can write a script that sorts your inbox and drafts the replies for you.” The afternoon room dims and the offer assembles above the desk as pixel objects: inbox, sort, draft, you. Claude presents it like a salesman; Ivan reads it from his chair.' },
   { id: 'K16', name: 'Want me to build one?', t0: 60.0, t1: 64.11, mm: [60, 60], f: 5.6,
     from: [0.72, 4.06, 1.00], to: [0.745, 4.029, 1.0], at0: [1.02, 4.30, 0.80], at1: [1.045, 4.269, 0.8], focus: [1.00, 4.28, 0.80], mv: [60.0, 64.05], roll: [0, 0],
@@ -429,7 +430,7 @@ export const SCREENS = {
 
 // ---------------------------------------------------------------- set-up
 let RL = null, claude = null, stage = null, note = null, cardMesh = null, label = null, rig = null;
-let glowPass = null, clearLens = null, lensMat = null, keyLight = null, imagPass = null, legends = null, postRef = null, bloom0 = null;
+let spark = null, atmoRef = null, glowPass = null, clearLens = null, lensMat = null, keyLight = null, imagPass = null, legends = null, postRef = null, bloom0 = null;
 let winLight = null, crossLight = null, cyanLight = null, amberLight = null, mug = null, mugGhosts = [], phone = null, refl = null;
 let ghostChairs = [], beam = null, weave = null, lifeUps = [], icons = [], iconLights = [], envs = [], blocks = [], pipe = null, thin = null, phoneLight = null, greenLight = null;
 
@@ -450,6 +451,8 @@ export async function setup(args) {
   refineGlass(args.named || {}, scene);                          // every Ivan's bind pose, before any performance touches the bones
 
   claude = createClaude({ size: 0.011 }); scene.add(claude.group); claude.group.visible = false;
+  atmoRef = args.atmo || null;
+  spark = createSpark(); scene.add(spark.group);   // Claude's first form (round 13)
   stage = createStage(scene, { center: [1.04, 3.95] });
   for (const mode of ['cheat', 'door', 'dome', 'down', 'tower', 'balcony', 'monolith']) stage.set(mode, 0);   // fill every buffer once
   stage.set(null);
@@ -724,7 +727,7 @@ export function props(t, ctx) {
 
   // the world outside the window by day and at dawn: a bright haze (the window reads as the light source)
   if (!outside) { outside = []; root.traverse((o) => { if (o.isMesh && /^(Hill|Ground|Neighbourhood|Tree_Line|Facade_Towers)/.test(o.name)) outside.push({ m: o.material, e: o.material.emissive.clone(), k: o.material.emissiveIntensity }); }); }
-  const haze = { day: [0xdfe8f2, 3.2], sunrise: [0xffb27a, 2.6], evening: [0x6a4a6a, 0.6] }[s.light];
+  const haze = { day: [0xb9cde2, 1.25], sunrise: [0xffb27a, 2.6], evening: [0x6a4a6a, 0.6] }[s.light];   // round 13: day was 3.2 (a blown white band)
   for (const o of outside) { if (haze) { o.m.emissive.setHex(haze[0]); o.m.emissiveIntensity = haze[1] * dim; } else o.m.emissive.copy(o.e); }
 
   for (const k of ['Water', 'Water_Bubbles', 'Water_Glass']) if (named[k]) named[k].visible = s.glass !== false && (!zone || ['cheat', 'tower', 'iso'].includes(zone));
@@ -780,6 +783,15 @@ export function props(t, ctx) {
     const p = B(...at);
     const yaw = cl.face ? Math.atan2(B(...cl.face).x - p.x, B(...cl.face).z - p.z) : 0;
     claude.set({ pos: p, yaw, scale: cl.s || 1, mood: cl.mood, pose: cl.pose, t, build, glow: cl.glow ?? 1, lightK: (cl.lightK ?? 1) * lk });
+    if (cl.form === 'spark') {                                     // round 13: before the character, Claude is the spark
+      claude.group.visible = false;
+      spark.set({ pos: p.clone().add(new THREE.Vector3(0, 0.045 * (cl.s || 1), 0)), t, born: build, evo: cl.evo || 0, glow: cl.glow ?? 1, lightK: (cl.lightK ?? 1) * Math.max(lk, build), size: 0.07 * (cl.s || 1) });
+    } else spark.set({ born: 0 });
+  } else spark.set({ born: 0 });
+  if (atmoRef) {                                                   // round 13: the dust round Claude catches its light (magic in the air)
+    const u = atmoRef.dust.uniforms, sp = spark.group.visible, on = (claude.group.visible || sp) && !zone;
+    u.orbK.value = on ? 1.6 * (cl?.glow ?? 1) : 0;
+    if (on) { (sp ? spark.halo : claude.halo).getWorldPosition(u.orbPos.value); u.orbCol.value.copy((sp ? spark : claude).light.color); }
   }
 
   // the modules: lit one by one over the desk in the void (V13), orbiting (V15), idle on the wall at dawn (V28)
@@ -1069,6 +1081,7 @@ function gazePoint(g, t, ctx) {
   }
   if (Array.isArray(g)) return B(...g);
   if (g === 'phone' && phone && phone.visible) return phone.getWorldPosition(new THREE.Vector3());
+  if (g === 'claude' && spark && spark.group.visible) return spark.group.getWorldPosition(new THREE.Vector3());
   if (g === 'claude' && claude && claude.group.visible) return claude.group.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, 0.04, 0));
   if (g === 'cam' && ctx.camera) return ctx.camera.position.clone();
   if (g === 'monitor') return B(1.58, 4.46, 1.0);

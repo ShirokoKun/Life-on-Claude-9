@@ -54,6 +54,14 @@ export function createClaude({ size = 0.012, motes = 40 } = {}) {
   const mote = new THREE.InstancedMesh(new THREE.BoxGeometry(size * 0.3, size * 0.3, size * 0.3), moteMat, motes);
   mote.frustumCulled = false; group.add(mote);
 
+  // round 13: the warm halo in the air around it (r6 had it: Claude lit the air and his face; it went missing). A soft
+  // additive glow that breathes, behind the voxels; with the light it makes Claude a source, not an object
+  const hc = document.createElement('canvas'); hc.width = hc.height = 128; const hg = hc.getContext('2d');
+  const hgr = hg.createRadialGradient(64, 64, 0, 64, 64, 64);
+  hgr.addColorStop(0, 'rgba(255,255,255,0.55)'); hgr.addColorStop(0.25, 'rgba(255,255,255,0.18)'); hgr.addColorStop(0.6, 'rgba(255,255,255,0.05)'); hgr.addColorStop(1, 'rgba(255,255,255,0)');
+  hg.fillStyle = hgr; hg.fillRect(0, 0, 128, 128);
+  const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(hc), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, color: 0xffa36b }));
+  halo.position.y = 4 * size; halo.renderOrder = 5; group.add(halo);
   const light = new THREE.PointLight(0xffa36b, 0, 1.2, 2);
   light.position.y = 4 * size; group.add(light);
 
@@ -82,8 +90,9 @@ export function createClaude({ size = 0.012, motes = 40 } = {}) {
     }
     for (const m of mats) { m.uniforms.uGlow.value = M.glow * glow; m.uniforms.uGlitch.value = glitch; m.uniforms.uTime.value = t; }
     moteMat.uniforms.uGlow.value = M.moteGlow * glow * moteK;
-    light.color.setHex(M.light); light.intensity = 0.7 * M.lightK * glow * lightK * build * scale * scale;
-    light.distance = 1.2 * scale;
+    light.color.setHex(M.light); light.intensity = 2.2 * M.lightK * glow * lightK * build * scale * scale;   // round 13: x3, it lights his face again
+    light.distance = 1.8 * scale;
+    halo.material.color.setHex(M.light).multiplyScalar(0.55 * glow * build); halo.scale.setScalar(size * 26 * scale * (1 + 0.06 * Math.sin(t * 1.9)));   // breathes
 
     // poses (degrees in comments): arms rotate about z at the shoulder, legs swing about x at the hip
     const A = { hover: [-20, 20], wave: [-25, 150], present: [-60, 60], type: [-70, 70], hold: [160, -160], cheer: [140, -140],
@@ -116,5 +125,5 @@ export function createClaude({ size = 0.012, motes = 40 } = {}) {
     mote.instanceMatrix.needsUpdate = true;
   }
   set({});
-  return { group, set, light, size };
+  return { group, set, light, halo, size };
 }

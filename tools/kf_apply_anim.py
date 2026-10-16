@@ -16,17 +16,18 @@ def block(sid):
 
 def strip_fields(b):
     for f in FIELDS: b = re.sub(r" %s: (\[\[.*?\]\]\]|\[\[.*?\]\]|\[[^\]]*\]|\{[^}]*\}|[\d.\-]+|'[^']*'|true)," % f, '', b)
-    b = re.sub(r", (born|bornDur|exit): [\d.]+", '', b)
+    b = re.sub(r", (born|bornDur|exit|evo): [\d.]+", '', b)
+    b = re.sub(r", form: '[a-z]+'", '', b)
     b = re.sub(r", path: \[\[.*?\]\]\]", '', b)
     return b
 
 ANIM = {
     'K01': {'fadeIn': '[0.0, 1.0]'},
     'K09': {'weaveT0': '31.3', 'cl': {'born': 30.35}},
-    'K12': {'lookK': '[[41.9, -16, -15], [46.4, -18, -18]]', 'breath': '0.32', 'cl': {'born': 42.2, 'exit': 46.1, 'path': '[[42.2, [1.30, 4.28, 1.18]], [43.2, [1.10, 4.55, 1.32]], [44.0, [0.66, 4.12, 1.36]], [44.8, [0.98, 3.70, 1.30]], [45.6, [0.92, 4.30, 1.20]]]'}},
+    'K12': {'lookK': '[[41.9, -16, -15], [46.4, -18, -18]]', 'breath': '0.32', 'cl': {'form': "'spark'", 'born': 42.2, 'exit': 46.1, 'path': '[[42.2, [1.30, 4.28, 1.18]], [43.2, [1.10, 4.55, 1.32]], [44.0, [0.66, 4.12, 1.36]], [44.8, [0.98, 3.70, 1.30]], [45.6, [0.92, 4.30, 1.20]]]'}},
     'K13': {'rise': '[46.4]', 'breath': '0.4', 'lookK': '[[46.4, -20, -30], [51.0, -24, -32]]'},
-    'K14': {'lookK': '[[51.0, -18, -15], [51.9, -18, -15], [53.8, 8, -22]]', 'cl': {'born': 51.01}},
-    'K15': {'lookK': '[[55.3, 6, 12], [59.6, 8, -12]]', 'dimIn': '[1.0, 1.0]', 'pipe_born': '[56.2, 57.0, 58.1, 59.2]'},
+    'K14': {'lookK': '[[51.0, -18, -15], [51.9, -18, -15], [53.8, 8, -22]]', 'cl': {'form': "'spark'", 'born': 51.01, 'bornDur': 0.6, 'path': '[[51.01, [1.10, 4.26, 1.04]], [52.1, [1.11, 4.31, 1.22]], [55.3, [1.11, 4.30, 1.24]]]'}},   # round 13: Claude's first form
+    'K15': {'lookK': '[[55.3, 6, 12], [59.6, 8, -12]]', 'dimIn': '[1.0, 1.0]', 'pipe_born': '[56.2, 57.0, 58.1, 59.2]', 'cl': {'form': "'spark'", 'evo': 0.3}},   # the rays start breaking into pixels
     'K17': {'evTo': '[-7, 68.1, 0.4]'},
     'K18': {'dimIn': '[0.0, 0.6]', 'pipe_ticks': '[69.2, 69.55, 69.9, 70.25]'},
     'K05': {'leanK': '[[15.6, 9], [16.3, 9], [17.7, -3]]', 'lookK': '[[15.6, -4, 0], [16.4, -4, 0], [17.6, 8, 0]]'},
@@ -89,6 +90,9 @@ CAMS = {
     # round 12: K40 from high front-left (the top-down hid how he holds the mug); a slow push. K41 / K43 focus on his real eyes / fingertip
     'K40': dict(mm='[32, 32]', f='2.8', frm='[0.80, 4.90, 1.30]', to='[0.806, 4.854, 1.281]', at0='[0.90, 4.15, 0.93]', at1='[0.90, 4.15, 0.93]', focus='[0.92, 4.34, 0.90]'),
     'K41': dict(focus="'iris'"),
+    # round 13: K14 restaged as the profile two-shot (r6 / s04 B04): the spark rises out of his phone and hangs in front of
+    # his face, its warm light on him, the window behind
+    'K14': dict(mm='[40, 40]', f='2.0', frm='[1.66, 4.40, 1.22]', to='[1.64, 4.37, 1.22]', at0='[1.08, 4.23, 1.20]', at1='[1.08, 4.23, 1.20]', focus="'iris'"),
     # round 13: K35 a 3/4 from behind his left shoulder (cheek, ear, glasses arm, mug at the lips, the rail and the city);
     # straight from behind, the hand and mug stuck out beside his head and the neck read as a flat tube
     'K35': dict(mm='[35, 35]', f='2.4', frm='[0.95, 4.55, 1.38]', to='[0.91, 4.50, 1.38]', at0='[1.88, 3.30, 1.31]', at1='[1.88, 3.30, 1.31]', focus="'iris'"),

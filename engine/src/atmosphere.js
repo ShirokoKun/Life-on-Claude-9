@@ -31,8 +31,9 @@ export function createAtmosphere({ lamp, lampTarget, screen, count = 2200, cente
   const dust = new THREE.ShaderMaterial({
     uniforms: { ...shared, time, cocK: { value: 0 }, focus: { value: 1 }, px: { value: 1 },
       lampPos: { value: lamp.clone() }, lampDir: { value: lampTarget.clone().sub(lamp).normalize() },
-      screenPos: { value: screen.clone() }, gain: { value: 1.0 } },
-    vertexShader: `attribute vec4 seed; uniform float time, cocK, focus, px; uniform vec3 lampPos, lampDir, screenPos;
+      screenPos: { value: screen.clone() }, gain: { value: 1.0 },
+      orbPos: { value: new THREE.Vector3() }, orbCol: { value: new THREE.Color() }, orbK: { value: 0 } },   // a glowing thing the dust catches (kf1's Claude; 0 = off)
+    vertexShader: `attribute vec4 seed; uniform float time, cocK, focus, px, orbK; uniform vec3 lampPos, lampDir, screenPos, orbPos, orbCol;
       varying float vI; varying float vSoft; varying float vDepth; varying vec3 vCol;
       void main() {
         vec3 p = position;
@@ -45,6 +46,7 @@ export function createAtmosphere({ lamp, lampTarget, screen, count = 2200, cente
         float cone = smoothstep(0.62, 0.86, dot(L / dl, lampDir)) / (1.0 + dl * dl * 6.0);
         float scr = 1.0 / (1.0 + pow(length(p - screenPos) / 0.35, 2.0));
         vCol = vec3(1.0, 0.62, 0.32) * cone * 2.2 + vec3(0.55, 0.70, 1.0) * scr * 0.55 + vec3(0.004);   // motes only exist where light is
+        if (orbK > 0.0) vCol += orbCol * orbK / (1.0 + pow(length(p - orbPos) / 0.3, 2.0));
         float size = (0.0007 + 0.0011 * seed.w) * px / d;          // 0.7-1.8 mm motes
         float coc = cocK * abs(d - focus) / d;                     // same thin lens as the scene
         float sz = max(size, coc * 2.0);
