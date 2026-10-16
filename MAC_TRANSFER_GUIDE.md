@@ -26,7 +26,8 @@ The film expects this layout. The studio files sit two folders above the repo.
 gh auth login
 mkdir -p ~/CLAUDE/"Life on Claude 9"
 cd ~/CLAUDE/"Life on Claude 9"
-git clone -b claude/wonderful-franklin-gzawe0 https://github.com/ShirokoKun/Life-on-Claude-9 Ivan-3dScenes
+git clone -b claude/wonderful-franklin-gzawe0 https://github.com/idkshowteam/Ivan-3dScenes Ivan-3dScenes
+# (the same history is also on https://github.com/ShirokoKun/Life-on-Claude-9)
 cd Ivan-3dScenes
 npm install
 npx playwright install chromium
