@@ -165,6 +165,10 @@ Tick a box only after the change has been **seen in a render** (board frame or t
 - [ ] **D1** (V2) After every batch, a before/after keyframe board (`renders/kf1/<take>/board.jpg`).
 - [ ] **D2** (V2) A **low-quality review film** (720p, `render_mp4 --w 1280 --h 720`) shared here when all lanes are merged.
 - [ ] **D3** Commit each lane small and descriptive on `claude/wonderful-franklin-gzawe0`; tick `NOTES.md` lines as their fixes are seen.
+- [ ] **D4** (director, 2026-10-16) **The proof sheet, before anything is called done.**
+  - For every item above: the note's words, the BEFORE frame (`before14`), the AFTER frame, and the reference (where there is one), side by side, with a verdict.
+  - Three passes over the whole checklist after merging. Pass 1 finds the misses; fix them. Pass 2 checks the fixes and their neighbours. Pass 3 is the final read against his words.
+  - Nothing is reported as done that is not merged into the branch the Studio runs.
 
 ## Interpretations (say so if any are wrong)
 - "K48 … hands shake from caffeine overload" → **K40** (the shot on that line).
