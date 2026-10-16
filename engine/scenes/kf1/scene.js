@@ -184,9 +184,9 @@ export const SHOTS = [
   // it out). He stands alone in the night void, lit from straight above; the six life-ups fly in out of the dark and
   // snap into their slots on a ring round him, each snap turning the light above him up a step; when the last locks a
   // dotted line runs round and joins them. One slow push in. (The crane into K25, flow F3, is gone: K25 is a cut.)
-  { id: 'K24', name: 'A cheat code for life', t0: 89.9, t1: 93.8, mm: [24, 24], f: 2.8,
-    from: [2.05, 10.45, 1.15], to: [2.02, 10.10, 1.16], at0: [1.04, 3.85, 1.98], at1: [1.04, 3.85, 1.99], focus: 'eyes', roll: [0, 0], ev: -0.6,
-    lifeBorn: [90.4, 90.65, 90.9, 91.15, 91.4, 91.65], light: 'void', iv: ['s03', 8.0], stand: true, look: 24, zone: 'cheat', zopt: { snaps: [90.4, 90.65, 90.9, 91.15, 91.4, 91.65], topK: 0.7, ring: { o: 'h', r: 1.6, z: 3.2, dot: 0.024 }, crown: 1.9 }, lifeScale: 1.9, lifeUps: true,
+  { id: 'K24', name: 'A cheat code for life', t0: 89.9, t1: 93.8, mm: [28, 28], f: 2.8,
+    from: [1.33, 7.80, 0.62], to: [1.30, 7.56, 0.63], at0: [1.04, 3.85, 1.03], at1: [1.04, 3.85, 1.04], focus: 'eyes', roll: [0, 0], ev: -0.7,
+    lifeBorn: [90.4, 90.65, 90.9, 91.15, 91.4, 91.65], light: 'void', iv: ['s03', 8.0], stand: true, look: 24, zone: 'cheat', zopt: { snaps: [90.4, 90.65, 90.9, 91.15, 91.4, 91.65], topK: 1.5, topAt: [0, 0.75, 3.5], topTo: 1.42, topDeg: 8, ringK: 1.1, ring: { o: 'a', r: 0.74, rz: 0.62, z: 1.36, back: 0.18, tilt: 25, arc: [200, -20], dot: 0.012 } }, lifeScale: 1.1, lifeUps: true,
     beat: 'V15 *', board: 'r2c6 (rebuilt round 14: night void, black to dark violet, stars)', tr: 'cut on the rush: out of the room into the void',
     why: 'V15 “It’s like discovering a cheat code for life.” He has figured it out: alone in a starry violet-black void, lit from above, the six life-ups snapping into a ring round him like a solved puzzle.' },
   { id: 'K25', name: 'Hours into minutes', t0: 93.8, t1: 97.4, mm: [30, 30], f: 3.2,
@@ -745,7 +745,7 @@ function follow(o, key, st, k) {
 // ---------------------------------------------------------------- what is in the frame
 const KEEP_IN_ZONE = /^(Baked_DESK|Laptop_Hinge|Laptop_Screen|Monitor_Screen|Water|Water_Bubbles|Water_Glass|Ring_Stain_\d|Lamp_Bulb_Desk)$/;
 const FIGURE_ZONES = ['down', 'dome', 'door', 'balcony', 'monolith', 'cheat'];          // he stands; no desk
-let roomVis = null, outside = null, lmUsers = null, menS03 = null;
+let roomVis = null, outside = null, lmUsers = null, menS03 = null, zoneOut = null;
 const DESK_SWEEP = new THREE.Plane(new THREE.Vector3(0, -1, 0), 99);   // keeps y < constant
 const SHELF_CUT = new THREE.Plane(new THREE.Vector3(1, 0, 0), -0.41);       // keeps x > 0.41 (three x = Blender x)
 export function props(t, ctx) {
@@ -932,7 +932,7 @@ export function props(t, ctx) {
     g.visible = !!s.lifeUps && !s.black && t >= bt; if (!g.visible) return;
     const FLY = 0.5, u = Math.min(1, Math.max(0, (t - bt) / FLY));
     const slot = B(...stage.lifeSlot(i));
-    const a = (i / 6) * Math.PI * 2 + 0.9, from = B(1.04 + Math.cos(a) * 6.5, 3.85 + Math.sin(a) * 5.0 - 2.0, 6.5 + 1.5 * Math.sin(i * 2.3));   // out of the dark, high and far
+    const a = (i / 6) * Math.PI * 2 + 0.9, from = B(1.04 + Math.cos(a) * 3.2, 3.85 + Math.sin(a) * 2.0 - 1.2, 2.6 + 0.8 * Math.sin(i * 2.3));   // out of the dark round him
     const e = 1 - Math.pow(1 - u, 3), p = from.clone().lerp(slot, e);
     p.y += Math.sin(e * Math.PI) * 0.25;                                              // an arc, not a straight line
     const snap = t - bt - FLY, pop = snap > 0 ? 1 + 0.22 * Math.exp(-snap * 9) * Math.cos(snap * 30) : 0.35 + 0.65 * e;   // the lock: a quick ring-down
@@ -1106,6 +1106,10 @@ export function props(t, ctx) {
   // round 14: at dawn the live, shadow-mapped sun (room.js) does the real work; the window-bar cookie spot stays at 0.7 as a lift on his face
   crossLight.intensity = (s.cross || 0) * 95 * (roomState.dawn && /sunrise/.test(s.light || '') ? +(new URLSearchParams(location.search).get('crossk') ?? 0.7) : 1);
   roomFrame(t, s, ctx, { zone, dim, weights: weightsFor(s.light, t, s.t0, s.t1), envAt: ROOM3.ENV_AT, lens: postRef && postRef.lens });
+  // round 14 (L2): roomFrame shows the world outside the window again every frame; in the voids it must stay gone (the
+  // hills cut a dark band across K24's starfield)
+  if (zone) { if (!zoneOut) { zoneOut = []; root.traverse((o) => { if (/^(Tree_Line|Hill|Ground|Neighbourhood|Street_|Valley_|House_Windows|Facade_Towers|Aviation_|Sky_Card)/.test(o.name)) zoneOut.push(o); }); }
+    for (const o of zoneOut) o.visible = false; }
   if (rig && rig.L.monitor && !s.flick) rig.L.monitor.color.setHex(s.green ? 0x9ff0c4 : s.cyan ? 0xc8f6ff : moodOf(s).monCol);
 
   // the floating chat window
