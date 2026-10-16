@@ -182,7 +182,7 @@ export const SHOTS = [
     why: 'V16 “Every problem that used to take hours now takes minutes.” From high above, he stands in the dark looking up at us; soft bars of red, orange, peach and cyan drift around him at every depth.' },
   { id: 'K26', name: 'A different frequency', t0: 97.4, t1: 100.9, mm: [28, 28], f: 1.4,
     from: [1.04, 2.85, 1.05], to: [1.04, 2.85, 1.05], at0: [1.04, 8.0, 3.2], at1: [1.04, 8.0, 3.2], focus: [1.04, 3.85, 1.25], flow: 'F4', roll: [0, 0],
-    light: 'void', iv: ['s03', 8.0], stand: true, look: 18, zone: 'dome', beat: 'V17 a', board: 'r2c8 (B r3c4; render refs Group 5, 10)', tr: 'cut: from above to below and behind',
+    zoneAt: 96.4, light: 'void', iv: ['s03', 8.0], stand: true, look: 18, zone: 'dome', beat: 'V17 a', board: 'r2c8 (B r3c4; render refs Group 5, 10)', tr: 'cut: from above to below and behind',
     why: 'V17 “Ivan feels like he’s vibrating at a different frequency” Low behind him: rings of light streaking around him like a long exposure, teal and orange, his hair edged with light.' },
   { id: 'K27', name: 'Than everyone around him', t0: 100.9, t1: 102.3, mm: [28, 28], f: 2.0,
     from: [1.78, 4.12, 1.02], to: [1.78, 4.12, 1.02], at0: [1.02, 4.00, 1.45], at1: [1.02, 4.00, 1.45], focus: 'eyes', flow: 'F4', roll: [0, 0],
@@ -262,7 +262,7 @@ export const SHOTS = [
     why: 'V26 “But then he finishes another module, and it works,” One finger coming down on Enter.' },
   { id: 'K44', name: 'Pure satisfaction', t0: 162.2, t1: 166.0, mm: [35, 35], f: 2.8,
     from: [1.08, 4.58, 1.00], to: [1.081, 4.593, 0.997], at0: [1.05, 4.15, 1.10], at1: [1.05, 4.15, 1.1], focus: 'eyes', roll: [0, 0],
-    flick: [162.2, 166.0], light: '4am', iv: ['s03', 30.75], scr: 177.6, look: 16, cyan: 0.3, amber: 0.6, ev: -0.7, beat: 'V26 b', board: 'r4c4', tr: 'cut on the pass chord: the screen flares',
+    flick: [162.2, 166.0], light: '4am', iv: ['s03', 30.75], scr: 177.6, look: 16, cyan: 0.3, amber: 0.45, ev: -1.1, beat: 'V26 b', board: 'r4c4', tr: 'cut on the pass chord: the screen flares',
     why: 'V26 “and the dread dissolves into a rush of pure satisfaction.” The screen flares and washes his face cyan-white, the room glowing amber behind him.' },
   { id: 'K45', name: 'HE... built that', t0: 166.0, t1: 168.85, mm: [17, 17], f: 8.0,
     from: [24.0, -24.0, 1.6], to: [24.0, -24.0, 1.6], at0: [16.0, 18.0, 15.0], at1: [16.0, 18.0, 16.5], focus: [1.04, 3.85, 1.0], roll: [0, 0],
@@ -648,8 +648,8 @@ function voxels_check() { return checkMark({ size: 0.012, glow: 3 }); }
 // colour idea per sequence): how much of the baked bounce stays (room), the practicals (lamp, monitor key, laptop
 // screens) and their colour, and the grade (contrast, saturation, a split tone: lo = shadows tint, hi = highlights tint)
 const MOOD = {
-  '3am':     { room: 0.55, lamp: 1.35, mon: 1.9, scr: 1.5, monCol: 0x78aaff, con: 0.22, sat: 1.12, lo: [-0.012, 0.004, 0.022], hi: [0.026, 0.012, -0.01] },
-  '4am':     { room: 0.45, lamp: 0.9, mon: 2.3, scr: 1.7, monCol: 0x6f9dff, con: 0.28, sat: 1.06, lo: [-0.016, 0.0, 0.03], hi: [0.0, 0.012, 0.022] },
+  '3am':     { room: 0.38, lamp: 1.6, mon: 2.5, scr: 1.6, monCol: 0x5ea2ff, beam: 1.8, con: 0.26, sat: 1.16, lo: [-0.014, 0.004, 0.028], hi: [0.03, 0.014, -0.012] },
+  '4am':     { room: 0.3, lamp: 0.9, mon: 2.9, scr: 1.8, monCol: 0x5a96ff, beam: 1.2, con: 0.3, sat: 1.08, lo: [-0.018, 0.0, 0.034], hi: [0.0, 0.012, 0.024] },
   '4am_iso': { room: 0.3, lamp: 1.2, mon: 2.0, scr: 1.6, monCol: 0x78aaff, con: 0.26, sat: 1.1, lo: [-0.014, 0.0, 0.03], hi: [0.02, 0.01, 0.0] },
   day:       { room: 0.95, lamp: 1.0, mon: 1.2, scr: 1.2, monCol: 0xcfe6ff, con: 0.12, sat: 0.97, lo: [-0.01, 0.012, 0.006], hi: [0.004, 0.01, 0.0] },
   evening:   { room: 0.8, lamp: 1.4, mon: 1.4, scr: 1.3, monCol: 0x9fb6ff, con: 0.2, sat: 1.15, lo: [0.012, -0.006, 0.03], hi: [0.035, 0.012, -0.015] },
@@ -790,6 +790,7 @@ export function props(t, ctx) {
       spark.set({ pos: p.clone().add(new THREE.Vector3(0, 0.045 * (cl.s || 1), 0)), t, born: build, evo: cl.evo || 0, glow: cl.glow ?? 1, lightK: (cl.lightK ?? 1) * Math.max(lk, build), size: 0.07 * (cl.s || 1) });
     } else spark.set({ born: 0 });
   } else spark.set({ born: 0 });
+  if (atmoRef && atmoRef.beam) atmoRef.beam.uniforms.gain.value = zone ? 1 : (moodOf(s).beam ?? 1);   // the lamp's cone in the air
   if (atmoRef) {                                                   // round 13: the dust round Claude catches its light (magic in the air)
     const u = atmoRef.dust.uniforms, sp = spark.group.visible, on = (claude.group.visible || sp) && !zone;
     u.orbK.value = on ? 1.6 * (cl?.glow ?? 1) : 0;
@@ -956,10 +957,10 @@ export function props(t, ctx) {
     const [a0, a1] = s.flick, u = t - a0, P = [0x9ff0c4, 0xc8f6ff, 0xfff4e6, 0x86b8ff, 0xffc890, 0xb8fff0];
     const dur = (k) => 0.3 + 0.4 * (Math.sin(k * 78.233) * 43758.5453 % 1 + 1) % 1;
     let k = 0, e = 0; while (k < 60 && e + dur(k) < u) { e += dur(k); k++; }
-    const snap = Math.min(1, Math.max(0, (u - e) / 0.08)), lvl = (j) => 1.3 + 1.1 * ((Math.sin(j * 12.9898) * 43758.5453 % 1 + 1) % 1);
+    const snap = Math.min(1, Math.max(0, (u - e) / 0.08)), lvl = (j) => 0.7 + 0.8 * ((Math.sin(j * 12.9898) * 43758.5453 % 1 + 1) % 1);   // round 13: was 1.3-2.4 (a waxy white face once the mood lifted the monitor)
     const flare = ramp(t, a1 - 0.9, a1 - 0.2);
     cyanLight.color.setHex(P[(k + P.length - 1) % P.length]).lerp(new THREE.Color(P[k % P.length]), snap).lerp(new THREE.Color(0xd8fbff), flare);
-    cyanLight.intensity *= (lvl(k - 1) + (lvl(k) - lvl(k - 1)) * snap) * (1 - flare) + 3.2 * flare;
+    cyanLight.intensity *= (lvl(k - 1) + (lvl(k) - lvl(k - 1)) * snap) * (1 - flare) + 1.8 * flare;
     if (rig && rig.L.monitor) rig.L.monitor.color.copy(cyanLight.color);
   }
   amberLight.intensity = (s.amber || 0) * 4.0;

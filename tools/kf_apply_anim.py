@@ -38,6 +38,7 @@ ANIM = {
     'K21d': {'iconsBorn': '[74.35, 76.09, 77.83, 79.80]', 'cl': {'path': '[[79.55, [1.66, 4.66, 1.48]], [80.05, [2.10, 4.40, 1.30]]], exit: 81.5'}},
     'K22': {'ghostTicks': '[82.07, 82.62, 83.72]'},
     'K24': {'deskAway': '[93.3, 93.8]', 'zoneAt': '90.59', 'lifeBorn': '[91.3, 91.5, 91.75, 92.0, 92.25, 92.5]', 'lifeShrink': '93.4', 'cl': {'born': 90.7}},
+    'K26': {'zoneAt': '96.4'},   # round 13: the rays already streaming at the cut (the first second was an empty black frame)
     'K29': {'cutBlack': '105.15'},
     'K30': {'fadeIn': '[105.65, 0.5]'},
     'K42': {'cl': {'born': 156.0, 'bornDur': 1.2}},

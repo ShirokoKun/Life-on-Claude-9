@@ -19,7 +19,7 @@ const rnd = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return 
 
 const SKY = {
   iso:      { top: '#000000', mid: '#000000', low: '#000000', k: 1, band: 4 },
-  cheat:    { top: '#010103', mid: '#0a0520', low: '#2c1060', k: 1.0, band: 12 },
+  cheat:    { top: '#010103', mid: '#120630', low: '#6a22c4', k: 1.15, band: 14 },   // round 13: a violet-magenta horizon glow (wonder), the sky above stays near black
   down:     { top: '#000000', mid: '#010203', low: '#030507', k: 1, band: 6 },
   dome:     { top: '#000000', mid: '#020304', low: '#05080a', k: 1, band: 6 },
   door:     { top: '#010205', mid: '#03111a', low: '#0a2a33', k: 1.2, band: 8 },
@@ -28,7 +28,7 @@ const SKY = {
   balcony:  { top: '#000103', mid: '#03070e', low: '#0b1220', k: 1.0, band: 10 },
   drown:    { top: '#000000', mid: '#010405', low: '#03080a', k: 1.0, band: 6 },
 };
-const GRID = { cheat: ['#f2efff', 0.42], down: ['#0c1820', 0.25], dome: ['#0c1820', 0.2], door: ['#2a6a7a', 0.6], tower: ['#2a5a88', 0.9],
+const GRID = { cheat: ['#f2efff', 0.62], down: ['#0c1820', 0.25], dome: ['#0c1820', 0.2], door: ['#2a6a7a', 0.6], tower: ['#2a5a88', 0.9],
   iso: ['#000000', 0], monolith: ['#b9c0c4', 0.0], balcony: ['#000000', 0], drown: ['#000000', 0] };
 const TEAL_ORANGE = ['#ff7a2a', '#ffb070', '#ffd9c4', '#3fd8e0', '#1fa8b8', '#ff3b1f', '#ffe7cf', '#6ff0ff'].map(hex);
 
@@ -88,11 +88,18 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
 
   // a pool of light at his feet: a soft disc that blooms
   const poolTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d');
-    const gr = g.createRadialGradient(64, 64, 0, 64, 64, 64); gr.addColorStop(0, 'rgba(255,190,150,0.55)'); gr.addColorStop(0.35, 'rgba(255,160,120,0.22)'); gr.addColorStop(1, 'rgba(255,140,100,0)');
+    const gr = g.createRadialGradient(64, 64, 0, 64, 64, 64); gr.addColorStop(0, 'rgba(190,225,255,0.5)'); gr.addColorStop(0.35, 'rgba(120,180,255,0.18)'); gr.addColorStop(1, 'rgba(90,140,255,0)');   // round 13: cool (was a beige disc)
     g.fillStyle = gr; g.fillRect(0, 0, 128, 128); return new THREE.CanvasTexture(c); })();
   const poolMat = new THREE.MeshBasicMaterial({ map: poolTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
   const pool = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 1.3), poolMat); pool.rotation.x = -Math.PI / 2;
   pool.visible = false; group.add(pool);
+  // round 13: the stage light it comes from: a soft beam down through the dark (ref: headlight cones in haze)
+  const beamTex = (() => { const c = document.createElement('canvas'); c.width = 4; c.height = 128; const g = c.getContext('2d');
+    const gr = g.createLinearGradient(0, 0, 0, 128); gr.addColorStop(0, 'rgba(160,200,255,0)'); gr.addColorStop(0.55, 'rgba(160,200,255,0.022)'); gr.addColorStop(1, 'rgba(190,225,255,0.075)');
+    g.fillStyle = gr; g.fillRect(0, 0, 4, 128); return new THREE.CanvasTexture(c); })();
+  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.62, 5.5, 40, 1, true), new THREE.MeshBasicMaterial({ map: beamTex, transparent: true,
+    depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, fog: false }));
+  shaft.visible = false; group.add(shaft);
 
   // everyone else: grey low-poly people, far off, walking at normal speed
   const crowd = new THREE.Group(); group.add(crowd);
@@ -153,6 +160,12 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
     g.fillStyle = gr; g.fillRect(0, 0, 128, 128); return new THREE.CanvasTexture(c); })();
   const footShadow = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 1.1), new THREE.MeshBasicMaterial({ map: shTex, transparent: true, depthWrite: false }));
   footShadow.rotation.x = -Math.PI / 2; mono.add(footShadow);
+  const longTex = (() => { const c = document.createElement('canvas'); c.width = 64; c.height = 256; const g = c.getContext('2d');
+    const gr = g.createLinearGradient(0, 256, 0, 0); gr.addColorStop(0, 'rgba(30,36,46,0.5)'); gr.addColorStop(0.5, 'rgba(30,36,46,0.18)'); gr.addColorStop(1, 'rgba(30,36,46,0)');
+    g.fillStyle = gr; g.beginPath(); g.moveTo(22, 256); g.lineTo(42, 256); g.lineTo(60, 0); g.lineTo(4, 0); g.closePath(); g.fill();
+    return new THREE.CanvasTexture(c); })();
+  const longShadow = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 3.6), new THREE.MeshBasicMaterial({ map: longTex, transparent: true, depthWrite: false }));
+  longShadow.rotation.x = -Math.PI / 2; mono.add(longShadow);   // round 13: the white void gets depth (K46 from above)
   const L = 84, H = 44.0, D = 16, LOB = 5.0, FL = 3.0, BAY = 3.2;
   bld.position.copy(B(C[0] - 4.99, C[1] + 0.08, 0));            // the near corner 4 m to his left, the facade 3 m behind him bld.rotation.y = THREE.MathUtils.degToRad(35);
   const dark = new THREE.MeshStandardMaterial({ color: 0x161b21, roughness: 0.62, metalness: 0.15 });
@@ -539,6 +552,7 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
     door.position.copy(B(C[0], C[1] + 15, 1.15));
     pool.visible = mode === 'down' || mode === 'dome';
     pool.position.copy(B(F.x, F.y, 0.004));
+    shaft.visible = false; shaft.position.copy(B(F.x, F.y, 2.75));   // (tried: from the overhead camera it read as a flat wedge, not light)
     crowd.visible = !!opts.crowd;
     crowd.children.forEach((f, i) => { const [l, r] = f.userData.legs; l.rotation.x = 0.35 * Math.sin(t * 2 + i); r.rotation.x = -l.rotation.x; });
     tower.visible = mode === 'tower';
@@ -554,7 +568,12 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
       flow.instanceMatrix.needsUpdate = true; flow.instanceColor.needsUpdate = true;
     }
     mono.visible = mode === 'monolith';
-    if (mono.visible) { bld.visible = !opts.noBuilding; footShadow.position.copy(B(F.x, F.y, 0.003)); animFacade(opts.age ?? 0); }
+    if (mono.visible) {
+      bld.visible = !opts.noBuilding; footShadow.position.copy(B(F.x, F.y, 0.003)); animFacade(opts.age ?? 0);
+      const away = B(F.x, F.y, 0).sub(sun.position).setY(0).normalize();               // away from the sun, along the ground
+      longShadow.position.copy(B(F.x, F.y, 0.0025)).addScaledVector(away, 1.8);
+      longShadow.rotation.z = Math.atan2(away.x, away.z) + Math.PI;
+    }
     balc.visible = mode === 'balcony';
     drown.visible = mode === 'drown';
     if (drown.visible && opts.head && opts.cam) layDrown(B(...opts.head), B(...opts.cam), t, opts.rise);
