@@ -118,7 +118,7 @@ export const SHOTS = [
     // focal plane beside his face (0.6 m, the iris distance; at f/2 the plane is ~3 cm deep), turned three-quarters to us
     cl: { at: [1.055, 4.315, 1.205], face: [1.40, 4.30, 1.20], s: 0.85, pose: 'wave', glow: 1.0, lightK: 1.0, born: 51.01, bornDur: 0.6, path: [[51.01, [1.08, 4.39, 1.06]], [52.0, [1.055, 4.315, 1.205]], [55.3, [1.052, 4.322, 1.215]]] },
     why: 'V10 CLAUDE “That sounds genuinely exhausting...” Claude pops out of the phone and waves; its warm light on his face as he looks up at it.' },
-  { id: 'K15', name: 'The offer', t0: 55.3, t1: 60.0, mm: [28, 28], f: 2.8,
+  { id: 'K15', name: 'The offer', t0: 55.3, t1: 60.0, mm: [28, 28], f: 2.8, boardAt: 59.7,
     from: [1.28, 3.30, 1.42], to: [1.339, 3.311, 1.42], at0: [1.05, 4.55, 1.28], at1: [1.109, 4.561, 1.28], focus: [1.08, 4.50, 1.34], roll: [0, 0],
     lookK: [[55.3, 6, 12], [59.6, 8, -12]], dimIn: [1.0, 1.0], gaze: [[55.3, [0.70, 4.50, 1.30]], [59.5, [1.40, 4.50, 1.30]]], light: 'day', iv: ['s04', 24.9], s4: 19.5, glass: false, dim: 0.16, ev: -1.7, hide: ['Baked_DESK_8', 'Baked_DESK_9'], pipe: { born: [56.2, 57.0, 58.1, 59.2], state: 'offer', at: [1.08, 4.50, 1.34], bright: 0.85, light: 0.08 }, beat: 'V10 b', board: 'r1c9 (MOTION GRAPHICS)', tr: 'the room dims (not to a void: about a sixth of its light) as the offer builds module by module in the air; the dim carries on into K18 and the V13 void',
     // round 14: no Claude in this keyframe (director: the offer alone, on camera)

@@ -33,7 +33,7 @@ await page.waitForFunction(() => window.__ready === true, null, { timeout: 0 });
 const t0 = Date.now();
 const rows = [];
 for (const s of shots) {
-  const t = Math.max(s.t0 + 0.5 * (s.t1 - s.t0), 1.0);
+  const t = s.boardAt ?? Math.max(s.t0 + 0.5 * (s.t1 - s.t0), 1.0);   // boardAt: a shot whose middle is mid-build shows its finished state
   const f = Math.round(t * 24);
   const tf = Date.now();
   await page.evaluate((n) => { window.renderFrame(n); window.renderFrame(n); }, f);   // twice: the lens, lights and follows settle on the new shot

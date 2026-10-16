@@ -45,6 +45,7 @@ export function readSceneModule(ROOT, scene) {
       id: g(/^'([^']+)'/), name: unq(g(/name: '((?:[^'\\]|\\.)*)'/) || ''),
       t0: +g(/t0: ([\d.]+)/), t1: +g(/t1: ([\d.]+)/),
       mm: mm ? [+mm[1], +mm[2]] : null, dolly: g(/dolly: ([\d.]+)/) ? +g(/dolly: ([\d.]+)/) : null, f: +(g(/f: ([\d.]+)/) || 0),
+      boardAt: g(/boardAt: ([\d.]+)/) ? +g(/boardAt: ([\d.]+)/) : undefined,   // the board's frame for a shot whose middle is mid-build
       why: unq(g(/why: '((?:[^'\\]|\\.)*)'/) || ''),
     });
   }
