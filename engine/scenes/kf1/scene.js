@@ -1458,7 +1458,7 @@ function holdProp(s, who, ctx, t = 0) {
       const lipC = contact.addScaledVector(axis, -0.049).addScaledVector(perp(hBack, axis), -0.0395);
       c = chest ? chest.lerp(lipC, lipK) : lipC;
       c.addScaledVector(right, (h.lat || 0) * side);                                           // lat: held further out to his side (K40)
-    }
+    } else if (chest) c = chest.clone().addScaledVector(right, (h.lat || 0) * side);       // a sip keyed at 0: held at the chest (K30's first second; c was left undefined)
     if (h.shake) c.add(tremor(t, h.shake === true ? {} : h.shake));             // round 14 (K40): a slow 1-2 Hz waver, a faint fine tremor
     mug.visible = true;
     mug.position.copy(c);
