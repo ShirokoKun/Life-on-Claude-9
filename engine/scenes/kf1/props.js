@@ -1,35 +1,41 @@
 // Voxel props for Chapter 1's keyframes: the four modules (V13a-d), envelopes (V09 drowning, V19 auto-replies),
 // code blocks (V07a Claude building), a check mark. ASCII pixel art -> voxels (voxel.js).
 import * as THREE from 'three';
-import { voxels, voxelMaterial, hex } from './voxel.js';
+import { voxels, voxelMaterial, holoVoxels, hex } from './voxel.js';
 
 const W = hex('#fff4e2'), K = hex('#1d1a22');
+// round 13: redesigned on an 11 x 11 grid with a 7-tone palette per icon (director: "much better designed"):
+// X deep outline, A accent, L light accent, W white, G shade at the base, K ink, H a hot detail
+const pal = (deep, accent, light, white, shade, ink, hot) => ({ X: hex(deep), A: hex(accent), L: hex(light), W: hex(white), G: hex(shade), K: hex(ink), H: hex(hot) });
 export const ICONS = {
-  calendar: { accent: '#ff5a4d', rows: [
-    '.X.....X.', 'XXXXXXXXX', 'XRRRRRRRX', 'XWWWWWWWX', 'XWKWKWKWX', 'XWWWWWWWX', 'XWKWKWKWX', 'XWWWWWWWX', 'XXXXXXXXX'] },
-  meetings: { accent: '#ffd43b', rows: [
-    '..XXXXX..', '.XWWWWWX.', 'XWWWKWWWX', 'XWWWKWWWX', 'XWWWKKKWX', 'XWWWWWWWX', 'XWWWWWWWX', '.XWWWWWX.', '..XXXXX..'] },
-  documents: { accent: '#9df2bd', rows: [
-    'XXXXXX...', 'XWWWWXX..', 'XWKKWWXX.', 'XWWWWWWX.', 'XWKKKKWX.', 'XWWWWWWX.', 'XWKKKKWX.', 'XWWWWWWX.', 'XXXXXXXX.'] },
-  research: { accent: '#7ad8ff', rows: [
-    '..XXX....', '.XWWWX...', 'XWWWWWX..', 'XWKWWWX..', 'XWWWWWX..', '.XWWWX...', '..XXXXX..', '.....XXX.', '......XXX'] },
+  calendar: { pal: pal('#a3172a', '#ff4458', '#ff9aa4', '#fff5ee', '#d8c8c4', '#3a1c2a', '#ff4458'), rows: [
+    '..K.....K..', '.XKXXXXXKX.', 'XAAAAAAAAAX', 'XALLLLLLLAX', 'XWWWWWWWWWX', 'XWKWKWKWKWX',
+    'XWWWWWWWWWX', 'XWKWKWHHWWX', 'XWWWWWHHWWX', 'XGGGGGGGGGX', '.XXXXXXXXX.'] },
+  meetings: { pal: pal('#b07a06', '#ffc531', '#ffe38f', '#fffaf0', '#e8d9b4', '#3b2a10', '#ff6a2a'), rows: [
+    '...XXXXX...', '..XLLLLLX..', '.XLWWWWWLX.', 'XLWWWKWWWLX', 'XWWWWKWWWWX', 'XWWWWKHHWWX',
+    'XWWWWWWWWWX', 'XGWWWWWWWGX', '.XGWWWWWGX.', '..XGGGGGX..', '...XXXXX...'] },
+  documents: { pal: pal('#13804c', '#36e08a', '#9ff3c4', '#f3fff8', '#cfe6d9', '#1b4a35', '#36e08a'), rows: [
+    'XXXXXXX....', 'XWWWWWXX...', 'XWKKKWXLX..', 'XWWWWWXXXX.', 'XWKKKKKKWX.', 'XWWWWWWWWX.',
+    'XWKKKKKKWX.', 'XWWWWWWWWX.', 'XWKKKKWAWX.', 'XGGGGGGGGX.', 'XXXXXXXXXX.'] },
+  research: { pal: pal('#1763b0', '#45b4ff', '#a2ddff', '#eef9ff', '#c4e3f4', '#16324d', '#ffffff'), rows: [
+    '..XXXX.....', '.XLLLLX....', 'XLWWHWLX...', 'XLWHWWLX...', 'XLWWWWLX...', 'XLWWWWLX...',
+    '.XLLLLX....', '..XXXXAA...', '......AAA..', '.......AAA.', '........AX.'] },
 };
 export const MODULE_ORDER = ['calendar', 'meetings', 'documents', 'research'];
 
 export function icon(name, { size = 0.022, glow = 2.2 } = {}) {
   const I = ICONS[name];
-  const g = voxels(I.rows, { X: hex(I.accent), R: hex(I.accent), W, K }, { size, depth: 2, frontOnly: { K: 'W' },
-    material: voxelMaterial({ glow }) });
+  const g = holoVoxels(I.rows, I.pal, { size: size * 9 / 11, depth: 2, frontOnly: { K: 'W', H: 'W' }, glow: glow * 0.7 });
   g.name = `Icon ${name}`;
   return g;
 }
 
 export function envelope({ size = 0.012, glow = 1.6, check = false } = {}) {
-  const rows = check
-    ? ['XXXXXXXXX', 'XKWWWWWKX', 'XWKWWWKWX', 'XWWKWKGGX', 'XWWWKGGWX', 'XXXXXXXXX']
-    : ['XXXXXXXXX', 'XKWWWWWKX', 'XWKWWWKWX', 'XWWKWKWWX', 'XWWWKWWWX', 'XXXXXXXXX'];
-  return voxels(rows, { X: hex('#d9d2c3'), W: hex('#f6efe2'), K: hex('#8a8172'), G: hex('#5ff0a0') },
-    { size, depth: 1, material: voxelMaterial({ glow }) });
+  const rows = check   // round 13: a white letter, its flap drawn in the accent, a wax seal; sent ones carry a green tick
+    ? ['XXXXXXXXXXX', 'XLWWWWWWWLX', 'XWLWWWWWLWX', 'XWWLWWWLWGG', 'XWWWLALWGGX', 'XWWWWWWGGWX', 'XXXXXXXXXXX']
+    : ['XXXXXXXXXXX', 'XLWWWWWWWLX', 'XWLWWWWWLWX', 'XWWLWWWLWWX', 'XWWWLALWWWX', 'XWWWWWWWWWX', 'XXXXXXXXXXX'];
+  return holoVoxels(rows, { X: hex('#7f8fb3'), L: hex('#6aa8ff'), W: hex('#f4f6ff'), A: hex('#ff5a6a'), G: hex('#38f08f') },
+    { size: size * 9 / 11, depth: 1, glow: glow * 0.75 });
 }
 
 // a code block: one line of code as a glowing brick (Claude stacks these into the email system)
@@ -42,25 +48,32 @@ export function codeBlock(i, { size = 0.01, glow = 2.4 } = {}) {
 }
 
 // the email pipeline as pixel objects (V10 the offer, V12 it works): inbox -> sort -> draft -> you
-export const PIPE = {
-  inbox: { accent: '#7ad8ff', rows: ['.........', '.XXXXXXX.', '.XWWWWWX.', '.XWKWKWX.', '.XWWKWWX.', 'XXWWWWWXX', 'X.......X', 'X.XXXXX.X', 'XXXXXXXXX'] },
-  sort: { accent: '#ffd43b', rows: ['XXXXXXXXX', 'XWWWWWWWX', '.XWWWWWX.', '..XWWWX..', '...XWX...', '...XWX...', '...XWX...', '....X....', '.........'] },
-  draft: { accent: '#9df2bd', rows: ['XXXXX....', 'XWWWXX..P', 'XWKKWX.PP', 'XWWWWXPP.', 'XWKKKPP..', 'XWWWPPX..', 'XWKKKWX..', 'XWWWWWX..', 'XXXXXXX..'] },
-  you: { accent: '#ff9a6b', rows: ['...XXX...', '..XWWWX..', '..XWWWX..', '...XXX...', '..XXXXX.G', '.XWWWWXGG', '.XWWWGGG.', '.XWWWWGX.', '.XXXXXXX.'] },
+export const PIPE = {   // round 13: redesigned, same palette scheme as the module icons (P pencil, G the tick)
+  inbox: { pal: pal('#16679e', '#3fb2ff', '#a6dcff', '#f0f9ff', '#c7e2f2', '#173450', '#ffffff'), rows: [
+    '...........', '.XXXXXXXXX.', '.XWWWWWWWX.', '.XWKKKKKWX.', '.XWWWWWWWX.', 'XXWKKKKKWXX', 'XAAAWWWAAAX',
+    'XAAAAXAAAAX', 'XLLLLLLLLLX', 'XXXXXXXXXXX'] },
+  sort: { pal: pal('#a8730a', '#ffc12e', '#ffe48f', '#fffaf0', '#e6d5ab', '#3b2a10', '#ffffff'), rows: [
+    'XXXXXXXXXXX', 'XLLLLLLLLLX', 'XAAAAAAAAAX', '.XAAAHAAAX.', '..XAAAAAX..', '...XAAAX...', '....XAX....',
+    '....XAX....', '....XLX....', '.....X.....'] },
+  draft: { pal: pal('#13804c', '#36e08a', '#9ff3c4', '#f3fff8', '#cfe6d9', '#1b4a35', '#ff7a3a'), rows: [
+    'XXXXXX.....', 'XWWWWXX..PP', 'XWKKWWX.PPP', 'XWWWWWXPPP.', 'XWKKKKPPP..', 'XWWWWPPPX..', 'XWKKKHPWX..',
+    'XWWWWWWWX..', 'XGGGGGGGX..', 'XXXXXXXXX..'] },
+  you: { pal: pal('#b4501a', '#ff8a3d', '#ffc29a', '#fff4ec', '#e7d0c0', '#3d2214', '#ffffff'), rows: [
+    '...XXX.....', '..XLLLX....', '..XLLLX....', '...XXX.....', '..XXXXX...G', '.XAAAAAX.GG',
+    '.XAAAAAXGG.', '.XLAAALXG..', '.XLLLLLX...', '.XXXXXXX...'] },
 };
 export const PIPE_ORDER = ['inbox', 'sort', 'draft', 'you'];
 export function pipeIcon(name, { size = 0.02, glow = 2.0 } = {}) {
   const I = PIPE[name];
-  return voxels(I.rows, { X: hex(I.accent), W, K, P: hex('#ffd43b'), G: hex('#5ff0a0') }, { size, depth: 2, frontOnly: { K: 'W' },
-    material: voxelMaterial({ glow }) });
+  return holoVoxels(I.rows, { ...I.pal, P: hex('#ffc531'), G: hex('#38f08f') }, { size: size * 9 / 11, depth: 2, frontOnly: { K: 'W', H: 'W' }, glow: glow * 0.7 });
 }
 export function pixelArrow({ size = 0.014, glow = 2.4, color = '#e8f4ff' } = {}) {
   return voxels(['...X.', 'XXXXX', '...X.'], { X: hex(color) }, { size, depth: 1, material: voxelMaterial({ glow }) });
 }
 
 export function checkMark({ size = 0.02, glow = 3 } = {}) {
-  return voxels(['......G', '.....GG', 'G...GG.', 'GG.GG..', '.GGG...', '..G....'], { G: hex('#5ff0a0') },
-    { size, depth: 2, material: voxelMaterial({ glow }) });
+  return holoVoxels(['.......LG', '......LGG', 'L....LGG.', 'GL..LGG..', '.GLLGG...', '..GGG....', '...G.....'],
+    { G: hex('#2fe886'), L: hex('#b6ffd6') }, { size: size * 7 / 9, depth: 2, glow: glow * 0.6 });
 }
 
 // the cheat code for his life (V15): game power-ups made of the things his days are made of. Each: a voxel sprite, a
@@ -82,8 +95,8 @@ export const LIFE_UPS = [
 export function lifeUp(i, { size = 0.03 } = {}) {
   const L = LIFE_UPS[i];
   const g = new THREE.Group(); g.name = 'Life up ' + L.name;
-  const spr = voxels(L.rows, { X: hex(L.accent), W, K, S: hex('#e8e2d8'), C: hex('#5a3420'), Y: hex('#ffe08a'), G: hex('#5ff0a0') },
-    { size, depth: 2, frontOnly: { K: 'W' }, material: voxelMaterial({ glow: 2.4 }) });
+  const spr = holoVoxels(L.rows, { X: hex(L.accent), W, K, S: hex('#e8e2d8'), C: hex('#5a3420'), Y: hex('#ffe08a'), G: hex('#5ff0a0') },
+    { size, depth: 2, frontOnly: { K: 'W' }, glow: 1.7 });
   spr.name = 'sprite'; g.add(spr);
   const hc = document.createElement('canvas'); hc.width = hc.height = 128; const hg = hc.getContext('2d');
   const gr = hg.createRadialGradient(64, 64, 0, 64, 64, 64); const ac = new THREE.Color(hex(L.accent));

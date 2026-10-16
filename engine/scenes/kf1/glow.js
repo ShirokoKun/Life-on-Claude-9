@@ -28,7 +28,7 @@ export class GlowPass extends Pass {
   constructor(scene, camera) {
     super();
     this.scene = scene; this.camera = camera; this.needsSwap = true;
-    this.params = { gain: 1.0, core: 0.35, sat: 1.25, streak: 0.0, streakTh: 1.2, radius: 0.85, strength: 1.1, threshold: 0.35 };
+    this.params = { gain: 1.45, core: 0.35, sat: 1.3, streak: 0.0, streakTh: 1.2, radius: 0.9, strength: 1.35, threshold: 0.3 };
     this.src = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType });
     this.occ = new THREE.MeshBasicMaterial({ color: 0x000000 });
     this.blur = new UnrealBloomPass(new THREE.Vector2(256, 256), 1.1, 0.85, 0.0);

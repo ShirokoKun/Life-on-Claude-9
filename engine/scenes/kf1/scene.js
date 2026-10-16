@@ -17,6 +17,7 @@ import { SCREENS as S4 } from '../s04/scene.js';
 import { createClaude } from './claude.js';
 import { createStage } from './stage.js';
 import { GlowPass } from './glow.js';
+import { holoTick } from './voxel.js';
 import { createSpark } from './spark.js';
 import { icon, envelope, codeBlock, pipeIcon, pixelArrow, checkMark, MODULE_ORDER, PIPE_ORDER, lifeUp, LIFE_UPS } from './props.js';
 import { captureRest, stand, plantFeet, lookUp, reach, grip, handWorld, bones, makeMug, makePhone, begin, end, orientHand, curl, gripPoint, touch, pointIndex, curlAnat, palmFrame } from './rig.js';
@@ -692,6 +693,7 @@ let roomVis = null, outside = null, lmUsers = null;
 const DESK_SWEEP = new THREE.Plane(new THREE.Vector3(0, -1, 0), 99);   // keeps y < constant
 const SHELF_CUT = new THREE.Plane(new THREE.Vector3(1, 0, 0), -0.41);       // keeps x > 0.41 (three x = Blender x)
 export function props(t, ctx) {
+  holoTick(t);   // round 13: the holographic icons' scanlines and shimmer
   ROOM3.props(t, ctx);
   const { named, root, cast, scene } = ctx;
   const s = kf(t);

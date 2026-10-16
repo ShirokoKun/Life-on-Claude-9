@@ -126,3 +126,68 @@ export function assemble(mesh, k, { spread = 6, seed = 1 } = {}) {
 }
 
 export const hex = (h) => { const c = new THREE.Color(h); return [c.r, c.g, c.b]; };
+
+// ---------------------------------------------------------------- round 13: the holographic icons (director's brief)
+// Designed voxel objects that glow from inside: clean (no PS1 snap or dither), each voxel face with a bright bevel line
+// round its edge (the voxel-render refs: the TV, the smiley), a Fresnel rim, scanlines drifting up through it, and
+// translucent, so the far side and the inner faces show faintly. Drawn in two passes: the back faces (faint, no depth),
+// then the front faces (they write depth, so the lens focuses on the icon where it is). The deep glow (glow.js) gives the
+// saturated halo. holoTick(t) moves the scanlines and the shimmer.
+const HOLO_VERT = /* glsl */ `
+varying vec3 vColor; varying vec3 vN; varying vec3 vW; varying vec3 vV; varying vec2 vUv2; varying float vId;
+void main() {
+  mat4 im = mat4(1.0);
+#ifdef USE_INSTANCING
+  im = instanceMatrix;
+#endif
+  vColor = vec3(1.0);
+#ifdef USE_INSTANCING_COLOR
+  vColor = instanceColor;
+#endif
+  vec4 wp = modelMatrix * im * vec4(position, 1.0);
+  vW = wp.xyz; vUv2 = uv; vId = im[3][0] * 91.7 + im[3][1] * 47.3 + im[3][2] * 13.1;
+  vN = normalize(mat3(modelMatrix) * mat3(im) * normal);
+  vV = cameraPosition - wp.xyz;
+  gl_Position = projectionMatrix * viewMatrix * wp;
+}`;
+const HOLO_FRAG = /* glsl */ `
+uniform vec3 uColor; uniform float uGlow, uTime, uAlpha, uBack, uScan; uniform vec3 uLight;
+varying vec3 vColor; varying vec3 vN; varying vec3 vW; varying vec3 vV; varying vec2 vUv2; varying float vId;
+void main() {
+  vec3 n = normalize(vN), v = normalize(vV);
+  vec3 base = vColor * uColor;
+  float shade = 0.72 + 0.28 * max(dot(n, normalize(uLight)), 0.0) + 0.12 * max(n.y, 0.0);
+  float e = min(min(vUv2.x, 1.0 - vUv2.x), min(vUv2.y, 1.0 - vUv2.y));
+  float edge = 1.0 - smoothstep(0.02, 0.075, e);                              // a fine bevel line round every face
+  float fr = pow(1.0 - abs(dot(n, v)), 2.2);                                   // the rim
+  float scan = 0.5 + 0.5 * sin(vW.y * 700.0 - uTime * 5.0);                    // scanlines drifting up
+  float shim = 0.92 + 0.08 * sin(uTime * 3.1 + fract(sin(vId) * 43758.5) * 6.28);   // each voxel shimmers on its own
+  vec3 c = base * shade * (1.0 - uScan * 0.22 * scan) + mix(base, vec3(1.0), 0.25) * edge * 0.45 + base * fr * 0.55;
+  c *= uGlow * 0.42 * shim;   // deep, not luminous: the colour stays saturated under AgX; the deep glow (glow.js) gives the halo
+  float a = uBack > 0.5 ? uAlpha * 0.3 * (0.4 + edge) : uAlpha * (0.8 + 0.2 * edge + 0.2 * fr);   // mostly solid: the far side shows only faintly
+  gl_FragColor = vec4(c, clamp(a, 0.0, 1.0));
+}`;
+const HOLO_MATS = new Set();
+export function holoMaterial({ glow = 1.4, alpha = 1, back = false } = {}) {
+  const m = new THREE.ShaderMaterial({
+    vertexShader: HOLO_VERT, fragmentShader: HOLO_FRAG, fog: false, transparent: true,
+    side: back ? THREE.BackSide : THREE.FrontSide, depthWrite: !back,
+    uniforms: { uColor: { value: new THREE.Color(1, 1, 1) }, uGlow: { value: glow }, uTime: { value: 0 }, uAlpha: { value: alpha },
+      uBack: { value: back ? 1 : 0 }, uScan: { value: 1 }, uLight: { value: new THREE.Vector3(-0.4, 1, 0.6) } },
+    userData: { glow: 1, holo: true },
+  });
+  HOLO_MATS.add(m); return m;
+}
+export function holoTick(t) { for (const m of HOLO_MATS) m.uniforms.uTime.value = t; }
+// voxels() with the holographic material: the front mesh, its back faces a child sharing the same instances
+export function holoVoxels(rows, palette, opts = {}) {
+  const glow = opts.glow ?? 1.4;
+  const front = voxels(rows, palette, { ...opts, material: holoMaterial({ glow }) });
+  const back = new THREE.InstancedMesh(front.geometry, holoMaterial({ glow, back: true }), front.count);
+  back.instanceMatrix = front.instanceMatrix; back.instanceColor = front.instanceColor;
+  back.frustumCulled = false; back.renderOrder = -1; back.name = 'holo back';
+  front.add(back);
+  // uGlow is driven per object (born flashes etc.): keep the back face in step through the front's uniform
+  back.material.uniforms.uGlow = front.material.uniforms.uGlow; back.material.uniforms.uAlpha = front.material.uniforms.uAlpha;
+  return front;
+}
