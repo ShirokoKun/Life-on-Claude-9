@@ -72,6 +72,7 @@ export function voxelMaterial({ color = [1, 1, 1], glow = 1, snap = [240, 135] }
       uColor: { value: new THREE.Color(...color) }, uGlow: { value: glow }, uSnap: { value: new THREE.Vector2(...snap) },
       uLight: { value: new THREE.Vector3(-0.4, 1, 0.6) }, uLevels: { value: 15 }, uGlitch: { value: 0 }, uTime: { value: 0 },
     },
+    userData: { glow: 1 },                       // round 13: every pixel-art object feeds the deep glow (glow.js)
   });
 }
 

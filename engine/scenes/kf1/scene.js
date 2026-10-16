@@ -16,6 +16,7 @@ import { SCREENS as CH1, phoneGlow } from '../ch1/screens.js';
 import { SCREENS as S4 } from '../s04/scene.js';
 import { createClaude } from './claude.js';
 import { createStage } from './stage.js';
+import { GlowPass } from './glow.js';
 import { icon, envelope, codeBlock, pipeIcon, pixelArrow, checkMark, MODULE_ORDER, PIPE_ORDER, lifeUp, LIFE_UPS } from './props.js';
 import { captureRest, stand, plantFeet, lookUp, reach, grip, handWorld, bones, makeMug, makePhone, begin, end, orientHand, curl, gripPoint, touch, pointIndex, curlAnat, palmFrame } from './rig.js';
 import { setPix } from './pix.js';
@@ -428,7 +429,7 @@ export const SCREENS = {
 
 // ---------------------------------------------------------------- set-up
 let RL = null, claude = null, stage = null, note = null, cardMesh = null, label = null, rig = null;
-let clearLens = null, lensMat = null, keyLight = null, imagPass = null, legends = null, postRef = null, bloom0 = null;
+let glowPass = null, clearLens = null, lensMat = null, keyLight = null, imagPass = null, legends = null, postRef = null, bloom0 = null;
 let winLight = null, crossLight = null, cyanLight = null, amberLight = null, mug = null, mugGhosts = [], phone = null, refl = null;
 let ghostChairs = [], beam = null, weave = null, lifeUps = [], icons = [], iconLights = [], envs = [], blocks = [], pipe = null, thin = null, phoneLight = null, greenLight = null;
 
@@ -564,14 +565,15 @@ export async function setup(args) {
   if (args.post && args.post.bloom) { postRef = args.post; bloom0 = { s: args.post.bloom.strength, r: args.post.bloom.radius, th: args.post.bloom.threshold }; }
   if (args.post && args.post.composer) {
     imagPass = new ShaderPass({
-      uniforms: { tDiffuse: { value: null }, k: { value: 0 }, con: { value: 0 }, gsat: { value: 1 }, duo: { value: 0 }, poster: { value: 6 }, stip: { value: 0.5 }, seed: { value: 0 },
+      uniforms: { tDiffuse: { value: null }, k: { value: 0 }, con: { value: 0 }, gsat: { value: 1 }, lo: { value: new THREE.Vector3() }, hi: { value: new THREE.Vector3() }, duo: { value: 0 }, poster: { value: 6 }, stip: { value: 0.5 }, seed: { value: 0 },
         res: { value: new THREE.Vector2(1280, 720) }, cLo: { value: new THREE.Color(0.02, 0.006, 0.003) }, cMid: { value: new THREE.Color(0.55, 0.17, 0.08) }, cHi: { value: new THREE.Color(1.0, 0.66, 0.46) } },
       vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
-      fragmentShader: `uniform sampler2D tDiffuse; uniform float k, con, gsat, duo, poster, stip, seed; uniform vec2 res; uniform vec3 cLo, cMid, cHi; varying vec2 vUv;
+      fragmentShader: `uniform sampler2D tDiffuse; uniform float k, con, gsat, duo, poster, stip, seed; uniform vec3 lo, hi; uniform vec2 res; uniform vec3 cLo, cMid, cHi; varying vec2 vUv;
         float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233)) + seed) * 43758.5453); }
         void main(){
           vec4 src = texture2D(tDiffuse, vUv); vec3 c = src.rgb;
           if (con > 0.0 || gsat != 1.0) { float g0 = dot(c, vec3(0.299, 0.587, 0.114)); c = mix(vec3(g0), c, gsat); c = mix(c, c * c * (3.0 - 2.0 * clamp(c, 0.0, 1.0)), con); src.rgb = c; }   // per-shot grade: an S-curve
+          { float lg = clamp(dot(c, vec3(0.299, 0.587, 0.114)), 0.0, 1.0); c = max(c + lo * (1.0 - lg) * (1.0 - lg) + hi * lg * lg, 0.0); src.rgb = c; }   // round 13: split tone
           if (k <= 0.0) { gl_FragColor = src; return; }
           float l = dot(c, vec3(0.299, 0.587, 0.114));
           float mx = max(c.r, max(c.g, c.b)), mn = min(c.r, min(c.g, c.b)), sat = mx > 0.0 ? (mx - mn) / mx : 0.0;
@@ -587,6 +589,11 @@ export async function setup(args) {
           gl_FragColor = vec4(mix(c, o, k), src.a);
         }` });
     args.post.composer.addPass(imagPass);
+    // round 13: the deep glow, after the tone mapper (OutputPass) and before the film grade, so grain and vignette sit on top
+    glowPass = new GlowPass(args.scene || scene, args.camera);
+    const oi = args.post.composer.passes.findIndex((p) => p.constructor && p.constructor.name === 'OutputPass');
+    args.post.composer.insertPass(glowPass, oi >= 0 ? oi + 1 : args.post.composer.passes.length - 1);
+    { const v = args.renderer.getDrawingBufferSize(new THREE.Vector2()); glowPass.setSize(v.x, v.y); }
     args.renderer.getDrawingBufferSize(imagPass.uniforms.res.value);
     imagPass.uniforms.res.value.divideScalar(Math.max(1, imagPass.uniforms.res.value.y / 1080));   // stipple cells in 1080p pixels (4K keeps the look)
   }
@@ -633,15 +640,29 @@ export async function setup(args) {
 function voxels_check() { return checkMark({ size: 0.012, glow: 3 }); }
 
 // ---------------------------------------------------------------- light per keyframe
+// round 13, the colour script (NOTES_R13_LOOK.md section 3; ref OpenKnight: low key, practicals paint the face, one
+// colour idea per sequence): how much of the baked bounce stays (room), the practicals (lamp, monitor key, laptop
+// screens) and their colour, and the grade (contrast, saturation, a split tone: lo = shadows tint, hi = highlights tint)
+const MOOD = {
+  '3am':     { room: 0.55, lamp: 1.35, mon: 1.9, scr: 1.5, monCol: 0x78aaff, con: 0.22, sat: 1.12, lo: [-0.012, 0.004, 0.022], hi: [0.026, 0.012, -0.01] },
+  '4am':     { room: 0.45, lamp: 0.9, mon: 2.3, scr: 1.7, monCol: 0x6f9dff, con: 0.28, sat: 1.06, lo: [-0.016, 0.0, 0.03], hi: [0.0, 0.012, 0.022] },
+  '4am_iso': { room: 0.3, lamp: 1.2, mon: 2.0, scr: 1.6, monCol: 0x78aaff, con: 0.26, sat: 1.1, lo: [-0.014, 0.0, 0.03], hi: [0.02, 0.01, 0.0] },
+  day:       { room: 0.95, lamp: 1.0, mon: 1.2, scr: 1.2, monCol: 0xcfe6ff, con: 0.12, sat: 0.97, lo: [-0.01, 0.012, 0.006], hi: [0.004, 0.01, 0.0] },
+  evening:   { room: 0.8, lamp: 1.4, mon: 1.4, scr: 1.3, monCol: 0x9fb6ff, con: 0.2, sat: 1.15, lo: [0.012, -0.006, 0.03], hi: [0.035, 0.012, -0.015] },
+  sunrise:   { room: 1.0, lamp: 1.0, mon: 1.0, scr: 1.0, monCol: 0xffd9b0, con: 0.18, sat: 1.14, lo: [0.012, -0.004, 0.018], hi: [0.04, 0.018, -0.012] },
+  void:      { room: 1.0, lamp: 1.0, mon: 1.0, scr: 1.0, monCol: 0x86b8ff, con: 0.18, sat: 1.12, lo: [0.0, 0.0, 0.02], hi: [0.02, 0.01, 0.0] },
+};
+const moodOf = (s) => MOOD[s.mood] || MOOD[(String(s.light || '3am').match(/4am_iso|4am|3am|evening|day|sunrise|void/) || ['3am'])[0]];
 export function exposureBoost(t) {
   if (!RL) return 0;
   const s = kf(t), w = weightsFor(s.light, t, s.t0, s.t1);
   RL.apply(w);
   const night = (w['3am'] || 0) + (w['4am'] || 0) + (w['4am_iso'] || 0) + 0.6 * (w.evening || 0) + 0.5 * (w.sunrise || 0) + (w.void || 0);
   if (rig) {
-    follow(rig.L, 'lampBase', rig.lamp, night);
-    if (rig.L.monitor) follow(rig.L.monitor, 'intensity', rig.monitor, 0.3 + 0.7 * Math.min(1, night));
-    (rig.L.screens || []).forEach((x, i) => follow(x.s, 'intensity', rig.screens[i], 0.4 + 0.6 * Math.min(1, night)));
+    const M = moodOf(s);   // round 13: the mood scales the practicals INSIDE follow (a multiply after it compounds frame to frame)
+    follow(rig.L, 'lampBase', rig.lamp, night * M.lamp);
+    if (rig.L.monitor) follow(rig.L.monitor, 'intensity', rig.monitor, (0.3 + 0.7 * Math.min(1, night)) * M.mon);
+    (rig.L.screens || []).forEach((x, i) => follow(x.s, 'intensity', rig.screens[i], (0.4 + 0.6 * Math.min(1, night)) * M.scr));
     for (const x of rig.glow) follow(x.m, 'emissiveIntensity', x.st, Math.min(1, night));
   }
   const zoneEV = { drown: 0.3, balcony: 0.0, monolith: 0.4, down: 0.6, dome: 0.4, iso: 0.2 }[s.zone] || 0;
@@ -698,7 +719,7 @@ export function props(t, ctx) {
 
   // dim: the room sinks toward black around a lit desk (a transition state on the way into the zone)
   if (!lmUsers) { lmUsers = []; root.traverse((o) => { if (o.isMesh && !/^Baked_DESK/.test(o.parent?.name || '') && !/^Baked_DESK/.test(o.name) && o.material && o.material.lightMap) lmUsers.push(o.material); }); }
-  const dim = s.dimIn ? s.dimIn[0] + ((s.dim ?? 1) - s.dimIn[0]) * ramp(t, s.t0 + (s.dimIn[2] || 0), s.t0 + (s.dimIn[2] || 0) + s.dimIn[1]) : (s.dim ?? 1);
+  const dim = (s.dimIn ? s.dimIn[0] + ((s.dim ?? 1) - s.dimIn[0]) * ramp(t, s.t0 + (s.dimIn[2] || 0), s.t0 + (s.dimIn[2] || 0) + s.dimIn[1]) : (s.dim ?? 1)) * (zone ? 1 : moodOf(s).room);   // round 13: the mood keeps less bounce at night
   for (const m of lmUsers) { if (m.userData.lm0 === undefined || Math.abs(m.lightMapIntensity - (m.userData.lmw ?? -1)) > 1e-6) m.userData.lm0 = m.lightMapIntensity; m.lightMapIntensity = m.userData.lmw = m.userData.lm0 * dim; }
 
   // the world outside the window by day and at dawn: a bright haze (the window reads as the light source)
@@ -909,7 +930,7 @@ export function props(t, ctx) {
     const u = imagPass.uniforms;
     u.k.value = I && !s.black ? I.k : 0; u.duo.value = I?.duo || 0; u.poster.value = I?.poster || 7; u.stip.value = I?.stip ?? 0.45;
     u.seed.value = Math.floor(t * 24) % 97;
-    u.con.value = s.grade?.con || 0; u.gsat.value = s.grade?.sat ?? 1;
+    { const M = moodOf(s); u.con.value = s.grade?.con ?? M.con; u.gsat.value = s.grade?.sat ?? M.sat; u.lo.value.set(...M.lo); u.hi.value.set(...M.hi); }
   }
   // imagined worlds may glow more than the room: a per-world bloom (the room keeps the locked LOOK values)
   if (postRef && bloom0) { const B2 = { drown: [0.5, 0.7, 1.2], tower: [0.75, 0.9, 1.0] }[zone]; postRef.bloom.strength = B2 ? B2[0] : bloom0.s; postRef.bloom.radius = B2 ? B2[1] : bloom0.r; postRef.bloom.threshold = B2 ? B2[2] : bloom0.th; }
@@ -931,7 +952,7 @@ export function props(t, ctx) {
   const W = { sunrise: [0xff9a50, 7.0], day: [0xfff1dc, 2.5], evening: [0xff8a60, 1.6] }[s.light];
   winLight.intensity = W && !zone ? W[1] * (s.dim ?? 1) : 0; if (W) winLight.color.setHex(W[0]);
   crossLight.intensity = (s.cross || 0) * 95;
-  if (rig && rig.L.monitor && !s.flick) rig.L.monitor.color.setHex(s.green ? 0x9ff0c4 : s.cyan ? 0xc8f6ff : 0x86b8ff);
+  if (rig && rig.L.monitor && !s.flick) rig.L.monitor.color.setHex(s.green ? 0x9ff0c4 : s.cyan ? 0xc8f6ff : moodOf(s).monCol);
 
   // the floating chat window
   cardMesh.visible = !!s.card && !s.black;

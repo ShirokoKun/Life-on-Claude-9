@@ -64,7 +64,7 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
         f *= 1.0 - smoothstep(rev - 1.5, rev, d);                                        // revealed outward from his desk
         gl_FragColor = vec4(base + col*0.02 + col*l*k*f, 1.); }`,
   });
-  const grid = new THREE.Mesh(new THREE.PlaneGeometry(240, 240), gridMat);
+  const grid = new THREE.Mesh(new THREE.PlaneGeometry(240, 240), gridMat); grid.userData.glow = 0.6;
   grid.rotation.x = -Math.PI / 2; grid.position.copy(B(C[0], C[1], -0.002)); group.add(grid);
 
   // shards: low-poly gems drifting at all depths (the game world's "air")
@@ -78,7 +78,7 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
   const NK = 420;
   const streakMat = voxelMaterial({ glow: 1, snap: [960, 540] });
   streakMat.uniforms.uLevels.value = 32;
-  const streaks = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), streakMat, NK);
+  const streaks = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), streakMat, NK); streaks.userData.glow = 1;
   streaks.frustumCulled = false; group.add(streaks);
 
   // the door: a slot of white light, 0.95 x 2.3 m
@@ -138,7 +138,7 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
   // what flows out of him into it (V25): warm motes rising from the chair into the tower, cooling as they go
   const NF = 220;
   const flowMat = voxelMaterial({ glow: 3.5 });
-  const flow = new THREE.InstancedMesh(new THREE.BoxGeometry(0.025, 0.025, 0.025), flowMat, NF);
+  const flow = new THREE.InstancedMesh(new THREE.BoxGeometry(0.025, 0.025, 0.025), flowMat, NF); flow.userData.glow = 1;
   flow.frustumCulled = false; flow.visible = false; group.add(flow);
 
   // the monolith (V27 "HE... built that"): a dark slab of a building, its windows lit, against a pale sky
