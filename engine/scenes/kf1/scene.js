@@ -55,11 +55,11 @@ const STAND = [1.04, 3.85];                                                  // 
 // refl (lens reflections), cross (window-bar light), board (the storyboard panel), tr (the transition into the shot).
 export const SHOTS = [
   { id: 'K01', name: 'Three AM', t0: 0, t1: 3.0, mm: [18, 18], f: 5.6,
-    from: [2.25, 2.40, 3.45], to: [2.208, 2.4, 3.357], at0: [0.85, 2.40, 0.35], at1: [0.85, 2.4, 0.35], focus: [1.2, 2.4, 0.5], roll: [0, 0],
+    from: [2.10, 3.88, 3.40], to: [2.07, 3.88, 3.32], at0: [0.95, 3.92, 0.60], at1: [0.95, 3.92, 0.60], focus: [1.05, 3.95, 0.90], roll: [0, 0],   // round 14: Ivan in the centre (was: the room centred, him at the edge)
     fadeIn: [0.0, 1.0], light: '3am', iv: ['s03', 0.6, 3.6], scr: 4, top: true, beat: 'pre-roll', board: '(establishing)', tr: 'fade up from black',
     why: 'Pre-roll, room tone. Straight down into his room: the bed he is not in, the lamp, the one lit desk. The first of three top-downs (night, day, dawn).' },
-  { id: 'K02', name: 'Hasn’t eaten since lunch', t0: 3.0, t1: 7.8, mm: [85, 85], f: 5.6,
-    from: [1.165, 4.534, 1.049], to: [1.162, 4.524, 1.051], at0: [1.074, 4.194, 1.124], at1: [1.074, 4.194, 1.124], focus: [1.080, 4.205, 1.122], roll: [0, 0],
+  { id: 'K02', name: 'Hasn’t eaten since lunch', t0: 3.0, t1: 7.8, mm: [85, 85], f: 11,
+    from: [1.165, 4.534, 1.049], to: [1.162, 4.524, 1.051], at0: [1.074, 4.194, 1.124], at1: [1.074, 4.194, 1.124], focus: [1.083, 4.216, 1.119], roll: [0, 0],   // round 14: f/11, focus 1 cm in front of the eye: the glasses read sharp with it
     light: '3am', iv: ['s03', 6.0], scr: 6, look: 12, cyan: 0.12, ev: -0.6, beat: 'V01', board: 'r1c1 (B r1c3: the side eye)', tr: 'cut: from the room to the eye',
     why: 'V01 “It’s 3 AM, and Ivan hasn’t eaten since lunch.” Extreme close on his eye in profile through the round glasses, the screen light in it.' },
   { id: 'K03', name: 'Six hours ago', t0: 7.8, t1: 12.7, mm: [28, 28], f: 3.2,
@@ -83,7 +83,7 @@ export const SHOTS = [
     light: '3am', iv: ['s03', 0.4, 5.6], scr: 24.0, green: 0.1, ev: -0.4, beat: 'V05', board: 'r1c5 (A r1c4, green screen light)', tr: 'cut: from his eyes into the screen (board r1c5: the screen is the frame)',
     why: 'V05 “A terminal window, a Claude chat, and a growing sprawl of Python scripts.” Over his shoulder onto the three things the line names, the screen’s green on everything.' },
   { id: 'K08', name: 'Email automation system', t0: 26.6, t1: 30.3, mm: [35, 35], f: 2.8,
-    from: [1.02, 3.62, 1.48], to: [1.028, 3.646, 1.466], at0: [1.30, 4.48, 1.02], at1: [1.3, 4.48, 1.02], focus: 'mon:800,240', roll: [0, 0],
+    from: [1.05, 3.70, 1.42], to: [1.058, 3.725, 1.412], at0: [1.40, 4.48, 1.02], at1: [1.40, 4.48, 1.02], focus: 'mon:800,240', roll: [0, 0],   // round 14: the screen is the subject (the pipeline being built reads whole), his head soft in the corner
     light: '3am', hide: ['Baked_DESK_19', 'Baked_DESK_20'], iv: ['s03', 22.4, 25.0], scr: 28.9, label: true, beat: 'V06', board: 'r1c5 (A r2c1, the label)', tr: 'cut: tilt up to the monitor',
     why: 'V06 “He’s building an email automation system.” The monitor’s pipeline going green, the board’s hand-lettered label pointing at it.' },
   { id: 'K09', name: 'Claude is doing the building', t0: 30.3, t1: 34.9, mm: [35, 35], f: 4.0,
@@ -98,7 +98,7 @@ export const SHOTS = [
     why: 'V07b “Ivan keeps saying yes.” His finger on the keys, the y/n prompt above, Claude a warm blur behind, waiting for the next yes.' },
 
   { id: 'K11', name: 'Two days ago', t0: 37.9, t1: 41.9, mm: [18, 18], f: 5.6,
-    from: [2.25, 2.40, 3.45], to: [2.208, 2.4, 3.357], at0: [0.85, 2.40, 0.35], at1: [0.85, 2.4, 0.35], focus: [1.2, 2.4, 0.5], roll: [0, 0],
+    from: [2.10, 3.88, 3.40], to: [2.07, 3.88, 3.32], at0: [0.95, 3.92, 0.60], at1: [0.95, 3.92, 0.60], focus: [1.05, 3.95, 0.90], roll: [0, 0],   // round 14: Ivan in the centre (was: the room centred, him at the edge)
     light: 'day', iv: ['s04', 5.1, 8.5], s4: 4.2, glass: false, top: true, beat: 'V08', board: 'r1c7 (flashback)', tr: 'match on K01: the same top-down, the night drains into day',
     why: 'V08 “It started two days ago.” The K01 top-down in afternoon light, no glass poured. Clean: the same room, the same man, two days earlier; the only change is the light.' },
   { id: 'K12', name: '400 unread', t0: 41.9, t1: 46.4, mm: [30, 30], f: 2.0,
@@ -279,7 +279,7 @@ export const SHOTS = [
     fadeIn: [172.4, 0.8], light: 'sunrise', iv: ['s03', 36.6], scr: 200.7, beat: 'V28 a', board: 'r4c7 (MOTION GRAPHICS)', tr: 'the vacuum (171.94), then dawn rises (173.28) on the K04 frame',
     why: 'V28 “By sunrise,” The K04 glass at dawn, gold now: still full.' },
   { id: 'K48', name: 'By sunrise', t0: 175.2, t1: 177.8, mm: [18, 18], f: 5.6,
-    from: [2.25, 2.40, 3.45], to: [2.292, 2.4, 3.543], at0: [0.85, 2.40, 0.35], at1: [0.85, 2.4, 0.35], focus: [1.2, 2.4, 0.5], roll: [0, 0],
+    from: [2.10, 3.88, 3.40], to: [2.13, 3.88, 3.48], at0: [0.95, 3.92, 0.60], at1: [0.95, 3.92, 0.60], focus: [1.05, 3.95, 0.90], roll: [0, 0],   // round 14: the K01 framing, Ivan centred
     grade: { con: 0.25, sat: 1.05 }, light: 'sunrise', iv: ['s03', 30.75, 33.3], scr: 200.7, top: true, ev: 0.3, amber: 0.5, beat: 'V28 b', board: 'r4c7', tr: 'match on K01 / K11: the third top-down',
     why: 'V28 “...Ivan has a system that handles his email,” The third top-down: the room gold, the bed untouched.' },
   { id: 'K49', name: 'Calendar, documents, reading', t0: 177.8, t1: 182.5, mm: [28, 28], f: 4.0,
