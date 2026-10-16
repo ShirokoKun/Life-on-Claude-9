@@ -407,17 +407,22 @@ const phoneG = phoneCanvas.getContext('2d');
 // the phone fully lit on Sarah's last message: the chapter's own wake moment (found once; 118.2 s fell in its dimmed tail)
 const PHONE_LIT_T = (() => { for (let t = 100; t < 140; t += 0.01) if (phoneGlow(t) > 0.995) return t + 0.05; return 118.2; })();
 // a screen's clock runs on through the shot from its keyframe value (the work keeps happening), unless scrHold
-// round 12 (K43): the right index fingertip over the Enter key, hovering 3 cm above it, down onto it at s.press and
-// off again (arm IK: the wrist is moved so the tip lands, two passes because the hand turns with the forearm)
+// round 12 (K43): the right index fingertip over the Enter key, hovering above it, down onto it at s.press and off again.
+// Round 14 (director: the finger bent too much): the hand keeps ONE attitude in the world (the index near straight,
+// pointing forward and down at the key, palm down) and the whole hand moves straight down and up; the arm IK only
+// carries it (the wrist roll is in the forearm), so the fingertip travels vertically onto the key
+const ENTER_AIM = { along: B(-0.12, 0.84, -0.5).normalize(), across: B(-1, 0.05, -0.12).normalize(), hover: 0.024 };
 function tapEnter(root, t, s) {
   const key = legends && legends.userData.enter, b = bones(root), tip = b.RightHandIndex4, hand = b.RightHand;
   if (!key || !tip || !hand) return;
-  const down = s.press ? ramp(t, s.press - 0.22, s.press) - ramp(t, s.press + 0.15, s.press + 0.5) : 0;
-  const goal = key.clone().add(new THREE.Vector3(0.0095, 0.004 + 0.03 * (1 - down), -0.0044));   // the tip bone sits behind the pad: measured on the K43 frame
-  for (let i = 0; i < 3; i++) {
+  const down = s.press ? ramp(t, s.press - 0.2, s.press) - ramp(t, s.press + 0.16, s.press + 0.5) : 0;
+  const goal = key.clone().add(new THREE.Vector3(0.0095, 0.004 + ENTER_AIM.hover * (1 - down), -0.0044));   // the tip bone sits behind the pad: measured on the K43 frame
+  const pole = new THREE.Vector3(0.5, -1, 0.3);
+  for (let i = 0; i < 5; i++) {
     root.updateMatrixWorld(true);
     const tp = tip.getWorldPosition(new THREE.Vector3()), hp = hand.getWorldPosition(new THREE.Vector3());
-    reach(root, 'R', hp.add(goal.clone().sub(tp)), new THREE.Vector3(0.5, -1, 0.3));
+    reach(root, 'R', hp.add(goal.clone().sub(tp)), pole);
+    orientHand(root, 'R', ENTER_AIM.along, ENTER_AIM.across);
   }
   root.updateMatrixWorld(true);
 }
@@ -760,7 +765,7 @@ export function props(t, ctx) {
     if (s.hand && s.hand.gulps) lookUp(r, (s.hand.gulpLook ?? 7) * gulpAt(s.hand.gulps, t));   // a gulp: the head tips back with the mug
     if (s.armrest) armsOnChair(r, s.armrest === 'L' ? ['L'] : ['L', 'R']);
     if (s.laced && (r === ctx.ivan)) handsBehindHead(r, s.lacedRamp ? ramp(t, s.lacedRamp[0], s.lacedRamp[1]) : 1);
-    if (s.point && (r === ctx.ivan || cast.find((c) => c.root === r && c.role === 'main4'))) pointIndex(r, s.point, s.press ? 34 * (ramp(t, s.press - 0.18, s.press) - ramp(t, s.press + 0.12, s.press + 0.4)) : 0);
+    if (s.point && (r === ctx.ivan || cast.find((c) => c.root === r && c.role === 'main4'))) pointIndex(r, s.point, 0);   // round 14: no bend on the press (the hand comes down, tapEnter)
     if (s.tapKey && r === ctx.ivan) tapEnter(r, t, s);
     if (r === ctx.ivan || cast.find((c) => c.root === r && c.role === 'main4')) who = r;
     setPix(r, !!s.pix || (s.pixable && new URLSearchParams(location.search).get('pixall') === '1'));
