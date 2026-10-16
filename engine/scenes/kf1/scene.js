@@ -182,7 +182,7 @@ export const SHOTS = [
   // dotted line runs round and joins them. One slow push in. (The crane into K25, flow F3, is gone: K25 is a cut.)
   { id: 'K24', name: 'A cheat code for life', t0: 89.9, t1: 93.8, mm: [24, 24], f: 2.8,
     from: [2.05, 10.45, 1.15], to: [2.02, 10.10, 1.16], at0: [1.04, 3.85, 1.98], at1: [1.04, 3.85, 1.99], focus: 'eyes', roll: [0, 0], ev: -0.6,
-    lifeBorn: [90.55, 90.9, 91.25, 91.6, 91.95, 92.3], light: 'void', iv: ['s03', 8.0], stand: true, look: 24, zone: 'cheat', zopt: { snaps: [90.55, 90.9, 91.25, 91.6, 91.95, 92.3], topK: 0.7, ring: { o: 'h', r: 1.6, z: 3.2, dot: 0.024 }, crown: 1.9 }, lifeScale: 1.9, lifeUps: true,
+    lifeBorn: [90.4, 90.65, 90.9, 91.15, 91.4, 91.65], light: 'void', iv: ['s03', 8.0], stand: true, look: 24, zone: 'cheat', zopt: { snaps: [90.4, 90.65, 90.9, 91.15, 91.4, 91.65], topK: 0.7, ring: { o: 'h', r: 1.6, z: 3.2, dot: 0.024 }, crown: 1.9 }, lifeScale: 1.9, lifeUps: true,
     beat: 'V15 *', board: 'r2c6 (rebuilt round 14: night void, black to dark violet, stars)', tr: 'cut on the rush: out of the room into the void',
     why: 'V15 “It’s like discovering a cheat code for life.” He has figured it out: alone in a starry violet-black void, lit from above, the six life-ups snapping into a ring round him like a solved puzzle.' },
   { id: 'K25', name: 'Hours into minutes', t0: 93.8, t1: 97.4, mm: [30, 30], f: 3.2,
@@ -191,11 +191,11 @@ export const SHOTS = [
     why: 'V16 “Every problem that used to take hours now takes minutes.” From high above, he stands in the dark looking up at us; soft bars of red, orange, peach and cyan drift around him at every depth.' },
   { id: 'K26', name: 'A different frequency', t0: 97.4, t1: 100.9, mm: [28, 28], f: 2.0,
     from: [1.04, 2.85, 1.05], to: [1.04, 2.85, 1.05], at0: [1.04, 8.0, 3.2], at1: [1.04, 8.0, 3.2], focus: [1.04, 3.85, 1.25], flow: 'F4', roll: [0, 0],
-    zoneAt: 96.4, light: 'void', iv: ['s03', 8.0], stand: true, look: 18, zone: 'dome', beat: 'V17 a', board: 'r2c8 (B r3c4; render refs Group 5, 10)', tr: 'cut: from above to below and behind',
+    zoneAt: 96.4, light: 'void', iv: ['s03', 8.0], stand: true, look: 18, zone: 'dome', zopt: { tunnel: { straight: [98.6, 101.2] } }, beat: 'V17 a', board: 'r2c8 (B r3c4; render refs Group 5, 10)', tr: 'cut: from above to below and behind',
     why: 'V17 “Ivan feels like he’s vibrating at a different frequency” Low behind him: rings of light streaking around him like a long exposure, teal and orange, his hair edged with light.' },
   { id: 'K27', name: 'Than everyone around him', t0: 100.9, t1: 102.3, mm: [28, 28], f: 2.0,
     from: [1.78, 4.12, 1.02], to: [1.78, 4.12, 1.02], at0: [1.02, 4.00, 1.45], at1: [1.02, 4.00, 1.45], focus: 'eyes', flow: 'F4', roll: [0, 0],
-    light: 'void', iv: ['s03', 8.0], stand: true, look: 28, zone: 'dome', zopt: { crowd: true }, beat: 'V17 b', board: 'r2c8 (render ref Group 11)', tr: 'cut: round to his profile',
+    light: 'void', iv: ['s03', 8.0], stand: true, look: 28, zone: 'dome', zopt: { crowd: true, tunnel: { straight: [98.6, 101.2] } }, beat: 'V17 b', board: 'r2c8 (render ref Group 11)', tr: 'cut: round to his profile',
     why: 'V17 “than everyone around him,” Low profile, looking up into the rings; far off in the dark, grey people walk at normal speed.' },
   // round 14 (B2): K28 is gone; K29 carries the whole of "like he's stepped through a door that others can't even see".
   // An extreme close-up of his eye and glasses: the camera orbits from the right side of his face round to the front

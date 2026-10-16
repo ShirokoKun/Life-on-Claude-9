@@ -194,11 +194,12 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
   const tunMat = new THREE.ShaderMaterial({
     transparent: true, depthWrite: true, blending: THREE.AdditiveBlending, fog: false, side: THREE.DoubleSide,
     uniforms: { uT: { value: 0 }, uO: { value: new THREE.Vector3() }, uD: { value: new THREE.Vector3(0, 0, -1) }, uU: { value: new THREE.Vector3(1, 0, 0) }, uV: { value: new THREE.Vector3(0, 1, 0) },
-      uS0: { value: -3 }, uS1: { value: 26 }, uVs: { value: 2.2 }, uVa: { value: 0.35 }, uK: { value: 1 },
+      uS0: { value: -3 }, uS1: { value: 26 }, uStr: { value: 0 }, uVs: { value: 2.2 }, uVa: { value: 0.35 }, uK: { value: 1 },
       uEdge: { value: TUN_COL.map((c) => new THREE.Color(c[0])) }, uCore: { value: TUN_COL.map((c) => new THREE.Color(c[1])) } },
     vertexShader: `attribute vec4 aA, aB; attribute vec3 aC; uniform float uT, uS0, uS1, uVs, uVa; uniform vec3 uO, uD, uU, uV;
       varying vec2 vQ; varying float vF, vCi, vK;
-      vec3 P(float u, float s, float th) { float a = th + u * aA.w; return uO + uD * (s + u * aB.x) + (uU * cos(a) + uV * sin(a)) * aA.y; }
+      uniform float uStr;
+      vec3 P(float u, float s, float th) { float a = th + u * aA.w * (1.0 - 0.88 * uStr); return uO + uD * (s + u * (aB.x + uStr * (1.6 + 2.4 * aB.w))) + (uU * cos(a) + uV * sin(a)) * aA.y; }
       void main() {
         float L = uS1 - uS0, sp = uVs * (0.55 + 0.9 * aB.w);
         float s = uS0 + mod(aA.z * L - uT * sp, L);                                   // streaming back toward us
@@ -689,6 +690,7 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
       u.uO.value.copy(B(F.x, F.y + (T.o ?? 0.6), T.z ?? 1.62));
       u.uD.value.copy(B(...(T.dir || [0, 1, 0.3]))).normalize();
       u.uU.value.set(1, 0, 0); u.uV.value.crossVectors(u.uD.value, u.uU.value).normalize(); u.uU.value.crossVectors(u.uV.value, u.uD.value).normalize();
+      const st = T.straight ? Math.min(1, Math.max(0, (t - T.straight[0]) / (T.straight[1] - T.straight[0]))) : 0; u.uStr.value = st * st * (3 - 2 * st);   // the curves straighten
       u.uS0.value = T.s0 ?? -3; u.uS1.value = T.s1 ?? 26; u.uVs.value = T.vs ?? 2.2; u.uVa.value = T.va ?? 0.35;
     }
     const up = new THREE.Vector3(0, 1, 0);
