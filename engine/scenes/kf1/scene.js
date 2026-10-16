@@ -249,7 +249,7 @@ export const SHOTS = [
   // zoom 55 -> 80 mm with a 3 cm push, focus on the lips. The mug pivots on his lower lip: grip.js, holdProp)
   { id: 'K36', name: 'One more module', t0: 129.4, t1: 136.9, mm: [55, 80], f: 4.0,
     from: [1.461, 4.136, 1.077], to: [1.432, 4.144, 1.076], at0: [1.058, 4.248, 1.066], at1: [1.058, 4.248, 1.066], focus: [1.056, 4.250, 1.068], mv: [129.4, 136.9], roll: [0, 0],
-    light: '3am', iv: ['s03', 24.0], scr: 142.95, gaze: 'screen', look: 24, hand: { side: 'R', to: 'mouth', prop: 'mug', sip: [[129.4, 1.0], [136.9, 1.0]], tilt: 0.62, gulps: [130.2, 132.1] },
+    light: '3am', iv: ['s03', 24.0], scr: 142.95, gaze: 'screen', look: 24, ev: -2.0, key: { at: [1.20, 4.45, 1.00], color: 0x9cc8ff, k: 0.6 }, hand: { side: 'R', to: 'mouth', prop: 'mug', sip: [[129.4, 1.0], [136.9, 1.0]], tilt: 0.62, gulps: [130.2, 132.1] },   // pass 3: the face was chalk-white this close to the lamp: down 2 EV, the screen's cool light on him
     beat: 'V22 (Ivan) + V23', board: 'r3c6', tr: 'cut: back at the desk, close on his mouth at the mug',
     why: 'V22 IVAN “One more module. One more integration.” V23 “Then he’ll rest.” Close in profile on his mouth, the mug held at his lips: a gulp on each line, the screen light on his face. He doesn’t put it down.' },
   { id: 'K38', name: 'It’s not all pleasant', t0: 136.9, t1: 140.0, mm: [38, 38], f: 4.0,
