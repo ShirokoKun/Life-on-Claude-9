@@ -87,7 +87,7 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
   // stay where the frame needs them; they write depth (the lens blurs them as the near things they are).
   const FG = [
     // v: screen row (-1 bottom .. 1 top), d: metres from the lens, x: centre (-1 left .. 1 right), len / th: frame widths / heights, sp: frame widths a second
-    { v: -0.30, d: 0.30, x: -0.10, len: 1.55, th: 0.13, sp: 0.020, k: 1.0, seed: 1 },
+    { v: -0.53, d: 0.30, x: -0.10, len: 1.55, th: 0.12, sp: 0.020, k: 1.0, seed: 1 },   // pass 2: below his hands, across his legs only (never his head or torso)
     { v: -0.96, d: 0.26, x: 0.25, len: 1.85, th: 0.10, sp: -0.014, k: 0.85, seed: 2 },
     { v: 0.50, d: 0.34, x: -1.05, len: 0.62, th: 0.07, sp: 0.026, k: 0.6, seed: 3 },
   ];
@@ -141,13 +141,20 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
   // the ring: 'h' lies round his waist; 'v' stands upright just behind him, facing the lens (he is framed inside it)
   let RING = { o: 'v', r: 1.22, rz: 0.82, z: 1.18, back: 0.30 };
   const LIFE_A0 = Math.PI / 2;
-  const ringAt = (a) => RING.o === 'v' ? [figure.x + Math.cos(a) * RING.r, figure.y - RING.back, RING.z + Math.sin(a) * (RING.rz ?? RING.r)]
-    : [figure.x + Math.cos(a) * RING.r, figure.y + Math.sin(a) * RING.r, RING.z];
-  const lifeSlot = (i, n = 6) => ringAt(LIFE_A0 + (i + 0.5) / n * Math.PI * 2);   // 'v': none at the top or bottom (behind his legs)
+  // 'a' (round 14, pass 2): an arch round his head and shoulders, in a plane just behind him leaning back by `tilt`
+  // (degrees), the slots spread over arc [from, to] (degrees, 90 = over his head)
+  const ringAt = (a) => {
+    if (RING.o === 'a') { const T = THREE.MathUtils.degToRad(RING.tilt || 0), c = Math.cos(a) * RING.r, v = Math.sin(a) * (RING.rz ?? RING.r);
+      return [figure.x + c, figure.y - RING.back - v * Math.sin(T), RING.z + v * Math.cos(T)]; }
+    return RING.o === 'v' ? [figure.x + Math.cos(a) * RING.r, figure.y - RING.back, RING.z + Math.sin(a) * (RING.rz ?? RING.r)]
+      : [figure.x + Math.cos(a) * RING.r, figure.y + Math.sin(a) * RING.r, RING.z]; };
+  const arcA = (u) => THREE.MathUtils.degToRad(RING.arc[0] + (RING.arc[1] - RING.arc[0]) * u);
+  const lifeSlot = (i, n = 6) => ringAt(RING.o === 'a' ? arcA(i / (n - 1)) : LIFE_A0 + (i + 0.5) / n * Math.PI * 2);   // 'v': none at the top or bottom (behind his legs)
   const NR = 96;
   const ringDots = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), voxelMaterial({ color: [1, 1, 1], glow: 2.2 }), NR); ringDots.userData.glow = 0.8;
   ringDots.frustumCulled = false; ringDots.visible = false; group.add(ringDots);
   const top = new THREE.SpotLight(0xffe9d2, 0, 9, THREE.MathUtils.degToRad(17), 0.85, 1.4);
+  const ringLight = new THREE.PointLight(0xf2ecff, 0, 3.5, 2); group.add(ringLight);
   group.add(top, top.target);
   // a halo of the solved code over him: a faint ring of light high above, the source of the top light (just in frame)
   const crownTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 256; const g = c.getContext('2d');
@@ -746,14 +753,18 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
       const lit = snaps.reduce((a, b) => a + sm((t - b - SNAP + 0.06) / 0.12), 0) / Math.max(1, snaps.length);   // each snap turns it up a step
       const draw = sm((t - lock) / 0.55), flash = Math.exp(-Math.max(0, t - lock - 0.55) * 3) * sm((t - lock - 0.45) / 0.1);
       const ta = opts.topAt || [0, 0, RING.o === 'h' ? RING.z : 4.4]; top.position.copy(B(F.x + ta[0], F.y + ta[1], ta[2])); top.target.position.copy(B(F.x, F.y, 1.2)); top.target.updateMatrixWorld();
+      if (opts.topTo) { top.target.position.copy(B(F.x, F.y, opts.topTo)); top.target.updateMatrixWorld(); }
+      top.angle = THREE.MathUtils.degToRad(opts.topDeg ?? 17); top.penumbra = opts.topDeg ? 0.6 : 0.85;
       top.intensity = (opts.topK ?? 1) * (40 + 160 * lit + 80 * flash);
+      ringLight.intensity = (opts.ringK ?? 0) * (0.25 + 0.75 * lit + 0.8 * flash);   // the solved ring lights his face
+      ringLight.position.copy(B(...(opts.ringLightAt ? [F.x + opts.ringLightAt[0], F.y + opts.ringLightAt[1], opts.ringLightAt[2]] : [F.x, F.y + 0.6, RING.z + 0.4])));
       crown.visible = !!opts.crown; crown.position.copy(B(F.x, F.y, RING.o === 'h' ? RING.z + 0.02 : 3.35)); crown.rotation.set(-Math.PI / 2, 0, 0); crown.scale.setScalar(opts.crown || 1); crown.material.opacity = 0.35 + 0.65 * lit + 0.6 * flash;
       pad.position.copy(B(F.x, F.y, 0.003)); pad.material.opacity = 0.25 + 0.75 * lit;
       // the dotted ring: drawn round from slot 0 once the last life-up locks, gaps where the icons sit
       const n = snaps.length || 6;
       for (let i = 0; i < NR; i++) {
-        const u = i / NR, a = LIFE_A0 + u * Math.PI * 2, slot = (u * n) % 1;
-        const near = Math.abs(slot - 0.5) < 0.17;
+        const arch = RING.o === 'a', u = i / NR, a = arch ? arcA(u * 1.0) : LIFE_A0 + u * Math.PI * 2, slot = arch ? (u * (n - 1) + 0.5) % 1 : (u * n) % 1;
+        const near = Math.abs(slot - 0.5) < (arch ? 0.2 : 0.17);
         const on = !near && u < draw;
         const s = on ? (RING.dot || 0.016) : 0;
         m4.compose(B(...ringAt(a)), q0, new THREE.Vector3(s, s, s)); ringDots.setMatrixAt(i, m4);
