@@ -1,3 +1,31 @@
+# Resume here (2026-10-16, Mac mini): round 14, the director's notes (checklist + proof sheets)
+
+**Start with `scenes/ch1-keyframes/R14_CHECKLIST.md`** (every round-14 note, ticked after three verification passes;
+partial items say so). Proof sheets (note / before / after / reference / verdict): `renders/kf1/r14_proof/` (not in git;
+rebuild by rendering a board). Review film: `renders/kf1/r14_review/` (720p).
+
+**What changed in round 14** (five parallel lanes, merged on this branch):
+- Shot list: K15-K17 one composition (offer -> review + approve, zoom); K28 removed (K29 102.3-105.35); K37 removed
+  (K36 runs to 136.9, gulps); K51+K52 one overhead constant zoom; K21 a void from frame one; K22 typing.
+- `kf1/lineicons.js`: every pixel icon is white line art after R3 (`reference/r14/`); Claude is always the voxel
+  character (spark.js deleted).
+- `kf1/room.js` + `kf1/bed.glb` + `kf1/lighting/{day,dawn}`: kf1-only room (Persian rug, cloth bed, pillows, oak floor),
+  a sky inside the far plane (the day window was black), live sun with shadows, god rays, glazing bars.
+- stage.js: K24 rebuilt (life-ups lock round him), K25 foreground code bars (R5), K26-K27 curved tunnel, K34 city bokeh
+  stretches into trails (R4), K45 whole machine in frame.
+- Screens: K18 "email sent" toasts, K31 phone sleeps, K32 outbox (no Ivan), K41 code -> symbols -> blocks, K29 lens lines.
+- Hands (`kf1/grip.js`): mug body grip (R4), K36 gulps, K40 OTS slow tremor, K43 straight press, K07 home-row typing,
+  K12 phone cradle, K13 hand on thigh, K50 look up; K02 lids rebuilt in `prep_tripo.py` (both ivan_eyes.glb).
+- **Preview = render:** kf1's dim and roomlight fought over the lightmaps, so in-order films darkened over time
+  (`exposureBoost` now hands roomlight its own value first). The dust shader compiles again (`res` in atmosphere.js).
+- Mac tools: `kf_board` uses `~/.local/py` (Pillow venv) and Mac fonts; `boardAt` sets a shot's board frame;
+  `tools/_probe_preview.mjs` compares cold / seek / playback / in-order renders.
+
+**Open after round 14:** the bed is better but not R1-soft; balcony bokeh denser than R4; K50 sleeves; K36 lit pale was
+fixed with -2 EV (watch it in motion).
+
+---
+
 # Resume here (2026-10-16, evening): round 13, the look overhaul (keyframes only)
 
 **Start with `scenes/ch1-keyframes/NOTES_R13_LOOK.md`.** It has:
