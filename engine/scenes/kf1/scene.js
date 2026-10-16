@@ -496,8 +496,8 @@ export async function setup(args) {
   const nc = document.createElement('canvas'); nc.width = nc.height = 256;
   const n = nc.getContext('2d');
   n.fillStyle = '#f2d35b'; n.fillRect(0, 0, 256, 256); n.fillStyle = 'rgba(0,0,0,0.06)'; n.fillRect(0, 0, 256, 34);
-  n.fillStyle = '#23201a'; n.textAlign = 'center'; n.font = 'bold 50px "Marker Felt", "Comic Sans MS", sans-serif';
-  n.fillText('REVIEW', 128, 112); n.font = 'bold 44px "Marker Felt", "Comic Sans MS", sans-serif'; n.fillText('+ APPROVE', 128, 172);
+  n.fillStyle = '#23201a'; n.textAlign = 'center'; n.font = 'bold 50px "Comic Sans MS", "Marker Felt", sans-serif';
+  n.fillText('REVIEW', 128, 112); n.font = 'bold 44px "Comic Sans MS", "Marker Felt", sans-serif'; n.fillText('+ APPROVE', 128, 172);
   const ntex = new THREE.CanvasTexture(nc); ntex.colorSpace = THREE.SRGBColorSpace; ntex.anisotropy = 8;
   note = new THREE.Mesh(new THREE.PlaneGeometry(0.076, 0.076), new THREE.MeshBasicMaterial({ map: ntex, color: new THREE.Color(0.55, 0.55, 0.55), polygonOffset: true, polygonOffsetFactor: -4 }));
   const a20 = 20 * Math.PI / 180, nrm = [0, Math.cos(a20), -Math.sin(a20)];

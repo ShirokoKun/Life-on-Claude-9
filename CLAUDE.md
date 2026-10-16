@@ -3,6 +3,11 @@
 An animated short rendered in a three.js engine (`engine/`), with light baked and the set built in Blender (`blender/`). The human runs the **Studio** (`npm run studio`, http://localhost:8080) to watch, review and render. Read `docs/WORKFLOW.md` before changing the look, the lighting or the acting.
 
 ## Start of every session
+0. **New machine check.** Run `node tools/setup_check.mjs` before anything else.
+   - If any line says `MISSING`, stop. Ask the human for exactly those items, naming each one and the folder of the transfer pack (`Mac_transfer.zip`) it comes from. `MAC_TRANSFER_GUIDE.md` has the table.
+   - Do not work around a missing font or file: the film would render differently.
+   - If the human points to an unzipped pack, install it for them: `into-repo/` into this repo; `into-workspace/` two folders up; `claude-memory/*.md` into this project's `~/.claude/projects/<folder>/memory/`. The fonts they install themselves in Font Book.
+   - Rerun the check until everything says `ok`.
 1. Read the open notes in `scenes/*/NOTES.md`: lines `- [ ] **<shot> @ <t> s** <text>`. The human left them in the Studio's player at that exact moment.
 2. Fix them, then tick them: `- [x]`.
 3. `project.json` lists the scenes. A scene is `engine/scenes/<id>/scene.js` (the intro is `engine/src/shots.js`) plus `scenes/<nn-name>/`.

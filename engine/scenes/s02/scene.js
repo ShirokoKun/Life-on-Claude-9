@@ -151,8 +151,8 @@ export function props(t, { root, scene, THREE, ivan }) {
     const g = nc.getContext('2d');
     g.fillStyle = '#f2d35b'; g.fillRect(0, 0, 256, 256);
     g.fillStyle = 'rgba(0,0,0,0.06)'; g.fillRect(0, 0, 256, 34);
-    g.fillStyle = '#23201a'; g.textAlign = 'center'; g.font = `bold 50px "Marker Felt", "Comic Sans MS", ${SANS}`;
-    g.fillText('REVIEW', 128, 112); g.font = `bold 44px "Marker Felt", "Comic Sans MS", ${SANS}`; g.fillText('+ APPROVE', 128, 172);
+    g.fillStyle = '#23201a'; g.textAlign = 'center'; g.font = `bold 50px "Comic Sans MS", "Marker Felt", ${SANS}`;
+    g.fillText('REVIEW', 128, 112); g.font = `bold 44px "Comic Sans MS", "Marker Felt", ${SANS}`; g.fillText('+ APPROVE', 128, 172);
     g.strokeStyle = '#23201a'; g.lineWidth = 4; g.beginPath(); g.moveTo(48, 196); g.quadraticCurveTo(128, 210, 208, 192); g.stroke();
     const ntex = new THREE.CanvasTexture(nc); ntex.colorSpace = THREE.SRGBColorSpace; ntex.anisotropy = 8;
     const note = new THREE.Mesh(new THREE.PlaneGeometry(0.076, 0.076), new THREE.MeshStandardMaterial({ map: ntex, roughness: 0.8 }));

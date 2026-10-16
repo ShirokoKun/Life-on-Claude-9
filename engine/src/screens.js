@@ -8,7 +8,7 @@
 // Other scenes pass their own draw functions: createScreens(root, acting, { laptop(g, t, keys), monitor(g, t) }).
 import * as THREE from 'three';
 
-export const MONO = '"DejaVu Sans Mono", "JetBrains Mono", Menlo, Consolas, monospace';
+export const MONO = '"DejaVu Sans Mono", "JetBrains Mono", Consolas, Menlo, monospace';   // Consolas before Menlo: a Mac with the transfer fonts draws what Windows draws
 export const SANS = 'Inter, "DejaVu Sans", "Segoe UI", Helvetica, Arial, sans-serif';
 export const C = {
   bar: '#0f1117', ed: '#161922', side: '#12141b', gutter: '#4b5263', txt: '#d7dae0', kw: '#c678dd', str: '#98c379',

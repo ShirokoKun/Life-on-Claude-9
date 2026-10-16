@@ -1,4 +1,4 @@
-# Resume here (2026-10-16): round 11 done, final 4K render
+# Resume here (2026-10-16): round 11 done, final 1080p render
 
 **Latest state (read first):**
 - Round 11 (the director's notes on the `anim2` preview): every note and its fix is in `NOTES_R11.md`. Checked in stills; the 720p
@@ -9,8 +9,9 @@
   and the same with `engine/scenes/s04/ivan_eyes.glb --scene s04 --seconds 31.32 --eyes`.
 - **4K:** effects sized in screen pixels now scale above 1080p, so a 3840x2160 frame keeps the approved 1080p look. Scaled:
   depth of field, bloom, halation, the stipple, the dither, the grid line width and Claude's threads. At 1080p and below
-  nothing changes. Final render:
-  `node tools/render_mp4.mjs --scene kf1 --w 3840 --h 2160 --take final4k` (about 4-6 h on the RTX laptop).
+  nothing changes. The director chose the **1080p final**: 4K added only 7-27% more fine detail (measured on six
+  frames), under the 50% bar. Final render: `node tools/render_mp4.mjs --scene kf1 --take final1080` (about 75 min on the PC).
+- **New machine:** `MAC_TRANSFER_GUIDE.md` and `node tools/setup_check.mjs`.
 - **Not in git** (made again on any machine):
   - `renders/`: every MP4 and frame;
   - `node_modules/`: `npm install` and `npx playwright install chromium`;

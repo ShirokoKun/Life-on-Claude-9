@@ -173,8 +173,8 @@ export async function setup(args) {
   const nc = document.createElement('canvas'); nc.width = nc.height = 256;
   const n = nc.getContext('2d');
   n.fillStyle = '#f2d35b'; n.fillRect(0, 0, 256, 256); n.fillStyle = 'rgba(0,0,0,0.06)'; n.fillRect(0, 0, 256, 34);
-  n.fillStyle = '#23201a'; n.textAlign = 'center'; n.font = 'bold 50px "Marker Felt", "Comic Sans MS", sans-serif';
-  n.fillText('REVIEW', 128, 112); n.font = 'bold 44px "Marker Felt", "Comic Sans MS", sans-serif'; n.fillText('+ APPROVE', 128, 172);
+  n.fillStyle = '#23201a'; n.textAlign = 'center'; n.font = 'bold 50px "Comic Sans MS", "Marker Felt", sans-serif';
+  n.fillText('REVIEW', 128, 112); n.font = 'bold 44px "Comic Sans MS", "Marker Felt", sans-serif'; n.fillText('+ APPROVE', 128, 172);
   n.strokeStyle = '#23201a'; n.lineWidth = 4; n.beginPath(); n.moveTo(48, 196); n.quadraticCurveTo(128, 210, 208, 192); n.stroke();
   const ntex = new THREE.CanvasTexture(nc); ntex.colorSpace = THREE.SRGBColorSpace; ntex.anisotropy = 8;
   note = new THREE.Mesh(new THREE.PlaneGeometry(0.076, 0.076), new THREE.MeshStandardMaterial({ map: ntex, roughness: 0.8 }));
