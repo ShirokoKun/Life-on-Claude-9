@@ -105,3 +105,87 @@ export function tremor(t, { amp = 0.0022, fine = 0.00025, hz = 1.4 } = {}) {
   const a = (k) => amp * (0.62 * w(hz * 0.83, k) + 0.38 * w(hz * 1.37, 2.1 + k)) + fine * (w(8.7, 0.4 + k * 1.7) * 0.7 + w(10.9, 1.3 + k) * 0.3);
   return new THREE.Vector3(a(0), a(1.9) * 0.8, a(3.7));
 }
+
+// Round 14 (K07, director: "hand placements on the keyboard more open and aligned with the keys"): touch-typing hands.
+// Each hand rests over its home keys (A S D F / J K L ;): the palm floats behind and above them, the hand slopes down
+// to the keys, each finger is turned toward its own key and curled just enough to rest on it. Typing: keystrokes at
+// ~9 a second shared by the two hands (seeded, so renders repeat), each one a finger lifting ~8 mm and striking its
+// key, sometimes the key above or below; the hand follows each stroke a little.
+const HOMEK = { L: { Pinky: 'A', Ring: 'S', Middle: 'D', Index: 'F' }, R: { Index: 'J', Middle: 'K', Ring: 'L', Pinky: ';' } };
+const hash = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+export function typeHands(who, keyAt, t, o = {}) {
+  if (!keyAt || !keyAt.A || !keyAt.L || !keyAt.Q || !keyAt.J) return;
+  const b = bones(who);
+  const right = keyAt.L.clone().sub(keyAt.A).normalize();
+  const fwd = keyAt.Q.clone().sub(keyAt.A); fwd.addScaledVector(right, -fwd.dot(right)).normalize();
+  const up = new THREE.Vector3().crossVectors(right, fwd).normalize(); if (up.y < 0) up.negate();
+  const pitch = keyAt.Q.distanceTo(keyAt.A);                                  // one row
+  const rate = o.rate ?? 9, slot = Math.floor(t * rate);
+  // the stroke on each finger now: the latest slot (within 0.2 s) that picked it
+  const stroke = {};
+  for (let k = slot - 2; k <= slot; k++) {
+    const side = hash(k) < 0.5 ? 'L' : 'R', fn = ['Index', 'Middle', 'Ring', 'Pinky', 'Index', 'Middle'][Math.floor(hash(k + 0.37) * 6)];
+    const u = (t - k / rate) / 0.2; if (u < 0 || u > 1) continue;
+    const row = hash(k + 0.71) < 0.25 ? 1 : hash(k + 0.71) > 0.85 ? -1 : 0;
+    stroke[side + fn] = { u, row };
+  }
+  for (const side of ['L', 'R']) {
+    const S = side === 'L' ? 'Left' : 'Right', F = HOMEK[side];
+    const tg = {};
+    const mean = new THREE.Vector3(), nudge = new THREE.Vector3();
+    for (const [fn, ch] of Object.entries(F)) {
+      const p = keyAt[ch].clone(); mean.add(p);
+      const st = stroke[side + fn];
+      let h = 0.0045;                                                          // resting on the key top (pad)
+      if (st) {
+        p.addScaledVector(fwd, st.row * pitch * Math.min(1, st.u * 3));
+        h += st.u < 0.45 ? 0.008 * Math.sin(st.u / 0.45 * Math.PI * 0.5) : st.u < 0.7 ? 0.008 - 0.0105 * (st.u - 0.45) / 0.25 : -0.0025 * (1 - (st.u - 0.7) / 0.3);
+        nudge.addScaledVector(fwd, st.row * 0.004 * Math.sin(st.u * Math.PI)).addScaledVector(up, 0.0015 * Math.sin(st.u * Math.PI));
+      }
+      tg[fn] = p.addScaledVector(up, h);
+    }
+    mean.multiplyScalar(0.25);
+    const along = fwd.clone().multiplyScalar(Math.cos(0.3)).addScaledVector(up, -Math.sin(0.3)).normalize();   // the hand slopes ~17 deg down to the keys
+    const across = side === 'L' ? right.clone() : right.clone().negate();     // index - pinky
+    const goal = mean.clone().addScaledVector(fwd, -(o.back ?? 0.062)).addScaledVector(up, o.lift ?? 0.034).add(nudge);
+    const pole = up.clone().negate().addScaledVector(right, side === 'L' ? -0.7 : 0.7).addScaledVector(fwd, -0.3).normalize();
+    const wrist = goal.clone().addScaledVector(fwd, -0.05);
+    for (let it = 0; it < 6; it++) {
+      reach(who, side, wrist, pole);
+      orientHand(who, side, along, across);
+      const P = palmFrame(who, side); if (!P) break;
+      const miss = goal.clone().sub(P.centre); wrist.add(miss);
+      if (miss.length() < 0.0008 && it > 1) break;
+    }
+    reach(who, side, wrist, pole);
+    orientHand(who, side, along, across);
+    // each finger: turned toward its key in the palm's plane, curled until its tip is at the target height
+    const P = palmFrame(who, side); if (!P) continue;
+    const n = P.normal, prj = (v) => v.addScaledVector(n, -v.dot(n)).normalize();
+    const sc = {}, lo = {}, hi = {};
+    for (const fn of Object.keys(F)) { sc[fn] = 25; lo[fn] = 0; hi[fn] = 70; }
+    const pat = [1.0, 1.15, 0.7];
+    const apply = () => {
+      curlAnat(who, side, Object.fromEntries(Object.keys(F).map((fn) => [fn, pat.map((x) => x * sc[fn])])), [12, 16, 10]);
+      for (const fn of Object.keys(F)) {
+        const f1 = b[`${S}Hand${fn}1`], f2 = b[`${S}Hand${fn}2`]; if (!f1 || !f2) continue;
+        const d = prj(W(f2).sub(W(f1))), wantD = prj(tg[fn].clone().sub(W(f1)));
+        const ang = Math.atan2(new THREE.Vector3().crossVectors(d, wantD).dot(n), d.dot(wantD));
+        touch(f1);
+        const wq = f1.getWorldQuaternion(new THREE.Quaternion()), pq = f1.parent.getWorldQuaternion(new THREE.Quaternion());
+        f1.quaternion.copy(pq.invert().multiply(new THREE.Quaternion().setFromAxisAngle(n, ang).multiply(wq)));
+        f1.updateMatrixWorld(true);
+      }
+    };
+    for (let it = 0; it < 8; it++) {
+      apply();
+      for (const fn of Object.keys(F)) {
+        const tip = b[`${S}Hand${fn}4`] || b[`${S}Hand${fn}3`]; if (!tip) continue;
+        const hgt = W(tip).sub(tg[fn]).dot(up);
+        if (hgt > 0) lo[fn] = sc[fn]; else hi[fn] = sc[fn];                // too high: curl more
+        sc[fn] = (lo[fn] + hi[fn]) / 2;
+      }
+    }
+    apply();
+  }
+}

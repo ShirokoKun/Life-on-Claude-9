@@ -22,7 +22,7 @@ import { createSpark } from './spark.js';
 import { icon, envelope, codeBlock, pipeIcon, pixelArrow, checkMark, MODULE_ORDER, PIPE_ORDER, lifeUp, LIFE_UPS } from './props.js';
 import { captureRest, stand, plantFeet, lookUp, reach, grip, handWorld, bones, makeMug, makePhone, begin, end, orientHand, curl, gripPoint, touch, pointIndex, curlAnat, palmFrame } from './rig.js';
 import { setPix } from './pix.js';
-import { bodyGrip, gulpAt, tremor } from './grip.js';
+import { bodyGrip, gulpAt, tremor, typeHands } from './grip.js';
 import { addKeyLegends } from './keys.js';
 export { LOOKS, LOOK_NAME } from '../s03/looks.js';
 
@@ -81,7 +81,7 @@ export const SHOTS = [
     why: 'V04 “typing furiously, eyes bloodshot.” His face over the monitor’s edge, cold light from the screen, the bed and the lamp dark behind him.' },
   { id: 'K07', name: 'A terminal, a chat, scripts', t0: 20.9, t1: 26.6, mm: [24, 24], f: 5.6,
     from: [1.40, 4.02, 1.10], to: [1.31, 4.15, 1.05], at0: [1.05, 4.40, 0.86], at1: [1.04, 4.45, 0.90], focus: [1.05, 4.42, 0.88], mv: [20.9, 26.6], roll: [0, 0],
-    light: '3am', iv: ['s03', 0.4, 5.6], scr: 24.0, green: 0.1, ev: -0.4, beat: 'V05', board: 'r1c5 (A r1c4, green screen light)', tr: 'cut: from his eyes into the screen (board r1c5: the screen is the frame)',
+    light: '3am', iv: ['s03', 0.4, 5.6], scr: 24.0, typing: true, green: 0.1, ev: -0.4, beat: 'V05', board: 'r1c5 (A r1c4, green screen light)', tr: 'cut: from his eyes into the screen (board r1c5: the screen is the frame)',
     why: 'V05 “A terminal window, a Claude chat, and a growing sprawl of Python scripts.” Over his shoulder onto the three things the line names, the screen’s green on everything.' },
   { id: 'K08', name: 'Email automation system', t0: 26.6, t1: 30.3, mm: [35, 35], f: 2.8,
     from: [1.02, 3.62, 1.48], to: [1.028, 3.646, 1.466], at0: [1.30, 4.48, 1.02], at1: [1.3, 4.48, 1.02], focus: 'mon:800,240', roll: [0, 0],
@@ -767,6 +767,7 @@ export function props(t, ctx) {
     if (s.laced && (r === ctx.ivan)) handsBehindHead(r, s.lacedRamp ? ramp(t, s.lacedRamp[0], s.lacedRamp[1]) : 1);
     if (s.point && (r === ctx.ivan || cast.find((c) => c.root === r && c.role === 'main4'))) pointIndex(r, s.point, 0);   // round 14: no bend on the press (the hand comes down, tapEnter)
     if (s.tapKey && r === ctx.ivan) tapEnter(r, t, s);
+    if (s.typing && r === ctx.ivan && legends) typeHands(r, legends.userData.keyAt, t, s.typing === true ? {} : s.typing);   // round 14 (K07): touch-typing hands on the home keys
     if (r === ctx.ivan || cast.find((c) => c.root === r && c.role === 'main4')) who = r;
     setPix(r, !!s.pix || (s.pixable && new URLSearchParams(location.search).get('pixall') === '1'));
   }

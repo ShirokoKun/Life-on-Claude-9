@@ -66,7 +66,7 @@ export function addKeyLegends(root, scene) {
   const geo = new THREE.PlaneGeometry(1, 1); geo.rotateX(-Math.PI / 2);
   const mesh = new THREE.InstancedMesh(geo, mat, all.length);
   const cell = new Float32Array(all.length);
-  const m4 = new THREE.Matrix4();
+  const m4 = new THREE.Matrix4(), keyAt = {};
   all.forEach(({ k, ri, ci, len }, i) => {
     const w = k.x1 - k.x0, d = k.z1 - k.z0;
     const map = ri - (rows.length - ROWS.length) >= 0 ? ROWS[ri - (rows.length - ROWS.length)] : null;   // rows above the number row (function keys): blank
@@ -75,6 +75,7 @@ export function addKeyLegends(root, scene) {
     else if (map) ch = map[Math.min(map.length - 1, Math.max(0, ci - Math.floor((len - map.length) / 2)))];
     if (ri === rows.length - 3 && ci === len - 1) ch = '⏎';                   // Enter (K43 taps it)
     cell[i] = Math.max(0, GLYPHS.indexOf(ch));
+    if (ch !== '␣' && !keyAt[ch]) keyAt[ch] = new THREE.Vector3(k.cx, k.y, k.cz);   // round 14 (K07): where each key is, for the typing hands
     const s = Math.min(w, d) * 0.9;
     m4.compose(new THREE.Vector3(k.cx, k.y + 0.0003, k.cz), new THREE.Quaternion(), new THREE.Vector3(s, 1, s));
     mesh.setMatrixAt(i, m4);
@@ -84,6 +85,7 @@ export function addKeyLegends(root, scene) {
   // (every key on this deck is the same size, so Enter is the last key of the home row, three rows above the space bar)
   const home = rows[rows.length - 3], ent = home && home.k[home.k.length - 1];
   mesh.userData.enter = ent ? new THREE.Vector3(ent.cx, ent.y, ent.cz) : null;
+  mesh.userData.keyAt = keyAt;
   mesh.frustumCulled = false; mesh.name = 'Key legends';
   scene.add(mesh);
   return mesh;
