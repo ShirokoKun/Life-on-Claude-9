@@ -287,11 +287,22 @@ function Player(s, body) {
   const addPending = (files) => { for (const f of files) pending.push({ file: f, url: URL.createObjectURL(f) }); drawPending(); };
   const picker = h('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp,image/gif', multiple: true, hidden: true, onchange: (e) => { addPending(imagesIn(e.target.files)); e.target.value = ''; } });
   noteText.addEventListener('paste', (e) => { const f = imagesIn(e.clipboardData?.items); if (f.length) { e.preventDefault(); addPending(f); } });
+  // long dictated notes (Wispr Flow etc.): the box grows to show the whole text (then scrolls), counts what arrived,
+  // and keeps a draft per scene, so a reload or a stray click never loses a transcript
+  const DRAFT = `claude9.noteDraft.${s.id}`;
+  const countEl = h('span.faint.mono', { style: { fontSize: '11px', marginLeft: 'auto' } });
+  const fit = () => {
+    noteText.style.height = 'auto'; noteText.style.height = Math.min(noteText.scrollHeight + 2, Math.round(innerHeight * 0.5)) + 'px';
+    const n = noteText.value.length; countEl.textContent = n ? `${n.toLocaleString()} characters` : '';
+  };
+  noteText.addEventListener('input', () => { fit(); try { if (noteText.value) localStorage.setItem(DRAFT, noteText.value); else localStorage.removeItem(DRAFT); } catch { /* storage blocked */ } });
+  try { const d = localStorage.getItem(DRAFT); if (d) noteText.value = d; } catch { /* storage blocked */ }
   const addNote = run(async () => {
     const st = E()?.state(); if ((!noteText.value.trim() && !pending.length) || !st) return;
     const refs = await uploadRefs(s.id, st.shot, pending.map((p) => p.file));
     s.notes = await api('/api/notes', { scene: s.id, t: st.t, shot: st.shot, text: noteText.value, refs });
-    noteText.value = ''; pending.forEach((p) => URL.revokeObjectURL(p.url)); pending.length = 0; drawPending(); drawNotes(); lastShot = null;
+    noteText.value = ''; fit(); try { localStorage.removeItem(DRAFT); } catch { /* storage blocked */ }
+    pending.forEach((p) => URL.revokeObjectURL(p.url)); pending.length = 0; drawPending(); drawNotes(); lastShot = null;
     toast(`Note saved to ${s.folder}/NOTES.md${refs.length ? ` with ${refs.length} reference image${refs.length > 1 ? 's' : ''} (refs/${st.shot}/)` : ''}`);
   });
   body.replaceChildren(h('div.playerWrap', {},
@@ -305,8 +316,9 @@ function Player(s, body) {
       h('p.faint.row', { style: { fontSize: '12px' } }, h('span.grow', {}, h('span.kbd', {}, 'Space'), ' play · ', h('span.kbd', {}, '←'), h('span.kbd', {}, '→'), ' frame · ', h('span.kbd', {}, '['), h('span.kbd', {}, ']'), ' shot · ', h('span.kbd', {}, 'N'), ' note'), loadEl)),
     h('div.card.shotInfo', {}, shotEl, noteBox = h('div.noteBox', {}, h('h3', {}, 'Note at this moment'), noteText, pendEl,
       h('div.row', {}, h('button.btn.primary', { onclick: addNote }, 'Save note'), h('button.btn', { onclick: () => picker.click(), title: 'Attach reference images to this note (or paste / drop them here)' }, '＋ Reference image'), picker,
-        h('span.faint', { style: { fontSize: '12px' } }, 'Claude reads these from NOTES.md'))))));
+        h('span.faint', { style: { fontSize: '12px' } }, 'Claude reads these from NOTES.md'), countEl)))));
   dropImages(noteBox, addPending);
+  fit();                                                            // sized once it is in the page (a restored draft shows whole)
   // the iframe lives outside the page (so it survives navigation) and is laid over the screen box every frame
   const place = () => {
     const r = screen.getBoundingClientRect(), m = main.getBoundingClientRect();
