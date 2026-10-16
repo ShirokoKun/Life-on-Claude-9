@@ -22,6 +22,7 @@ import { icon, envelope, codeBlock, pipeIcon, pixelArrow, checkMark, MODULE_ORDE
 import { captureRest, stand, plantFeet, lookUp, reach, grip, handWorld, bones, makeMug, makePhone, begin, end, orientHand, curl, gripPoint, touch, pointIndex, curlAnat, palmFrame } from './rig.js';
 import { setPix } from './pix.js';
 import { addKeyLegends } from './keys.js';
+import { createRoom, roomFrame, roomState } from './room.js';   // round 14 (L5): the room's materials, bed, outside and sun
 export { LOOKS, LOOK_NAME } from '../s03/looks.js';
 
 export const FPS = 24;
@@ -52,6 +53,7 @@ const STAND = [1.04, 3.85];                                                  // 
 // cl (Claude), zone (+ zopt), icons, env, card, pipe, glass, note, cyan/green, thin, ghosts, black, top (ceiling off),
 // stand, place {at, yaw}, look (head pitch), hand {side, to: 'mouth'|'phone'|[x,y,z], prop}, pix (faceted Ivan),
 // refl (lens reflections), cross (window-bar light), board (the storyboard panel), tr (the transition into the shot).
+// Round 14 (room.js, day and sunrise only): rays (god-ray strength, 1 = default), dust (sunlit motes), sunK (live sun).
 export const SHOTS = [
   { id: 'K01', name: 'Three AM', t0: 0, t1: 3.0, mm: [18, 18], f: 5.6,
     from: [2.10, 3.88, 3.40], to: [2.07, 3.88, 3.32], at0: [0.95, 3.92, 0.60], at1: [0.95, 3.92, 0.60], focus: [1.05, 3.95, 0.90], roll: [0, 0],   // round 14: Ivan in the centre (was: the room centred, him at the edge)
@@ -102,7 +104,7 @@ export const SHOTS = [
     why: 'V08 “It started two days ago.” The K01 top-down in afternoon light, no glass poured. Clean: the same room, the same man, two days earlier; the only change is the light.' },
   { id: 'K12', name: '400 unread', t0: 41.9, t1: 46.4, mm: [30, 30], f: 2.0,
     from: [2.10, 3.92, 1.16], to: [2.042, 4.391, 1.16], at0: [1.00, 3.98, 1.20], at1: [1.00, 3.98, 1.20], focus: 'eyes', mv: [45.6, 46.4], ease: 'in', arc: [1.05, 4.03], roll: [0, 0],
-    lookK: [[41.9, -16, -15], [46.4, -18, -18]], breath: 0.32, gaze: 'phone', light: 'day', iv: ['s04', 14.8], s4: 8.0, glass: false, lean: 10, look: 2, hand: { side: 'R', to: 'phone', prop: 'phone', ph: 44.0 },
+    lookK: [[41.9, -16, -15], [46.4, -18, -18]], breath: 0.32, gaze: 'phone', light: 'day', rays: 1.6, iv: ['s04', 14.8], s4: 8.0, glass: false, lean: 10, look: 2, hand: { side: 'R', to: 'phone', prop: 'phone', ph: 44.0 },
     cl: { at: [0.92, 4.30, 1.20], face: [1.05, 4.02, 1.15], s: 1.5, pose: 'hover', glow: 0.7, lightK: 0.4, born: 42.2, exit: 46.1, path: [[42.2, [1.30, 4.28, 1.18]], [43.2, [1.10, 4.55, 1.32]], [44.0, [0.66, 4.12, 1.36]], [44.8, [0.98, 3.70, 1.30]], [45.6, [0.92, 4.30, 1.20]]] }, beat: 'V09 a', board: 'r1c7 (A r2c4 “complaining to claude”)', tr: 'push down from the top-down into him',
     why: 'V09 IVAN “i have like 400 unread emails. every single one wants a reply.” Leaning back in the afternoon light, talking into the phone held up near his face. Claude, small and warm, circles him and drifts round in front of him as he talks (the orbit is animated: it starts behind his shoulder and ends between him and the phone).' },
   { id: 'K13', name: 'Drowning here!', t0: 46.4, t1: 51.01, mm: [40, 40], f: 2.2,
@@ -682,6 +684,7 @@ export async function setup(args) {
   amberLight = new THREE.PointLight(0xff9a3c, 0, 4.0, 1.4); amberLight.position.copy(B(1.20, 3.20, 1.55)); scene.add(amberLight);
   phoneLight = new THREE.PointLight(0x9fb8ff, 0, 0.9, 2); phoneLight.position.copy(B(PHONE[0], PHONE[1], PHONE[2] + 0.06)); scene.add(phoneLight);
   greenLight = new THREE.PointLight(0x7dffb0, 0, 1.6, 2); greenLight.position.copy(B(1.10, 4.36, 1.02)); scene.add(greenLight);
+  await createRoom(args, RL);   // round 14 (L5): rug, bed, floor, the outside by day, the dawn bake and its live sun, rays, dust
 }
 
 // ---------------------------------------------------------------- light per keyframe
@@ -783,7 +786,7 @@ export function props(t, ctx) {
 
   // the world outside the window by day and at dawn: a bright haze (the window reads as the light source)
   if (!outside) { outside = []; root.traverse((o) => { if (o.isMesh && /^(Hill|Ground|Neighbourhood|Tree_Line|Facade_Towers)/.test(o.name)) outside.push({ m: o.material, e: o.material.emissive.clone(), k: o.material.emissiveIntensity }); }); }
-  const haze = { day: [0xb9cde2, 1.25], sunrise: [0xffb27a, 2.6], evening: [0x6a4a6a, 0.6] }[s.light];   // round 13: day was 3.2 (a blown white band)
+  const haze = { evening: [0x6a4a6a, 0.6] }[s.light];   // round 14: day and dawn have their own outside (room.js: a day sky, hazy hills and towers)
   for (const o of outside) { if (haze) { o.m.emissive.setHex(haze[0]); o.m.emissiveIntensity = haze[1] * dim; } else o.m.emissive.copy(o.e); }
 
   for (const k of ['Water', 'Water_Bubbles', 'Water_Glass']) if (named[k]) named[k].visible = s.glass !== false && (!zone || ['tower', 'iso'].includes(zone));
@@ -1100,7 +1103,9 @@ export function props(t, ctx) {
   amberLight.intensity = (s.amber || 0) * 4.0;
   const W = { sunrise: [0xff9a50, 7.0], day: [0xfff1dc, 2.5], evening: [0xff8a60, 1.6] }[s.light];
   winLight.intensity = W && !zone ? W[1] * (s.dim ?? 1) : 0; if (W) winLight.color.setHex(W[0]);
-  crossLight.intensity = (s.cross || 0) * 95;
+  // round 14: at dawn the live, shadow-mapped sun (room.js) does the real work; the window-bar cookie spot stays at 0.7 as a lift on his face
+  crossLight.intensity = (s.cross || 0) * 95 * (roomState.dawn && /sunrise/.test(s.light || '') ? +(new URLSearchParams(location.search).get('crossk') ?? 0.7) : 1);
+  roomFrame(t, s, ctx, { zone, dim, weights: weightsFor(s.light, t, s.t0, s.t1), envAt: ROOM3.ENV_AT, lens: postRef && postRef.lens });
   if (rig && rig.L.monitor && !s.flick) rig.L.monitor.color.setHex(s.green ? 0x9ff0c4 : s.cyan ? 0xc8f6ff : moodOf(s).monCol);
 
   // the floating chat window

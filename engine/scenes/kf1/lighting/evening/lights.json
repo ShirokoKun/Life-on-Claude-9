@@ -1,0 +1,9 @@
+{
+ "preset": "evening",
+ "exposure": 1.0,
+ "source": "engine/scenes/s03/room/room.glb (TEXCOORD_1)",
+ "live": [
+  "Key_Laptop"
+ ],
+ "sun": null
+}

@@ -1014,6 +1014,18 @@ PRESETS = {
     "sunrise": dict(world=((0.12, 0.16, 0.30), (0.90, 0.50, 0.25), 2.0), lamp=240, window=(700, (1.0, 0.68, 0.48)),
                     moon=0.0, sun=(5.0, (1.0, 0.58, 0.32), (1.0, -0.20, -0.13)), sodium=0, fill=0, city=0.1, screens=0.8,
                     desk=18, exposure=0.6),
+    # kf1 only (Ch 1 keyframes K47-K53, round 14): the dawn sun raking in from the south-west so it reaches Ivan at the
+    # desk and the glass of water (the s03 sunrise misses him). Its direct light is LIVE (the engine's shadow-mapped sun:
+    # Ivan, the chair, the guitar and the laptop all shadow it); the bake keeps only its bounce.
+    #   ... --bake --preset dawn_kf1 --lm-only  ->  engine/scenes/kf1/lighting/dawn
+    "dawn_kf1": dict(world=((0.12, 0.16, 0.30), (0.90, 0.50, 0.25), 2.0), lamp=240, window=(700, (1.0, 0.68, 0.48)),
+                     moon=0.0, sun=(5.0, (1.0, 0.62, 0.36), (1.0, 1.15, -0.55)), sodium=0, fill=0, city=0.1, screens=0.8,
+                     desk=18, exposure=0.6, live_sun=True),
+    # kf1 only: the s03 day light with its sun drawn live too (K11-K17: true shadows on the new bed, Ivan, the chair)
+    #   blender/scenes/kf1_dawn_bake.py -- engine/scenes/kf1/lighting/day --preset day_kf1 --half
+    "day_kf1": dict(world=((0.25, 0.35, 0.60), (0.60, 0.60, 0.58), 1.5), lamp=0, window=(2600, (0.85, 0.90, 1.0)),
+                    moon=0.0, sun=(4.0, (1.0, 0.90, 0.78), (1.0, 0.30, -0.62)), sodium=0, fill=0, city=0.0, screens=0.5,
+                    desk=0, exposure=0.1, live_sun=True),
 }
 CITY_LIGHTS = ("Sodium Light", "Street LED", "House Window LED", "Facade City", "Aviation Red", "Sky Night")
 SCREEN_MATS = ("Laptop Screen", "Monitor Screen", "Code Screen", "Phone Screen")
@@ -1107,6 +1119,8 @@ def bake_and_export(out, scene, small=False, samples=64, preset="3am", lm_only=F
     import lightmap
     BK.FLAT_ALBEDO = True                           # procedural colours baked black: the floor, the bed (LESSONS.md)
     lightmap.LIVE_LIGHTS = ("Key_Laptop",)          # the lamp is baked: soft Cycles shadows instead of a hard shadow map
+    if PRESETS[preset].get("live_sun"):             # kf1 dawn: the sun's direct light is drawn live (shadow-mapped)
+        lightmap.LIVE_LIGHTS = ("Key_Laptop", "Sun")
     BK.DESK = Vector((1.3, 4.4, 0.0))               # the desk zone gets its own, sharper map
     bpy.data.objects["Wall_N"]["bake_group"] = "WALLN"   # wild wall and ceiling: own maps, so shots can pull them
     bpy.data.objects["Ceiling"]["bake_group"] = "CEIL"
