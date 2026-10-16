@@ -159,7 +159,7 @@ void main() {
   float shade = 0.72 + 0.28 * max(dot(n, normalize(uLight)), 0.0) + 0.12 * max(n.y, 0.0);
   float e = min(min(vUv2.x, 1.0 - vUv2.x), min(vUv2.y, 1.0 - vUv2.y));
   float edge = 1.0 - smoothstep(0.02, 0.075, e);                              // a fine bevel line round every face
-  float fr = pow(1.0 - abs(dot(n, v)), 2.2);                                   // the rim
+  float fr = pow(max(1.0 - abs(dot(n, v)), 0.0), 2.2);                                // the rim
   float scan = 0.5 + 0.5 * sin(vW.y * 700.0 - uTime * 5.0);                    // scanlines drifting up
   float shim = 0.92 + 0.08 * sin(uTime * 3.1 + fract(sin(vId) * 43758.5) * 6.28);   // each voxel shimmers on its own
   vec3 c = base * shade * (1.0 - uScan * 0.22 * scan) + mix(base, vec3(1.0), 0.25) * edge * 0.45 + base * fr * 0.55;

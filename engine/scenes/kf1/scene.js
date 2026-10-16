@@ -178,22 +178,26 @@ export const SHOTS = [
     from: [0.90, 4.13, 1.40], to: [0.90, 4.13, 1.40], at0: 'lap:520,420', at1: 'lap:520,420', focus: [1.05, 4.46, 0.94], roll: [0, 0],
     light: '3am', iv: ['s03', 32.0, 33.3], scr: 87.5, beat: 'V14b', board: 'r2c5', tr: 'cut: back in the room, over his shoulder',
     why: 'V14b “Each one removing another task from his daily routine.” Over his shoulder onto TODO.md ticking itself off.' },
-  { id: 'K24', name: 'A cheat code for life', t0: 89.9, t1: 93.8, mm: [24, 24], f: 4.0,
-    from: [0.92, 5.55, 1.12], to: [0.92, 5.55, 1.12], at0: [0.98, 3.95, 1.32], at1: [0.98, 3.95, 1.32], focus: 'eyes', flow: 'F3', roll: [0, 0],
-    deskAway: [93.3, 93.8], zoneAt: 90.59, lifeBorn: [91.3, 91.5, 91.75, 92.0, 92.25, 92.5], lifeShrink: 93.4, gaze: [[89.9, 'screen'], [91.1, [1.0, 6.5, 3.2]]], light: '3am', iv: ['s03', 31.9], scr: 90.6, zone: 'cheat', zopt: { codeAt: [1.04, -5.0, 5.2], codeFace: [0.98, 5.55, 1.22] }, lifeUps: true, beat: 'V15 *', board: 'r2c6 (experimental, kept; night void: black to dark violet, white grid, stars)', tr: 'the walls fall away on the rush (90.59)',
-    cl: { at: [1.36, 4.30, 1.30], face: [0.98, 5.55, 1.22], s: 1.5, pose: 'cheer', born: 90.7 },
-    why: 'V15 “It’s like discovering a cheat code for life.” The room falls away: his desk floats in a teal-and-orange retro world, the four modules orbit him like power-ups, the code is written across the sky.' },
-  { id: 'K25', name: 'Hours into minutes', t0: 93.8, t1: 97.4, mm: [24, 24], f: 1.4,
-    from: [1.04, 4.95, 2.85], to: [1.04, 4.918, 2.793], at0: [1.04, 3.90, 0.95], at1: [1.04, 3.9, 0.95], focus: [1.04, 3.95, 1.40], roll: [0, 0],
+  // round 14: K24 rebuilt (director: no grid forming under him, no orbit, not in his room; a frame that says he figured
+  // it out). He stands alone in the night void, lit from straight above; the six life-ups fly in out of the dark and
+  // snap into their slots on a ring round him, each snap turning the light above him up a step; when the last locks a
+  // dotted line runs round and joins them. One slow push in. (The crane into K25, flow F3, is gone: K25 is a cut.)
+  { id: 'K24', name: 'A cheat code for life', t0: 89.9, t1: 93.8, mm: [24, 24], f: 2.8,
+    from: [2.05, 10.45, 1.15], to: [2.02, 10.10, 1.16], at0: [1.04, 3.85, 1.98], at1: [1.04, 3.85, 1.99], focus: 'eyes', roll: [0, 0], ev: -0.6,
+    lifeBorn: [90.4, 90.65, 90.9, 91.15, 91.4, 91.65], light: 'void', iv: ['s03', 8.0], stand: true, look: 24, zone: 'cheat', zopt: { snaps: [90.4, 90.65, 90.9, 91.15, 91.4, 91.65], topK: 0.7, ring: { o: 'h', r: 1.6, z: 3.2, dot: 0.024 }, crown: 1.9 }, lifeScale: 1.9, lifeUps: true,
+    beat: 'V15 *', board: 'r2c6 (rebuilt round 14: night void, black to dark violet, stars)', tr: 'cut on the rush: out of the room into the void',
+    why: 'V15 “It’s like discovering a cheat code for life.” He has figured it out: alone in a starry violet-black void, lit from above, the six life-ups snapping into a ring round him like a solved puzzle.' },
+  { id: 'K25', name: 'Hours into minutes', t0: 93.8, t1: 97.4, mm: [30, 30], f: 3.2,
+    from: [1.04, 4.95, 2.85], to: [1.04, 4.918, 2.793], at0: [1.04, 3.90, 0.95], at1: [1.04, 3.9, 0.95], focus: 'eyes', roll: [0, 0],
     light: 'void', iv: ['s03', 8.0], stand: true, look: 40, zone: 'down', beat: 'V16', board: 'r2c7 (B r3c3; render ref Group 6/7)', tr: 'the desk drops away; he is standing in the dark',
     why: 'V16 “Every problem that used to take hours now takes minutes.” From high above, he stands in the dark looking up at us; soft bars of red, orange, peach and cyan drift around him at every depth.' },
-  { id: 'K26', name: 'A different frequency', t0: 97.4, t1: 100.9, mm: [28, 28], f: 1.4,
+  { id: 'K26', name: 'A different frequency', t0: 97.4, t1: 100.9, mm: [28, 28], f: 2.0,
     from: [1.04, 2.85, 1.05], to: [1.04, 2.85, 1.05], at0: [1.04, 8.0, 3.2], at1: [1.04, 8.0, 3.2], focus: [1.04, 3.85, 1.25], flow: 'F4', roll: [0, 0],
-    zoneAt: 96.4, light: 'void', iv: ['s03', 8.0], stand: true, look: 18, zone: 'dome', beat: 'V17 a', board: 'r2c8 (B r3c4; render refs Group 5, 10)', tr: 'cut: from above to below and behind',
+    zoneAt: 96.4, light: 'void', iv: ['s03', 8.0], stand: true, look: 18, zone: 'dome', zopt: { tunnel: { straight: [98.6, 101.2] } }, beat: 'V17 a', board: 'r2c8 (B r3c4; render refs Group 5, 10)', tr: 'cut: from above to below and behind',
     why: 'V17 “Ivan feels like he’s vibrating at a different frequency” Low behind him: rings of light streaking around him like a long exposure, teal and orange, his hair edged with light.' },
   { id: 'K27', name: 'Than everyone around him', t0: 100.9, t1: 102.3, mm: [28, 28], f: 2.0,
     from: [1.78, 4.12, 1.02], to: [1.78, 4.12, 1.02], at0: [1.02, 4.00, 1.45], at1: [1.02, 4.00, 1.45], focus: 'eyes', flow: 'F4', roll: [0, 0],
-    light: 'void', iv: ['s03', 8.0], stand: true, look: 28, zone: 'dome', zopt: { crowd: true }, beat: 'V17 b', board: 'r2c8 (render ref Group 11)', tr: 'cut: round to his profile',
+    light: 'void', iv: ['s03', 8.0], stand: true, look: 28, zone: 'dome', zopt: { crowd: true, tunnel: { straight: [98.6, 101.2] } }, beat: 'V17 b', board: 'r2c8 (render ref Group 11)', tr: 'cut: round to his profile',
     why: 'V17 “than everyone around him,” Low profile, looking up into the rings; far off in the dark, grey people walk at normal speed.' },
   // round 14 (B2): K28 is gone; K29 carries the whole of "like he's stepped through a door that others can't even see".
   // An extreme close-up of his eye and glasses: the camera orbits from the right side of his face round to the front
@@ -225,9 +229,9 @@ export const SHOTS = [
     why: 'V20 “He knows this isn’t healthy.” Close, mug at his lips, dark under his eyes, the city in bokeh behind; his face in facets.' },
   { id: 'K34', name: 'A thinness to his thoughts', t0: 121.6, t1: 126.3, mm: [50, 50], f: 2.8,
     from: [1.56, 3.10, 1.36], to: [1.56, 3.10, 1.36], at0: [1.20, 3.84, 1.32], at1: [1.20, 3.84, 1.32], focus: [1.21, 3.82, 1.37], flow: 'F6', roll: [0, 0],
-    light: 'void', iv: ['s03', 8.0], stand: true, yaw: -100, look: 0, zone: 'balcony', zopt: { spill: 3.0 }, hand: { side: 'L', to: 'mouth', prop: 'mug', sip: [[121.6, 0.45], [123.4, 0.25], [126.3, 0.25]] }, pix: false, pixable: true, thin: true,
+    light: 'void', iv: ['s03', 8.0], stand: true, yaw: -100, look: 0, zone: 'balcony', zopt: { spill: 3.0, trails: [121.75, 125.6] }, hand: { side: 'L', to: 'mouth', prop: 'mug', sip: [[121.6, 0.45], [123.4, 0.25], [126.3, 0.25]] }, pix: false, pixable: true,
     refl: { kind: 'warm', k: 0.8, tint: 0.04 }, beat: 'V20 b', board: 'r3c5 (C r2c1; render ref Group 7 bottom)', tr: 'the same frame: the city stretches into lines',
-    why: 'V20 “something fraying at the edges of his mind, a thinness to his thoughts.” The same close; behind him the city has stretched into thin horizontal lines.' },
+    why: 'V20 “something fraying at the edges of his mind, a thinness to his thoughts.” The same close; behind him the city’s own lights stretch from discs into long thin trails streaming past (R4). No lines come in from outside (round 14).' },
   { id: 'K35', name: 'Close to something', t0: 126.3, t1: 129.4, mm: [35, 35], f: 2.4,
     from: [0.95, 4.55, 1.38], to: [0.91, 4.50, 1.38], at0: [1.88, 3.30, 1.31], at1: [1.88, 3.30, 1.31], focus: 'iris', roll: [0, 0],
     light: 'void', iv: ['s03', 8.0], stand: true, yaw: -100, look: 0, zone: 'balcony', zopt: { spill: 3.0 }, hand: { side: 'L', to: 'mouth', prop: 'mug', sip: [[126.3, 0.3], [127.4, 1.0], [128.4, 1.0], [129.4, 0.6]] }, pix: false, pixable: true, amber: 0.35,
@@ -270,10 +274,12 @@ export const SHOTS = [
     from: [1.08, 4.58, 1.00], to: [1.081, 4.593, 0.997], at0: [1.05, 4.15, 1.10], at1: [1.05, 4.15, 1.1], focus: 'eyes', roll: [0, 0],
     flick: [162.2, 166.0], light: '4am', iv: ['s03', 30.75], scr: 177.6, look: 16, cyan: 0.3, amber: 0.45, ev: -1.1, beat: 'V26 b', board: 'r4c4', tr: 'cut on the pass chord: the screen flares',
     why: 'V26 “and the dread dissolves into a rush of pure satisfaction.” The screen flares and washes his face cyan-white, the room glowing amber behind him.' },
-  { id: 'K45', name: 'HE... built that', t0: 166.0, t1: 168.85, mm: [17, 17], f: 8.0,
-    from: [24.0, -24.0, 1.6], to: [24.0, -24.0, 1.6], at0: [16.0, 18.0, 15.0], at1: [16.0, 18.0, 16.5], focus: [1.04, 3.85, 1.0], roll: [0, 0],
-    light: 'void', iv: ['s03', 8.0], stand: true, look: 30, zone: 'monolith', beat: 'V27 a * (Ivan)', board: 'r4c5', tr: 'hard cut on “HE” (166.00): white',
-    why: 'V27 IVAN “HE... built that.” Low, against a pale sky: a dark tower of lit windows, Ivan tiny at its foot looking up at it.' },
+  // round 14: the machine is too big to see: set back 60 m and seen whole (all four edges in frame) from low on the
+  // pale ground, a 24 mm lens 20 m behind him; he stands tiny in the lower left, looking up at it. A slow push.
+  { id: 'K45', name: 'HE... built that', t0: 166.0, t1: 168.85, mm: [24, 24], f: 8.0,
+    from: [3.0, -20.0, 0.40], to: [3.15, -19.3, 0.42], at0: [41.0, 64.0, 20.0], at1: [41.0, 64.0, 20.25], focus: [1.04, 3.85, 1.0], roll: [0, 0],
+    light: 'void', iv: ['s03', 8.0], stand: true, look: 30, zone: 'monolith', zopt: { bldAt: [10, 60], fog: 0.0028 }, beat: 'V27 a * (Ivan)', board: 'r4c5', tr: 'hard cut on “HE” (166.00): white',
+    why: 'V27 IVAN “HE... built that.” Low on the pale ground: the whole machine, a dark block of lit windows spelling his modules, edge to edge in the frame; Ivan tiny in the corner, looking up at it.' },
   { id: 'K46', name: 'What HE told it to do', t0: 168.85, t1: 172.4, mm: [32, 32], f: 2.8,
     from: [1.04, 5.10, 3.50], to: [1.04, 4.62, 2.55], at0: [1.04, 3.88, 0.90], at1: [1.04, 3.88, 0.90], focus: [1.04, 3.95, 1.40], mv: [168.85, 171.94], dolly: 13.37, roll: [0, 0],
     cutBlack: 171.94, gaze: 'cam', light: 'void', iv: ['s03', 8.0], stand: true, look: 42, zone: 'monolith', zopt: { noBuilding: true }, beat: 'V27 b (Ivan)', board: 'r4c6', tr: 'cut on the drop (168.85): from above',
@@ -316,7 +322,7 @@ export const FLOWS = {
   // (no F1: K07's camera sits between his face and the laptop and K08's is behind him, and a move between them would pass
   // through his head, so K07 -> K08 is a cut)
   F2: { t0: 74.1, t1: 81.8, cam: { from: [2.45, 2.70, 2.30], to: [2.367, 2.796, 2.215], at0: [1.18, 4.30, 1.02], at1: [1.18, 4.30, 1.02], mm: [28, 28] } },   // K21a-d: push 6% at the island
-  F3: { t0: 92.6, t1: 93.8, cam: { from: [0.92, 5.55, 1.12], to: [1.04, 4.95, 2.85], at0: [0.98, 3.95, 1.32], at1: [1.04, 3.90, 0.95], mm: [24, 24] } },   // K24 to K25: the crane up over his head as the desk breaks away
+  // (no F3: round 14, K24 holds its own push and cuts to K25's top shot)
   F4: { t0: 97.4, t1: 102.3, cam: { from: [1.04, 2.85, 1.05], to: [1.78, 4.12, 1.02], arc: [1.04, 3.95], at0: [1.04, 5.4, 2.1], at1: [1.02, 4.00, 1.45], mm: [28, 28] } },   // K26 to K27: orbit round him (radius 1.1 to 0.76 m) to his profile, the aim coming down from the rings to his face
   F6: { t0: 117.7, t1: 126.3, cam: { from: [1.54, 3.11, 1.36], to: [1.574, 3.135, 1.358], at0: [1.20, 3.84, 1.32], at1: [1.20, 3.84, 1.32], mm: [50, 50] } },   // K33 to K34: one slow push, ending past the K34 keyframe
 };
@@ -693,7 +699,12 @@ const MOOD = {
   void:      { room: 1.0, lamp: 1.0, mon: 1.0, scr: 1.0, monCol: 0x86b8ff, con: 0.18, sat: 1.12, lo: [0.0, 0.0, 0.02], hi: [0.02, 0.01, 0.0] },
 };
 // the zones carry their own colour idea (the balcony: a cold night, amber and teal city)
-const ZMOOD = { balcony: { ...MOOD.void, con: 0.26, sat: 1.15, lo: [-0.012, 0.0, 0.036], hi: [0.032, 0.012, -0.01] } };
+const ZMOOD = { balcony: { ...MOOD.void, con: 0.26, sat: 1.15, lo: [-0.012, 0.0, 0.036], hi: [0.032, 0.012, -0.01] },
+  // round 14 (L2): the lens haze (LOOK, locked) lifts every void's black to a navy; the R5 worlds sit on true black, K24 on
+  // a black-violet: a negative shadow lift sinks the haze back (the highlights and the skin keep their tone)
+  cheat: { ...MOOD.void, con: 0.2, lo: [-0.034, -0.058, -0.088], hi: [0.02, 0.01, 0.0] },
+  down: { ...MOOD.void, con: 0.22, lo: [-0.048, -0.06, -0.125], hi: [0.02, 0.008, -0.004] },
+  dome: { ...MOOD.void, con: 0.22, lo: [-0.045, -0.055, -0.115], hi: [0.02, 0.008, -0.004] } };
 const moodOf = (s) => MOOD[s.mood] || ZMOOD[s.zone] || MOOD[(String(s.light || '3am').match(/4am_iso|4am|3am|evening|day|sunrise|void/) || ['3am'])[0]];
 export function exposureBoost(t) {
   if (!RL) return 0;
@@ -730,7 +741,7 @@ function follow(o, key, st, k) {
 
 // ---------------------------------------------------------------- what is in the frame
 const KEEP_IN_ZONE = /^(Baked_DESK|Laptop_Hinge|Laptop_Screen|Monitor_Screen|Water|Water_Bubbles|Water_Glass|Ring_Stain_\d|Lamp_Bulb_Desk)$/;
-const FIGURE_ZONES = ['down', 'dome', 'door', 'balcony', 'monolith'];          // he stands; no desk
+const FIGURE_ZONES = ['down', 'dome', 'door', 'balcony', 'monolith', 'cheat'];          // he stands; no desk
 let roomVis = null, outside = null, lmUsers = null, menS03 = null;
 const DESK_SWEEP = new THREE.Plane(new THREE.Vector3(0, -1, 0), 99);   // keeps y < constant
 const SHELF_CUT = new THREE.Plane(new THREE.Vector3(1, 0, 0), -0.41);       // keeps x > 0.41 (three x = Blender x)
@@ -755,14 +766,14 @@ export function props(t, ctx) {
   if (named.Baked_ROOM) named.Baked_ROOM.children.forEach((c) => { c.visible = !zone || c.name === 'Baked_ROOM_21'; });   // in a void only his chair stays (he must sit on something)
   stage.setFigure(new THREE.Vector3(STAND[0], STAND[1], 0));
   let z0 = s; for (let k = 0; k < 8; k++) { const p = prevShot(z0); if (!p || p === z0 || p.zone !== s.zone) break; z0 = p; }
-  stage.set(zone, t, { ...(s.zopt || {}), rise: s.rise, age: t - (s.zoneAt ?? z0.zoneAt ?? z0.t0), camV: camPos(t) });
+  stage.set(zone, t, { ...(s.zopt || {}), rise: s.rise, age: t - (s.zoneAt ?? z0.zoneAt ?? z0.t0), camV: camPos(t), cam: ctx.camera });
   if (glowPass) glowPass.params.gain = ({ dome: 0.6, door: 0.7, down: 0.8 })[zone] ?? 1.45;   // the ray worlds: dozens of sources, gentler halos
   // the desk falls away (K24 into K25): a plane sweeps it off from the top while the camera is overhead
   DESK_SWEEP.constant = s.deskAway ? 1.7 - 1.85 * ramp(t, s.deskAway[0], s.deskAway[1]) : 99;
   const clips = (zone ? [SHELF_CUT] : []).concat(s.deskAway && t > s.deskAway[0] ? [DESK_SWEEP] : []);
   if (named.Baked_DESK) named.Baked_DESK.traverse((o) => { if (o.isMesh) for (const m of [].concat(o.material)) m.clippingPlanes = clips.length ? clips : null; });
   for (const n of ['Baked_ROOM', 'Laptop_Hinge', 'Laptop_Screen', 'Monitor_Screen', 'Water', 'Water_Glass']) if (named[n]) named[n].traverse((o) => { if (o.isMesh) for (const m of [].concat(o.material)) m.clippingPlanes = s.deskAway && t > s.deskAway[0] ? [DESK_SWEEP] : (n === 'Baked_ROOM' ? null : m.clippingPlanes); });
-  scene.fog.density = zone ? ({ balcony: 0.0, monolith: 0.006, drown: 0.16, tower: 0.035 }[zone] ?? 0.004) : 0.045;
+  scene.fog.density = zone ? (s.zopt?.fog ?? { balcony: 0.0, monolith: 0.006, drown: 0.16, tower: 0.035 }[zone] ?? 0.004) : 0.045;   // round 14: a shot may set its own haze (K45)
   scene.fog.color.set(zone === 'tower' ? 0x0a1a2c : zone === 'cheat' ? 0x0d0624 : zone === 'monolith' ? 0xd8dee3 : zone ? 0x02050a : 0x060a10);   // monolith: pale haze, the far end of the block fades
 
   // dim: the room sinks toward black around a lit desk (a transition state on the way into the zone)
@@ -775,7 +786,7 @@ export function props(t, ctx) {
   const haze = { day: [0xb9cde2, 1.25], sunrise: [0xffb27a, 2.6], evening: [0x6a4a6a, 0.6] }[s.light];   // round 13: day was 3.2 (a blown white band)
   for (const o of outside) { if (haze) { o.m.emissive.setHex(haze[0]); o.m.emissiveIntensity = haze[1] * dim; } else o.m.emissive.copy(o.e); }
 
-  for (const k of ['Water', 'Water_Bubbles', 'Water_Glass']) if (named[k]) named[k].visible = s.glass !== false && (!zone || ['cheat', 'tower', 'iso'].includes(zone));
+  for (const k of ['Water', 'Water_Bubbles', 'Water_Glass']) if (named[k]) named[k].visible = s.glass !== false && (!zone || ['tower', 'iso'].includes(zone));
   if (named.Water_Glass) for (const d of named.Water_Glass.userData.details || []) d.visible = named.Water_Glass.visible;   // rim, base, meniscus (left floating in the voids before)
   // round 14 (K04): s03 adds its own meniscus, an OPAQUE dark ring at the waterline. Here the clear water refracts the
   // opaque scene, so that ring was drawn twice: on the waterline and again, smaller, inside the water's surface (the
@@ -910,18 +921,25 @@ export function props(t, ctx) {
     beam.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize());
   }
 
-  // the cheat code for his life (V15): power-ups hang round him in the void, turning like game pickups
-  const LIFE_AT = [[0.18, 3.80, 1.40], [1.86, 3.70, 1.52], [-0.20, 3.30, 1.86], [2.30, 3.20, 1.22], [0.42, 3.05, 2.05], [1.62, 2.95, 1.98]];   // round his head, below the code
+  // the cheat code for his life (V15, round 14): each life-up flies in out of the dark on its own curve, turning, and
+  // snaps into its slot on the ring round him (stage.lifeSlot) with a small overshoot and a flash; then it hangs there,
+  // bobbing a little
   lifeUps.forEach((g, i) => {
     const bt = s.lifeBorn ? s.lifeBorn[i] : -1e9;
-    g.visible = !!s.lifeUps && !s.black && t >= bt && !(s.zoneAt && t < s.zoneAt); if (!g.visible) return;
-    const bu = land((t - bt) / 0.45), sh = s.lifeShrink ? 1 - ramp(t, s.lifeShrink, s.lifeShrink + 0.4) : 1;
-    const p = B(1.05, 4.40, 0.98).lerp(B(...LIFE_AT[i]), Math.min(1, bu)); p.y += Math.sin(Math.min(1, bu) * Math.PI) * 0.15 + 0.03 * Math.sin(t * 2.1 + i * 1.7);
-    g.scale.setScalar(Math.max(0.02, Math.min(1, bu) * sh));
+    g.visible = !!s.lifeUps && !s.black && t >= bt; if (!g.visible) return;
+    const FLY = 0.5, u = Math.min(1, Math.max(0, (t - bt) / FLY));
+    const slot = B(...stage.lifeSlot(i));
+    const a = (i / 6) * Math.PI * 2 + 0.9, from = B(1.04 + Math.cos(a) * 6.5, 3.85 + Math.sin(a) * 5.0 - 2.0, 6.5 + 1.5 * Math.sin(i * 2.3));   // out of the dark, high and far
+    const e = 1 - Math.pow(1 - u, 3), p = from.clone().lerp(slot, e);
+    p.y += Math.sin(e * Math.PI) * 0.25;                                              // an arc, not a straight line
+    const snap = t - bt - FLY, pop = snap > 0 ? 1 + 0.22 * Math.exp(-snap * 9) * Math.cos(snap * 30) : 0.35 + 0.65 * e;   // the lock: a quick ring-down
+    p.y += snap > 0 ? 0.012 * Math.sin(t * 2.1 + i * 1.7) : 0;
+    g.scale.setScalar(Math.max(0.02, pop) * (s.lifeScale || 1));
     g.position.copy(p);
-    g.lookAt(camPos(t)); g.getObjectByName('sprite').rotation.y = 0.35 * Math.sin(t * 1.3 + i);
-    const age = t - bt;                                                              // round 14: white line power-ups draw on as they pop
-    setLine(g.getObjectByName('sprite'), { draw: Math.min(1, age / 0.4), k: 1.05 * (1 + 1.0 * Math.max(0, 1 - age / 0.4)), t, hot: 1.5 });
+    g.lookAt(camPos(t));
+    const sp = g.getObjectByName('sprite'); if (sp) sp.rotation.y = snap > 0 ? 0.25 * Math.sin(t * 1.3 + i) * Math.min(1, snap * 2) : (1 - e) * 6.0;   // spinning in, settling
+    const age = t - bt;                                                              // round 14: white line power-ups draw on as they fly in
+    setLine(sp, { draw: Math.min(1, age / 0.4), k: 1.05 * (1 + 1.0 * Math.max(0, 1 - age / 0.4)), t, hot: 1.5 });
     setLine(g.getObjectByName('label'), { draw: Math.min(1, Math.max(0, (age - 0.15) / 0.3)), k: 0.9, t, hot: 1.2 });
   });
 
