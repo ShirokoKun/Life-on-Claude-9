@@ -210,6 +210,7 @@ async function loadCast(url) {
     if (o.isMesh) {
       const src = o.material, n = src.name || '';
       if (/Glasses Frame/.test(n)) o.material = new THREE.MeshPhysicalMaterial({ color: 0x0b0908, roughness: 0.28, clearcoat: 0.6, clearcoatRoughness: 0.1, name: n });
+      else if (/Ivan Eye/.test(n)) o.material = new THREE.MeshPhysicalMaterial({ map: src.map, roughness: 0.3, clearcoat: 1, clearcoatRoughness: 0.03, envMapIntensity: 0.6, name: n });   // real eyeballs (prep_tripo --eyes): glossy, not skin
       else if (/Glasses Lens/.test(n)) o.material = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.02, transparent: true, opacity: 0.06,
         envMapIntensity: 1.6, specularIntensity: 1, depthWrite: false, name: n });
       else {

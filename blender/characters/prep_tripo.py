@@ -247,19 +247,21 @@ def add_glasses(rig, body):
 
 # Eye openings of ivan_tripo_v3 (staging, --eyes): the painted lid margins, traced on texture-only orthographic front
 # renders at 40 px/mm, relative to the Head bone head (x across, z up; the model faces -Y), in order around the
-# opening. The top follows the lower edge of the painted lash line, so the lashes stay on the lid. Centres are the
-# painted pupils (55 mm apart, 0.2 mm above the glasses' eye line).
+# opening. The top follows the lower edge of the painted lash line, so the lashes stay on the lid; the bottom is
+# traced along the sclera and then lowered up to 1.3 mm (mid-lid) to take in the painted pale waterline, which would
+# otherwise stand as a shelf in front of the eyeball. Centres are the painted pupils (55 mm apart, 0.2 mm above the
+# glasses' eye line).
 EYE_LIDS = {
     "Right": [(-0.0407, 0.0519), (-0.0394, 0.0538), (-0.0382, 0.0542), (-0.0369, 0.0545), (-0.0354, 0.0547),
-              (-0.0332, 0.0549), (-0.0307, 0.0549), (-0.0282, 0.0549), (-0.0264, 0.0547), (-0.0249, 0.0544),
-              (-0.0237, 0.0539), (-0.0226, 0.0533), (-0.0217, 0.0521), (-0.0224, 0.0513), (-0.0234, 0.0506),
-              (-0.0244, 0.0501), (-0.0269, 0.0491), (-0.0294, 0.0486), (-0.0319, 0.0484), (-0.0344, 0.0486),
-              (-0.0369, 0.0492), (-0.0387, 0.0500), (-0.0399, 0.0509)],
+            (-0.0332, 0.0549), (-0.0307, 0.0549), (-0.0282, 0.0549), (-0.0264, 0.0547), (-0.0249, 0.0544),
+            (-0.0237, 0.0539), (-0.0226, 0.0533), (-0.0217, 0.0521), (-0.0224, 0.0510), (-0.0234, 0.0501),
+            (-0.0244, 0.0494), (-0.0269, 0.0480), (-0.0294, 0.0473), (-0.0319, 0.0471), (-0.0344, 0.0474),
+            (-0.0369, 0.0483), (-0.0387, 0.0494), (-0.0399, 0.0506)],
     "Left": [(0.0169, 0.0523), (0.0181, 0.0531), (0.0193, 0.0538), (0.0211, 0.0546), (0.0231, 0.0550),
-             (0.0251, 0.0550), (0.0271, 0.0548), (0.0291, 0.0545), (0.0311, 0.0539), (0.0326, 0.0534),
-             (0.0337, 0.0529), (0.0344, 0.0524), (0.0337, 0.0517), (0.0326, 0.0511), (0.0311, 0.0504),
-             (0.0286, 0.0497), (0.0261, 0.0494), (0.0236, 0.0494), (0.0211, 0.0498), (0.0193, 0.0505),
-             (0.0181, 0.0513)],
+           (0.0251, 0.0550), (0.0271, 0.0548), (0.0291, 0.0545), (0.0311, 0.0539), (0.0326, 0.0534),
+           (0.0337, 0.0529), (0.0344, 0.0524), (0.0337, 0.0514), (0.0326, 0.0505), (0.0311, 0.0495),
+           (0.0286, 0.0485), (0.0261, 0.0481), (0.0236, 0.0482), (0.0211, 0.0488), (0.0193, 0.0498),
+           (0.0181, 0.0509)],
 }
 EYE_CENTRES = {"Right": (-0.0304, 0.0536), "Left": (0.0247, 0.0537)}
 
@@ -320,7 +322,7 @@ def _eye_texture(name, r, iris_r, pupil_r, size=2048, seed=5):
     col *= (1 + 0.18 * ring)[..., None]
     # sclera: warm off-white, greyer and pinker toward the corners, faint vessels from the periphery
     t_sc = np.clip((th - th_i) / math.radians(70), 0, 1)
-    scl = lerp((222, 212, 198), (196, 168, 158), t_sc ** 1.3)
+    scl = lerp((214, 203, 190), (190, 162, 152), t_sc ** 1.3)
     veins = np.zeros_like(th)
     for _ in range(26):
         a0 = rng.uniform(-math.pi, math.pi)
@@ -355,16 +357,21 @@ def _eye_texture(name, r, iris_r, pupil_r, size=2048, seed=5):
 
 
 def add_eyes(rig, body, radius=0.0105, iris_r=0.0054, pupil_r=0.0019, bulge=0.0005):
-    """Real eyeballs in the painted sockets (staging, --eyes). Run after the performance, before export.
+    """Real eyeballs in the painted sockets (staging, --eyes). Run after the performance, before export, so the
+    acting (which reads the mesh for its head ellipsoid) is untouched.
     1. The mesh is cut exactly along each traced lid opening (EYE_LIDS): vertical planes through the outline's edges
        split the triangles they cross (UVs, weights and the baked Shade interpolate), and the faces inside are removed.
-       The lid rim is extruded back into the eyeball (a lid margin, darker Shade) so no gap shows at grazing angles.
-       Custom normals are carried over from the original triangles.
-    2. Two spheres (radius from the face's scale: painted iris 10-11 mm wide and 55 mm between the pupils, ~0.9 of an
-       average adult, so 11 mm not 12) with a slight corneal bulge, a generated sclera/iris/pupil texture and a glossy
-       clear coat. Each is set as far forward as the lids allow (no skin vertex within radius + bulge of its centre).
-    3. Bones mixamorig:LeftEye / mixamorig:RightEye, children of Head, head at the eyeball centre, +Y straight out
-       of the eye, +Z up (rest = looking straight ahead); each eyeball is weighted 100% to its bone."""
+    2. Two spheres, radius 10.5 mm (from the face's scale: painted iris ~10.5 mm wide and 55 mm between the pupils,
+       ~0.88 of an average adult's 12 mm eye and 63 mm), a 0.5 mm corneal bulge over the iris, a generated
+       sclera/iris/pupil texture and a glossy clear coat. Centred on the painted pupils (x-z); the depth is set by the
+       lids over the iris (they stay 0.15 mm clear of the cornea).
+    3. The lids are fitted to the eyeball: the skin within 2.5 mm of the opening rolls onto the eyeball's surface (the
+       scan's eye was a flat painted plate), any skin the eyeball would poke through is eased out, the crumpled lid
+       skin near the opening is relaxed, and the rim is extruded 0.5-1 mm into the eyeball (a lid margin, darker
+       Shade) so no gap shows at grazing angles. Custom normals are carried over from the original triangles and
+       follow the new surface where it moved. Nothing farther than ~17 mm from an eye centre changes.
+    4. Bones mixamorig:LeftEye / mixamorig:RightEye, children of Head, head at the eyeball centre, +Y straight out
+       of the eye, +Z up, +X to his right (rest = looking straight ahead); each eyeball is weighted 100% to its bone."""
     import bmesh
     import numpy as np
     me = body.data
@@ -442,7 +449,7 @@ def add_eyes(rig, body, radius=0.0105, iris_r=0.0054, pupil_r=0.0019, bulge=0.00
         kill = [f for f in bm.faces if f.calc_center_median().y < deep_y and inside(f.calc_center_median().x, f.calc_center_median().z)]
         ys = [f.calc_center_median().y for f in kill]
         print(f"eyes: {side} opening {np.ptp(poly[:, 0]) * 1000:.1f} x {np.ptp(poly[:, 1]) * 1000:.1f} mm, "
-              f"{len(kill)} faces removed (y {min(ys):.4f}..{max(ys):.4f})", flush=True)
+              f"{len(kill)} faces of the painted eye removed (y {min(ys):.4f}..{max(ys):.4f})", flush=True)
         surf = np.array([v.co[:] for f in kill if f.calc_center_median().y < front_y for v in f.verts])
         bmesh.ops.delete(bm, geom=kill, context="FACES")
         rim = [e for e in bm.edges if e.is_boundary and all(on_edge(v.co.x, v.co.z) for v in e.verts)
@@ -472,34 +479,51 @@ def add_eyes(rig, body, radius=0.0105, iris_r=0.0054, pupil_r=0.0019, bulge=0.00
             if math.hypot(p.x - cx, p.z - cz) < 0.6 * radius and rr > 0:
                 cy = max(cy, p.y + math.sqrt(rr))
         C = Vector((cx, cy, cz))
-        # the lids roll onto the eyeball: every rim vertex moves along the eyeball's radius onto its surface (plus the
-        # cornea where it can reach, plus 0.15 mm), and the skin within 2.5 mm of the rim follows smoothly. The shift
-        # is interpolated in x-z only, so the scan's hidden inner shell moves with the skin in front of it.
-        from mathutils.kdtree import KDTree
-        rim_pts = [(v.co.x, v.co.z, (v.co - C).normalized() * (need(v.co) - (v.co - C).length)) for v in rim_v]
-        kd = KDTree(len(rim_pts))
-        for i, (x, z, _) in enumerate(rim_pts):
-            kd.insert((x, 0.0, z), i)
-        kd.balance()
-        roll = 0.0025
+        # the lids roll onto the eyeball: each vertex near the opening moves onto the eyeball's surface (plus the
+        # cornea where it can reach, plus 0.15 mm): all the way at the rim, fading out 2.5 mm from the outline. The
+        # weight depends on x-z only, so the scan's hidden inner shell keeps its order behind the skin.
+        def dist_outline(x, z):
+            ap = np.c_[x - a_[:, 0], z - a_[:, 1]]
+            d = b_ - a_
+            t = np.clip((ap * d).sum(1) / (d * d).sum(1), 0, 1)
+            return float(np.min(np.hypot(*(ap - d * t[:, None]).T)))
         moved = 0
+        rim_moves = []
         for v in bm.verts:
             p = v.co
-            if p.y > deep_y or math.hypot(p.x - cx, p.z - cz) > radius + roll + 0.002:
+            if p.y > deep_y or math.hypot(p.x - cx, p.z - cz) > radius + 0.004:
                 continue
-            hits = kd.find_n((p.x, 0.0, p.z), 8)
-            dmin = hits[0][2]
-            if dmin > roll:
+            roll = 0.0025
+            dd = dist_outline(p.x, p.z)
+            if dd > roll:
                 continue
-            g = [1.0 / (h[2] + 1e-4) ** 2 for h in hits]
-            sh = sum((rim_pts[h[1]][2] * gi for gi, h in zip(g, hits)), Vector()) / sum(g)
-            w = 1 - dmin / roll
+            w = 1 - dd / roll
             w = w * w * (3 - 2 * w)
-            v.co = p + sh * w
+            rad = p - C
+            r0, Rn = rad.length, need(p)
+            if r0 >= Rn:
+                # outside: straight back (keeps the traced outline) over the iris, turning radial toward the corners,
+                # where straight back would fall off the eyeball's silhouette
+                d2 = math.hypot(p.x - cx, p.z - cz)
+                k = min(1.0, max(0.0, (d2 / Rn - 0.55) / 0.35)) ** 2
+                dvec = (Vector((0, 1, 0)) * (1 - k) - rad / r0 * k).normalized()
+                bq = 2 * dvec.dot(rad)
+                disc = bq * bq - 4 * (r0 * r0 - Rn * Rn)
+                if disc >= 0:
+                    t = (-bq - math.sqrt(disc)) / 2
+                    if t < 0:
+                        t = (-bq + math.sqrt(disc)) / 2
+                    mv = dvec * t
+                else:
+                    mv = -rad / r0 * (r0 - Rn)
+            else:                                                       # inside the eyeball: out along the radius
+                mv = rad / r0 * (Rn - r0)
+            v.co = p + mv * w
             v[roll_l] = max(v[roll_l], w)
             moved += 1
-        sh_all = [t[2].length * (1 if t[2].y > 0 else -1) for t in rim_pts]
-        print(f"eyes: {side} lids rolled onto the eyeball: rim moved {min(sh_all) * 1000:+.2f}..{max(sh_all) * 1000:+.2f} mm "
+            if v in rim_v:
+                rim_moves.append(mv.length * (1 if r0 >= Rn else -1))
+        print(f"eyes: {side} lids rolled onto the eyeball: rim moved {min(rim_moves) * 1000:+.2f}..{max(rim_moves) * 1000:+.2f} mm "
               f"(+ = in, toward the eye centre), {moved} verts", flush=True)
         # anything of the outer skin still inside the eyeball (the corners curl tighter than a real eye) is eased out
         deficit = [(v.co.copy(), need(v.co) - (v.co - C).length) for v in outer]
@@ -521,6 +545,53 @@ def add_eyes(rig, body, radius=0.0105, iris_r=0.0054, pupil_r=0.0019, bulge=0.00
             left = [need(v.co) - (v.co - C).length for v in outer]
             print(f"eyes: {side} skin eased out of the eyeball: max {DD.max() * 1000:.2f} mm, {moved} verts; "
                   f"worst remaining {max(left) * 1000:+.2f} mm", flush=True)
+        # the scan's lids are crumpled where the plate met them; relax them: Laplacian smoothing over the lid skin
+        # within 3 mm of the opening (4.5 mm under it), welded across the scan's split seams; the rim stays put
+        zone = {}
+        for v in bm.verts:
+            p = v.co
+            if p.y > deep_y or math.hypot(p.x - cx, p.z - cz) > radius + 0.005:
+                continue
+            dd = dist_outline(p.x, p.z)
+            reach_ = 0.003 + 0.0015 * min(1.0, max(0.0, (cz - p.z) / 0.004))   # further under the eye (the seam)
+            if dd < reach_:
+                wz = 1 - dd / reach_
+                zone[v] = wz * wz * (3 - 2 * wz)
+        key = lambda co: (round(co.x * 2e5), round(co.y * 2e5), round(co.z * 2e5))
+        groups = {}
+        for v in zone:
+            groups.setdefault(key(v.co), []).append(v)
+        nbr = {k: set() for k in groups}
+        for k, vs in groups.items():
+            for v in vs:
+                for e in v.link_edges:
+                    o = e.other_vert(v)
+                    ko = key(o.co)
+                    if ko != k:
+                        nbr[k].add(ko)
+        pos = {k: vs[0].co.copy() for k, vs in groups.items()}
+        wgt = {k: max(zone[v] for v in vs) for k, vs in groups.items()}
+        on_rim = {k for k, vs in groups.items() if any(v in rim_v for v in vs)}
+        outside_pos = {}
+        for it in range(8):
+            new = {}
+            for k, p in pos.items():
+                if k in on_rim:
+                    continue
+                ns = [pos[n] if n in pos else outside_pos.setdefault(n, Vector(n) / 2e5) for n in nbr[k]]
+                if not ns:
+                    continue
+                avg = sum(ns, Vector()) / len(ns)
+                q = p.lerp(avg, 0.5 * wgt[k])
+                rr = q - C
+                if rr.length < need(q):                                 # nothing may sink into the eyeball
+                    q = C + rr.normalized() * need(q)
+                new[k] = q
+            pos.update(new)
+        for k, vs in groups.items():
+            for v in vs:
+                v.co = pos[k]
+                v[roll_l] = max(v[roll_l], wgt[k])
         rim_y = np.mean([v.co.y for v in rim_v])
         print(f"eyes: {side} centre ({cx:.4f}, {cy:.4f}, {cz:.4f}); pole {(cy - radius - np.median(surf[:, 1])) * 1000:+.2f} mm "
               f"behind the painted surface, {(cy - radius - rim_y) * 1000:+.2f} mm behind the rim (mean); rim edges {len(rim)}",

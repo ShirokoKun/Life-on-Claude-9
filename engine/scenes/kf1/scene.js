@@ -27,7 +27,7 @@ export const DURATION = 201.64;                // the Ch 1 VO package: 3.0 s pre
 export const VO_OFFSET = 0.0;
 export const VOICEOVER = 'scenes/kf1/ch01_full_mix.mp3';
 export const ROOM = ROOM3.ROOM;
-export const IVAN = 'scenes/s03/ivan.glb';
+export const IVAN = 'scenes/s03/ivan_eyes.glb';   // with real eyeballs and eye bones (prep_tripo.py --eyes)
 export const ACTING = 'scenes/s03/acting.json';
 export const CAST_OFFSET = ROOM3.CAST_OFFSET;
 export const ENV_AT = ROOM3.ENV_AT;
@@ -56,7 +56,7 @@ export const SHOTS = [
     fadeIn: [0.0, 1.0], light: '3am', iv: ['s03', 0.6, 3.6], scr: 4, top: true, beat: 'pre-roll', board: '(establishing)', tr: 'fade up from black',
     why: 'Pre-roll, room tone. Straight down into his room: the bed he is not in, the lamp, the one lit desk. The first of three top-downs (night, day, dawn).' },
   { id: 'K02', name: 'Hasn’t eaten since lunch', t0: 3.0, t1: 7.8, mm: [85, 85], f: 5.6,
-    from: [1.331, 4.551, 1.042], to: [1.322, 4.538, 1.044], at0: [1.092, 4.21, 1.10], at1: [1.092, 4.21, 1.10], focus: [1.10, 4.23, 1.10], roll: [0, 0],
+    from: [1.165, 4.534, 1.049], to: [1.162, 4.524, 1.051], at0: [1.074, 4.194, 1.124], at1: [1.074, 4.194, 1.124], focus: [1.080, 4.205, 1.122], roll: [0, 0],
     light: '3am', iv: ['s03', 6.0], scr: 6, look: 12, cyan: 0.12, ev: -0.6, beat: 'V01', board: 'r1c1 (B r1c3: the side eye)', tr: 'cut: from the room to the eye',
     why: 'V01 “It’s 3 AM, and Ivan hasn’t eaten since lunch.” Extreme close on his eye in profile through the round glasses, the screen light in it.' },
   { id: 'K03', name: 'Six hours ago', t0: 7.8, t1: 12.7, mm: [28, 28], f: 3.2,
@@ -73,7 +73,7 @@ export const SHOTS = [
     why: 'V04 “He’s hunched over his laptop,” From behind: his back curved into the light of the screens, the dark room around him.' },
   { id: 'K06', name: 'Eyes bloodshot', t0: 18.3, t1: 20.9, mm: [45, 45], f: 2.8,
     from: [1.03, 4.88, 1.06], to: [1.031, 4.86, 1.061], at0: [1.07, 4.20, 1.10], at1: [1.07, 4.2, 1.1], focus: 'eyes', roll: [0, 0],
-    lookK: [[18.3, -8, 0], [19.1, -8, 0], [20.8, 8, -14]], light: '3am', iv: ['s03', 10.2, 12.8], scr: 20, look: 14, key: { at: [1.07, 4.45, 0.98], color: 0x9cc8ff, k: 2.4 }, ev: -1.3, dim: 0.5, beat: 'V04 b', board: 'r1c4 (the photo ref; render ref Editing_image)', tr: 'reverse: from the screens back at him',
+    lookK: [[18.3, -8, 0], [19.1, -8, 0], [20.8, 8, -14]], gaze: [[18.3, 'screen'], [19.6, 'screen'], [20.6, 'monitor']], light: '3am', iv: ['s03', 10.2, 12.8], scr: 20, look: 14, key: { at: [1.07, 4.45, 0.98], color: 0x9cc8ff, k: 2.4 }, ev: -1.3, dim: 0.5, beat: 'V04 b', board: 'r1c4 (the photo ref; render ref Editing_image)', tr: 'reverse: from the screens back at him',
     why: 'V04 “typing furiously, eyes bloodshot.” His face over the monitor’s edge, cold light from the screen, the bed and the lamp dark behind him.' },
   { id: 'K07', name: 'A terminal, a chat, scripts', t0: 20.9, t1: 26.6, mm: [24, 24], f: 5.6,
     from: [1.40, 4.02, 1.10], to: [1.31, 4.15, 1.05], at0: [1.05, 4.40, 0.86], at1: [1.04, 4.45, 0.90], focus: [1.05, 4.42, 0.88], mv: [20.9, 26.6], roll: [0, 0],
@@ -100,23 +100,23 @@ export const SHOTS = [
     why: 'V08 “It started two days ago.” The K01 top-down in afternoon light, no glass poured. Clean: the same room, the same man, two days earlier; the only change is the light.' },
   { id: 'K12', name: '400 unread', t0: 41.9, t1: 46.4, mm: [30, 30], f: 2.0,
     from: [2.10, 3.92, 1.16], to: [2.042, 4.391, 1.16], at0: [1.00, 3.98, 1.20], at1: [1.00, 3.98, 1.20], focus: 'eyes', mv: [45.6, 46.4], ease: 'in', arc: [1.05, 4.03], roll: [0, 0],
-    lookK: [[41.9, -16, -15], [46.4, -18, -18]], breath: 0.32, light: 'day', iv: ['s04', 14.8], s4: 8.0, glass: false, lean: 10, look: 2, hand: { side: 'R', to: 'phone', prop: 'phone', ph: 44.0 },
+    lookK: [[41.9, -16, -15], [46.4, -18, -18]], breath: 0.32, gaze: 'phone', light: 'day', iv: ['s04', 14.8], s4: 8.0, glass: false, lean: 10, look: 2, hand: { side: 'R', to: 'phone', prop: 'phone', ph: 44.0 },
     cl: { at: [0.92, 4.30, 1.20], face: [1.05, 4.02, 1.15], s: 0.8, mood: 'warm', pose: 'hover', glow: 0.7, lightK: 0.4, born: 42.2, exit: 46.1, path: [[42.2, [1.30, 4.28, 1.18]], [43.2, [1.10, 4.55, 1.32]], [44.0, [0.66, 4.12, 1.36]], [44.8, [0.98, 3.70, 1.30]], [45.6, [0.92, 4.30, 1.20]]] }, beat: 'V09 a', board: 'r1c7 (A r2c4 “complaining to claude”)', tr: 'push down from the top-down into him',
     why: 'V09 IVAN “i have like 400 unread emails. every single one wants a reply.” Leaning back in the afternoon light, talking into the phone held up near his face. Claude, small and warm, circles him and drifts round in front of him as he talks (the orbit is animated: it starts behind his shoulder and ends between him and the phone).' },
   { id: 'K13', name: 'Drowning here!', t0: 46.4, t1: 51.01, mm: [40, 40], f: 2.2,
     from: [1.923, 5.472, 1.08], to: [0.82, 5.70, 1.08], at0: [1.06, 4.05, 1.02], at1: [1.06, 4.05, 1.02], focus: 'eyes', mv: [46.4, 47.6], ease: 'out', arc: [1.05, 4.03], roll: [0, 0],
-    rise: [46.4], breath: 0.4, lookK: [[46.4, -20, -30], [51.0, -24, -32]], light: 'void', iv: ['s04', 14.8], look: 10, armrest: 'L', hand: { side: 'R', to: 'phone', prop: 'phone', ph: 47.0 }, zone: 'drown', zopt: { head: [1.05, 4.02, 1.15], cam: [0.82, 5.70, 1.08] },
+    rise: [46.4], breath: 0.4, lookK: [[46.4, -20, -30], [51.0, -24, -32]], gaze: 'phone', light: 'void', iv: ['s04', 14.8], look: 10, armrest: 'L', hand: { side: 'R', to: 'phone', prop: 'phone', ph: 47.0 }, zone: 'drown', zopt: { head: [1.05, 4.02, 1.15], cam: [0.82, 5.70, 1.08] },
     key: { at: [0.85, 4.80, 1.70], color: 0xffc090, k: 1.4 }, ev: -0.3,
     beat: 'V09 b', board: 'r1c7 (director ref: the man in his chair inside a storm of paper)', tr: 'the room drops away around his chair as the pages rise; out: snap back to the daylit desk (K14)',
     why: 'V09 IVAN “i’m fucking drowning here!” The imagined moment: the room is gone, he sits in his chair in a dark void, hundreds of glowing pages hang around him at every depth, the near ones soft and huge past the lens, a fine snow of specks between them.' },
   { id: 'K14', name: 'Hello, Claude', t0: 51.01, t1: 55.3, mm: [27, 27], f: 2.8,
     from: [0.70, 4.45, 1.22], to: [0.709, 4.478, 1.22], at0: [1.12, 4.31, 1.10], at1: [1.129, 4.338, 1.1], focus: 'eyes', roll: [0, 0],
-    lookK: [[51.0, -18, -15], [51.9, -18, -15], [53.8, 8, -22]], light: 'day', ev: -0.5, iv: ['s04', 14.8], s4: 14.4, glass: false, hand: { side: 'R', to: 'phone', prop: 'phone', ph: 50.0 }, beat: 'V10 a', board: 'r1c8 (A r3c1)', tr: 'cut on the chime (51.01)',
+    lookK: [[51.0, -18, -15], [51.9, -18, -15], [53.8, 8, -22]], gaze: [[51.0, 'phone'], [52.0, 'phone'], [52.7, 'claude']], light: 'day', ev: -0.5, iv: ['s04', 14.8], s4: 14.4, glass: false, hand: { side: 'R', to: 'phone', prop: 'phone', ph: 50.0 }, beat: 'V10 a', board: 'r1c8 (A r3c1)', tr: 'cut on the chime (51.01)',
     cl: { at: [1.15, 4.41, 1.17], face: [1.05, 4.06, 1.20], s: 1.1, mood: 'warm', pose: 'wave', glow: 0.75, lightK: 0.3, born: 51.01 },
     why: 'V10 CLAUDE “That sounds genuinely exhausting...” Claude pops out of the phone and waves; its warm light on his face as he looks up at it.' },
   { id: 'K15', name: 'The offer', t0: 55.3, t1: 60.0, mm: [28, 28], f: 2.8,
     from: [1.28, 3.30, 1.42], to: [1.339, 3.311, 1.42], at0: [1.05, 4.55, 1.28], at1: [1.109, 4.561, 1.28], focus: [1.05, 4.50, 1.30], roll: [0, 0],
-    lookK: [[55.3, 6, 12], [59.6, 8, -12]], dimIn: [1.0, 1.0], light: 'day', iv: ['s04', 24.9], s4: 19.5, glass: false, dim: 0.16, ev: -1.7, hide: ['Baked_DESK_8', 'Baked_DESK_9'], pipe: { born: [56.2, 57.0, 58.1, 59.2], state: 'offer', bright: 2.4, light: 0.08 }, beat: 'V10 b', board: 'r1c9 (MOTION GRAPHICS)', tr: 'the room dims (not to a void: about a sixth of its light) as the offer builds module by module in the air; the dim carries on into K18 and the V13 void',
+    lookK: [[55.3, 6, 12], [59.6, 8, -12]], dimIn: [1.0, 1.0], gaze: [[55.3, [0.70, 4.50, 1.30]], [59.5, [1.40, 4.50, 1.30]]], light: 'day', iv: ['s04', 24.9], s4: 19.5, glass: false, dim: 0.16, ev: -1.7, hide: ['Baked_DESK_8', 'Baked_DESK_9'], pipe: { born: [56.2, 57.0, 58.1, 59.2], state: 'offer', bright: 2.4, light: 0.08 }, beat: 'V10 b', board: 'r1c9 (MOTION GRAPHICS)', tr: 'the room dims (not to a void: about a sixth of its light) as the offer builds module by module in the air; the dim carries on into K18 and the V13 void',
     cl: { at: [0.42, 4.30, 1.08], face: [1.28, 3.30, 1.42], s: 1.5, mood: 'warm', pose: 'present', glow: 2.2, lightK: 0.25 },
     why: 'V10 CLAUDE “I can write a script that sorts your inbox and drafts the replies for you.” The afternoon room dims and the offer assembles above the desk as pixel objects: inbox, sort, draft, you. Claude presents it like a salesman; Ivan reads it from his chair.' },
   { id: 'K16', name: 'Want me to build one?', t0: 60.0, t1: 64.11, mm: [60, 60], f: 5.6,
@@ -134,11 +134,11 @@ export const SHOTS = [
     why: 'V12 “But once the email system was working,” Dusk; the room sinks into the dark and the pipeline runs on its own across the bottom of the frame, every stage ticked green. Ivan soft behind it.' },
   { id: 'K19', name: 'Hands on the keys', t0: 71.2, t1: 72.6, mm: [50, 50], f: 2.0,
     from: [1.06, 4.95, 1.02], to: [1.059, 4.92, 1.019], at0: [1.04, 3.95, 1.00], at1: [1.04, 3.95, 1.0], focus: 'eyes', roll: [0, 0],
-    light: 'evening', iv: ['s03', 8.0, 9.4], scr: 72, look: 12, beat: 'V12 b', board: 'r2c2 (B r2c2)', tr: 'cut: the pipeline clears, the same axis',
+    gaze: [[71.2, 'screen'], [71.9, [1.06, 5.6, 1.25]]], light: 'evening', iv: ['s03', 8.0, 9.4], scr: 72, look: 12, beat: 'V12 b', board: 'r2c2 (B r2c2)', tr: 'cut: the pipeline clears, the same axis',
     why: 'V12 “Ivan saw...” Front, both hands spread on the keyboard, mouth a little open: the idea arriving.' },
   { id: 'K20', name: 'What else was possible', t0: 72.6, t1: 74.1, mm: [100, 100], f: 2.0,
     from: [1.06, 4.86, 1.00], to: [1.06, 4.86, 1.0], at0: [1.04, 3.97, 1.10], at1: [1.04, 3.97, 1.1], focus: 'eyes', roll: [0, 0],
-    light: 'evening', iv: ['s03', 9.3], scr: 72.5, look: 12, beat: 'V12 c', board: 'r2c3 + r2c4 (B r2c3/r2c4)', tr: 'cut in: the same axis, onto the eyes',
+    gaze: [1.06, 5.6, 1.25], light: 'evening', iv: ['s03', 9.3], scr: 72.5, look: 12, beat: 'V12 c', board: 'r2c3 + r2c4 (B r2c3/r2c4)', tr: 'cut in: the same axis, onto the eyes',
     why: 'V12 “...what else was possible.” Both eyes through the glasses, close.' },
   { id: 'K21a', name: 'Calendar management', t0: 74.1, t1: 75.9, mm: [28, 28], f: 4.0,
     from: ISO_CAM, to: ISO_CAM, at0: ISO_AT, at1: ISO_AT, focus: [1.10, 4.10, 1.00], flow: 'F2', roll: [0, 0],
@@ -170,7 +170,7 @@ export const SHOTS = [
     why: 'V14b “Each one removing another task from his daily routine.” Over his shoulder onto TODO.md ticking itself off.' },
   { id: 'K24', name: 'A cheat code for life', t0: 89.9, t1: 93.8, mm: [24, 24], f: 4.0,
     from: [0.92, 5.55, 1.12], to: [0.92, 5.55, 1.12], at0: [0.98, 3.95, 1.32], at1: [0.98, 3.95, 1.32], focus: 'eyes', flow: 'F3', roll: [0, 0],
-    deskAway: [93.3, 93.8], zoneAt: 90.59, lifeBorn: [91.3, 91.5, 91.75, 92.0, 92.25, 92.5], lifeShrink: 93.4, light: '3am', iv: ['s03', 31.9], scr: 90.6, zone: 'cheat', zopt: { codeAt: [1.04, -5.0, 5.2], codeFace: [0.98, 5.55, 1.22] }, lifeUps: true, beat: 'V15 *', board: 'r2c6 (experimental, kept; night void: black to dark violet, white grid, stars)', tr: 'the walls fall away on the rush (90.59)',
+    deskAway: [93.3, 93.8], zoneAt: 90.59, lifeBorn: [91.3, 91.5, 91.75, 92.0, 92.25, 92.5], lifeShrink: 93.4, gaze: [[89.9, 'screen'], [91.1, [1.0, 6.5, 3.2]]], light: '3am', iv: ['s03', 31.9], scr: 90.6, zone: 'cheat', zopt: { codeAt: [1.04, -5.0, 5.2], codeFace: [0.98, 5.55, 1.22] }, lifeUps: true, beat: 'V15 *', board: 'r2c6 (experimental, kept; night void: black to dark violet, white grid, stars)', tr: 'the walls fall away on the rush (90.59)',
     cl: { at: [1.36, 4.30, 1.30], face: [0.98, 5.55, 1.22], s: 1.5, mood: 'bright', pose: 'cheer', born: 90.7 },
     why: 'V15 “It’s like discovering a cheat code for life.” The room falls away: his desk floats in a teal-and-orange retro world, the four modules orbit him like power-ups, the code is written across the sky.' },
   { id: 'K25', name: 'Hours into minutes', t0: 93.8, t1: 97.4, mm: [24, 24], f: 1.4,
@@ -197,7 +197,7 @@ export const SHOTS = [
 
   { id: 'K30', name: 'He’s barely slept', t0: 105.35, t1: 109.9, mm: [45, 45], f: 4.0,
     from: [1.62, 2.88, 1.42], to: [1.565, 2.856, 1.42], at0: [1.20, 3.84, 1.22], at1: [1.145, 3.816, 1.22], focus: [1.21, 3.82, 1.37], roll: [0, 0],
-    fadeIn: [105.65, 0.5], light: 'void', iv: ['s03', 8.0], stand: true, yaw: -100, look: -4, zone: 'balcony', zopt: { spill: 3.0 }, hand: { side: 'L', to: 'mouth', prop: 'mug', sip: [[105.35, 0.0], [107.0, 0.0], [107.9, 1.0], [108.5, 1.0], [109.3, 0.25]], sip: [[105.35, 0.0], [107.0, 0.0], [107.9, 1.0], [108.5, 1.0], [109.3, 0.25]], sip: [[105.35, 0.0], [107.0, 0.0], [107.9, 1.0], [108.5, 1.0], [109.3, 0.25]], sip: [[105.35, 0.0], [107.0, 0.0], [107.9, 1.0], [108.5, 1.0], [109.3, 0.25]], sip: [[105.35, 0.0], [107.0, 0.0], [107.9, 1.0], [108.5, 1.0], [109.3, 0.25]], sip: [[105.35, 0.0], [107.0, 0.0], [107.9, 1.0], [108.5, 1.0], [109.3, 0.25]] }, pix: false, pixable: true,
+    fadeIn: [105.65, 0.5], light: 'void', iv: ['s03', 8.0], stand: true, yaw: -100, look: -4, zone: 'balcony', zopt: { spill: 3.0 }, hand: { side: 'L', to: 'mouth', prop: 'mug', sip: [[105.35, 0.0], [107.0, 0.0], [107.9, 1.0], [108.5, 1.0], [109.3, 0.25]] }, pix: false, pixable: true,
     beat: 'V18 a', board: 'r3c1 (C r1c1; render ref Group 12)', tr: 'from black (the vacuum): the phone buzz (105.65) brings the night back, outside',
     why: 'V18 “He’s barely slept.” On the balcony at night, mug in hand, the warm light of the flat on his face and the city behind him. He is starting to break into facets.' },
   { id: 'K31', name: 'She stopped texting', t0: 109.9, t1: 112.8, mm: [40, 40], f: 2.0,
@@ -210,17 +210,17 @@ export const SHOTS = [
     why: 'V19 “Ironic, given that his system now responds to everyone else.” The same frame, focus pulled off the dark phone to the laptop full of code, a stream of green-ticked envelopes leaving it.' },
   { id: 'K33', name: 'He knows', t0: 117.7, t1: 121.6, mm: [50, 50], f: 2.8,
     from: [1.54, 3.11, 1.36], to: [1.54, 3.11, 1.36], at0: [1.20, 3.84, 1.32], at1: [1.20, 3.84, 1.32], focus: [1.21, 3.82, 1.37], flow: 'F6', roll: [0, 0],
-    light: 'void', iv: ['s03', 8.0], stand: true, yaw: -100, look: 0, zone: 'balcony', zopt: { spill: 3.0 }, hand: { side: 'L', to: 'mouth', prop: 'mug', sip: [[117.7, 0.3], [118.4, 1.0], [119.4, 1.0], [120.3, 0.3]], sip: [[117.7, 0.3], [118.4, 1.0], [119.4, 1.0], [120.3, 0.3]], sip: [[117.7, 0.3], [118.4, 1.0], [119.4, 1.0], [120.3, 0.3]], sip: [[117.7, 0.3], [118.4, 1.0], [119.4, 1.0], [120.3, 0.3]], sip: [[117.7, 0.3], [118.4, 1.0], [119.4, 1.0], [120.3, 0.3]], sip: [[117.7, 0.3], [118.4, 1.0], [119.4, 1.0], [120.3, 0.3]] }, pix: false, pixable: true,
+    light: 'void', iv: ['s03', 8.0], stand: true, yaw: -100, look: 0, zone: 'balcony', zopt: { spill: 3.0 }, hand: { side: 'L', to: 'mouth', prop: 'mug', sip: [[117.7, 0.3], [118.4, 1.0], [119.4, 1.0], [120.3, 0.3]] }, pix: false, pixable: true,
     beat: 'V20 a', board: 'r3c4 (C r1c4; render ref Group 8)', tr: 'cut: back out on the balcony, close',
     why: 'V20 “He knows this isn’t healthy.” Close, mug at his lips, dark under his eyes, the city in bokeh behind; his face in facets.' },
   { id: 'K34', name: 'A thinness to his thoughts', t0: 121.6, t1: 126.3, mm: [50, 50], f: 2.8,
     from: [1.56, 3.10, 1.36], to: [1.56, 3.10, 1.36], at0: [1.20, 3.84, 1.32], at1: [1.20, 3.84, 1.32], focus: [1.21, 3.82, 1.37], flow: 'F6', roll: [0, 0],
-    light: 'void', iv: ['s03', 8.0], stand: true, yaw: -100, look: 0, zone: 'balcony', zopt: { spill: 3.0 }, hand: { side: 'L', to: 'mouth', prop: 'mug', sip: [[121.6, 0.3], [126.3, 0.3]], sip: [[121.6, 0.3], [126.3, 0.3]], sip: [[121.6, 0.3], [126.3, 0.3]], sip: [[121.6, 0.3], [126.3, 0.3]], sip: [[121.6, 0.3], [126.3, 0.3]], sip: [[121.6, 0.3], [126.3, 0.3]] }, pix: false, pixable: true, thin: true,
+    light: 'void', iv: ['s03', 8.0], stand: true, yaw: -100, look: 0, zone: 'balcony', zopt: { spill: 3.0 }, hand: { side: 'L', to: 'mouth', prop: 'mug', sip: [[121.6, 0.3], [126.3, 0.3]] }, pix: false, pixable: true, thin: true,
     beat: 'V20 b', board: 'r3c5 (C r2c1; render ref Group 7 bottom)', tr: 'the same frame: the city stretches into lines',
     why: 'V20 “something fraying at the edges of his mind, a thinness to his thoughts.” The same close; behind him the city has stretched into thin horizontal lines.' },
   { id: 'K35', name: 'Close to something', t0: 126.3, t1: 129.4, mm: [35, 35], f: 2.4,
     from: [0.66, 4.20, 1.31], to: [0.609, 4.091, 1.31], at0: [2.46, 3.36, 1.42], at1: [2.409, 3.251, 1.42], focus: [1.10, 3.74, 1.40], roll: [0, 0],
-    light: 'void', iv: ['s03', 8.0], stand: true, yaw: -100, look: 0, zone: 'balcony', zopt: { spill: 3.0 }, hand: { side: 'L', to: 'mouth', prop: 'mug', sip: [[126.3, 0.3], [126.9, 1.0], [127.8, 1.0], [128.6, 0.35]], sip: [[126.3, 0.3], [126.9, 1.0], [127.8, 1.0], [128.6, 0.35]], sip: [[126.3, 0.3], [126.9, 1.0], [127.8, 1.0], [128.6, 0.35]], sip: [[126.3, 0.3], [126.9, 1.0], [127.8, 1.0], [128.6, 0.35]], sip: [[126.3, 0.3], [126.9, 1.0], [127.8, 1.0], [128.6, 0.35]], sip: [[126.3, 0.3], [126.9, 1.0], [127.8, 1.0], [128.6, 0.35]] }, pix: false, pixable: true, amber: 0.35,
+    light: 'void', iv: ['s03', 8.0], stand: true, yaw: -100, look: 0, zone: 'balcony', zopt: { spill: 3.0 }, hand: { side: 'L', to: 'mouth', prop: 'mug', sip: [[126.3, 0.3], [126.9, 1.0], [127.8, 1.0], [128.6, 0.35]] }, pix: false, pixable: true, amber: 0.35,
     beat: 'V21', board: 'r3c6 (C r2c2; render ref Group 8 bottom)', tr: 'cut: round behind his left shoulder (ref Group 8 bottom): ear, glasses arm, mug at the lips, the city low',
     why: 'V21 “But he’s close to something.” Behind his shoulder as he drinks, the city lights in bokeh beyond the rail.' },
   { id: 'K36', name: 'One more module', t0: 129.4, t1: 133.2, mm: [60, 60], f: 5.6,
@@ -267,7 +267,7 @@ export const SHOTS = [
     why: 'V27 IVAN “HE... built that.” Low, against a pale sky: a dark tower of lit windows, Ivan tiny at its foot looking up at it.' },
   { id: 'K46', name: 'What HE told it to do', t0: 168.85, t1: 172.4, mm: [32, 32], f: 2.8,
     from: [1.04, 5.10, 3.50], to: [1.04, 4.62, 2.55], at0: [1.04, 3.88, 0.90], at1: [1.04, 3.88, 0.90], focus: [1.04, 3.95, 1.40], mv: [168.85, 171.94], dolly: 13.37, roll: [0, 0],
-    cutBlack: 171.94, light: 'void', iv: ['s03', 8.0], stand: true, look: 42, zone: 'monolith', zopt: { noBuilding: true }, beat: 'V27 b (Ivan)', board: 'r4c6', tr: 'cut on the drop (168.85): from above',
+    cutBlack: 171.94, gaze: 'cam', light: 'void', iv: ['s03', 8.0], stand: true, look: 42, zone: 'monolith', zopt: { noBuilding: true }, beat: 'V27 b (Ivan)', board: 'r4c6', tr: 'cut on the drop (168.85): from above',
     why: 'V27 IVAN “The machine does what HE told it to do.” From high above, he looks up at us, small on the pale ground. The machine’s view of him.' },
 
   { id: 'K47', name: 'Dawn', t0: 172.4, t1: 175.2, mm: [60, 60], f: 4.0,
@@ -285,15 +285,15 @@ export const SHOTS = [
     why: 'V28 “...manages his calendar, drafts his documents, and summarizes his reading.” From behind at dawn: the four modules idle and dim over the desk, Claude sitting on the monitor with nothing to do.' },
   { id: 'K50', name: 'Exhausted and wired', t0: 182.5, t1: 188.8, mm: [35, 35], f: 2.2,
     from: [1.32, 4.75, 1.12], to: [1.309, 4.718, 1.122], at0: [1.05, 3.95, 1.16], at1: [1.05, 3.95, 1.16], focus: [1.06, 4.04, 1.21], roll: [0, 0],
-    grade: { con: 0.25, sat: 1.05 }, lacedRamp: [182.9, 184.1], light: 'sunrise', laced: true, iv: ['s03', 33.0, 36.8], scr: 210, cross: 1, beat: 'V29', board: 'r4c8 (C r4c4)', tr: 'cut: in front of him',
+    grade: { con: 0.25, sat: 1.05 }, lacedRamp: [182.9, 184.1], gaze: [1.06, 6.0, 1.3], light: 'sunrise', laced: true, iv: ['s03', 33.0, 36.8], scr: 210, cross: 1, beat: 'V29', board: 'r4c8 (C r4c4)', tr: 'cut: in front of him',
     why: 'V29 “He leans back in his chair, exhausted and wired.” Hands behind his head, the sun across him in the shape of the window bars.' },
   { id: 'K51', name: 'Then he realizes', t0: 188.8, t1: 192.4, mm: [50, 50], f: 2.4,
     from: [1.06, 4.60, 1.13], to: [1.06, 4.581, 1.133], at0: [1.05, 3.98, 1.22], at1: [1.05, 3.98, 1.22], focus: [1.06, 4.04, 1.21], roll: [0, 0],
-    grade: { con: 0.25, sat: 1.05 }, light: 'sunrise', laced: true, iv: ['s03', 36.8], scr: 212, cross: 1, beat: 'V30a', board: 'r4c8', tr: 'cut in on the same axis',
+    grade: { con: 0.25, sat: 1.05 }, gaze: [1.06, 6.0, 1.3], light: 'sunrise', laced: true, iv: ['s03', 36.8], scr: 212, cross: 1, beat: 'V30a', board: 'r4c8', tr: 'cut in on the same axis',
     why: 'V30a “Then he realizes...” Closer, the warm bars of light on his face.' },
   { id: 'K52', name: 'What he’s supposed to do now', t0: 192.4, t1: 195.5, mm: [62, 62], f: 2.4,
     from: [1.06, 4.56, 1.15], to: [1.06, 4.546, 1.151], at0: [1.05, 3.99, 1.21], at1: [1.05, 3.99, 1.21], focus: [1.06, 4.04, 1.21], roll: [0, 0],
-    grade: { con: 0.25, sat: 1.05 }, cutBlack: 195.52, light: 'sunrise', laced: true, iv: ['s03', 36.8], scr: 215, cross: 1, beat: 'V30b *', board: 'r4c9', tr: 'cut in again: his face, nothing to do',
+    grade: { con: 0.25, sat: 1.05 }, cutBlack: 195.52, gaze: [1.06, 6.0, 1.3], light: 'sunrise', laced: true, iv: ['s03', 36.8], scr: 215, cross: 1, beat: 'V30b *', board: 'r4c9', tr: 'cut in again: his face, nothing to do',
     why: 'V30b “he doesn’t know what he’s supposed to do now.” Close on his face in the gold light, eyes on nothing. Then black (195.52).' },
   { id: 'K53', name: 'Black', t0: 195.5, t1: 201.64, mm: [85, 85], f: 2.0,
     from: [1.16, 4.50, 1.14], to: [1.16, 4.50, 1.14], at0: [1.05, 3.99, 1.21], at1: [1.05, 3.99, 1.21], focus: 'eyes', roll: [0, 0],
@@ -387,9 +387,9 @@ const ghost = (i, src) => ({
   time: (t) => { const s = kf(t), g = s.ghosts; if (!g || !g[i]) return 0; return g[i][2] !== undefined ? Math.min(g[i][2], g[i][1] + (t - s.t0)) : g[i][1]; },
 });
 export const CAST = [
-  { url: 'scenes/s04/ivan.glb', t0: 0, t1: 0, role: 'main4', visible: (t) => { const v = ivOf(t); return !!v && v[0] === 's04'; }, time: (t) => { const v = ivOf(t); return v ? v[1] : 0; } },
-  { url: 'scenes/s04/ivan.glb', t0: 0, t1: 0, role: 'ghost0', ...ghost(0, 's04') },
-  { url: 'scenes/s04/ivan.glb', t0: 0, t1: 0, role: 'ghost1', ...ghost(1, 's04') },
+  { url: 'scenes/s04/ivan_eyes.glb', t0: 0, t1: 0, role: 'main4', visible: (t) => { const v = ivOf(t); return !!v && v[0] === 's04'; }, time: (t) => { const v = ivOf(t); return v ? v[1] : 0; } },
+  { url: 'scenes/s04/ivan_eyes.glb', t0: 0, t1: 0, role: 'ghost0', ...ghost(0, 's04') },
+  { url: 'scenes/s04/ivan_eyes.glb', t0: 0, t1: 0, role: 'ghost1', ...ghost(1, 's04') },
 ];
 
 // ---------------------------------------------------------------- screens on each keyframe's own clock
@@ -470,7 +470,8 @@ export async function setup(args) {
     const RINGS = 6, PER = 16, NFLY = 22;
     const orbs = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 12, 8), new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: true }), RINGS * PER + NFLY + 1);
     orbs.frustumCulled = false;
-    const lines = new THREE.LineSegments(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: new THREE.Color(1.3, 0.85, 0.45), transparent: true, opacity: 0.4, blending: THREE.AdditiveBlending, depthWrite: false }));
+    // (the threads are 1 px lines: above 1080p their opacity rises so they keep their weight in a 4K frame)
+    const lines = new THREE.LineSegments(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: new THREE.Color(1.3, 0.85, 0.45), transparent: true, opacity: Math.min(1, 0.4 * Math.max(1, innerHeight / 1080)), blending: THREE.AdditiveBlending, depthWrite: false }));
     lines.frustumCulled = false;
     const haloC = document.createElement('canvas'); haloC.width = haloC.height = 64; const hg = haloC.getContext('2d');
     const gr = hg.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, 'rgba(255,220,170,0.9)'); gr.addColorStop(0.3, 'rgba(255,200,140,0.25)'); gr.addColorStop(1, 'rgba(255,190,120,0)');
@@ -570,6 +571,7 @@ export async function setup(args) {
         }` });
     args.post.composer.addPass(imagPass);
     args.renderer.getDrawingBufferSize(imagPass.uniforms.res.value);
+    imagPass.uniforms.res.value.divideScalar(Math.max(1, imagPass.uniforms.res.value.y / 1080));   // stipple cells in 1080p pixels (4K keeps the look)
   }
   // the glasses' lens is a transmission material: three renders it from a lower-resolution, softened copy of the scene,
   // so the eyes behind it go milky and flat. Here it is thin clear glass: nearly invisible face-on, a soft sheen at the
@@ -710,6 +712,8 @@ export function props(t, ctx) {
     setPix(r, !!s.pix || (s.pixable && new URLSearchParams(location.search).get('pixall') === '1'));
   }
   holdProp(s, who, ctx, t);
+  { const zoneStand = s.stand && !s.gaze; const g = s.gaze ?? (zoneStand ? null : 'screen');   // seated at the desk: on the laptop by default
+    for (const r of all) if (g) aimEyes(r, gazePoint(g, t, ctx), t); }
   end();
 
   // ghosts (time compressed into one frame): see-through Ivans
@@ -972,6 +976,44 @@ function drawRefl(c, kind, t) {
 }
 
 const GHOST_DX = 0.66;
+// the gaze: each eye bone's local +Y points out of the eye; it is turned toward the shot's gaze target (clamped to
+// what an eye can do), with small saccades (seeded, so renders repeat). Runs after the mixer, which resets the bones.
+const _e = new THREE.Vector3(), _f = new THREE.Vector3(), _q = new THREE.Quaternion(), _pq = new THREE.Quaternion(), _id = new THREE.Quaternion();
+function aimEyes(root, target, t, k = 1) {
+  const b = bones(root);
+  const sacc = Math.floor(t * 1.4), jit = (n) => { const x = Math.sin((sacc * 7 + n) * 91.7) * 43758.5; return (x - Math.floor(x) - 0.5) * 0.012; };
+  const tg = target.clone().add(new THREE.Vector3(jit(1), jit(2), jit(3)));
+  for (const n of ['LeftEye', 'RightEye']) {
+    const o = b[n]; if (!o) continue;
+    touch(o); root.updateMatrixWorld(true);
+    o.getWorldPosition(_e); const wq = o.getWorldQuaternion(new THREE.Quaternion());
+    _f.set(0, 1, 0).applyQuaternion(wq);
+    const d = tg.clone().sub(_e).normalize();
+    _q.setFromUnitVectors(_f, d);
+    const ang = 2 * Math.acos(Math.min(1, Math.abs(_q.w))), lim = THREE.MathUtils.degToRad(26);
+    if (ang > lim) _q.slerpQuaternions(_id, _q, lim / ang);                     // an eye turns ~26 degrees; the head does the rest
+    if (k < 1) _q.slerpQuaternions(_id, _q, k);
+    o.parent.getWorldQuaternion(_pq);
+    o.quaternion.copy(_pq.invert().multiply(_q.clone().multiply(wq)));
+    o.updateMatrixWorld(true);
+  }
+}
+function gazePoint(g, t, ctx) {
+  if (Array.isArray(g) && Array.isArray(g[0])) {                                   // keyed [[t, target], ...]
+    let i = 1; while (i < g.length && t > g[i][0]) i++;
+    if (i >= g.length) return gazePoint(g[g.length - 1][1], t, ctx);
+    if (t <= g[0][0]) return gazePoint(g[0][1], t, ctx);
+    const u = sm((t - g[i - 1][0]) / (g[i][0] - g[i - 1][0]));
+    return gazePoint(g[i - 1][1], t, ctx).lerp(gazePoint(g[i][1], t, ctx), u);
+  }
+  if (Array.isArray(g)) return B(...g);
+  if (g === 'phone' && phone && phone.visible) return phone.getWorldPosition(new THREE.Vector3());
+  if (g === 'claude' && claude && claude.group.visible) return claude.group.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, 0.04, 0));
+  if (g === 'cam' && ctx.camera) return ctx.camera.position.clone();
+  if (g === 'monitor') return B(1.58, 4.46, 1.0);
+  return B(1.05, 4.46, 0.94);                                                       // 'screen' (the laptop)
+}
+
 // sit back: the spine bends back about the same local axis the head lifts on (deg spread over three bones)
 function leanBack(root, deg) {
   const b = bones(root);

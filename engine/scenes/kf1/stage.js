@@ -11,6 +11,8 @@
 //   monolith  V27       pale sky, a dark tower of lit windows, Ivan tiny at its foot (board r4c5)
 import * as THREE from 'three';
 import { voxelMaterial, voxels, hex } from './voxel.js';
+// above 1080p, effects sized in screen pixels (dither, line widths) scale up so a 4K frame keeps the 1080p look; <= 1080p unchanged
+const PX = Math.max(1, (globalThis.innerHeight || 1080) / 1080);
 
 const B = (x, y, z) => new THREE.Vector3(x, z, -y);
 const rnd = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
@@ -45,7 +47,7 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
       float bayer(vec2 p){ ivec2 q = ivec2(mod(p,4.)); int i = q.x + q.y*4;
         int m[16] = int[16](0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5); return float(m[i])/16.-.5; }
       void main(){ float y = vP.y; float u = clamp(y*2.2+0.25, 0., 1.);
-        u = floor(u*band + 0.5 + bayer(floor(gl_FragCoord.xy/2.)))/band;
+        u = floor(u*band + 0.5 + bayer(floor(gl_FragCoord.xy/(2.*${PX.toFixed(4)}))))/band;
         vec3 c = u < .5 ? mix(low, mid, u*2.) : mix(mid, top, u*2.-1.);
         gl_FragColor = vec4(c*k, 1.); }`,
   });
@@ -57,8 +59,8 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
     fog: false, uniforms: { col: { value: new THREE.Color() }, k: { value: 1 }, base: { value: new THREE.Color() }, c: { value: B(C[0], C[1], 0) }, rev: { value: 1e4 } },
     vertexShader: 'varying vec3 vW; void main(){ vec4 w = modelMatrix*vec4(position,1.); vW = w.xyz; gl_Position = projectionMatrix*viewMatrix*w; }',
     fragmentShader: `uniform vec3 col, c, base; uniform float k, rev; varying vec3 vW;
-      void main(){ vec2 p = vW.xz/0.5; vec2 g = abs(fract(p-.5)-.5)/fwidth(p); float l = 1.-min(min(g.x,g.y),1.);
-        float d = length(vW.xz-c.xz); float f = exp(-d*0.06) * (1.0 - smoothstep(0.35, 1.0, max(fwidth(p).x, fwidth(p).y)));   // lines thin out before they moire
+      void main(){ vec2 p = vW.xz/0.5; vec2 fw = fwidth(p) * ${PX.toFixed(4)}; vec2 g = abs(fract(p-.5)-.5)/fw; float l = 1.-min(min(g.x,g.y),1.);
+        float d = length(vW.xz-c.xz); float f = exp(-d*0.06) * (1.0 - smoothstep(0.35, 1.0, max(fw.x, fw.y)));   // lines thin out before they moire
         f *= 1.0 - smoothstep(rev - 1.5, rev, d);                                        // revealed outward from his desk
         gl_FragColor = vec4(base + col*0.02 + col*l*k*f, 1.); }`,
   });

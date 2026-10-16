@@ -7,6 +7,8 @@
 //   - HDR colour, so the film's own bloom makes the glow (post.js stays untouched).
 // It writes depth, so the lens focuses on it where it is.
 import * as THREE from 'three';
+// above 1080p, effects sized in screen pixels (dither, line widths) scale up so a 4K frame keeps the 1080p look; <= 1080p unchanged
+const PX = Math.max(1, (globalThis.innerHeight || 1080) / 1080);
 
 const VERT = /* glsl */ `
 uniform vec2 uSnap;
@@ -57,7 +59,7 @@ void main() {
   vec3 c = vColor * uColor * shade;
   // quantise in a perceptual-ish space, dithered on 2x2 screen pixels (chunky, like a 320-wide frame upscaled)
   vec3 e = pow(max(c, 0.0) / max(uGlow, 1e-3), vec3(1.0 / 2.2));
-  e = floor(e * uLevels + 0.5 + bayer(floor(gl_FragCoord.xy / 2.0))) / uLevels;
+  e = floor(e * uLevels + 0.5 + bayer(floor(gl_FragCoord.xy / (2.0 * ${PX.toFixed(4)})))) / uLevels;
   c = pow(max(e, 0.0), vec3(2.2)) * uGlow;
   gl_FragColor = vec4(c, 1.0);
 }`;

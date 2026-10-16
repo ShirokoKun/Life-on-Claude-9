@@ -7,7 +7,7 @@ import os, re
 ROOT = os.path.join(os.path.dirname(__file__), '..')
 P = os.path.join(ROOT, 'engine', 'scenes', 'kf1', 'scene.js')
 s = open(P, encoding='utf8').read()
-FIELDS = ['lookK', 'leanK', 'press', 'grade', 'ghostTicks', 'deskAway', 'fadeIn', 'cutBlack', 'zoneAt', 'dimIn', 'rise', 'breath', 'iconsBorn', 'lifeBorn', 'lifeShrink', 'weaveT0', 'evTo', 'lacedRamp']
+FIELDS = ['gaze', 'lookK', 'leanK', 'press', 'grade', 'ghostTicks', 'deskAway', 'fadeIn', 'cutBlack', 'zoneAt', 'dimIn', 'rise', 'breath', 'iconsBorn', 'lifeBorn', 'lifeShrink', 'weaveT0', 'evTo', 'lacedRamp']
 CL_FIELDS = ['born', 'bornDur', 'exit', 'path']
 
 def block(sid):
@@ -15,7 +15,7 @@ def block(sid):
     return i, j
 
 def strip_fields(b):
-    for f in FIELDS: b = re.sub(r" %s: (\[\[.*?\]\]|\[[^\]]*\]|\{[^}]*\}|[\d.\-]+|'[^']*'|true)," % f, '', b)
+    for f in FIELDS: b = re.sub(r" %s: (\[\[.*?\]\]\]|\[\[.*?\]\]|\[[^\]]*\]|\{[^}]*\}|[\d.\-]+|'[^']*'|true)," % f, '', b)
     b = re.sub(r", (born|bornDur|exit): [\d.]+", '', b)
     b = re.sub(r", path: \[\[.*?\]\]\]", '', b)
     return b
@@ -49,6 +49,11 @@ ANIM = {
     'K51': {'grade': '{ con: 0.25, sat: 1.05 }'},
     'K52': {'grade': '{ con: 0.25, sat: 1.05 }', 'cutBlack': '195.52'},
 }
+
+# where his eyes look (aimEyes in scene.js): 'screen' 'monitor' 'phone' 'claude' 'cam', a point, or keyed
+GAZE = {'K06': "[[18.3, 'screen'], [19.6, 'screen'], [20.6, 'monitor']]", 'K12': "'phone'", 'K13': "'phone'", 'K14': "[[51.0, 'phone'], [52.0, 'phone'], [52.7, 'claude']]", 'K15': '[[55.3, [0.70, 4.50, 1.30]], [59.5, [1.40, 4.50, 1.30]]]', 'K19': "[[71.2, 'screen'], [71.9, [1.06, 5.6, 1.25]]]", 'K20': '[1.06, 5.6, 1.25]', 'K24': "[[89.9, 'screen'], [91.1, [1.0, 6.5, 3.2]]]", 'K46': "'cam'", 'K50': '[1.06, 6.0, 1.3]', 'K51': '[1.06, 6.0, 1.3]', 'K52': '[1.06, 6.0, 1.3]'}
+for sid, g in GAZE.items():
+    ANIM.setdefault(sid, {})['gaze'] = g
 # cuts moved onto the sound hits (the plan's section 3.4): [shot ending, shot starting, time]
 CUTS = [('K27', 'K28', 102.3), ('K13', 'K14', 51.01), ('K16', 'K17', 64.11), ('K44', 'K45', 166.0), ('K45', 'K46', 168.85)]
 
@@ -71,7 +76,7 @@ for a, c, tt in CUTS:
 
 # camera overrides (round 11): replace the keyframe camera of these shots with the move written here
 CAMS = {
-    'K02': dict(mm='[85, 85]', f='5.6', frm='[1.331, 4.551, 1.042]', to='[1.322, 4.538, 1.044]', at0='[1.092, 4.21, 1.10]', at1='[1.092, 4.21, 1.10]', focus='[1.10, 4.23, 1.10]'),
+    'K02': dict(mm='[85, 85]', f='5.6', frm='[1.165, 4.534, 1.049]', to='[1.162, 4.524, 1.051]', at0='[1.074, 4.194, 1.124]', at1='[1.074, 4.194, 1.124]', focus='[1.080, 4.205, 1.122]'),   # into his right eye (eye bone measured), low 3/4
     'K07': dict(mm='[24, 24]', f='5.6', frm='[1.40, 4.02, 1.10]', to='[1.31, 4.15, 1.05]', at0='[1.05, 4.40, 0.86]', at1='[1.04, 4.45, 0.90]', focus='[1.05, 4.42, 0.88]', mv='[20.9, 26.6]'),
     'K12': dict(frm='[2.10, 3.92, 1.16]', to='[2.042, 4.391, 1.16]', at0='[1.00, 3.98, 1.20]', at1='[1.00, 3.98, 1.20]', mv='[45.6, 46.4]', ease="'in'", arc='[1.05, 4.03]'),
     'K13': dict(frm='[1.923, 5.472, 1.08]', to='[0.82, 5.70, 1.08]', at0='[1.06, 4.05, 1.02]', at1='[1.06, 4.05, 1.02]', mv='[46.4, 47.6]', ease="'out'", arc='[1.05, 4.03]'),
@@ -99,7 +104,7 @@ SIPS = {'K30': '[[105.35, 0.0], [107.0, 0.0], [107.9, 1.0], [108.5, 1.0], [109.3
         'K35': '[[126.3, 0.3], [126.9, 1.0], [127.8, 1.0], [128.6, 0.35]]'}
 for sid, k in SIPS.items():
     i, j = block(sid); b = s[i:j]
-    b = re.sub(r", sip: \[\[.*?\]\]\]", '', b)
+    b = re.sub(r", sip: \[\[[^\]]*\](?:, \[[^\]]*\])*\]", '', b)   # every earlier sip
     b = re.sub(r"(hand: \{ side: '[LR]', to: '[a-z]+', prop: 'mug')", lambda m: m.group(1) + ', sip: ' + k, b, count=1)
     s = s[:i] + b + s[j:]
 # the time-skip ghosts act (their own clips play)

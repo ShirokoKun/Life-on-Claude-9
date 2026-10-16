@@ -50,7 +50,7 @@ export function createAtmosphere({ lamp, lampTarget, screen, count = 2200, cente
         float sz = max(size, coc * 2.0);
         vI = (0.35 + 0.65 * seed.z) * (size * size) / (sz * sz + 1e-4) * clamp(size, 0.0, 1.0);
         vSoft = clamp(coc / 3.0, 0.0, 1.0);
-        gl_PointSize = clamp(sz, 1.0, 64.0);
+        gl_PointSize = clamp(sz, 1.0, 64.0 * max(1.0, res.y / 1080.0));
         gl_Position = projectionMatrix * mv;
       }`,
     fragmentShader: `${COMMON} uniform float gain; varying float vI; varying float vSoft; varying float vDepth; varying vec3 vCol;
@@ -114,7 +114,7 @@ export function createAtmosphere({ lamp, lampTarget, screen, count = 2200, cente
       }
       const f = lens.camera.projectionMatrix.elements[5];       // cot(fov/2)
       dust.uniforms.px.value = sz.y * 0.5 * f;                  // world size / distance -> pixels
-      dust.uniforms.cocK.value = lens.mat.uniforms.k.value * 2.0;
+      dust.uniforms.cocK.value = lens.mat.uniforms.k.value * 2.0 * (lens.px || 1);   // the lens works in 1080p pixels
       dust.uniforms.focus.value = lens.mat.uniforms.focus.value;
     },
   };

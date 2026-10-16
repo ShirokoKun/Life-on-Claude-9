@@ -72,13 +72,15 @@ class LensPass extends Pass {
     this.qBlur = new FullScreenQuad(this.blur); this.qComp = new FullScreenQuad(this.comp);
   }
   // thin lens on a 36 mm sensor: blur diameter = f^2 / (N (S - f)) * |d - S| / d; radius in pixels
+  // (blur radii are in 1080p pixels: above 1080p, px > 1 widens each step, so a 4K frame keeps the 1080p look)
   cocScale() {
     const f = this.mm / 1000, S = Math.max(this.focus, f * 1.5);
-    return this.on ? LOOK.dof * 0.5 * (f * f / (this.fstop * (S - f))) / 0.036 * this.w : 0;
+    return this.on ? LOOK.dof * 0.5 * (f * f / (this.fstop * (S - f))) / 0.036 * this.w / this.px : 0;
   }
   setSize(w, h) {
     this.rt.setSize(w, h); this.half.setSize(Math.ceil(w / 2), Math.ceil(h / 2));
-    for (const m of [this.blur, this.comp]) m.uniforms.texel.value.set(1 / w, 1 / h);
+    this.px = Math.max(1, h / 1080);
+    for (const m of [this.blur, this.comp]) m.uniforms.texel.value.set(this.px / w, this.px / h);
     this.w = w; this.h = h;
   }
   render(renderer, writeBuffer) {
@@ -87,7 +89,7 @@ class LensPass extends Pass {
       const u = m.uniforms;
       u.k.value = this.cocScale(); u.focus.value = Math.max(this.focus, this.mm / 1000 * 1.5);
       u.near.value = this.camera.near; u.far.value = this.camera.far;
-      u.maxR.value = this.on ? Math.max(4, this.w / 64) : 0;
+      u.maxR.value = this.on ? Math.max(4, this.w / this.px / 64) : 0;
       u.tColor.value = this.rt.texture; u.tDepth.value = this.rt.depthTexture;
     }
     if (this.on) { renderer.setRenderTarget(this.half); this.qBlur.render(renderer); }
@@ -140,7 +142,12 @@ export function createPost(renderer, scene, camera, atmo) {
   });
   composer.addPass(film);
   return { composer, lens, bloom, film,
-    setSize(w, h, pr = 1) { composer.setSize(w, h); bloom.resolution.set(w * pr / 2, h * pr / 2); film.uniforms.texel.value.set(1 / (w * pr), 1 / (h * pr)); film.uniforms.aspect.value = w / h; },
+    setSize(w, h, pr = 1) {
+      composer.setSize(w, h); bloom.resolution.set(w * pr / 2, h * pr / 2);
+      const px = Math.max(1, h * pr / 1080);   // above 1080p: bloom built at 1080p size, halation radius in 1080p pixels (same look at 4K)
+      if (px > 1) bloom.setSize(Math.round(w * pr / px), Math.round(h * pr / px));
+      film.uniforms.texel.value.set(px / (w * pr), px / (h * pr)); film.uniforms.aspect.value = w / h;
+    },
     setEnabled(on) { lens.on = on; bloom.enabled = on; film.uniforms.vignette.value = on ? LOOK.vignette : 0; film.uniforms.halation.value = on ? LOOK.halation : 0; },
   };
 }

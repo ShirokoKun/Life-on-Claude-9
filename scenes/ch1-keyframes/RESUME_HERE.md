@@ -1,4 +1,31 @@
-# Resume here (2026-10-15, late): the keyframe LOCK pass
+# Resume here (2026-10-16): round 11 done, final 4K render
+
+**Latest state (read first):**
+- Round 11 (the director's notes on the `anim2` preview): every note and its fix is in `NOTES_R11.md`. Checked in stills; the 720p
+  preview `anim4` was the first time the fixes played in motion.
+- **Eyes:** real eyeballs built in Blender. kf1 loads `engine/scenes/s03/ivan_eyes.glb` and `engine/scenes/s04/ivan_eyes.glb`
+  (tracked). The live `ivan.glb` files are untouched. To rebuild them (Blender 5.2):
+  `blender -b --factory-startup -P blender/characters/prep_tripo.py -- blender/assets/characters/ivan_tripo_v3.glb engine/scenes/s03/ivan_eyes.glb --eyes`
+  and the same with `engine/scenes/s04/ivan_eyes.glb --scene s04 --seconds 31.32 --eyes`.
+- **4K:** effects sized in screen pixels now scale above 1080p, so a 3840x2160 frame keeps the approved 1080p look. Scaled:
+  depth of field, bloom, halation, the stipple, the dither, the grid line width and Claude's threads. At 1080p and below
+  nothing changes. Final render:
+  `node tools/render_mp4.mjs --scene kf1 --w 3840 --h 2160 --take final4k` (about 4-6 h on the RTX laptop).
+- **Not in git** (made again on any machine):
+  - `renders/`: every MP4 and frame;
+  - `node_modules/`: `npm install` and `npx playwright install chromium`;
+  - the Ch 1 audio stems: unzip `Ch01_part*.zip`;
+  - the Poly Haven props: `node tools/polyhaven.mjs`.
+- **Open items:**
+  - no blinks;
+  - a seam at the lower lid's outer corner in the K02 close-up;
+  - the K43 press is slightly out of focus;
+  - the K23 tick timing;
+  - the balcony face light has only had a light pass.
+
+---
+
+## Earlier: 2026-10-15, late: the keyframe LOCK pass
 
 The order the director set:
 1. **Lock every keyframe** (now).
