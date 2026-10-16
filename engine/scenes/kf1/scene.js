@@ -22,6 +22,7 @@ import { createSpark } from './spark.js';
 import { icon, envelope, codeBlock, pipeIcon, pixelArrow, checkMark, MODULE_ORDER, PIPE_ORDER, lifeUp, LIFE_UPS } from './props.js';
 import { captureRest, stand, plantFeet, lookUp, reach, grip, handWorld, bones, makeMug, makePhone, begin, end, orientHand, curl, gripPoint, touch, pointIndex, curlAnat, palmFrame } from './rig.js';
 import { setPix } from './pix.js';
+import { bodyGrip, gulpAt, tremor } from './grip.js';
 import { addKeyLegends } from './keys.js';
 export { LOOKS, LOOK_NAME } from '../s03/looks.js';
 
@@ -203,7 +204,7 @@ export const SHOTS = [
 
   { id: 'K30', name: 'He’s barely slept', t0: 105.35, t1: 109.9, mm: [45, 45], f: 4.0,
     from: [1.62, 2.88, 1.42], to: [1.565, 2.856, 1.42], at0: [1.20, 3.84, 1.22], at1: [1.145, 3.816, 1.22], focus: [1.21, 3.82, 1.37], roll: [0, 0],
-    fadeIn: [105.65, 0.5], light: 'void', iv: ['s03', 8.0], stand: true, yaw: -100, look: -4, zone: 'balcony', zopt: { spill: 3.0 }, hand: { side: 'L', to: 'mouth', prop: 'mug', sip: [[105.35, 0.0], [107.0, 0.0], [107.9, 1.0], [108.5, 1.0], [109.3, 0.25]] }, pix: false, pixable: true,
+    fadeIn: [105.65, 0.5], light: 'void', iv: ['s03', 8.0], stand: true, yaw: -100, look: -4, zone: 'balcony', zopt: { spill: 3.0 }, hand: { side: 'L', to: 'mouth', prop: 'mug', sip: [[105.35, 0.0], [107.0, 0.0], [107.9, 1.0], [109.9, 1.0]], gulps: [108.75], gulpLook: 5 }, pix: false, pixable: true,
     beat: 'V18 a', board: 'r3c1 (C r1c1; render ref Group 12)', tr: 'from black (the vacuum): the phone buzz (105.65) brings the night back, outside',
     why: 'V18 “He’s barely slept.” On the balcony at night, mug in hand, the warm light of the flat on his face and the city behind him. He is starting to break into facets.' },
   { id: 'K31', name: 'She stopped texting', t0: 109.9, t1: 112.8, mm: [40, 40], f: 2.0,
@@ -216,7 +217,7 @@ export const SHOTS = [
     why: 'V19 “Ironic, given that his system now responds to everyone else.” The same frame, focus pulled off the dark phone to the laptop full of code, a stream of green-ticked envelopes leaving it.' },
   { id: 'K33', name: 'He knows', t0: 117.7, t1: 121.6, mm: [50, 50], f: 2.8,
     from: [1.54, 3.11, 1.36], to: [1.54, 3.11, 1.36], at0: [1.20, 3.84, 1.32], at1: [1.20, 3.84, 1.32], focus: [1.21, 3.82, 1.37], flow: 'F6', roll: [0, 0],
-    light: 'void', iv: ['s03', 8.0], stand: true, yaw: -100, look: 0, zone: 'balcony', zopt: { spill: 3.0 }, hand: { side: 'L', to: 'mouth', prop: 'mug', sip: [[117.7, 1.0], [119.2, 1.0], [121.6, 0.45]] }, pix: false, pixable: true,
+    light: 'void', iv: ['s03', 8.0], stand: true, yaw: -100, look: 0, zone: 'balcony', zopt: { spill: 3.0 }, hand: { side: 'L', to: 'mouth', prop: 'mug', sip: [[117.7, 1.0], [120.9, 1.0], [121.6, 0.45]], gulps: [119.0], gulpLook: 4 }, pix: false, pixable: true,
     beat: 'V20 a', board: 'r3c4 (C r1c4; render ref Group 8)', tr: 'cut: back out on the balcony, close',
     why: 'V20 “He knows this isn’t healthy.” Close, mug at his lips, dark under his eyes, the city in bokeh behind; his face in facets.' },
   { id: 'K34', name: 'A thinness to his thoughts', t0: 121.6, t1: 126.3, mm: [50, 50], f: 2.8,
@@ -226,14 +227,16 @@ export const SHOTS = [
     why: 'V20 “something fraying at the edges of his mind, a thinness to his thoughts.” The same close; behind him the city has stretched into thin horizontal lines.' },
   { id: 'K35', name: 'Close to something', t0: 126.3, t1: 129.4, mm: [35, 35], f: 2.4,
     from: [0.95, 4.55, 1.38], to: [0.91, 4.50, 1.38], at0: [1.88, 3.30, 1.31], at1: [1.88, 3.30, 1.31], focus: 'iris', roll: [0, 0],
-    light: 'void', iv: ['s03', 8.0], stand: true, yaw: -100, look: 0, zone: 'balcony', zopt: { spill: 3.0 }, hand: { side: 'L', to: 'mouth', prop: 'mug', sip: [[126.3, 0.3], [127.4, 1.0], [128.4, 1.0], [129.4, 0.6]] }, pix: false, pixable: true, amber: 0.35,
+    light: 'void', iv: ['s03', 8.0], stand: true, yaw: -100, look: 0, zone: 'balcony', zopt: { spill: 3.0 }, hand: { side: 'L', to: 'mouth', prop: 'mug', sip: [[126.3, 0.3], [127.4, 1.0], [129.4, 1.0]], gulps: [128.1], gulpLook: 4 }, pix: false, pixable: true, amber: 0.35,
     beat: 'V21', board: 'r3c6 (C r2c2; render ref Group 8 bottom)', tr: 'cut: round behind his left shoulder (ref Group 8 bottom): ear, glasses arm, mug at the lips, the city low',
     why: 'V21 “But he’s close to something.” Behind his shoulder as he drinks, the city lights in bokeh beyond the rail.' },
   // round 14 (B3): K37 is gone; K36 runs to its end. Not the typing shot: close on his mouth at the mug, locked there,
   // one gulp on "One more module" and one on "One more integration", then held through "Then he'll rest"
-  { id: 'K36', name: 'One more module', t0: 129.4, t1: 136.9, mm: [70, 85], f: 2.8,
-    from: [0.70, 4.13, 1.13], to: [0.78, 4.12, 1.13], at0: [1.05, 4.12, 1.11], at1: [1.05, 4.12, 1.11], focus: 'eyes', mv: [129.4, 136.9], roll: [0, 0],
-    light: '3am', iv: ['s03', 24.0], scr: 142.95, gaze: 'screen', hand: { side: 'R', to: 'mouth', prop: 'mug', sip: [[129.4, 1.0], [136.9, 1.0]], gulps: [130.1, 132.0] },
+  // (L4: the camera from his right, a little behind the profile, the lips, the rim and his fist on the mug; one slow
+  // zoom 55 -> 80 mm with a 3 cm push, focus on the lips. The mug pivots on his lower lip: grip.js, holdProp)
+  { id: 'K36', name: 'One more module', t0: 129.4, t1: 136.9, mm: [55, 80], f: 4.0,
+    from: [1.461, 4.136, 1.077], to: [1.432, 4.144, 1.076], at0: [1.058, 4.248, 1.066], at1: [1.058, 4.248, 1.066], focus: [1.056, 4.250, 1.068], mv: [129.4, 136.9], roll: [0, 0],
+    light: '3am', iv: ['s03', 24.0], scr: 142.95, gaze: 'screen', look: 24, hand: { side: 'R', to: 'mouth', prop: 'mug', sip: [[129.4, 1.0], [136.9, 1.0]], tilt: 0.62, gulps: [130.2, 132.1] },
     beat: 'V22 (Ivan) + V23', board: 'r3c6', tr: 'cut: back at the desk, close on his mouth at the mug',
     why: 'V22 IVAN “One more module. One more integration.” V23 “Then he’ll rest.” Close in profile on his mouth, the mug held at his lips: a gulp on each line, the screen light on his face. He doesn’t put it down.' },
   { id: 'K38', name: 'It’s not all pleasant', t0: 136.9, t1: 140.0, mm: [38, 38], f: 4.0,
@@ -244,10 +247,11 @@ export const SHOTS = [
     from: [1.06, 4.86, 0.92], to: [1.059, 4.833, 0.925], at0: [1.04, 3.97, 1.08], at1: [1.04, 3.97, 1.08], focus: 'eyes', roll: [0, 0],
     light: '4am', iv: ['s03', 15.0], scr: 150, look: 8, key: { at: [1.05, 4.45, 0.86], color: 0x9fd2ff, k: 0.9 }, ev: -0.3, beat: 'V24 b', board: 'r3c8 (C r3c2)', tr: 'cut: low, from behind the screens',
     why: 'V24 “when his eyes burn” Low from behind the screens, the cold light up into his face.' },
-  { id: 'K40', name: 'Hands shake', t0: 143.4, t1: 147.4, mm: [32, 32], f: 2.8,
-    from: [0.80, 4.90, 1.30], to: [0.806, 4.854, 1.281], at0: [0.90, 4.15, 0.93], at1: [0.90, 4.15, 0.93], focus: [0.92, 4.34, 0.90], roll: [0, 0],
-    light: '4am', iv: ['s03', 16.4, 19.4], scr: 152, hand: { side: 'L', to: [0.80, 4.18, 0.90], lat: 0.09, prop: 'mug', sip: [[143.4, 0.5], [145.8, 0.6], [147.4, 0.64]], shake: true }, beat: 'V24 c', board: 'r3c9 (C r3c3)', tr: 'cut: top-down',
-    why: 'V24 “and his hands shake from a caffeine overload, Ivan feels a creeping dread.” Top-down: one hand typing, the other lifting a mug that won’t keep still.' },
+  // (L4: over his right shoulder, the mug wavering in his right hand, the left hand typing; a slow 3 cm push)
+  { id: 'K40', name: 'Hands shake', t0: 143.4, t1: 147.4, mm: [28, 28], f: 4.0,
+    from: [1.50, 4.00, 1.20], to: [1.478, 4.016, 1.188], at0: [1.00, 4.35, 0.88], at1: [1.00, 4.35, 0.88], focus: [1.14, 4.30, 0.84], mv: [143.4, 147.4], roll: [0, 0],
+    light: '4am', iv: ['s03', 16.4, 19.4], scr: 152, hand: { side: 'R', to: 'mouth', prop: 'mug', sip: [[143.4, 0.5], [147.4, 0.58]], lat: 0.05, shake: { amp: 0.0016, fine: 0.00018, hz: 1.3 } }, beat: 'V24 c', board: 'r3c9 (C r3c3)', tr: 'cut: over his right shoulder',
+    why: 'V24 “and his hands shake from a caffeine overload, Ivan feels a creeping dread.” Over his right shoulder: the left hand typing, the mug held up in his right, wavering, never still.' },
   { id: 'K41', name: 'Doesn’t fully understand', t0: 147.4, t1: 152.4, mm: [100, 100], f: 2.0,
     from: [1.06, 4.86, 1.06], to: [1.03, 4.861, 1.06], at0: [1.04, 3.97, 1.10], at1: [1.01, 3.971, 1.1], focus: 'iris', roll: [0, 0],
     light: '4am', iv: ['s03', 13.0], scr: 155, refl: { kind: 'code', at: [1.05, 4.27, 1.078], uv: true, flipV: true, tile: 1, k: 1.3, tint: 0.1 }, beat: 'V25 a', board: 'r4c1 (C r3c4)', tr: 'cut in: his eyes',
@@ -753,6 +757,7 @@ export function props(t, ctx) {
     leanBack(r, lean + 0.7 * Math.sin(t * Math.PI * 2 * (s.breath || 0.22)));   // breath
     if (typeof window !== 'undefined' && window.__look) lookUp(r, window.__look[0], window.__look[1]);
     else if (s.lookK) { const v = keyedP(s.lookK.map(([kt, l, y]) => [kt, [l, y || 0]]), t); lookUp(r, v[0], v[1]); } else lookUp(r, s.look || 0);
+    if (s.hand && s.hand.gulps) lookUp(r, (s.hand.gulpLook ?? 7) * gulpAt(s.hand.gulps, t));   // a gulp: the head tips back with the mug
     if (s.armrest) armsOnChair(r, s.armrest === 'L' ? ['L'] : ['L', 'R']);
     if (s.laced && (r === ctx.ivan)) handsBehindHead(r, s.lacedRamp ? ramp(t, s.lacedRamp[0], s.lacedRamp[1]) : 1);
     if (s.point && (r === ctx.ivan || cast.find((c) => c.root === r && c.role === 'main4'))) pointIndex(r, s.point, s.press ? 34 * (ramp(t, s.press - 0.18, s.press) - ramp(t, s.press + 0.12, s.press + 0.4)) : 0);
@@ -1172,6 +1177,9 @@ function refineGlass(named, scene) {
       new THREE.MeshBasicMaterial({ color: new THREE.Color(1.0, 1.05, 1.1), transparent: true, opacity: 0.45, depthWrite: false }), wb.max.y - 0.0004);   // the meniscus
 }
 
+// the rim of the mug at his lips, in the Head bone's frame (measured, K33): the point, and his up, back and right
+const LIP_L = { lip: new THREE.Vector3(0.15266, -0.02764, -0.02831), back: new THREE.Vector3(-0.9738, -0.1492, 0.1718).normalize(),
+  right: new THREE.Vector3(0.1737, 0.0002, 0.9848).normalize() };
 // a prop in his hand: two-bone IK to a point (the mouth, the chest, the phone's place, or a mark), then the prop
 function holdProp(s, who, ctx, t = 0) {
   mug.visible = false; phone.visible = false; mugGhosts.forEach((g) => (g.visible = false));
@@ -1189,23 +1197,38 @@ function holdProp(s, who, ctx, t = 0) {
   if (h.prop === 'mug') {
     // the mug is placed first (rim at the lips for a sip, at chest height to hold), then the hand reaches its side
     let c, tilt = 0;
+    // round 14: the lips in the HEAD's frame (measured on the K33 frame, where the rim met the lips), so the mug stays
+    // at the mouth when the head pitches (K36 at the desk, a gulp tipping the head back), and tips toward his face
+    const hq = head.getWorldQuaternion(new THREE.Quaternion());
+    const hBack = LIP_L.back.clone().applyQuaternion(hq), hRight = LIP_L.right.clone().applyQuaternion(hq), hUp = new THREE.Vector3().crossVectors(hBack, hRight).normalize();
+    let mugUp = up.clone();
+    const lipAt = () => head.localToWorld(LIP_L.lip.clone()).addScaledVector(hRight, 0.012 * side);
+    let toward = fwd.clone().negate();                                                       // the mug leans back toward him
+    let lipK = 0, chest = null;
     if (h.sip) {
       // a sip, keyed: k = 1 at the lips (tipped), 0 held at the chest; the hand follows the mug (IK below)
-      const k = keyedP(h.sip.map(([kt, v]) => [kt, [v]]), t)[0];
-      const mouth = hp.clone().addScaledVector(fwd, 0.105).addScaledVector(up, -0.015);
-      const lip = mouth.clone().addScaledVector(fwd, 0.042).addScaledVector(up, -0.03).addScaledVector(right, 0.012 * side);
-      const chest = hp.clone().addScaledVector(fwd, 0.22).addScaledVector(up, -0.36).addScaledVector(right, 0.07 * side);
-      c = chest.lerp(lip, k).addScaledVector(right, (h.lat || 0) * side); tilt = 0.55 * k;   // lat: held further out to his side (K40)
+      lipK = keyedP(h.sip.map(([kt, v]) => [kt, [v]]), t)[0];
+      toward.lerp(hBack, lipK).normalize();
+      chest = hp.clone().addScaledVector(fwd, 0.22).addScaledVector(up, -0.36).addScaledVector(right, 0.07 * side);
+      tilt = (h.tilt ?? 0.55) * lipK;
     } else if (h.to === 'mouth') {
-      const mouth = hp.clone().addScaledVector(fwd, 0.105).addScaledVector(up, -0.015);       // lips: in front of and level with the Head bone
-      c = mouth.clone().addScaledVector(fwd, 0.042).addScaledVector(up, -0.03).addScaledVector(right, 0.012 * side);
-      tilt = 0.55;                                                                              // top tipped toward the mouth
+      lipK = 1; toward = hBack;
+      tilt = h.tilt ?? 0.55;                                                                    // top tipped toward the mouth
     } else if (h.to === 'chest') {
       c = hp.clone().addScaledVector(fwd, 0.24).addScaledVector(up, -0.40).addScaledVector(right, 0.08 * side);
     } else c = B(...h.to);
-    if (h.shake) { const w = (f, p) => Math.sin(t * f + p); c.add(new THREE.Vector3(w(53, 0) * 0.0016 + w(19, 1) * 0.0012, w(61, 1) * 0.0012 + w(23, 2) * 0.001, w(47, 2) * 0.0016 + w(17, 3) * 0.0012)); }   // caffeine tremor: ~8-10 Hz shiver over a slower 3 Hz waver (round 12: the 7 Hz aliasing read as jumps)
-    const toward = fwd.clone().negate();                                                         // the mug leans back toward him
-    const axis = up.clone().multiplyScalar(Math.cos(tilt)).addScaledVector(toward, Math.sin(tilt)).normalize();
+    tilt += 0.32 * gulpAt(h.gulps, t) * lipK;                                                  // a gulp tips it further (K36)
+    const axis = mugUp.clone().multiplyScalar(Math.cos(tilt)).addScaledVector(toward, Math.sin(tilt)).normalize();
+    if (lipK > 0) {
+      // the mug pivots on his lower lip: the near point of the rim stays where it met the lips at the measured tilt
+      const perp = (v, ax) => v.clone().addScaledVector(ax, -v.dot(ax)).normalize();
+      const ax0 = up.clone().multiplyScalar(Math.cos(0.55)).addScaledVector(hBack, Math.sin(0.55)).normalize();   // (the liquid tips the mug in the world, not with his head)
+      const contact = lipAt().addScaledVector(ax0, 0.049).addScaledVector(perp(hBack, ax0), 0.0395);
+      const lipC = contact.addScaledVector(axis, -0.049).addScaledVector(perp(hBack, axis), -0.0395);
+      c = chest ? chest.lerp(lipC, lipK) : lipC;
+      c.addScaledVector(right, (h.lat || 0) * side);                                           // lat: held further out to his side (K40)
+    }
+    if (h.shake) c.add(tremor(t, h.shake === true ? {} : h.shake));             // round 14 (K40): a slow 1-2 Hz waver, a faint fine tremor
     mug.visible = true;
     mug.position.copy(c);
     // a natural sip (drinking kinematics: elbow flexed ~135 deg, upper arm raised ~55 deg forward, not out to the side,
@@ -1214,6 +1237,12 @@ function holdProp(s, who, ctx, t = 0) {
     // the loop, thumb on top, ring and pinky curled under), instead of bending the wrist to fit the mug
     const S = h.side === 'L' ? 'Left' : 'Right', fa = b[S + 'ForeArm'], hb = b[S + 'Hand'];
     const sipPole = new THREE.Vector3(0, -1, 0).addScaledVector(fwd, 0.55).addScaledVector(right, 0.35 * side).normalize();
+    if ((h.grip ?? 'body') === 'body') {
+      // round 14 (R4): round the mug's body in a loose fist (grip.js), the elbow down and forward
+      const pole = new THREE.Vector3(0, -1, 0).addScaledVector(fwd, h.poleF ?? 0.5).addScaledVector(right, (h.poleR ?? 0.5) * side).normalize();
+      bodyGrip(who, h.side, mug, c, axis, { pole, wrist0: c.clone().addScaledVector(right, 0.07 * side).addScaledVector(up, -0.05), handle: h.handle, fist: h.fist, thumb: h.thumb, drop: h.drop });
+      return;
+    }
     const W = (o) => o.getWorldPosition(new THREE.Vector3());
     const X = new THREE.Vector3(), Z = new THREE.Vector3(), M = new THREE.Matrix4();
     let wrist = c.clone().addScaledVector(right, 0.085 * side).addScaledVector(up, -0.06).addScaledVector(fwd, -0.03), fingerDir = fwd.clone();
