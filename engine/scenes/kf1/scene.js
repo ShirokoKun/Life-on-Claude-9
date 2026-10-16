@@ -210,17 +210,17 @@ export const SHOTS = [
     why: 'V19 “Ironic, given that his system now responds to everyone else.” The same frame, focus pulled off the dark phone to the laptop full of code, a stream of green-ticked envelopes leaving it.' },
   { id: 'K33', name: 'He knows', t0: 117.7, t1: 121.6, mm: [50, 50], f: 2.8,
     from: [1.54, 3.11, 1.36], to: [1.54, 3.11, 1.36], at0: [1.20, 3.84, 1.32], at1: [1.20, 3.84, 1.32], focus: [1.21, 3.82, 1.37], flow: 'F6', roll: [0, 0],
-    light: 'void', iv: ['s03', 8.0], stand: true, yaw: -100, look: 0, zone: 'balcony', zopt: { spill: 3.0 }, hand: { side: 'L', to: 'mouth', prop: 'mug', sip: [[117.7, 0.3], [118.4, 1.0], [119.4, 1.0], [120.3, 0.3]] }, pix: false, pixable: true,
+    light: 'void', iv: ['s03', 8.0], stand: true, yaw: -100, look: 0, zone: 'balcony', zopt: { spill: 3.0 }, hand: { side: 'L', to: 'mouth', prop: 'mug', sip: [[117.7, 1.0], [119.2, 1.0], [121.6, 0.45]] }, pix: false, pixable: true,
     beat: 'V20 a', board: 'r3c4 (C r1c4; render ref Group 8)', tr: 'cut: back out on the balcony, close',
     why: 'V20 “He knows this isn’t healthy.” Close, mug at his lips, dark under his eyes, the city in bokeh behind; his face in facets.' },
   { id: 'K34', name: 'A thinness to his thoughts', t0: 121.6, t1: 126.3, mm: [50, 50], f: 2.8,
     from: [1.56, 3.10, 1.36], to: [1.56, 3.10, 1.36], at0: [1.20, 3.84, 1.32], at1: [1.20, 3.84, 1.32], focus: [1.21, 3.82, 1.37], flow: 'F6', roll: [0, 0],
-    light: 'void', iv: ['s03', 8.0], stand: true, yaw: -100, look: 0, zone: 'balcony', zopt: { spill: 3.0 }, hand: { side: 'L', to: 'mouth', prop: 'mug', sip: [[121.6, 0.3], [126.3, 0.3]] }, pix: false, pixable: true, thin: true,
+    light: 'void', iv: ['s03', 8.0], stand: true, yaw: -100, look: 0, zone: 'balcony', zopt: { spill: 3.0 }, hand: { side: 'L', to: 'mouth', prop: 'mug', sip: [[121.6, 0.45], [123.4, 0.25], [126.3, 0.25]] }, pix: false, pixable: true, thin: true,
     beat: 'V20 b', board: 'r3c5 (C r2c1; render ref Group 7 bottom)', tr: 'the same frame: the city stretches into lines',
     why: 'V20 “something fraying at the edges of his mind, a thinness to his thoughts.” The same close; behind him the city has stretched into thin horizontal lines.' },
   { id: 'K35', name: 'Close to something', t0: 126.3, t1: 129.4, mm: [35, 35], f: 2.4,
     from: [0.66, 4.20, 1.31], to: [0.609, 4.091, 1.31], at0: [2.46, 3.36, 1.42], at1: [2.409, 3.251, 1.42], focus: [1.10, 3.74, 1.40], roll: [0, 0],
-    light: 'void', iv: ['s03', 8.0], stand: true, yaw: -100, look: 0, zone: 'balcony', zopt: { spill: 3.0 }, hand: { side: 'L', to: 'mouth', prop: 'mug', sip: [[126.3, 0.3], [126.9, 1.0], [127.8, 1.0], [128.6, 0.35]] }, pix: false, pixable: true, amber: 0.35,
+    light: 'void', iv: ['s03', 8.0], stand: true, yaw: -100, look: 0, zone: 'balcony', zopt: { spill: 3.0 }, hand: { side: 'L', to: 'mouth', prop: 'mug', sip: [[126.3, 0.3], [127.4, 1.0], [128.4, 1.0], [129.4, 0.6]] }, pix: false, pixable: true, amber: 0.35,
     beat: 'V21', board: 'r3c6 (C r2c2; render ref Group 8 bottom)', tr: 'cut: round behind his left shoulder (ref Group 8 bottom): ear, glasses arm, mug at the lips, the city low',
     why: 'V21 “But he’s close to something.” Behind his shoulder as he drinks, the city lights in bokeh beyond the rail.' },
   { id: 'K36', name: 'One more module', t0: 129.4, t1: 133.2, mm: [60, 60], f: 5.6,
@@ -240,12 +240,12 @@ export const SHOTS = [
     from: [1.06, 4.86, 0.92], to: [1.059, 4.833, 0.925], at0: [1.04, 3.97, 1.08], at1: [1.04, 3.97, 1.08], focus: 'eyes', roll: [0, 0],
     light: '4am', iv: ['s03', 15.0], scr: 150, look: 8, key: { at: [1.05, 4.45, 0.86], color: 0x9fd2ff, k: 0.9 }, ev: -0.3, beat: 'V24 b', board: 'r3c8 (C r3c2)', tr: 'cut: low, from behind the screens',
     why: 'V24 “when his eyes burn” Low from behind the screens, the cold light up into his face.' },
-  { id: 'K40', name: 'Hands shake', t0: 143.4, t1: 147.4, mm: [35, 35], f: 2.8,
-    from: [1.28, 3.90, 1.62], to: [1.28, 3.9, 1.62], at0: [0.98, 4.24, 0.84], at1: [0.98, 4.24, 0.84], focus: [0.95, 4.20, 0.88], roll: [0, 0],
+  { id: 'K40', name: 'Hands shake', t0: 143.4, t1: 147.4, mm: [32, 32], f: 2.8,
+    from: [0.80, 4.90, 1.30], to: [0.806, 4.854, 1.281], at0: [0.90, 4.13, 0.98], at1: [0.90, 4.13, 0.98], focus: [0.80, 4.14, 0.95], roll: [0, 0],
     light: '4am', iv: ['s03', 16.4, 19.4], scr: 152, hand: { side: 'L', to: [0.80, 4.18, 0.90], prop: 'mug', shake: true }, beat: 'V24 c', board: 'r3c9 (C r3c3)', tr: 'cut: top-down',
     why: 'V24 “and his hands shake from a caffeine overload, Ivan feels a creeping dread.” Top-down: one hand typing, the other lifting a mug that won’t keep still.' },
   { id: 'K41', name: 'Doesn’t fully understand', t0: 147.4, t1: 152.4, mm: [100, 100], f: 2.0,
-    from: [1.06, 4.86, 1.06], to: [1.03, 4.861, 1.06], at0: [1.04, 3.97, 1.10], at1: [1.01, 3.971, 1.1], focus: [1.05, 4.27, 1.078], roll: [0, 0],
+    from: [1.06, 4.86, 1.06], to: [1.03, 4.861, 1.06], at0: [1.04, 3.97, 1.10], at1: [1.01, 3.971, 1.1], focus: 'iris', roll: [0, 0],
     light: '4am', iv: ['s03', 13.0], scr: 155, refl: { kind: 'code', at: [1.05, 4.27, 1.078], uv: true, flipV: true, tile: 1, k: 1.3, tint: 0.1 }, beat: 'V25 a', board: 'r4c1 (C r3c4)', tr: 'cut in: his eyes',
     why: 'V25 “A sense that he’s building something he doesn’t fully understand.” His eyes behind the glasses, lines of code reflected across both lenses.' },
   { id: 'K42', name: 'It takes something from him', t0: 152.4, t1: 158.0, mm: [20, 20], f: 4.0,
@@ -253,13 +253,13 @@ export const SHOTS = [
     light: '4am', iv: ['s03', 0.4, 5.6], scr: 156, zone: 'tower', beat: 'V25 b', board: 'r4c2 (W.I.P.; experimental, kept)', tr: 'the walls fall away again, cold',
     cl: { at: [1.55, 6.6, 4.55], face: [2.70, 1.20, 0.55], s: 18, mood: 'cold', pose: 'idle', born: 156.0, bornDur: 1.2 },
     why: 'V25 “each automation takes something from him, even as it gives something back.” His desk small at the foot of the thing he built, a tower of modules in the dark, Claude huge and cold on it. His warm light streams up into it.' },
-  { id: 'K43', name: 'Finishes another module', t0: 158.0, t1: 162.2, mm: [70, 70], f: 5.6,
-    from: [1.40, 4.24, 0.84], to: [1.39, 4.243, 0.838], at0: [1.15, 4.31, 0.78], at1: [1.15, 4.31, 0.78], focus: [1.15, 4.30, 0.79], mv: [158.0, 160.2], roll: [0, 0],
-    press: 160.2, light: '4am', iv: ['s03', 30.75], scr: 175.5, point: 'R', beat: 'V26 a', board: 'r4c3 (C r4c1)', tr: 'cut: macro, the finger',
+  { id: 'K43', name: 'Finishes another module', t0: 158.0, t1: 162.2, mm: [70, 70], f: 8,
+    from: [1.36, 4.46, 0.86], to: [1.352, 4.455, 0.857], at0: [1.163, 4.326, 0.78], at1: [1.163, 4.326, 0.78], focus: 'bone:mixamorigRightHandIndex4', mv: [158.0, 160.2], roll: [0, 0],
+    press: 160.2, tapKey: true, light: '4am', iv: ['s03', 30.75], scr: 175.5, point: 'R', beat: 'V26 a', board: 'r4c3 (C r4c1)', tr: 'cut: macro, the finger',
     why: 'V26 “But then he finishes another module, and it works,” One finger coming down on Enter.' },
   { id: 'K44', name: 'Pure satisfaction', t0: 162.2, t1: 166.0, mm: [35, 35], f: 2.8,
     from: [1.08, 4.58, 1.00], to: [1.081, 4.593, 0.997], at0: [1.05, 4.15, 1.10], at1: [1.05, 4.15, 1.1], focus: 'eyes', roll: [0, 0],
-    light: '4am', iv: ['s03', 30.75], scr: 177.6, look: 16, cyan: 0.3, amber: 0.6, ev: -0.7, beat: 'V26 b', board: 'r4c4', tr: 'cut on the pass chord: the screen flares',
+    flick: [162.2, 166.0], light: '4am', iv: ['s03', 30.75], scr: 177.6, look: 16, cyan: 0.3, amber: 0.6, ev: -0.7, beat: 'V26 b', board: 'r4c4', tr: 'cut on the pass chord: the screen flares',
     why: 'V26 “and the dread dissolves into a rush of pure satisfaction.” The screen flares and washes his face cyan-white, the room glowing amber behind him.' },
   { id: 'K45', name: 'HE... built that', t0: 166.0, t1: 168.85, mm: [17, 17], f: 8.0,
     from: [24.0, -24.0, 1.6], to: [24.0, -24.0, 1.6], at0: [16.0, 18.0, 15.0], at1: [16.0, 18.0, 16.5], focus: [1.04, 3.85, 1.0], roll: [0, 0],
@@ -400,6 +400,20 @@ const phoneG = phoneCanvas.getContext('2d');
 // the phone fully lit on Sarah's last message: the chapter's own wake moment (found once; 118.2 s fell in its dimmed tail)
 const PHONE_LIT_T = (() => { for (let t = 100; t < 140; t += 0.01) if (phoneGlow(t) > 0.995) return t + 0.05; return 118.2; })();
 // a screen's clock runs on through the shot from its keyframe value (the work keeps happening), unless scrHold
+// round 12 (K43): the right index fingertip over the Enter key, hovering 3 cm above it, down onto it at s.press and
+// off again (arm IK: the wrist is moved so the tip lands, two passes because the hand turns with the forearm)
+function tapEnter(root, t, s) {
+  const key = legends && legends.userData.enter, b = bones(root), tip = b.RightHandIndex4, hand = b.RightHand;
+  if (!key || !tip || !hand) return;
+  const down = s.press ? ramp(t, s.press - 0.22, s.press) - ramp(t, s.press + 0.15, s.press + 0.5) : 0;
+  const goal = key.clone().add(new THREE.Vector3(0.0095, 0.004 + 0.03 * (1 - down), -0.0044));   // the tip bone sits behind the pad: measured on the K43 frame
+  for (let i = 0; i < 3; i++) {
+    root.updateMatrixWorld(true);
+    const tp = tip.getWorldPosition(new THREE.Vector3()), hp = hand.getWorldPosition(new THREE.Vector3());
+    reach(root, 'R', hp.add(goal.clone().sub(tp)), new THREE.Vector3(0.5, -1, 0.3));
+  }
+  root.updateMatrixWorld(true);
+}
 const scrT = (s, t, k) => (s[k] ?? 4) + (s.scrHold ? 0 : Math.max(0, t - s.t0));
 export const SCREENS = {
   laptop(g, t, keys = []) { const s = kf(t); if (s.s4 !== undefined) return S4.laptop(g, scrT(s, t, 's4'), keys); return CH1.laptop(g, scrT(s, t, 'scr'), keys); },
@@ -526,8 +540,11 @@ export async function setup(args) {
   for (let i = 0; i < 120; i++) {
     const r = (k) => { const x = Math.sin((i + k) * 91.3) * 43758.5; return x - Math.floor(x); };
     const c = r(5) > 0.75 ? new THREE.Color(0.35, 1.3, 1.5) : new THREE.Color(1.6, 0.95, 0.5);
-    const bar = new THREE.Mesh(new THREE.BoxGeometry(2 + r(3) * 9, 0.02 + r(2) * 0.05, 0.02), new THREE.MeshBasicMaterial({ color: c.multiplyScalar(0.25 + r(4) * 0.9), fog: false }));
+    const len = 2 + r(3) * 9;
+    const bar = new THREE.Mesh(new THREE.BoxGeometry(len, 0.02 + r(2) * 0.05, 0.02), new THREE.MeshBasicMaterial({ color: c.multiplyScalar(0.25 + r(4) * 0.9), fog: false }));
     bar.position.copy(B(1.04 + (r(1) - 0.2) * 22, 3.85 + 4 + r(6) * 18, -1.5 + r(7) * 5.0));
+    // round 12: each line grows out of a point like a light trail (staggered over ~2 s), then keeps drifting sideways
+    bar.userData = { x0: bar.position.x, len, delay: r(8) * 1.9, grow: 0.7 + r(9) * 1.3, v: (0.15 + r(10) * 0.5) * (r(11) > 0.5 ? 1 : -1) };
     thin.add(bar);
   }
 
@@ -708,6 +725,7 @@ export function props(t, ctx) {
     if (s.armrest) armsOnChair(r, s.armrest === 'L' ? ['L'] : ['L', 'R']);
     if (s.laced && (r === ctx.ivan)) handsBehindHead(r, s.lacedRamp ? ramp(t, s.lacedRamp[0], s.lacedRamp[1]) : 1);
     if (s.point && (r === ctx.ivan || cast.find((c) => c.root === r && c.role === 'main4'))) pointIndex(r, s.point, s.press ? 34 * (ramp(t, s.press - 0.18, s.press) - ramp(t, s.press + 0.12, s.press + 0.4)) : 0);
+    if (s.tapKey && r === ctx.ivan) tapEnter(r, t, s);
     if (r === ctx.ivan || cast.find((c) => c.root === r && c.role === 'main4')) who = r;
     setPix(r, !!s.pix || (s.pixable && new URLSearchParams(location.search).get('pixall') === '1'));
   }
@@ -871,6 +889,14 @@ export function props(t, ctx) {
   label.visible = !!s.label;
   if (s.label) { label.position.copy(B(1.18, 4.58, 1.40)); label.lookAt(camPos(t)); }
   thin.visible = !!s.thin;
+  if (s.thin) {
+    const u = t - s.t0;
+    for (const bar of thin.children) {
+      const d = bar.userData, g = sm(Math.min(1, Math.max(0, (u - d.delay) / d.grow)));
+      bar.visible = g > 0.002; bar.scale.x = Math.max(0.002, g);
+      bar.position.x = d.x0 - Math.sign(d.v) * d.len * 0.5 * (1 - g) + d.v * u;   // grows along its direction of travel
+    }
+  }
   phoneLight.intensity = s.phoneLit ? 0.16 : 0;
   greenLight.intensity = (s.green || 0) * 0.9;
   keyLight.intensity = s.key && !s.black ? s.key.k : 0;
@@ -886,12 +912,25 @@ export function props(t, ctx) {
   }
   // imagined worlds may glow more than the room: a per-world bloom (the room keeps the locked LOOK values)
   if (postRef && bloom0) { const B2 = { drown: [0.5, 0.7, 1.2], tower: [0.75, 0.9, 1.0] }[zone]; postRef.bloom.strength = B2 ? B2[0] : bloom0.s; postRef.bloom.radius = B2 ? B2[1] : bloom0.r; postRef.bloom.threshold = B2 ? B2[2] : bloom0.th; }
-  cyanLight.intensity = (s.cyan || 0) * 2.2;
+  cyanLight.intensity = (s.cyan || 0) * 2.2; cyanLight.color.setHex(0xc8f6ff);
+  if (s.flick) {
+    // round 12 (K44): he works across several windows at once. Each switch throws a different screen light on his
+    // face (terminal green, chat cyan, a white doc, the blue IDE, a warm page), snapping over 80 ms and holding
+    // 0.3-0.7 s; on the pass chord the screen flares cyan-white
+    const [a0, a1] = s.flick, u = t - a0, P = [0x9ff0c4, 0xc8f6ff, 0xfff4e6, 0x86b8ff, 0xffc890, 0xb8fff0];
+    const dur = (k) => 0.3 + 0.4 * (Math.sin(k * 78.233) * 43758.5453 % 1 + 1) % 1;
+    let k = 0, e = 0; while (k < 60 && e + dur(k) < u) { e += dur(k); k++; }
+    const snap = Math.min(1, Math.max(0, (u - e) / 0.08)), lvl = (j) => 1.3 + 1.1 * ((Math.sin(j * 12.9898) * 43758.5453 % 1 + 1) % 1);
+    const flare = ramp(t, a1 - 0.9, a1 - 0.2);
+    cyanLight.color.setHex(P[(k + P.length - 1) % P.length]).lerp(new THREE.Color(P[k % P.length]), snap).lerp(new THREE.Color(0xd8fbff), flare);
+    cyanLight.intensity *= (lvl(k - 1) + (lvl(k) - lvl(k - 1)) * snap) * (1 - flare) + 3.2 * flare;
+    if (rig && rig.L.monitor) rig.L.monitor.color.copy(cyanLight.color);
+  }
   amberLight.intensity = (s.amber || 0) * 4.0;
   const W = { sunrise: [0xff9a50, 7.0], day: [0xfff1dc, 2.5], evening: [0xff8a60, 1.6] }[s.light];
   winLight.intensity = W && !zone ? W[1] * (s.dim ?? 1) : 0; if (W) winLight.color.setHex(W[0]);
   crossLight.intensity = (s.cross || 0) * 95;
-  if (rig && rig.L.monitor) rig.L.monitor.color.setHex(s.green ? 0x9ff0c4 : s.cyan ? 0xc8f6ff : 0x86b8ff);
+  if (rig && rig.L.monitor && !s.flick) rig.L.monitor.color.setHex(s.green ? 0x9ff0c4 : s.cyan ? 0xc8f6ff : 0x86b8ff);
 
   // the floating chat window
   cardMesh.visible = !!s.card && !s.black;
@@ -1115,7 +1154,7 @@ function holdProp(s, who, ctx, t = 0) {
     } else if (h.to === 'chest') {
       c = hp.clone().addScaledVector(fwd, 0.24).addScaledVector(up, -0.40).addScaledVector(right, 0.08 * side);
     } else c = B(...h.to);
-    if (h.shake) c.add(new THREE.Vector3(Math.sin(t * 44) * 0.0025, Math.sin(t * 37 + 1) * 0.002, Math.sin(t * 51 + 2) * 0.0025));   // caffeine tremor
+    if (h.shake) { const w = (f, p) => Math.sin(t * f + p); c.add(new THREE.Vector3(w(53, 0) * 0.0016 + w(19, 1) * 0.0012, w(61, 1) * 0.0012 + w(23, 2) * 0.001, w(47, 2) * 0.0016 + w(17, 3) * 0.0012)); }   // caffeine tremor: ~8-10 Hz shiver over a slower 3 Hz waver (round 12: the 7 Hz aliasing read as jumps)
     const toward = fwd.clone().negate();                                                         // the mug leans back toward him
     const axis = up.clone().multiplyScalar(Math.cos(tilt)).addScaledVector(toward, Math.sin(tilt)).normalize();
     mug.visible = true;

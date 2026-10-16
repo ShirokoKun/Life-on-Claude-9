@@ -272,6 +272,21 @@ function pick(what) {
     head.updateWorldMatrix(true, false);
     return head.getWorldPosition(tmpV.clone()).add(new THREE.Vector3(0, 0.085, -0.085));
   }
+  // 'iris': between the two eyeball bones, at the cornea (+Y out of each eye); 'bone:<name>': a bone of whoever is on
+  // screen, e.g. 'bone:mixamorigRightHandIndex4' (a fingertip). For close-ups at long lenses, where 'eyes' is too rough.
+  const root = on ? on.root : ivan.root;
+  if (what === 'iris' && root) {
+    const l = root.getObjectByName('mixamorigLeftEye'), r = root.getObjectByName('mixamorigRightEye');
+    if (l && r) {
+      const at = (b) => { b.updateWorldMatrix(true, false); return new THREE.Vector3(0, 0.0105, 0).applyMatrix4(b.matrixWorld); };
+      return at(l).add(at(r)).multiplyScalar(0.5);
+    }
+    return pick('eyes');
+  }
+  if (what.startsWith?.('bone:') && root) {
+    const b = root.getObjectByName(what.slice(5));
+    if (b) { b.updateWorldMatrix(true, false); return b.getWorldPosition(new THREE.Vector3()); }
+  }
   if (what === 'screen') return B(6.98, 3.22, 0.90);
   const m = /^(lap|mon):(\d+),(\d+)$/.exec(what);              // a pixel on a screen: 'lap:420,300'
   if (m && screens) { const p = screens.screenPoint(m[1], +m[2], +m[3]); if (p) return p; }

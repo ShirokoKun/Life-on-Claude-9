@@ -73,12 +73,17 @@ export function addKeyLegends(root, scene) {
     let ch = '␣';
     if (w > 0.03) ch = ri === rows.length - 1 ? '␣' : ci === 0 ? '⇧' : '⏎';
     else if (map) ch = map[Math.min(map.length - 1, Math.max(0, ci - Math.floor((len - map.length) / 2)))];
+    if (ri === rows.length - 3 && ci === len - 1) ch = '⏎';                   // Enter (K43 taps it)
     cell[i] = Math.max(0, GLYPHS.indexOf(ch));
     const s = Math.min(w, d) * 0.9;
     m4.compose(new THREE.Vector3(k.cx, k.y + 0.0003, k.cz), new THREE.Quaternion(), new THREE.Vector3(s, 1, s));
     mesh.setMatrixAt(i, m4);
   });
   geo.setAttribute('aCell', new THREE.InstancedBufferAttribute(cell, 1));
+  // the Enter key (round 12: K43's finger taps it)
+  // (every key on this deck is the same size, so Enter is the last key of the home row, three rows above the space bar)
+  const home = rows[rows.length - 3], ent = home && home.k[home.k.length - 1];
+  mesh.userData.enter = ent ? new THREE.Vector3(ent.cx, ent.y, ent.cz) : null;
   mesh.frustumCulled = false; mesh.name = 'Key legends';
   scene.add(mesh);
   return mesh;

@@ -179,7 +179,7 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
   const paneM = new THREE.MeshBasicMaterial({ map: gtex, color: 0xffffff });
   const panes = new THREE.InstancedMesh(new THREE.PlaneGeometry(1, 1), paneM, nB * floors.length + 1);
   const WARM = ['#ffb46b', '#ffc890', '#ff9f55', '#ffe0b8'].map(hex), BLUE = hex('#7fc8ff');
-  let np = 0;
+  let np = 0; const paneMeta = [];
   // what he built, at the size of a building: the lit rooms spell his modules across the facade in giant pixels
   // (the envelope of the email system, then the calendar), every other room dark
   const ICONS_ON = [
@@ -194,15 +194,40 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
     const k = rnd(i * 7.3 + fi * 31.1), x = (i + 0.5) * BAY;
     const ic = iconAt(i, fi);
     m4.compose(new THREE.Vector3(x, y + FL / 2 + 0.1, 0.02), q0, new THREE.Vector3(BAY - 0.3, FL - 0.45, 1)); panes.setMatrixAt(np, m4);
+    paneMeta[np] = { i, fi, kind: ic ? 'icon' : k < 0.15 ? 'lit' : 'glass' };
     if (ic) col.setRGB(...hex(ic)).multiplyScalar(2.2);
     else if (k < 0.12) col.setRGB(...WARM[Math.floor(rnd(k * 99) * 4)]).multiplyScalar(0.5 + rnd(i + fi * 3) * 0.4);
     else if (k < 0.15) col.setRGB(...BLUE).multiplyScalar(0.4);
     else { const v = 0.05 + 0.10 * (fi / floors.length) + 0.05 * rnd(i * 3.1 + fi); col.setRGB(v * 0.9, v * 0.97, v * 1.08); }   // glass holding the pale sky
     panes.setColorAt(np++, col);
   } });
+  const paneBase = Float32Array.from(panes.instanceColor.array), nPanes = np;   // the facade as built (the lobby comes after)
   // the lobby: double height, all glass, lit warm, mullions every 1.6 m, a canopy over the door by his mark
   m4.compose(new THREE.Vector3(L / 2, LOB / 2, 0.02), q0, new THREE.Vector3(L, LOB - 0.2, 1)); panes.setMatrixAt(np, m4); panes.setColorAt(np++, col.setRGB(1.0, 0.66, 0.38).multiplyScalar(0.3));
   panes.count = np; bld.add(panes);
+  // round 12: the facade comes alive. His icons light up row by row from the street (0.12 s a floor); a diagonal band
+  // of light runs across the building every ~1.5 s, waking the dark rooms it passes; a few rooms switch on and off
+  function animFacade(age) {
+    const a = panes.instanceColor.array, nF = floors.length;
+    for (let p = 0; p < nPanes; p++) {
+      const m = paneMeta[p], b = p * 3;
+      const band = Math.pow(Math.max(0, Math.sin(age * 4.2 - (m.i * 0.38 + m.fi * 0.62))), 8);
+      let r = paneBase[b], g = paneBase[b + 1], bl = paneBase[b + 2];
+      if (m.kind === 'icon') {
+        const on = Math.min(1, Math.max(0, (age - 0.12 * (m.fi - 1)) / 0.18));
+        const k = (0.08 + 0.92 * on) * (1 + 0.45 * band);
+        r *= k; g *= k; bl *= k;
+      } else {
+        const step = Math.floor(age * 5), h = (Math.sin((m.i * 13.1 + m.fi * 71.7 + step * 3.3)) * 43758.5453 % 1 + 1) % 1;
+        const blink = h < 0.035 ? (m.kind === 'lit' ? -0.8 : 1) : 0;                 // a room switching (off if lit, on if dark)
+        const w = Math.min(1.2, 0.9 * band + Math.max(0, blink) * 0.8);
+        const keep = 1 + Math.min(0, blink);
+        r = r * keep + 1.0 * w * 0.55; g = g * keep + 0.72 * w * 0.55; bl = bl * keep + 0.45 * w * 0.55;
+      }
+      a[b] = r; a[b + 1] = g; a[b + 2] = bl;
+    }
+    panes.instanceColor.needsUpdate = true;
+  }
   const mull = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), finM, Math.ceil(L / 1.6) + 1);
   for (let i = 0; i * 1.6 <= L; i++) { m4.compose(new THREE.Vector3(i * 1.6, LOB / 2, 0.08), q0, new THREE.Vector3(0.08, LOB, 0.16)); mull.setMatrixAt(i, m4); }
   bld.add(mull);
@@ -529,7 +554,7 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
       flow.instanceMatrix.needsUpdate = true; flow.instanceColor.needsUpdate = true;
     }
     mono.visible = mode === 'monolith';
-    if (mono.visible) { bld.visible = !opts.noBuilding; footShadow.position.copy(B(F.x, F.y, 0.003)); }
+    if (mono.visible) { bld.visible = !opts.noBuilding; footShadow.position.copy(B(F.x, F.y, 0.003)); animFacade(opts.age ?? 0); }
     balc.visible = mode === 'balcony';
     drown.visible = mode === 'drown';
     if (drown.visible && opts.head && opts.cam) layDrown(B(...opts.head), B(...opts.cam), t, opts.rise);

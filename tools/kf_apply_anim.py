@@ -7,7 +7,7 @@ import os, re
 ROOT = os.path.join(os.path.dirname(__file__), '..')
 P = os.path.join(ROOT, 'engine', 'scenes', 'kf1', 'scene.js')
 s = open(P, encoding='utf8').read()
-FIELDS = ['gaze', 'lookK', 'leanK', 'press', 'grade', 'ghostTicks', 'deskAway', 'fadeIn', 'cutBlack', 'zoneAt', 'dimIn', 'rise', 'breath', 'iconsBorn', 'lifeBorn', 'lifeShrink', 'weaveT0', 'evTo', 'lacedRamp']
+FIELDS = ['gaze', 'lookK', 'leanK', 'press', 'grade', 'ghostTicks', 'deskAway', 'fadeIn', 'cutBlack', 'zoneAt', 'dimIn', 'rise', 'breath', 'iconsBorn', 'lifeBorn', 'lifeShrink', 'weaveT0', 'evTo', 'lacedRamp', 'flick', 'tapKey']
 CL_FIELDS = ['born', 'bornDur', 'exit', 'path']
 
 def block(sid):
@@ -40,7 +40,8 @@ ANIM = {
     'K29': {'cutBlack': '105.15'},
     'K30': {'fadeIn': '[105.65, 0.5]'},
     'K42': {'cl': {'born': 156.0, 'bornDur': 1.2}},
-    'K43': {'press': '160.2'},
+    'K43': {'press': '160.2', 'tapKey': 'true'},
+    'K44': {'flick': '[162.2, 166.0]'},   # round 12: screen light switching on his face, flare at the end
     'K46': {'cutBlack': '171.94'},
     'K47': {'fadeIn': '[172.4, 0.8]'},
     'K48': {'grade': '{ con: 0.25, sat: 1.05 }'},
@@ -85,6 +86,10 @@ CAMS = {
     'K37': dict(mm='[28, 28]', f='4.0', frm='[2.40, 2.60, 1.30]', to='[2.40, 2.60, 1.30]', at0='[1.05, 4.10, 1.00]', at1='[1.10, 1.00, 0.45]', mv='[133.6, 136.6]',
                 focus='[[133.2, [1.05, 4.10, 1.00]], [134.2, [1.05, 4.10, 1.00]], [136.4, [1.10, 1.00, 0.45]]]'),
     'K38': dict(mm='[38, 38]', f='4.0', frm='[2.05, 3.10, 1.75]', to='[2.02, 3.14, 1.73]', at0='[1.15, 4.32, 0.98]', at1='[1.15, 4.32, 0.98]'),
+    # round 12: K40 from high front-left (the top-down hid how he holds the mug); a slow push. K41 / K43 focus on his real eyes / fingertip
+    'K40': dict(mm='[32, 32]', f='2.8', frm='[0.80, 4.90, 1.30]', to='[0.806, 4.854, 1.281]', at0='[0.90, 4.13, 0.98]', at1='[0.90, 4.13, 0.98]', focus='[0.80, 4.14, 0.95]'),
+    'K41': dict(focus="'iris'"),
+    'K43': dict(mm='[70, 70]', f='8', frm='[1.36, 4.46, 0.86]', to='[1.352, 4.455, 0.857]', at0='[1.163, 4.326, 0.78]', at1='[1.163, 4.326, 0.78]', focus="'bone:mixamorigRightHandIndex4'"),   # front-right, low, onto the Enter key
     'K46': dict(frm='[1.04, 5.10, 3.50]', to='[1.04, 4.62, 2.55]', at0='[1.04, 3.88, 0.90]', at1='[1.04, 3.88, 0.90]', mv='[168.85, 171.94]', dolly='13.37'),
 }
 def setkv(b, key, val):
@@ -99,9 +104,10 @@ for sid, C in CAMS.items():
 
 # hands: the sips keyed (k = 1 at the lips), no ghost mugs
 SIPS = {'K30': '[[105.35, 0.0], [107.0, 0.0], [107.9, 1.0], [108.5, 1.0], [109.3, 0.25]]',
-        'K33': '[[117.7, 0.3], [118.4, 1.0], [119.4, 1.0], [120.3, 0.3]]',
-        'K34': '[[121.6, 0.3], [126.3, 0.3]]',
-        'K35': '[[126.3, 0.3], [126.9, 1.0], [127.8, 1.0], [128.6, 0.35]]'}
+        # round 12: K33 cuts in mid-sip (a 0.7 s lift from below the frame read as a glitch), then lowers slowly into K34
+        'K33': '[[117.7, 1.0], [119.2, 1.0], [121.6, 0.45]]',
+        'K34': '[[121.6, 0.45], [123.4, 0.25], [126.3, 0.25]]',
+        'K35': '[[126.3, 0.3], [127.4, 1.0], [128.4, 1.0], [129.4, 0.6]]'}
 for sid, k in SIPS.items():
     i, j = block(sid); b = s[i:j]
     b = re.sub(r", sip: \[\[[^\]]*\](?:, \[[^\]]*\])*\]", '', b)   # every earlier sip
