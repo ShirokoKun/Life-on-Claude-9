@@ -494,7 +494,7 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
     const cx = Math.sin(az) * dist, cy = Math.cos(az) * dist;
     const tx = Math.cos(az), ty = -Math.sin(az);                     // across the face, perpendicular to our line of sight
     const base = -75 + rnd(bI * 1.9) * 30, step = 2.6 + rnd(bI * 4.4) * 1.6, lit = 0.05 + rnd(bI * 8.3) * 0.24;
-    const top = -14 + Math.pow(rnd(bI * 6.7), 2.4) * 26;
+    const top = -14 + Math.pow(rnd(bI * 6.7), 2.4) * 26 + (rnd(bI * 7.9) > 0.86 ? 14 + rnd(bI * 8.1) * 26 : 0);   // round 14: a few towers rise past his eye line (R4)
     const cols = 3 + Math.floor(rnd(bI * 2.3) * 12), rows = Math.max(2, Math.floor((top - base) / step));
     const sz = 0.7 + rnd(bI * 5.5) * 0.9, warm = rnd(bI * 9.1);
     for (let r = 0; r < rows && n < NL; r++) {
@@ -508,7 +508,7 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
         const lp = B(cx + tx * u + Math.sin(az) * d, cy + ty * u + Math.cos(az) * d, z);
         m4.compose(lp, q0, new THREE.Vector3(sc * 1.3, sc, sc * 1.3)); lights.setMatrixAt(n, m4);
         LP[n * 3] = lp.x; LP[n * 3 + 1] = lp.y; LP[n * 3 + 2] = lp.z; LS[n] = sc; LT[n * 2] = tx; LT[n * 2 + 1] = -ty;   // (for the K34 trails)
-        const ci = warm < 0.18 ? 4 + Math.floor(rnd(n) * 3) % 3 : Math.floor(rnd(bI * 3 + k * 50) * 4);
+        const ci = warm < 0.27 ? 4 + Math.floor(rnd(n) * 3) % 3 : Math.floor(rnd(bI * 3 + k * 50) * 4);
         lights.setColorAt(n, col.setRGB(...LC[ci % LC.length]).multiplyScalar(0.5 + rnd(n * 1.3) * 1.7));
         n++;
       }
