@@ -982,6 +982,113 @@ function card(g, t) {
 
 // ------------------------------------------------------------------ the contract
 const lapEndA09 = (g) => laptopA09(g, W1('A09') - 0.01);
+
+// ------------------------------------------------------------------ kf1 only (round 14): the laptop as the frame
+// Not used by the ch1 or s04 films; the keyframe scene calls them by name. u = seconds into the shot.
+// the replies the system sends on its own: [to, subject], in the order they go out
+const SENT = [['Maya Chen', 'Re: Thursday sync'], ['Dana Ortiz', 'Re: Intro: Dana <> Ivan'], ['Priya R.', 'Re: Q3 planning notes'],
+  ['Tom K.', 'Re: Can you join at 4?'], ['Legal', 'Re: Contract v3 redlines'], ['Sasha K.', 'Re: lunch next week?'],
+  ['Billing', 'Re: Invoice 4471 overdue'], ['Marco', 'Re: Offsite agenda'], ['Lena', 'Re: Design review moved'],
+  ['Product', 'Re: launch checklist'], ['Finance', 'Re: Re: budget'], ['HR', 'Re: Benefits enrollment'],
+  ['Analytics', 'Re: Weekly metrics'], ['Ops', 'Re: Customer escalation'], ['Ana Silva', 'Re: Quick question'],
+  ['Concur', 'Re: Expense report'], ['Jordan Lee', 'Re: hiring loop'], ['Maya Chen', 'Re: Re: Thursday sync'],
+  ['Kai Brooks', 'Re: Flight change: LHR'], ['Priya R.', 'Re: PR #212 needs review']];
+const mailOf = (n) => n.toLowerCase().replace(/[^a-z ]/g, '').trim().replace(/ +/g, '.') + '@';
+function tick(g, x, y, r, col = '#ffffff', lw = 0) {
+  g.save(); g.strokeStyle = col; g.lineWidth = lw || r * 0.28; g.lineCap = 'round'; g.lineJoin = 'round';
+  g.beginPath(); g.moveTo(x - r * 0.45, y + r * 0.02); g.lineTo(x - r * 0.12, y + r * 0.34); g.lineTo(x + r * 0.5, y - r * 0.36); g.stroke(); g.restore();
+}
+// K18 "once the email system was working": 'email sent' notifications popping in one after another and stacking,
+// the newest on top (each with a tick, the recipient and the subject), faster and faster. o.bgT: the laptop's own
+// clock for the editor behind them (dimmed)
+const TOAST_AT = [-2.0, -1.2, 0.12, 0.5, 0.82, 1.1, 1.34, 1.55, 1.74, 1.9, 2.04, 2.17, 2.29, 2.4, 2.5, 2.6, 2.7, 2.8];
+export function sentToasts(g, u, o = {}) {
+  reset(g);
+  SCREENS.laptop(g, o.bgT ?? 71.5, []);
+  reset(g); g.fillStyle = 'rgba(6,8,12,0.55)'; g.fillRect(0, 26, 1600, 974);
+  const born = TOAST_AT.filter((b) => b <= u), X = 700, W = 860, H = 128, GAP = 16, TOP = 48;
+  // the count of replies sent today, ticking up with each toast (bottom left, under the dimmed editor)
+  g.font = `600 30px ${SANS}`; g.fillStyle = '#9df2bd'; g.fillText('auto_reply.py', 60, 900);
+  g.font = `700 64px ${SANS}`; g.fillStyle = '#e9ecf2'; g.fillText(`${(1158 + born.length).toLocaleString('en-US')} sent`, 60, 956);
+  for (let k = born.length - 1; k >= 0; k--) {
+    const b = born[k], age = u - b;
+    let pos = 0; for (let j = k + 1; j < born.length; j++) pos += smooth((u - born[j]) / 0.24);   // pushed down by every newer one
+    if (pos > 6) continue;
+    const e = smooth(age / 0.26), pop = 1 + 0.05 * Math.sin(Math.min(1, age / 0.3) * Math.PI);
+    const y = TOP + pos * (H + GAP), x = X + (1 - e) * 120;
+    const [to, subj] = SENT[k % SENT.length];
+    g.save(); g.globalAlpha = e * Math.min(1, Math.max(0, 6 - pos));
+    g.translate(x + W / 2, y + H / 2); g.scale(pop, pop); g.translate(-W / 2, -H / 2);
+    const flash = Math.max(0, 1 - age / 0.6);
+    g.shadowColor = 'rgba(0,0,0,0.55)'; g.shadowBlur = 24; g.shadowOffsetY = 6;
+    g.fillStyle = '#262a35'; rr(g, 0, 0, W, H, 26); g.fill();
+    g.shadowBlur = 0; g.shadowOffsetY = 0;
+    g.strokeStyle = flash > 0 ? `rgba(110,240,160,${0.25 + 0.65 * flash})` : 'rgba(255,255,255,0.10)'; g.lineWidth = 2 + 2 * flash; rr(g, 0, 0, W, H, 26); g.stroke();
+    g.fillStyle = '#2fa865'; g.beginPath(); g.arc(70, H / 2, 38, 0, 7); g.fill();
+    tick(g, 70, H / 2 + 2, 38, '#ffffff', 8);
+    g.font = `600 22px ${SANS}`; g.fillStyle = '#8fdc9a'; g.fillText('EMAIL SENT', 132, 30);
+    g.font = `22px ${SANS}`; g.fillStyle = '#8a8f99'; g.textAlign = 'right'; g.fillText(age < 1.5 ? 'now' : '1s ago', W - 30, 30); g.textAlign = 'left';
+    g.font = `600 36px ${SANS}`; g.fillStyle = '#ffffff'; g.fillText(`To: ${to}`, 132, 70);
+    g.font = `30px ${SANS}`; g.fillStyle = '#c4c8d2'; g.fillText(subj, 132, 106);
+    g.restore();
+  }
+}
+// K32 "his system now responds to everyone else": the mail app's Sent box, a reply going out every per seconds (in
+// step with the envelopes leaving the laptop), each row 'Sending...' with a bar, then 'Sent ✓'. o.first: the shot
+// second the first new one goes; o.clock: the chapter clock for the time stamps
+export function outbox(g, u, o = {}) {
+  reset(g);
+  const per = o.per ?? 0.38, first = o.first ?? 0.9, m0 = clockAt(o.clock ?? 121);
+  g.fillStyle = C.ed; g.fillRect(0, 0, 1600, 1000);
+  g.fillStyle = C.bar; g.fillRect(0, 0, 1600, 26); g.font = `15px ${SANS}`; g.fillStyle = '#c9ccd3'; g.fillText('Mail', 22, 13);
+  g.textAlign = 'right'; g.fillText(`${DAYS[Math.floor(m0 / 1440)]} ${hm(m0)}`, 1580, 13); g.textAlign = 'left';
+  // the sidebar
+  g.fillStyle = '#12141b'; g.fillRect(0, 26, 300, 974);
+  g.font = `600 26px ${SANS}`; g.fillStyle = '#e9ecf2'; g.fillText('Mailboxes', 30, 80);
+  [['Inbox', '0'], ['Drafts', ''], ['Outbox', ''], ['Sent', ''], ['Archive', '']].forEach(([n, c], i) => {
+    const y = 136 + i * 54, sel = n === 'Sent';
+    if (sel) { g.fillStyle = '#25406b'; rr(g, 16, y - 24, 268, 48, 10); g.fill(); }
+    g.font = `${sel ? 600 : 400} 26px ${SANS}`; g.fillStyle = sel ? '#ffffff' : '#c9ccd3'; g.fillText(n, 36, y);
+    if (c) { g.textAlign = 'right'; g.fillStyle = '#7d8392'; g.fillText(c, 270, y); g.textAlign = 'left'; }
+  });
+  const nNew = Math.max(0, Math.floor((u - first + 0.3) / per) + 1);      // rows started ('Sending...' 0.3 s before each goes)
+  const sent = Math.max(0, Math.floor((u - first) / per) + 1);
+  // the header: the system at work
+  g.font = `700 44px ${SANS}`; g.fillStyle = '#e9ecf2'; g.fillText('Sent', 340, 92);
+  g.fillStyle = '#1f6f43'; rr(g, 460, 70, 300, 44, 22); g.fill();
+  g.fillStyle = '#9df2bd'; g.beginPath(); g.arc(486, 92, 7 + 1.5 * Math.sin(u * 9), 0, 7); g.fill();
+  g.font = `600 22px ${SANS}`; g.fillText('AUTO-REPLY · RUNNING', 504, 93);
+  g.textAlign = 'right'; g.font = `600 32px ${MONO}`; g.fillStyle = '#9df2bd'; g.fillText(`${(1176 + sent).toLocaleString('en-US')} replies sent`, 1560, 94); g.textAlign = 'left';
+  g.fillStyle = '#2a2f3c'; g.fillRect(320, 136, 1260, 2);
+  const RH = 92, top = 150, ROWS = 10;
+  const lastStart = first + (nNew - 1) * per - 0.3, s = nNew > 0 ? smooth((u - lastStart) / 0.22) : 1;
+  g.save(); g.beginPath(); g.rect(300, top - 4, 1300, RH * ROWS); g.clip();
+  for (let k = 0; k < ROWS + 1; k++) {
+    const idx = nNew - 1 - k;                                          // idx >= 0: this shot's sends; < 0: earlier ones
+    const goes = first + idx * per, age = u - goes, y = top + (k - 1 + s) * RH;
+    const [to, subj] = SENT[((idx % SENT.length) + SENT.length * 4) % SENT.length];
+    g.globalAlpha = k === 0 ? s : Math.max(0.35, 1 - k * 0.06);
+    const flash = age >= 0 ? Math.max(0, 1 - age / 0.6) : 0;
+    g.fillStyle = flash > 0 ? `rgb(${26 + 10 * flash},${40 + 60 * flash},${34 + 26 * flash})` : (k % 2 ? '#181b25' : '#151821'); rr(g, 320, y, 1260, RH - 10, 12); g.fill();
+    const cy = y + (RH - 10) / 2;
+    if (age < 0) {                                                     // sending: a spinner and a bar filling
+      g.strokeStyle = '#7fb2ff'; g.lineWidth = 5; g.lineCap = 'round'; g.beginPath(); g.arc(372, cy, 18, u * 12, u * 12 + 4.2); g.stroke(); g.lineCap = 'butt';
+      g.font = `600 26px ${SANS}`; g.fillStyle = '#7fb2ff'; g.fillText('Sending…', 406, cy);
+      g.fillStyle = '#2a3550'; rr(g, 1300, cy - 6, 220, 12, 6); g.fill();
+      g.fillStyle = '#7fb2ff'; rr(g, 1300, cy - 6, 220 * clamp01(1 + age / 0.3), 12, 6); g.fill();
+    } else {
+      g.fillStyle = '#2fa865'; g.beginPath(); g.arc(372, cy, 22, 0, 7); g.fill(); tick(g, 372, cy + 1, 22, '#ffffff', 5);
+      g.font = `700 26px ${SANS}`; g.fillStyle = '#9df2bd'; g.fillText('Sent', 406, cy);
+      g.font = `24px ${MONO}`; g.fillStyle = '#7d8392'; g.textAlign = 'right'; g.fillText(hm(m0 - Math.max(0, -idx) * 0.02), 1560, cy); g.textAlign = 'left';
+    }
+    g.font = `600 30px ${SANS}`; g.fillStyle = '#ffffff'; g.fillText(to, 520, cy - 16);
+    g.font = `22px ${MONO}`; g.fillStyle = '#7d8392'; g.fillText(mailOf(to) + 'mail.com', 520, cy + 20);
+    g.font = `30px ${SANS}`; g.fillStyle = '#d7dae0'; g.fillText(subj, 860, cy - 16);
+    g.font = `22px ${SANS}`; g.fillStyle = '#8a8f99'; g.fillText('Hi! Thanks for the note. Here is where things stand…', 860, cy + 20);
+  }
+  g.restore();
+}
+
 export const SCREENS = {
   laptop(g, t, keys = []) {
     reset(g);
