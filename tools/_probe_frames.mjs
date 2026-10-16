@@ -8,7 +8,7 @@ const i = process.argv.indexOf('--w'), W = i > 0 ? +process.argv[i + 1] : 640, H
 fs.mkdirSync(out, { recursive: true });
 const { page, close } = await openPage({ gpu: true, w: W, h: H });
 page.on('pageerror', (e) => console.log('ERR', e.message));
-await page.goto((process.env.KF_URL || 'http://localhost:8791/index.html') + '?render=1&scene=kf1');
+await page.goto((process.env.KF_URL || 'http://localhost:8791/index.html') + '?render=1&scene=' + (process.env.SCENE || 'kf1'));
 await page.waitForFunction(() => window.__ready === true, null, { timeout: 0 });
 for (const f of frames) {
   await page.evaluate((n) => { window.renderFrame(n); window.renderFrame(n); }, f);

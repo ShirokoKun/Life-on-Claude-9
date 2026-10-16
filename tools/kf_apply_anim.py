@@ -87,8 +87,11 @@ CAMS = {
                 focus='[[133.2, [1.05, 4.10, 1.00]], [134.2, [1.05, 4.10, 1.00]], [136.4, [1.10, 1.00, 0.45]]]'),
     'K38': dict(mm='[38, 38]', f='4.0', frm='[2.05, 3.10, 1.75]', to='[2.02, 3.14, 1.73]', at0='[1.15, 4.32, 0.98]', at1='[1.15, 4.32, 0.98]'),
     # round 12: K40 from high front-left (the top-down hid how he holds the mug); a slow push. K41 / K43 focus on his real eyes / fingertip
-    'K40': dict(mm='[32, 32]', f='2.8', frm='[0.80, 4.90, 1.30]', to='[0.806, 4.854, 1.281]', at0='[0.90, 4.13, 0.98]', at1='[0.90, 4.13, 0.98]', focus='[0.80, 4.14, 0.95]'),
+    'K40': dict(mm='[32, 32]', f='2.8', frm='[0.80, 4.90, 1.30]', to='[0.806, 4.854, 1.281]', at0='[0.90, 4.15, 0.93]', at1='[0.90, 4.15, 0.93]', focus='[0.92, 4.34, 0.90]'),
     'K41': dict(focus="'iris'"),
+    # round 13: K35 a 3/4 from behind his left shoulder (cheek, ear, glasses arm, mug at the lips, the rail and the city);
+    # straight from behind, the hand and mug stuck out beside his head and the neck read as a flat tube
+    'K35': dict(mm='[35, 35]', f='2.4', frm='[0.95, 4.55, 1.38]', to='[0.91, 4.50, 1.38]', at0='[1.88, 3.30, 1.31]', at1='[1.88, 3.30, 1.31]', focus="'iris'"),
     'K43': dict(mm='[70, 70]', f='8', frm='[1.36, 4.46, 0.86]', to='[1.352, 4.455, 0.857]', at0='[1.163, 4.326, 0.78]', at1='[1.163, 4.326, 0.78]', focus="'bone:mixamorigRightHandIndex4'"),   # front-right, low, onto the Enter key
     'K46': dict(frm='[1.04, 5.10, 3.50]', to='[1.04, 4.62, 2.55]', at0='[1.04, 3.88, 0.90]', at1='[1.04, 3.88, 0.90]', mv='[168.85, 171.94]', dolly='13.37'),
 }
@@ -107,11 +110,14 @@ SIPS = {'K30': '[[105.35, 0.0], [107.0, 0.0], [107.9, 1.0], [108.5, 1.0], [109.3
         # round 12: K33 cuts in mid-sip (a 0.7 s lift from below the frame read as a glitch), then lowers slowly into K34
         'K33': '[[117.7, 1.0], [119.2, 1.0], [121.6, 0.45]]',
         'K34': '[[121.6, 0.45], [123.4, 0.25], [126.3, 0.25]]',
-        'K35': '[[126.3, 0.3], [127.4, 1.0], [128.4, 1.0], [129.4, 0.6]]'}
+        'K35': '[[126.3, 0.3], [127.4, 1.0], [128.4, 1.0], [129.4, 0.6]]',
+        # round 13: K40 held in front of his chest above the desk and lifted slowly (never reaching his lips); the mug
+        # used to sit beside his shoulder, which folded the arm back on itself (the reversed wrist)
+        'K40': '[[143.4, 0.5], [145.8, 0.6], [147.4, 0.64]]'}
 for sid, k in SIPS.items():
     i, j = block(sid); b = s[i:j]
     b = re.sub(r", sip: \[\[[^\]]*\](?:, \[[^\]]*\])*\]", '', b)   # every earlier sip
-    b = re.sub(r"(hand: \{ side: '[LR]', to: '[a-z]+', prop: 'mug')", lambda m: m.group(1) + ', sip: ' + k, b, count=1)
+    b = re.sub(r"(hand: \{ side: '[LR]', to: (?:'[a-z]+'|\[[^\]]*\]),(?: lat: [\d.]+,)? prop: 'mug')", lambda m: m.group(1) + ', sip: ' + k, b, count=1)
     s = s[:i] + b + s[j:]
 # the time-skip ghosts act (their own clips play)
 i, j = block('K22'); b = s[i:j]

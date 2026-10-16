@@ -219,7 +219,7 @@ export const SHOTS = [
     beat: 'V20 b', board: 'r3c5 (C r2c1; render ref Group 7 bottom)', tr: 'the same frame: the city stretches into lines',
     why: 'V20 “something fraying at the edges of his mind, a thinness to his thoughts.” The same close; behind him the city has stretched into thin horizontal lines.' },
   { id: 'K35', name: 'Close to something', t0: 126.3, t1: 129.4, mm: [35, 35], f: 2.4,
-    from: [0.66, 4.20, 1.31], to: [0.609, 4.091, 1.31], at0: [2.46, 3.36, 1.42], at1: [2.409, 3.251, 1.42], focus: [1.10, 3.74, 1.40], roll: [0, 0],
+    from: [0.95, 4.55, 1.38], to: [0.91, 4.50, 1.38], at0: [1.88, 3.30, 1.31], at1: [1.88, 3.30, 1.31], focus: 'iris', roll: [0, 0],
     light: 'void', iv: ['s03', 8.0], stand: true, yaw: -100, look: 0, zone: 'balcony', zopt: { spill: 3.0 }, hand: { side: 'L', to: 'mouth', prop: 'mug', sip: [[126.3, 0.3], [127.4, 1.0], [128.4, 1.0], [129.4, 0.6]] }, pix: false, pixable: true, amber: 0.35,
     beat: 'V21', board: 'r3c6 (C r2c2; render ref Group 8 bottom)', tr: 'cut: round behind his left shoulder (ref Group 8 bottom): ear, glasses arm, mug at the lips, the city low',
     why: 'V21 “But he’s close to something.” Behind his shoulder as he drinks, the city lights in bokeh beyond the rail.' },
@@ -241,8 +241,8 @@ export const SHOTS = [
     light: '4am', iv: ['s03', 15.0], scr: 150, look: 8, key: { at: [1.05, 4.45, 0.86], color: 0x9fd2ff, k: 0.9 }, ev: -0.3, beat: 'V24 b', board: 'r3c8 (C r3c2)', tr: 'cut: low, from behind the screens',
     why: 'V24 “when his eyes burn” Low from behind the screens, the cold light up into his face.' },
   { id: 'K40', name: 'Hands shake', t0: 143.4, t1: 147.4, mm: [32, 32], f: 2.8,
-    from: [0.80, 4.90, 1.30], to: [0.806, 4.854, 1.281], at0: [0.90, 4.13, 0.98], at1: [0.90, 4.13, 0.98], focus: [0.80, 4.14, 0.95], roll: [0, 0],
-    light: '4am', iv: ['s03', 16.4, 19.4], scr: 152, hand: { side: 'L', to: [0.80, 4.18, 0.90], prop: 'mug', shake: true }, beat: 'V24 c', board: 'r3c9 (C r3c3)', tr: 'cut: top-down',
+    from: [0.80, 4.90, 1.30], to: [0.806, 4.854, 1.281], at0: [0.90, 4.15, 0.93], at1: [0.90, 4.15, 0.93], focus: [0.92, 4.34, 0.90], roll: [0, 0],
+    light: '4am', iv: ['s03', 16.4, 19.4], scr: 152, hand: { side: 'L', to: [0.80, 4.18, 0.90], lat: 0.09, prop: 'mug', sip: [[143.4, 0.5], [145.8, 0.6], [147.4, 0.64]], shake: true }, beat: 'V24 c', board: 'r3c9 (C r3c3)', tr: 'cut: top-down',
     why: 'V24 “and his hands shake from a caffeine overload, Ivan feels a creeping dread.” Top-down: one hand typing, the other lifting a mug that won’t keep still.' },
   { id: 'K41', name: 'Doesn’t fully understand', t0: 147.4, t1: 152.4, mm: [100, 100], f: 2.0,
     from: [1.06, 4.86, 1.06], to: [1.03, 4.861, 1.06], at0: [1.04, 3.97, 1.10], at1: [1.01, 3.971, 1.1], focus: 'iris', roll: [0, 0],
@@ -707,6 +707,7 @@ export function props(t, ctx) {
   for (const o of outside) { if (haze) { o.m.emissive.setHex(haze[0]); o.m.emissiveIntensity = haze[1] * dim; } else o.m.emissive.copy(o.e); }
 
   for (const k of ['Water', 'Water_Bubbles', 'Water_Glass']) if (named[k]) named[k].visible = s.glass !== false && (!zone || ['cheat', 'tower', 'iso'].includes(zone));
+  if (named.Water_Glass) for (const d of named.Water_Glass.userData.details || []) d.visible = named.Water_Glass.visible;   // rim, base, meniscus (left floating in the voids before)
 
   // Ivan: held pose, then standing, placing, feet, head, hands, the faceted look
   begin();
@@ -1114,7 +1115,7 @@ function refineGlass(named, scene) {
   Object.assign(W.material, { roughness: 0.03, transmission: 1, thickness: 0.075, ior: 1.33, color: new THREE.Color(1, 1, 1),
     attenuationColor: new THREE.Color(0.86, 0.95, 1.0), attenuationDistance: 0.35, specularIntensity: 1, envMapIntensity: 1.2 });
   W.material.needsUpdate = true;
-  const add = (geo, mat, y, rx = Math.PI / 2) => { const o = new THREE.Mesh(geo, mat); o.position.set(c.x, y, c.z); o.rotation.x = rx; o.renderOrder = 4; o.name = 'Glass detail'; scene.add(o); return o; };
+  const add = (geo, mat, y, rx = Math.PI / 2) => { const o = new THREE.Mesh(geo, mat); o.position.set(c.x, y, c.z); o.rotation.x = rx; o.renderOrder = 4; o.name = 'Glass detail'; scene.add(o); (G.userData.details ||= []).push(o); return o; };   // (round 13: they hide with the glass)
   const rimM = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: 0.02, transparent: true, opacity: 0.55, depthWrite: true, envMapIntensity: 2, clearcoat: 1 });
   add(new THREE.TorusGeometry(r - 0.0012, 0.0013, 8, 64), rimM, gb.max.y - 0.0008);                                   // the lip
   const baseM = fresnelGlass(0.12, 0.8, 1.8);
@@ -1146,7 +1147,7 @@ function holdProp(s, who, ctx, t = 0) {
       const mouth = hp.clone().addScaledVector(fwd, 0.105).addScaledVector(up, -0.015);
       const lip = mouth.clone().addScaledVector(fwd, 0.042).addScaledVector(up, -0.03).addScaledVector(right, 0.012 * side);
       const chest = hp.clone().addScaledVector(fwd, 0.22).addScaledVector(up, -0.36).addScaledVector(right, 0.07 * side);
-      c = chest.lerp(lip, k); tilt = 0.55 * k;
+      c = chest.lerp(lip, k).addScaledVector(right, (h.lat || 0) * side); tilt = 0.55 * k;   // lat: held further out to his side (K40)
     } else if (h.to === 'mouth') {
       const mouth = hp.clone().addScaledVector(fwd, 0.105).addScaledVector(up, -0.015);       // lips: in front of and level with the Head bone
       c = mouth.clone().addScaledVector(fwd, 0.042).addScaledVector(up, -0.03).addScaledVector(right, 0.012 * side);

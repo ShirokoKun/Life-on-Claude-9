@@ -118,3 +118,18 @@ Read as 7 sheets (one frame a second) plus full-resolution checks. Problems, wit
    - **Lighting per sequence:** the colour script above.
 3. Icons v2: the holographic voxel material and redesigned pixel art.
 4. Keyframe boards, before and after, for the director. No film render until asked.
+
+## 6. Claude's arc: from spark to character (director, 2026-10-16)
+Claude does not start as the character. It **first appears as the starburst spark** (the warm 10-ray star from the scene-4
+draft, `engine/scenes/s04/scene.js`, "Hello, Claude": `renders/stills/claude_spark_s04_*.png`), and **evolves into the voxel
+Claude character as the story goes on**.
+
+In story order the first meeting is **K14 "Hello, Claude" (51.0 s)**, inside the "two days ago" flashback (K11–K20). K09 (30 s)
+is the 3 AM present, where Claude is already the character, so it stays the character. Proposed evolution beats (to show as keyframes):
+
+| Shot | Claude |
+|---|---|
+| K14 Hello, Claude | the spark rises out of the laptop and hangs by his face, gently breathing (scale and glow) |
+| K15 The offer | the spark, its rays starting to break into pixels at the tips |
+| K17–K20 (review, the pipeline runs, 3 AM) | a glowing core inside a forming voxel shell: half spark, half character |
+| K21a onward (the voids) and the present (K09, K42, K49) | the full voxel character, in the new holographic, deep-glow treatment |
