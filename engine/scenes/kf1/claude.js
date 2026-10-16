@@ -62,6 +62,9 @@ export function createClaude({ size = 0.012, motes = 40 } = {}) {
   hg.fillStyle = hgr; hg.fillRect(0, 0, 128, 128);
   const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(hc), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, color: 0xffa36b }));
   halo.position.y = 4 * size; halo.renderOrder = 5; group.add(halo);
+  // round 14: a tighter inner glow round its body (the warm air right at it), under the wide halo
+  const core = new THREE.Sprite(new THREE.SpriteMaterial({ map: halo.material.map, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, color: 0xffa36b }));
+  core.position.y = 3.5 * size; core.renderOrder = 5; group.add(core);
   const light = new THREE.PointLight(0xffa36b, 0, 1.2, 2);
   light.position.y = 4 * size; group.add(light);
 
@@ -69,7 +72,7 @@ export function createClaude({ size = 0.012, motes = 40 } = {}) {
   const st = { mood: '' };
 
   function set({ pos, yaw = 0, pitch = 0, scale = 1, mood = 'warm', pose = 'hover', t = 0, build = 1, glow = 1,
-    lightK = 1, glitch = 0, moteK = 1, blink = 0 } = {}) {
+    lightK = 1, glitch = 0, moteK = 1, blink = 0, halo: haloK = 1 } = {}) {
     const M = MOODS[mood] || MOODS.warm;
     if (pos) group.position.copy(pos);
     group.rotation.set(pitch, yaw, 0); group.scale.setScalar(scale);
@@ -90,9 +93,15 @@ export function createClaude({ size = 0.012, motes = 40 } = {}) {
     }
     for (const m of mats) { m.uniforms.uGlow.value = M.glow * glow; m.uniforms.uGlitch.value = glitch; m.uniforms.uTime.value = t; }
     moteMat.uniforms.uGlow.value = M.moteGlow * glow * moteK;
-    light.color.setHex(M.light); light.intensity = 2.2 * M.lightK * glow * lightK * build * scale * scale;   // round 13: x3, it lights his face again
+    // round 14 (A2): its glow is ALWAYS on: a halo in the air that breathes (size and strength on a slow pulse, a second
+    // faster one under it), and its light breathing with it, so Claude reads as a source in every frame it is in
+    const br = 0.5 + 0.5 * Math.sin(t * 1.9), br2 = 0.5 + 0.5 * Math.sin(t * 4.3 + 1.1);
+    light.color.setHex(M.light); light.intensity = 2.2 * M.lightK * glow * lightK * build * scale * scale * (0.9 + 0.12 * br);
     light.distance = 1.8 * scale;
-    halo.material.color.setHex(M.light).multiplyScalar(0.55 * glow * build); halo.scale.setScalar(size * 26 * scale * (1 + 0.06 * Math.sin(t * 1.9)));   // breathes
+    halo.material.color.setHex(M.light).multiplyScalar(Math.max(0.3, 0.6 * glow) * haloK * build * (0.8 + 0.25 * br + 0.06 * br2));
+    halo.scale.setScalar(size * 26 * scale * (0.94 + 0.12 * br));
+    core.material.color.setHex(M.light).multiplyScalar(Math.max(0.35, 0.7 * glow) * haloK * build * (0.85 + 0.2 * br2));
+    core.scale.setScalar(size * 12 * scale * (0.96 + 0.06 * br2));
 
     // poses (degrees in comments): arms rotate about z at the shoulder, legs swing about x at the hip
     const A = { hover: [-20, 20], wave: [-25, 150], present: [-60, 60], type: [-70, 70], hold: [160, -160], cheer: [140, -140],
@@ -125,5 +134,5 @@ export function createClaude({ size = 0.012, motes = 40 } = {}) {
     mote.instanceMatrix.needsUpdate = true;
   }
   set({});
-  return { group, set, light, halo, size };
+  return { group, set, light, halo, core, size };
 }
