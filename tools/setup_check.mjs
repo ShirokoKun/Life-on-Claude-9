@@ -31,7 +31,9 @@ check(false, 'Blender 5.2 (only to rebuild the set, light or Ivan)', blenders.so
 
 // ---- the repo
 const branch = spawnSync('git', ['branch', '--show-current'], { cwd: ROOT, encoding: 'utf8' }).stdout?.trim();
-check(true, `git branch claude/wonderful-franklin-gzawe0 (on ${branch || '?'})`, branch === 'claude/wonderful-franklin-gzawe0', '`git checkout claude/wonderful-franklin-gzawe0` (the Ch 1 work is on this branch, not main)');
+// a duplicated scene's branch (scene/<id>, made by the Studio) carries the Ch 1 work too: any branch that contains it is fine
+const hasCh1 = spawnSync('git', ['merge-base', '--is-ancestor', 'bc0a77c', 'HEAD'], { cwd: ROOT }).status === 0;
+check(true, `git branch with the Ch 1 work (on ${branch || '?'})`, branch === 'claude/wonderful-franklin-gzawe0' || hasCh1, '`git checkout claude/wonderful-franklin-gzawe0` (the Ch 1 work is on this branch, not main)');
 check(true, "Ivan's eye models (ivan_eyes.glb)", has(path.join(ROOT, 'engine/scenes/s03/ivan_eyes.glb')) && has(path.join(ROOT, 'engine/scenes/s04/ivan_eyes.glb')), '`git pull`: they are in git');
 
 // ---- the transfer pack

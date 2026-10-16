@@ -157,3 +157,46 @@ export function createScene(ROOT, p, { id, title }) {
   saveProject(ROOT, p);
   return scene;
 }
+
+// Duplicate a scene: a new scene with its own id, engine folder and scene folder, a copy of everything the original
+// has right now (code, assets, lighting, look.json, camera.json, notes, references, docs), so the copy can change
+// freely while the original stays exactly as it was. The copy's own files are made to point at its own folder
+// (`scenes/<from>/...` -> `scenes/<id>/...`); what the original borrows from other scenes (e.g. kf1 from s03) it keeps
+// borrowing. renders/<id>/ starts empty.
+const TEXT_EXT = /\.(m?js|json|md|txt|py)$/i;
+export function duplicateScene(ROOT, p, { from, id, title }) {
+  const src = p.scenes.find((s) => s.id === from); if (!src) throw new Error('no scene ' + from);
+  if (!/^[a-z][a-z0-9_]{1,20}$/.test(id)) throw new Error('id: lowercase letters, digits, underscore (2-21 characters)');
+  if (p.scenes.some((s) => s.id === id)) throw new Error(`a scene called ${id} exists`);
+  const srcDir = path.dirname(src.module);
+  if (srcDir !== `engine/scenes/${from}`) throw new Error(`${from} lives in shared engine code (${src.module}), so it can't be copied on its own`);
+  const dstDir = `engine/scenes/${id}`;
+  if (fs.existsSync(path.join(ROOT, dstDir))) throw new Error(`${dstDir} exists already`);
+  const number = Math.max(0, ...p.scenes.map((s) => s.number)) + 1;
+  const name = String(title || `${src.title} (copy)`).trim();
+  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || id;
+  const folder = `scenes/${String(number).padStart(2, '0')}-${slug}`;
+  if (fs.existsSync(path.join(ROOT, folder))) throw new Error(`${folder} exists already`);
+  const esc = from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const own = new RegExp(`scenes/${esc}/`, 'g');
+  const copy = (a, b, rewrite) => {
+    fs.cpSync(path.join(ROOT, a), path.join(ROOT, b), { recursive: true });
+    if (!rewrite) return;
+    const walk = (d) => { for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+      const f = path.join(d, e.name);
+      if (e.isDirectory()) walk(f);
+      else if (TEXT_EXT.test(e.name)) { const t = fs.readFileSync(f, 'utf8'), u = t.replace(own, `scenes/${id}/`); if (u !== t) fs.writeFileSync(f, u); }
+    } };
+    walk(path.join(ROOT, b));
+  };
+  copy(srcDir, dstDir, true);
+  if (src.folder && fs.existsSync(path.join(ROOT, src.folder))) copy(src.folder, folder, false);
+  else fs.mkdirSync(path.join(ROOT, folder), { recursive: true });
+  const notes = path.join(ROOT, folder, 'NOTES.md');               // the copy's notes say whose they are
+  if (fs.existsSync(notes)) fs.writeFileSync(notes, fs.readFileSync(notes, 'utf8').replace(/^# Notes: .*$/m, `# Notes: scene ${number}, ${name}`));
+  const scene = { ...src, id, number, title: name, module: `${dstDir}/${path.basename(src.module)}`, folder,
+    voiceover: src.voiceover ? src.voiceover.replace(`${srcDir}/`, `${dstDir}/`) : src.voiceover, duplicatedFrom: from };
+  p.scenes.splice(p.scenes.indexOf(src) + 1, 0, scene);              // listed right after its original
+  saveProject(ROOT, p);
+  return scene;
+}

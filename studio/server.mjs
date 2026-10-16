@@ -341,6 +341,44 @@ const routes = {
   'POST /api/notes/refs': async (b) => { P.addRefs(ROOT, sceneById(b.scene), b.line, b.refs || []); return P.readNotes(ROOT, sceneById(b.scene)); },   // more reference images on a note
   'POST /api/notes/toggle': async (b) => { P.toggleNote(ROOT, sceneById(b.scene), b.line, b.done); return P.readNotes(ROOT, sceneById(b.scene)); },
   'POST /api/scenes': async (b) => P.createScene(ROOT, P.loadProject(ROOT), b),
+  // duplicate a scene (b: from, id, title, branch): 1) the original's uncommitted work is committed and tagged
+  // snapshot/<from>-<time>, so it stays exactly as it is now; 2) optionally a new branch scene/<id> starts there;
+  // 3) the copy is made (its own engine and scene folders) and committed on that branch
+  'POST /api/scenes/duplicate': async (b) => {
+    const p = P.loadProject(ROOT), src = p.scenes.find((x) => x.id === b.from); if (!src) throw new Error('no scene ' + b.from);
+    const paths = [path.dirname(src.module), src.folder].filter((x) => x && fs.existsSync(path.join(ROOT, x)));
+    const isGit = (await git('rev-parse', '--is-inside-work-tree')).ok;
+    const out = { snapshot: null, tag: null, branch: null };
+    if (isGit) {
+      if ((await git('status', '--porcelain', '--', ...paths)).out) {
+        await git('add', '-A', '--', ...paths);
+        const c = await git('commit', '-m', `Snapshot ${src.id} (${src.title}) before duplicating it`, '--', ...paths);
+        if (!c.ok) throw new Error('could not commit the snapshot: ' + c.err.slice(0, 200));
+        out.snapshot = (await git('rev-parse', '--short', 'HEAD')).out;
+      }
+      const stamp = new Date().toISOString().slice(0, 16).replace(/[-:]/g, '').replace('T', '-');
+      out.tag = `snapshot/${src.id}-${stamp}`;
+      const t = await git('tag', '-a', out.tag, '-m', `${src.id} (${src.title}) as it was when ${b.id} was duplicated from it`);
+      if (!t.ok) throw new Error('could not tag the snapshot: ' + t.err.slice(0, 200));
+      if (b.branch) {
+        out.branch = `scene/${b.id}`;
+        const br = await git('checkout', '-b', out.branch);
+        if (!br.ok) throw new Error('could not start the branch: ' + br.err.slice(0, 200));
+      }
+    }
+    const scene = P.duplicateScene(ROOT, p, { from: src.id, id: b.id, title: b.title });
+    const at = isGit ? (await git('rev-parse', '--short', 'HEAD')).out : null;
+    fs.writeFileSync(path.join(ROOT, scene.folder, 'ORIGIN.md'), `# ${scene.title}\n\nDuplicated from **${src.id}** (${src.title}) on ${new Date().toISOString().slice(0, 16).replace('T', ' ')}` +
+      (isGit ? ` at commit \`${at}\`; the original as it was then is tagged \`${out.tag}\`${out.branch ? `; work on this copy happens on the branch \`${out.branch}\`` : ''}.` : '.') +
+      `\n\n- Engine: \`${scene.module}\` (a copy of \`${src.module}\`; its own paths point at \`engine/scenes/${scene.id}/\`)\n- Scene folder: \`${scene.folder}\` (a copy of \`${src.folder}\`)\n- Renders: \`renders/${scene.id}/\`\n`);
+    if (isGit) {
+      await git('add', '-A', '--', path.dirname(scene.module), scene.folder, 'project.json');
+      const c = await git('commit', '-m', `Duplicate ${src.id} as ${scene.id} (${scene.title})`, '--', path.dirname(scene.module), scene.folder, 'project.json');
+      if (!c.ok) throw new Error('the copy was made but could not be committed: ' + c.err.slice(0, 200));
+    }
+    head = (await git('rev-parse', 'HEAD')).out;
+    return { scene: { id: scene.id, title: scene.title, module: scene.module, folder: scene.folder }, ...out };
+  },
   'POST /api/scenes/update': async (b) => {
     const p = P.loadProject(ROOT); const s = p.scenes.find((x) => x.id === b.id); if (!s) throw new Error('no scene');
     for (const k of ['title', 'stage', 'voiceover']) if (k in b) s[k] = b[k];

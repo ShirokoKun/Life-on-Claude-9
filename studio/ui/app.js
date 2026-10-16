@@ -177,6 +177,34 @@ const newScene = run(async () => {
   toast(`Scene created: engine/scenes/${s.id}/scene.js and ${s.folder}/`);
 });
 
+// duplicate a scene: the original is committed and tagged as it is now, the copy gets its own id, engine folder and
+// scene folder (and, if chosen, its own git branch), so changes to the copy never touch the original
+function duplicateScene(s) {
+  const ids = new Set(S.project.scenes.map((x) => x.id)), base = s.id.replace(/_v\d+$/, '');
+  let n = 2; while (ids.has(`${base}_v${n}`)) n++;
+  const title = h('input', { value: `${s.title.replace(/ · v\d+$/, '')} · v${n}`, 'aria-label': 'Title of the copy' });
+  const id = h('input', { value: `${base}_v${n}`, 'aria-label': 'Id of the copy', spellcheck: 'false' });
+  const branch = h('input', { type: 'checkbox', checked: true, id: 'dupBranch' });
+  const msg = h('p.faint', { style: { fontSize: '12px', margin: 0 } });
+  const say = () => { msg.textContent = `Copies engine/scenes/${s.id}/ to engine/scenes/${id.value}/ and ${s.folder}/ to a new scene folder (notes, references and docs included). ${s.id} is committed and tagged first, so it stays exactly as it is now.${branch.checked ? ` Work then continues on a new git branch, scene/${id.value}.` : ''}`; };
+  id.addEventListener('input', say); branch.addEventListener('change', say); say();
+  const go = h('button.btn.primary', {}, 'Duplicate');
+  const dlg = h('dialog.dup', {}, h('form', { method: 'dialog' },
+    h('h2', {}, `Duplicate ${s.id}`), h('label', {}, 'Title', title), h('label', {}, 'Id (lowercase, digits, _)', id),
+    h('label.row', {}, branch, h('span', {}, 'Start a new git branch for the copy')), msg,
+    h('div.row', { style: { justifyContent: 'flex-end' } }, h('button.btn', { value: 'cancel' }, 'Cancel'), go)));
+  go.addEventListener('click', run(async (e) => {
+    e.preventDefault(); go.disabled = true; go.textContent = 'Duplicating…';
+    try {
+      const r = await api('/api/scenes/duplicate', { from: s.id, id: id.value.trim(), title: title.value.trim(), branch: branch.checked });
+      dlg.close(); dlg.remove(); await loadAll(); location.hash = `#/scene/${r.scene.id}`;
+      toast(`${r.scene.id} created from ${s.id}${r.tag ? ` · original tagged ${r.tag}` : ''}${r.branch ? ` · on branch ${r.branch}` : ''}`);
+    } finally { go.disabled = false; go.textContent = 'Duplicate'; }
+  }));
+  dlg.addEventListener('close', () => dlg.remove());
+  document.body.append(dlg); dlg.showModal(); title.select();
+}
+
 // ------------------------------------------------------------------ one scene: player, board, notes, renders, script
 function Scene(id, tab = 'player') {
   const s = S.project.scenes.find((x) => x.id === id); if (!s) return Scenes();
@@ -185,7 +213,8 @@ function Scene(id, tab = 'player') {
   page(h('div.head', {}, h('div', {}, h('div.eyebrow', {}, `Scene ${s.number} · ${s.id}`), h('h1', {}, s.title),
     h('p.sub', {}, `${fmtT(s.duration)} · ${s.shots.length} shots · ${s.fps} fps · `, h('code', {}, s.module))),
   h('div.row', {}, h('select', { 'aria-label': 'Stage', onchange: run(async (e) => { await api('/api/scenes/update', { id: s.id, stage: e.target.value }); refreshProject(); }) },
-    ['idea', 'storyboard', 'draft', 'final'].map((v) => h('option', { value: v, selected: v === s.stage }, v))))),
+    ['idea', 'storyboard', 'draft', 'final'].map((v) => h('option', { value: v, selected: v === s.stage }, v))),
+    h('button.btn', { onclick: () => duplicateScene(s), title: 'Save this scene exactly as it is and continue on a copy' }, '⧉ Duplicate scene'))),
   h('nav.tabs', {}, tabs.map(([k, l]) => h('a', { href: `#/scene/${id}/${k}`, class: k === tab ? 'on' : '' }, l))), body);
   ({ player: Player, board: Board, notes: Notes, renders: Renders, script: Script }[tab] || Player)(s, body);
 }
