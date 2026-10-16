@@ -87,8 +87,8 @@ export const SHOTS = [
     from: [1.40, 4.02, 1.10], to: [1.31, 4.15, 1.05], at0: [1.05, 4.40, 0.86], at1: [1.04, 4.45, 0.90], focus: [1.05, 4.42, 0.88], mv: [20.9, 26.6], roll: [0, 0],
     light: '3am', iv: ['s03', 0.4, 5.6], scr: 24.0, typing: true, green: 0.1, ev: -0.4, beat: 'V05', board: 'r1c5 (A r1c4, green screen light)', tr: 'cut: from his eyes into the screen (board r1c5: the screen is the frame)',
     why: 'V05 “A terminal window, a Claude chat, and a growing sprawl of Python scripts.” Over his shoulder onto the three things the line names, the screen’s green on everything.' },
-  { id: 'K08', name: 'Email automation system', t0: 26.6, t1: 30.3, mm: [35, 35], f: 2.8,
-    from: [1.05, 3.70, 1.42], to: [1.058, 3.725, 1.412], at0: [1.40, 4.48, 1.02], at1: [1.40, 4.48, 1.02], focus: 'mon:800,240', roll: [0, 0],   // round 14: the screen is the subject (the pipeline being built reads whole), his head soft in the corner
+  { id: 'K08', name: 'Email automation system', t0: 26.6, t1: 30.3, mm: [40, 40], f: 2.8,
+    from: [1.22, 3.78, 1.40], to: [1.252, 3.86, 1.375], at0: [1.50, 4.48, 1.04], at1: [1.50, 4.48, 1.04], focus: 'mon:800,240', mv: [26.6, 30.3], roll: [0, 0],   // round 14: the screen is the frame: the automation being built fills it, a slow push in
     light: '3am', hide: ['Baked_DESK_19', 'Baked_DESK_20'], iv: ['s03', 22.4, 25.0], scr: 28.9, label: true, beat: 'V06', board: 'r1c5 (A r2c1, the label)', tr: 'cut: tilt up to the monitor',
     why: 'V06 “He’s building an email automation system.” The monitor’s pipeline going green, the board’s hand-lettered label pointing at it.' },
   { id: 'K09', name: 'Claude is doing the building', t0: 30.3, t1: 34.9, mm: [35, 35], f: 4.0,
