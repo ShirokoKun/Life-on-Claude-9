@@ -656,7 +656,9 @@ const MOOD = {
   sunrise:   { room: 1.0, lamp: 1.0, mon: 1.0, scr: 1.0, monCol: 0xffd9b0, con: 0.18, sat: 1.14, lo: [0.012, -0.004, 0.018], hi: [0.04, 0.018, -0.012] },
   void:      { room: 1.0, lamp: 1.0, mon: 1.0, scr: 1.0, monCol: 0x86b8ff, con: 0.18, sat: 1.12, lo: [0.0, 0.0, 0.02], hi: [0.02, 0.01, 0.0] },
 };
-const moodOf = (s) => MOOD[s.mood] || MOOD[(String(s.light || '3am').match(/4am_iso|4am|3am|evening|day|sunrise|void/) || ['3am'])[0]];
+// the zones carry their own colour idea (the balcony: a cold night, amber and teal city)
+const ZMOOD = { balcony: { ...MOOD.void, con: 0.26, sat: 1.15, lo: [-0.012, 0.0, 0.036], hi: [0.032, 0.012, -0.01] } };
+const moodOf = (s) => MOOD[s.mood] || ZMOOD[s.zone] || MOOD[(String(s.light || '3am').match(/4am_iso|4am|3am|evening|day|sunrise|void/) || ['3am'])[0]];
 export function exposureBoost(t) {
   if (!RL) return 0;
   const s = kf(t), w = weightsFor(s.light, t, s.t0, s.t1);
@@ -827,11 +829,18 @@ export function props(t, ctx) {
     let p;
     if (s.env === 'drown') { const a = r(i, 1) * Math.PI * 2, rad = 0.35 + r(i, 2) * 0.8; p = B(1.04 + Math.cos(a) * rad, 3.85 + Math.sin(a) * rad * 0.8, 0.55 + r(i, 3) * 1.1); }
     else if (s.env === 'pile') { const a = r(i, 1) * Math.PI * 2, rad = 0.25 + r(i, 2) * 0.9; p = B(1.10 + Math.cos(a) * rad, 3.95 + Math.sin(a) * rad * 0.7, 0.05 + r(i, 3) * 0.9); }
-    else {                                                                          // send: a stream rising out of the laptop, fanning out above it, inside the frame
-      const u = ((i / envs.length) * 1.0 + Math.max(0, t - (s.t0 + 1.1)) * 0.16) % 1, on = t > s.t0 + 1.1 + (i / envs.length) * 0.6;
-      e.visible = on; if (!on) return;
-      if (i % 2) { e.visible = false; return; }                                     // half as many: a stream, not a stack
-      p = B(1.02 - 0.30 * u + (r(i, 4) - 0.5) * 0.9 * u, 4.46 + 0.30 * u + (r(i, 6) - 0.5) * 0.2 * u, 0.98 + 0.55 * u + (r(i, 5) - 0.5) * 0.25 * u); }   // up out of the screen, fanning out and away
+    else {                                                                          // send: one envelope at a time leaves the screen
+      // round 13: a readable stream, not a clump (a shared looping offset stacked them by the laptop, each tumbling):
+      // every 0.38 s an envelope leaves the top of the screen, rides one rising arc up and to the left, grows in and fades
+      const per = 0.38, life = 3.2, t0 = s.t0 + 0.9, cyc = envs.length * per;
+      const tt = (((t - t0 - i * per) % cyc) + cyc) % cyc;
+      if (t < t0 + i * per || tt > life) { e.visible = false; return; }
+      const u = tt / life, w = (r(i, 4) - 0.5) * 0.18;
+      p = B(1.02 - 0.5 * u + w * u, 4.46 + 0.06 * u + w * 0.3 * u, 0.96 + 0.42 * u - 0.08 * u * u);
+      e.position.copy(p); e.rotation.set(-0.25, 0.55 + (r(i, 7) - 0.5) * 0.25, (r(i, 8) - 0.5) * 0.18);
+      e.scale.setScalar(0.85 * sm(Math.min(1, u * 9)) * (1 - sm(Math.max(0, (u - 0.8) / 0.2))));
+      return;
+    }
     e.position.copy(p); e.rotation.set(r(i, 6) * 0.8 - 0.4, r(i, 7) * 6.28, r(i, 8) * 0.6 - 0.3);
     e.scale.setScalar(s.env === 'drown' || s.env === 'pile' ? 1.2 : 0.9);
   });

@@ -309,10 +309,10 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
   }
   for (const y of [-0.85, 0.05, 0.95]) box(0.06, 0.05, 2.32, -0.72, y, 1.18, metal);   // door frame
   box(0.06, 1.85, 0.05, -0.72, 0.05, 2.34, metal);
-  const spill = new THREE.RectAreaLight(0xff9a50, 0, 1.6, 2.1);        // the flat's light through the door: his key, from the side
+  const spill = new THREE.RectAreaLight(0xff8a3a, 0, 1.6, 2.1);   // round 13: a deeper amber        // the flat's light through the door: his key, from the side
   spill.position.copy(B(-0.70, 0.05, 1.25)); spill.lookAt(B(0.6, 0.2, 1.3)); balc.add(spill);
-  const night = new THREE.HemisphereLight(0x1e2c48, 0x07080a, 0.14); balc.add(night);
-  const cityRim = new THREE.DirectionalLight(0x8fc8ff, 0.35); cityRim.position.copy(B(3, 5, 1.6)); cityRim.target.position.copy(B(0, 0, 1.3)); balc.add(cityRim, cityRim.target);
+  const night = new THREE.HemisphereLight(0x1e2c48, 0x07080a, 0.07); balc.add(night);   // round 13: deeper shadows (0.14)
+  const cityRim = new THREE.DirectionalLight(0x7fc4ff, 1.5);   // round 13: the city's cool rim on his far edge (0.35 read as nothing) cityRim.position.copy(B(3, 5, 1.6)); cityRim.target.position.copy(B(0, 0, 1.3)); balc.add(cityRim, cityRim.target);
   // the city: towers below and beyond, fine grids of windows, mostly dark, some lit warm, a few cool
   const cc = document.createElement('canvas'); cc.width = 384; cc.height = 1280;
   const cg = cc.getContext('2d'); cg.fillStyle = '#000'; cg.fillRect(0, 0, 384, 1280);
@@ -365,7 +365,7 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
     }
   }
   for (let i = n; i < NL; i++) { m4.makeScale(0, 0, 0); lights.setMatrixAt(i, m4); lights.setColorAt(i, col.setRGB(0, 0, 0)); }
-  lights.frustumCulled = false; balc.add(lights);
+  lights.frustumCulled = false; lights.userData.glow = 0; balc.add(lights);   // round 13: the city stays creamy bokeh, out of the deep glow (it washed orange)
 
   // drowning (V09 "i'm drowning here", director ref: the man in his chair inside a storm of paper): the room is gone,
   // he sits in his chair in a dark void and hundreds of pages hang at every depth around him, glowing warm-white,
