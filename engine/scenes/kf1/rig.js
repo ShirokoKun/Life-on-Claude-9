@@ -208,7 +208,7 @@ export function gripPoint(root, side) {
 // one finger out (Enter, a decisive key): the index back to its straight bind pose, the other three folded into the palm
 export function pointIndex(root, side, press = 0) {
   const b = bones(root), S = side === 'L' ? 'Left' : 'Right';
-  for (const j of [1, 2, 3]) { const o = b[`${S}HandIndex${j}`]; if (!o || !REST.has(o)) continue; touch(o); o.quaternion.copy(REST.get(o).q); o.rotateZ(THREE.MathUtils.degToRad((j === 1 ? 12 : 8) + (j === 1 ? press : press * 0.3))); }
+  for (const j of [1, 2, 3]) { const o = b[`${S}HandIndex${j}`]; if (!o || !REST.has(o)) continue; touch(o); o.quaternion.copy(REST.get(o).q); o.rotateZ(THREE.MathUtils.degToRad([0, 9, 6, 4][j] + (j === 1 ? press : press * 0.3))); }   // round 14: near straight (was 12/8/8)
   for (const f of ['Middle', 'Ring', 'Pinky']) [70, 85, 60].forEach((d, j) => { const o = b[`${S}Hand${f}${j + 1}`]; if (!o) return; touch(o); o.quaternion.copy(REST.get(o)?.q || o.quaternion); o.rotateZ(THREE.MathUtils.degToRad(d)); });
   root.updateMatrixWorld(true);
 }
