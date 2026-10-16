@@ -546,14 +546,17 @@ def add_eyes(rig, body, radius=0.0105, iris_r=0.0054, pupil_r=0.0019, bulge=0.00
             print(f"eyes: {side} skin eased out of the eyeball: max {DD.max() * 1000:.2f} mm, {moved} verts; "
                   f"worst remaining {max(left) * 1000:+.2f} mm", flush=True)
         # the scan's lids are crumpled where the plate met them; relax them: Laplacian smoothing over the lid skin
-        # within 3 mm of the opening (4.5 mm under it), welded across the scan's split seams; the rim stays put
+        # within 6 mm of the opening (7.5 mm under it), welded across the scan's split seams; the rim stays put.
+        # Round 14 (K02, the director: "pixel breakage" at the lids in close-ups): it was 8 passes at 0.5 over 3 mm,
+        # which left folded slivers standing out of the lid as dark shards and a flap past the outer corner; 80
+        # passes at 0.9 over 6 mm unfold them (checked from 4 angles at 100 mm and in K02, K06, K20, K29)
         zone = {}
         for v in bm.verts:
             p = v.co
             if p.y > deep_y or math.hypot(p.x - cx, p.z - cz) > radius + 0.005:
                 continue
             dd = dist_outline(p.x, p.z)
-            reach_ = 0.003 + 0.0015 * min(1.0, max(0.0, (cz - p.z) / 0.004))   # further under the eye (the seam)
+            reach_ = 0.006 + 0.0015 * min(1.0, max(0.0, (cz - p.z) / 0.004))   # further under the eye (the seam)
             if dd < reach_:
                 wz = 1 - dd / reach_
                 zone[v] = wz * wz * (3 - 2 * wz)
@@ -573,7 +576,7 @@ def add_eyes(rig, body, radius=0.0105, iris_r=0.0054, pupil_r=0.0019, bulge=0.00
         wgt = {k: max(zone[v] for v in vs) for k, vs in groups.items()}
         on_rim = {k for k, vs in groups.items() if any(v in rim_v for v in vs)}
         outside_pos = {}
-        for it in range(8):
+        for it in range(80):
             new = {}
             for k, p in pos.items():
                 if k in on_rim:
@@ -582,7 +585,7 @@ def add_eyes(rig, body, radius=0.0105, iris_r=0.0054, pupil_r=0.0019, bulge=0.00
                 if not ns:
                     continue
                 avg = sum(ns, Vector()) / len(ns)
-                q = p.lerp(avg, 0.5 * wgt[k])
+                q = p.lerp(avg, 0.9 * wgt[k])
                 rr = q - C
                 if rr.length < need(q):                                 # nothing may sink into the eyeball
                     q = C + rr.normalized() * need(q)
