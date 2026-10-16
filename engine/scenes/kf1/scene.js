@@ -54,6 +54,9 @@ const STAND = [1.04, 3.85];                                                  // 
 // cl (Claude), zone (+ zopt), icons, env, card, pipe, glass, note, cyan/green, thin, ghosts, black, top (ceiling off),
 // stand, place {at, yaw}, look (head pitch), hand {side, to: 'mouth'|'phone'|[x,y,z], prop}, pix (faceted Ivan),
 // refl (lens reflections), cross (window-bar light), board (the storyboard panel), tr (the transition into the shot).
+// round 14 (K50, K51): leaning back in the chair, his head tipped back, his eyes on the ceiling straight above him
+const LOOKUP = { lean: 22, look: 66, yaw: 24, gaze: [1.05, 3.80, 3.4] };
+const K51_ROLL = -28;                         // degrees, measured: his eye line level in the top shot
 export const SHOTS = [
   { id: 'K01', name: 'Three AM', t0: 0, t1: 3.0, mm: [18, 18], f: 5.6,
     from: [2.25, 2.40, 3.45], to: [2.208, 2.4, 3.357], at0: [0.85, 2.40, 0.35], at1: [0.85, 2.4, 0.35], focus: [1.2, 2.4, 0.5], roll: [0, 0],
@@ -291,15 +294,20 @@ export const SHOTS = [
     grade: { con: 0.35, sat: 1.12 }, iconsBorn: [177.9, 178.6, 179.7, 181.1], light: 'sunrise', iv: ['s03', 32.0, 33.3], scr: 204.6, icons: 4, iconsIdle: true, iconsWall: true, beat: 'V28 c', board: 'r4c7', tr: 'cut: from behind, the desk wall',
     cl: { at: [1.58, 4.48, 1.235], face: BEHIND, s: 1.8, pose: 'sit', glow: 0.6, born: 177.9, bornDur: 0.9 },
     why: 'V28 “...manages his calendar, drafts his documents, and summarizes his reading.” From behind at dawn: the four modules idle and dim over the desk, Claude sitting on the monitor with nothing to do.' },
-  { id: 'K50', name: 'Exhausted and wired', t0: 182.5, t1: 188.8, mm: [35, 35], f: 2.2,
-    from: [1.32, 4.75, 1.12], to: [1.309, 4.718, 1.122], at0: [1.05, 3.95, 1.16], at1: [1.05, 3.95, 1.16], focus: [1.06, 4.04, 1.21], roll: [0, 0],
-    grade: { con: 0.25, sat: 1.05 }, lacedRamp: [182.9, 184.1], gaze: [1.06, 6.0, 1.3], light: 'sunrise', laced: true, iv: ['s03', 33.0, 36.8], scr: 210, cross: 1, beat: 'V29', board: 'r4c8 (C r4c4)', tr: 'cut: in front of him',
+  // (L4: high in front of him, so his face turned up to the ceiling reads; a slow 3 cm push)
+  { id: 'K50', name: 'Exhausted and wired', t0: 182.5, t1: 188.8, mm: [35, 35], f: 2.8,
+    from: [1.25, 4.62, 1.55], to: [1.24, 4.59, 1.535], at0: [1.03, 3.90, 1.13], at1: [1.03, 3.84, 1.18], focus: 'eyes', roll: [0, 0],
+    grade: { con: 0.25, sat: 1.05 }, lacedRamp: [182.9, 184.1], leanK: [[182.5, 0], [183.0, 0], [184.6, LOOKUP.lean]], lookK: [[182.5, 0, 0], [184.0, 4, 6], [186.0, LOOKUP.look, LOOKUP.yaw]],
+    gaze: [[182.5, [1.06, 6.0, 1.3]], [184.2, [1.06, 6.0, 1.3]], [185.9, LOOKUP.gaze]], light: 'sunrise', laced: true, iv: ['s03', 33.0, 36.8], scr: 210, cross: 1, beat: 'V29', board: 'r4c8 (C r4c4)', tr: 'cut: in front of him',
     why: 'V29 “He leans back in his chair, exhausted and wired.” Hands behind his head, the sun across him in the shape of the window bars.' },
   // round 14 (B4): K51 and K52 are one shot: straight down onto his face as he looks up at the ceiling, one constant
   // zoom from wide to very close across both lines (the ceiling is off, as in the top-downs)
-  { id: 'K51', name: 'Then he realizes... what now', t0: 188.8, t1: 195.5, mm: [24, 70], f: 2.8,
-    from: [1.05, 3.965, 2.55], to: [1.05, 3.958, 1.80], at0: [1.05, 3.95, 1.22], at1: [1.05, 3.95, 1.22], focus: 'eyes', mv: [188.8, 195.52], ease: 'lin', roll: [0, 0],   // a hair north of the face: the top of his head is up in frame
-    grade: { con: 0.25, sat: 1.05 }, cutBlack: 195.52, gaze: [1.05, 3.95, 2.7], look: 34, top: true, light: 'sunrise', laced: true, iv: ['s03', 36.8], scr: 212, cross: 1, beat: 'V30a + V30b *', board: 'r4c8 + r4c9', tr: 'cut: overhead, straight down on his face',
+  { id: 'K51', name: 'Then he realizes... what now', t0: 188.8, t1: 195.5, mm: [24, 70], f: 4.0,
+    // (L4: the camera on his face's normal, measured: eyes [1.020, 3.748, 1.225], face normal [-0.09, 0.48, 0.87]; 1.40 m
+    // out at 24 mm (the chair, his arms, the desk edge) in to 0.38 m at 70 mm (his eyes and glasses), rolled so his eye
+    // line is level and the top of his head at the top of the frame)
+    from: [0.8957, 4.4200, 2.4460], to: [0.9865, 3.9304, 1.5566], at0: [1.0203, 3.748, 1.2252], at1: [1.0203, 3.748, 1.2252], focus: 'eyes', mv: [188.8, 195.52], ease: 'lin', roll: [K51_ROLL, K51_ROLL],
+    grade: { con: 0.25, sat: 1.05 }, cutBlack: 195.52, gaze: LOOKUP.gaze, lookK: [[188.8, LOOKUP.look, LOOKUP.yaw]], lean: LOOKUP.lean, top: true, light: 'sunrise', laced: true, iv: ['s03', 36.8], scr: 212, cross: 1, beat: 'V30a + V30b *', board: 'r4c8 + r4c9', tr: 'cut: overhead, straight down on his face',
     why: 'V30 “Then he realizes... he doesn’t know what he’s supposed to do now.” From directly above: his face turned up to the ceiling, hands behind his head, the sun across him; one slow constant zoom from the whole chair to his eyes. Then black (195.52).' },
   { id: 'K53', name: 'Black', t0: 195.5, t1: 201.64, mm: [85, 85], f: 2.0,
     from: [1.16, 4.50, 1.14], to: [1.16, 4.50, 1.14], at0: [1.05, 3.99, 1.21], at1: [1.05, 3.99, 1.21], focus: 'eyes', roll: [0, 0],
