@@ -18,8 +18,7 @@ import { createClaude } from './claude.js';
 import { createStage } from './stage.js';
 import { GlowPass } from './glow.js';
 import { holoTick } from './voxel.js';
-import { createSpark } from './spark.js';
-import { icon, envelope, codeBlock, pipeIcon, pixelArrow, checkMark, MODULE_ORDER, PIPE_ORDER, lifeUp, LIFE_UPS } from './props.js';
+import { icon, envelope, codeBlock, pipeIcon, pixelArrow, checkMark, MODULE_ORDER, PIPE_ORDER, lifeUp, LIFE_UPS, reviewIcon, approveIcon, burst, setLine, layerK, setArrow } from './props.js';
 import { captureRest, stand, plantFeet, lookUp, reach, grip, handWorld, bones, makeMug, makePhone, begin, end, orientHand, curl, gripPoint, touch, pointIndex, curlAnat, palmFrame } from './rig.js';
 import { setPix } from './pix.js';
 import { addKeyLegends } from './keys.js';
@@ -104,7 +103,7 @@ export const SHOTS = [
   { id: 'K12', name: '400 unread', t0: 41.9, t1: 46.4, mm: [30, 30], f: 2.0,
     from: [2.10, 3.92, 1.16], to: [2.042, 4.391, 1.16], at0: [1.00, 3.98, 1.20], at1: [1.00, 3.98, 1.20], focus: 'eyes', mv: [45.6, 46.4], ease: 'in', arc: [1.05, 4.03], roll: [0, 0],
     lookK: [[41.9, -16, -15], [46.4, -18, -18]], breath: 0.32, gaze: 'phone', light: 'day', iv: ['s04', 14.8], s4: 8.0, glass: false, lean: 10, look: 2, hand: { side: 'R', to: 'phone', prop: 'phone', ph: 44.0 },
-    cl: { at: [0.92, 4.30, 1.20], face: [1.05, 4.02, 1.15], s: 1.7, pose: 'hover', glow: 0.7, lightK: 0.4, form: 'spark', born: 42.2, exit: 46.1, path: [[42.2, [1.30, 4.28, 1.18]], [43.2, [1.10, 4.55, 1.32]], [44.0, [0.66, 4.12, 1.36]], [44.8, [0.98, 3.70, 1.30]], [45.6, [0.92, 4.30, 1.20]]] }, beat: 'V09 a', board: 'r1c7 (A r2c4 “complaining to claude”)', tr: 'push down from the top-down into him',
+    cl: { at: [0.92, 4.30, 1.20], face: [1.05, 4.02, 1.15], s: 1.5, pose: 'hover', glow: 0.7, lightK: 0.4, born: 42.2, exit: 46.1, path: [[42.2, [1.30, 4.28, 1.18]], [43.2, [1.10, 4.55, 1.32]], [44.0, [0.66, 4.12, 1.36]], [44.8, [0.98, 3.70, 1.30]], [45.6, [0.92, 4.30, 1.20]]] }, beat: 'V09 a', board: 'r1c7 (A r2c4 “complaining to claude”)', tr: 'push down from the top-down into him',
     why: 'V09 IVAN “i have like 400 unread emails. every single one wants a reply.” Leaning back in the afternoon light, talking into the phone held up near his face. Claude, small and warm, circles him and drifts round in front of him as he talks (the orbit is animated: it starts behind his shoulder and ends between him and the phone).' },
   { id: 'K13', name: 'Drowning here!', t0: 46.4, t1: 51.01, mm: [40, 40], f: 2.2,
     from: [1.923, 5.472, 1.08], to: [0.82, 5.70, 1.08], at0: [1.06, 4.05, 1.02], at1: [1.06, 4.05, 1.02], focus: 'eyes', mv: [46.4, 47.6], ease: 'out', arc: [1.05, 4.03], roll: [0, 0],
@@ -115,24 +114,26 @@ export const SHOTS = [
   { id: 'K14', name: 'Hello, Claude', t0: 51.01, t1: 55.3, mm: [40, 40], f: 2.0,
     from: [1.66, 4.40, 1.22], to: [1.64, 4.37, 1.22], at0: [1.08, 4.23, 1.20], at1: [1.08, 4.23, 1.20], focus: 'iris', roll: [0, 0],
     lookK: [[51.0, -18, -15], [51.9, -18, -15], [53.8, 8, -22]], gaze: [[51.0, 'phone'], [52.0, 'phone'], [52.7, 'claude']], light: 'day', ev: -0.9, iv: ['s04', 14.8], s4: 14.4, glass: false, hand: { side: 'R', to: 'phone', prop: 'phone', ph: 50.0 }, beat: 'V10 a', board: 'r1c8 (A r3c1)', tr: 'cut on the chime (51.01)',
-    cl: { at: [1.15, 4.41, 1.17], face: [1.05, 4.06, 1.20], s: 1.1, pose: 'wave', glow: 0.9, lightK: 1.4, form: 'spark', born: 51.01, bornDur: 0.6, path: [[51.01, [1.10, 4.26, 1.04]], [52.1, [1.11, 4.31, 1.22]], [55.3, [1.11, 4.30, 1.24]]] },
+    // round 14 (A2): the voxel character, not the spark: it climbs out of the phone (below the frame) and stops in the lens's
+    // focal plane beside his face (0.6 m, the iris distance; at f/2 the plane is ~3 cm deep), turned three-quarters to us
+    cl: { at: [1.055, 4.315, 1.205], face: [1.40, 4.30, 1.20], s: 0.85, pose: 'wave', glow: 1.0, lightK: 1.0, born: 51.01, bornDur: 0.6, path: [[51.01, [1.08, 4.39, 1.06]], [52.0, [1.055, 4.315, 1.205]], [55.3, [1.052, 4.322, 1.215]]] },
     why: 'V10 CLAUDE “That sounds genuinely exhausting...” Claude pops out of the phone and waves; its warm light on his face as he looks up at it.' },
   { id: 'K15', name: 'The offer', t0: 55.3, t1: 60.0, mm: [28, 28], f: 2.8,
-    from: [1.28, 3.30, 1.42], to: [1.339, 3.311, 1.42], at0: [1.05, 4.55, 1.28], at1: [1.109, 4.561, 1.28], focus: [1.05, 4.50, 1.30], roll: [0, 0],
-    lookK: [[55.3, 6, 12], [59.6, 8, -12]], dimIn: [1.0, 1.0], gaze: [[55.3, [0.70, 4.50, 1.30]], [59.5, [1.40, 4.50, 1.30]]], light: 'day', iv: ['s04', 24.9], s4: 19.5, glass: false, dim: 0.16, ev: -1.7, hide: ['Baked_DESK_8', 'Baked_DESK_9'], pipe: { born: [56.2, 57.0, 58.1, 59.2], state: 'offer', bright: 2.4, light: 0.08 }, beat: 'V10 b', board: 'r1c9 (MOTION GRAPHICS)', tr: 'the room dims (not to a void: about a sixth of its light) as the offer builds module by module in the air; the dim carries on into K18 and the V13 void',
+    from: [1.28, 3.30, 1.42], to: [1.339, 3.311, 1.42], at0: [1.05, 4.55, 1.28], at1: [1.109, 4.561, 1.28], focus: [1.08, 4.50, 1.34], roll: [0, 0],
+    lookK: [[55.3, 6, 12], [59.6, 8, -12]], dimIn: [1.0, 1.0], gaze: [[55.3, [0.70, 4.50, 1.30]], [59.5, [1.40, 4.50, 1.30]]], light: 'day', iv: ['s04', 24.9], s4: 19.5, glass: false, dim: 0.16, ev: -1.7, hide: ['Baked_DESK_8', 'Baked_DESK_9'], pipe: { born: [56.2, 57.0, 58.1, 59.2], state: 'offer', at: [1.08, 4.50, 1.34], bright: 0.85, light: 0.08 }, beat: 'V10 b', board: 'r1c9 (MOTION GRAPHICS)', tr: 'the room dims (not to a void: about a sixth of its light) as the offer builds module by module in the air; the dim carries on into K18 and the V13 void',
     // round 14: no Claude in this keyframe (director: the offer alone, on camera)
     why: 'V10 CLAUDE “I can write a script that sorts your inbox and drafts the replies for you.” The afternoon room dims and the offer assembles above the desk as white outline pixel icons: inbox, sort, draft, you. Ivan reads it from his chair.' },
   // round 14 (B1): K15, K16 and K17 are ONE composition, no cuts. K16 holds K15's frame: the four offer icons flicker
   // off and REVIEW and APPROVE come on in the same place; K17 zooms in on them (flow F5)
   { id: 'K16', name: 'You just review and approve', t0: 60.0, t1: 64.11, mm: [28, 28], f: 2.8,
-    from: [1.339, 3.311, 1.42], to: [1.339, 3.311, 1.42], at0: [1.109, 4.561, 1.28], at1: [1.109, 4.561, 1.28], focus: [1.05, 4.50, 1.30], roll: [0, 0],
+    from: [1.339, 3.311, 1.42], to: [1.339, 3.311, 1.42], at0: [1.109, 4.561, 1.28], at1: [1.109, 4.561, 1.28], focus: [1.08, 4.50, 1.34], roll: [0, 0],
     lookK: [[60.0, 8, -12], [64.11, 8, -4]], gaze: [[60.0, [1.40, 4.50, 1.30]], [61.2, [1.05, 4.50, 1.30]]], light: 'day', iv: ['s04', 24.9], s4: 23.5, glass: false, dim: 0.16, ev: -1.7, hide: ['Baked_DESK_8', 'Baked_DESK_9'],
-    pipe: { born: [56.2, 57.0, 58.1, 59.2], state: 'review', off: [60.0, 60.45], review: 60.55, approve: 61.35, bright: 2.4, light: 0.08 }, beat: 'V10 c', board: 'r1c9', tr: 'no cut: the same frame, the offer flickers off and review + approve come on',
+    pipe: { born: [56.2, 57.0, 58.1, 59.2], state: 'review', at: [1.08, 4.50, 1.34], off: [60.0, 60.5], review: 60.55, approve: 61.35, bright: 0.85, light: 0.08 }, beat: 'V10 c', board: 'r1c9', tr: 'no cut: the same frame, the offer flickers off and review + approve come on',
     why: 'V10 CLAUDE “You just review and approve. Want me to build one?” The same frame as K15: the four offer icons flicker out, and in their place REVIEW (a page looked over) and APPROVE (a tick stamped on it) light up as he reads.' },
   { id: 'K17', name: 'Review and approve', t0: 64.11, t1: 68.5, mm: [28, 46], f: 2.8,
-    from: [1.339, 3.311, 1.42], to: [1.30, 3.47, 1.41], at0: [1.109, 4.561, 1.28], at1: [1.05, 4.50, 1.30], focus: [1.05, 4.50, 1.30], mv: [64.11, 68.5], roll: [0, 0],   // a zoom (28 -> 46 mm) with a little push; the lens stays clear of his head
+    from: [1.339, 3.311, 1.42], to: [1.30, 3.47, 1.41], at0: [1.109, 4.561, 1.28], at1: [1.08, 4.50, 1.345], focus: [1.08, 4.50, 1.34], mv: [64.11, 68.5], roll: [0, 0],   // a zoom (28 -> 46 mm) with a little push; the lens stays clear of his head
     lookK: [[64.11, 8, -4]], gaze: [1.05, 4.50, 1.30], light: 'day', iv: ['s04', 24.9], s4: 27.6, glass: false, dim: 0.16, ev: -1.7, hide: ['Baked_DESK_8', 'Baked_DESK_9'],
-    pipe: { born: [56.2, 57.0, 58.1, 59.2], state: 'review', off: [60.0, 60.45], review: 60.55, approve: 61.35, bright: 2.4, light: 0.08 }, beat: 'V11 *', board: 'r1c9', tr: 'no cut: a slow zoom in to the review and approve icons',
+    pipe: { born: [56.2, 57.0, 58.1, 59.2], state: 'review', at: [1.08, 4.50, 1.34], off: [60.0, 60.5], review: 60.55, approve: 61.35, bright: 0.85, light: 0.08 }, beat: 'V11 *', board: 'r1c9', tr: 'no cut: a slow zoom in to the review and approve icons',
     why: 'V11 “That was the plan. Review and approve.” Still the K15 frame, now closing in on the two icons over his head: that was all he was meant to do.' },
 
   // round 14: the laptop screen is the frame (from just over his hands, his eye line): 'email sent' toasts stacking
@@ -171,7 +172,7 @@ export const SHOTS = [
   // round 14: no ghost Ivans; he types (the s03 typing take), close on his hands and the keys, still in the void
   { id: 'K22', name: 'A few hours of coding', t0: 81.8, t1: 85.2, mm: [32, 32], f: 2.8,
     from: [1.46, 3.94, 1.20], to: [1.43, 3.99, 1.17], at0: [1.05, 4.40, 0.88], at1: [1.05, 4.40, 0.88], focus: [1.05, 4.38, 0.87], roll: [0, 0],
-    light: '3am', zone: 'iso', iv: ['s03', 0.4, 5.6], scr: 82, icons: 4, iconsIdle: true, iconsBorn: [74.35, 76.09, 77.83, 79.80], beat: 'V14a', board: 'r2c5', tr: 'cut in: over his right shoulder onto his hands, the same void',
+    light: '3am', zone: 'iso', iv: ['s03', 0.4, 5.6], scr: 82, icons: 4, iconsIdle: true, iconIdleK: 0.9, iconsBorn: [74.35, 76.09, 77.83, 79.80], iconScale: 0.3, iconSpots: [[1.146, 4.727, 0.956], [1.22, 4.755, 0.965], [1.173, 4.703, 0.864], [1.247, 4.732, 0.876]], beat: 'V14a', board: 'r2c5', tr: 'cut in: over his right shoulder onto his hands, the same void',
     why: 'V14a “Each one a few hours of coding.” Over his shoulder in the void: his hands typing fast on the laptop, the code scrolling, the four small icons idle above.' },
   { id: 'K23', name: 'Another task gone', t0: 85.2, t1: 89.9, mm: [55, 55], f: 4.0,
     from: [0.90, 4.13, 1.40], to: [0.90, 4.13, 1.40], at0: 'lap:520,420', at1: 'lap:520,420', focus: [1.05, 4.46, 0.94], roll: [0, 0],
@@ -286,11 +287,13 @@ export const SHOTS = [
     from: [2.10, 3.88, 3.40], to: [2.13, 3.88, 3.48], at0: [0.95, 3.92, 0.60], at1: [0.95, 3.92, 0.60], focus: [1.05, 3.95, 0.90], roll: [0, 0],   // round 14: the K01 framing, Ivan centred
     grade: { con: 0.25, sat: 1.05 }, light: 'sunrise', iv: ['s03', 30.75, 33.3], scr: 200.7, top: true, ev: 0.3, amber: 0.5, beat: 'V28 b', board: 'r4c7', tr: 'match on K01 / K11: the third top-down',
     why: 'V28 “...Ivan has a system that handles his email,” The third top-down: the room gold, the bed untouched.' },
-  { id: 'K49', name: 'Calendar, documents, reading', t0: 177.8, t1: 182.5, mm: [28, 28], f: 4.0,
-    from: BEHIND, to: [1.17, 2.55, 1.55], at0: BEHIND_AT, at1: [1.17, 4.55, 1.24], focus: [1.05, 4.4, 1.3], roll: [0, 0],
-    grade: { con: 0.35, sat: 1.12 }, iconsBorn: [177.9, 178.6, 179.7, 181.1], light: 'sunrise', iv: ['s03', 32.0, 33.3], scr: 204.6, icons: 4, iconsIdle: true, iconsWall: true, beat: 'V28 c', board: 'r4c7', tr: 'cut: from behind, the desk wall',
+  // round 14 (V1): the white icons' focus and glow more prominent: the lens on the wall of icons (f/2.8, Ivan soft in
+  // front), brighter, bigger; and they are the words of the line: his email (already handled), calendar, documents, reading
+  { id: 'K49', name: 'Calendar, documents, reading', t0: 177.8, t1: 182.5, mm: [28, 28], f: 2.0,
+    from: BEHIND, to: [1.17, 2.55, 1.55], at0: BEHIND_AT, at1: [1.17, 4.55, 1.24], focus: [1.28, 4.68, 1.65], roll: [0, 0],
+    grade: { con: 0.35, sat: 1.12 }, iconSet: ['inbox', 'calendar', 'documents', 'research'], iconsBorn: [177.0, 178.3, 179.6, 181.0], light: 'sunrise', iv: ['s03', 32.0, 33.3], scr: 204.6, icons: 4, iconsIdle: true, iconIdleK: 1, iconK: 0.9, iconTint: [0.9, 0.97, 1.0], iconScale: 1.5, iconLight: 0.1, ev: -0.4, iconsWall: true, beat: 'V28 c', board: 'r4c7', tr: 'cut: from behind, the desk wall',
     cl: { at: [1.58, 4.48, 1.235], face: BEHIND, s: 1.8, pose: 'sit', glow: 0.6, born: 177.9, bornDur: 0.9 },
-    why: 'V28 “...manages his calendar, drafts his documents, and summarizes his reading.” From behind at dawn: the four modules idle and dim over the desk, Claude sitting on the monitor with nothing to do.' },
+    why: 'V28 “...manages his calendar, drafts his documents, and summarizes his reading.” From behind at dawn: on the wall over the desk the white icons of what he built light one by one on the words (email, calendar, documents, reading), sharp and glowing, Ivan soft in front of them, Claude sitting on the monitor with nothing to do.' },
   { id: 'K50', name: 'Exhausted and wired', t0: 182.5, t1: 188.8, mm: [35, 35], f: 2.2,
     from: [1.32, 4.75, 1.12], to: [1.309, 4.718, 1.122], at0: [1.05, 3.95, 1.16], at1: [1.05, 3.95, 1.16], focus: [1.06, 4.04, 1.21], roll: [0, 0],
     grade: { con: 0.25, sat: 1.05 }, lacedRamp: [182.9, 184.1], gaze: [1.06, 6.0, 1.3], light: 'sunrise', laced: true, iv: ['s03', 33.0, 36.8], scr: 210, cross: 1, beat: 'V29', board: 'r4c8 (C r4c4)', tr: 'cut: in front of him',
@@ -448,9 +451,9 @@ export const SCREENS = {
 
 // ---------------------------------------------------------------- set-up
 let RL = null, claude = null, stage = null, note = null, cardMesh = null, label = null, rig = null;
-let spark = null, atmoRef = null, glowPass = null, clearLens = null, lensMat = null, keyLight = null, imagPass = null, legends = null, postRef = null, bloom0 = null;
+let atmoRef = null, glowPass = null, clearLens = null, lensMat = null, keyLight = null, imagPass = null, legends = null, postRef = null, bloom0 = null;
 let winLight = null, crossLight = null, cyanLight = null, amberLight = null, mug = null, mugGhosts = [], phone = null, refl = null;
-let ghostChairs = [], beam = null, weave = null, lifeUps = [], icons = [], iconLights = [], envs = [], blocks = [], pipe = null, thin = null, phoneLight = null, greenLight = null;
+let ghostChairs = [], beam = null, weave = null, lifeUps = [], icons = {}, iconLights = [], envs = [], blocks = [], pipe = null, thin = null, phoneLight = null, greenLight = null;
 
 export async function setup(args) {
   ROOM3.setup(args);
@@ -469,18 +472,18 @@ export async function setup(args) {
   refineGlass(args.named || {}, scene);                          // every Ivan's bind pose, before any performance touches the bones
 
   claude = createClaude({ size: 0.011 }); scene.add(claude.group); claude.group.visible = false;
-  atmoRef = args.atmo || null;
-  spark = createSpark(); scene.add(spark.group);   // Claude's first form (round 13)
+  atmoRef = args.atmo || null;   // round 14 (A2): Claude is always the voxel character (the starburst spark is gone)
   stage = createStage(scene, { center: [1.04, 3.95] });
   for (const mode of ['cheat', 'door', 'dome', 'down', 'tower', 'balcony', 'monolith']) stage.set(mode, 0);   // fill every buffer once
   stage.set(null);
 
-  // the four modules, each with its own small light (they light the desk and his hair as they arrive)
-  icons = MODULE_ORDER.map((n) => { const m = icon(n, { size: 0.022 }); m.visible = false; scene.add(m); return m; });
-  const IC = [0xff5a4d, 0xffd43b, 0x9df2bd, 0x7ad8ff];
-  iconLights = IC.map((c) => { const l = new THREE.PointLight(c, 0, 1.4, 2); scene.add(l); return l; });
-  for (let i = 0; i < 70; i++) { const e = envelope({ size: 0.012, check: i % 2 === 0 }); e.visible = false; scene.add(e); envs.push(e); }
-  lifeUps = LIFE_UPS.map((_, i) => { const g = lifeUp(i); scene.add(g); return g; });
+  // the modules (round 14: white outline icons after R3), each with a small warm-white light (they touch the desk and
+  // his hair as they arrive). One of every module design, plus the inbox (K49: "handles his email")
+  icons = {};
+  for (const n of [...MODULE_ORDER, 'inbox']) { const m = icon(n, { px: 0.0082 }); m.visible = false; scene.add(m); icons[n] = m; }
+  iconLights = [0, 1, 2, 3].map(() => { const l = new THREE.PointLight(0xffe9d2, 0, 1.4, 2); scene.add(l); return l; });
+  for (let i = 0; i < 70; i++) { const e = envelope({ px: 0.0042, check: i % 2 === 0 }); e.visible = false; scene.add(e); envs.push(e); }
+  lifeUps = LIFE_UPS.map((_, i) => { const g = lifeUp(i, { px: 0.014 }); scene.add(g); return g; });
   // the time-skip ghosts sit on ghost chairs (copies of his chair, tinted like each ghost), beside him at the desk
   {
     let chair = null; args.root.traverse((o) => { if (o.name === 'Baked_ROOM_21') chair = o; });
@@ -519,14 +522,25 @@ export async function setup(args) {
   }
   for (let i = 0; i < 48; i++) { const b = codeBlock(i, { size: 0.009 }); b.visible = false; scene.add(b); blocks.push(b); }
 
-  // the pipeline as pixel objects: inbox -> sort -> draft -> you, arrows between, ticks above when it runs
+  // the pipeline (round 14: white outline icons after R3): inbox -> sort -> draft -> you with dotted arrows between,
+  // ticks above when it runs (K18); and in the same place REVIEW -> APPROVE (K16, K17). Local units: metres at scale 1
   pipe = new THREE.Group(); pipe.visible = false; scene.add(pipe);
-  PIPE_ORDER.forEach((n, i) => {
-    const m = pipeIcon(n, { size: 0.016 }); m.position.x = (i - 1.5) * 0.24; m.name = n; m.userData.mi = i; m.userData.p0 = m.position.clone(); pipe.add(m);
-    if (i < 3) { const a = pixelArrow({ size: 0.012 }); a.position.set((i - 1.5) * 0.24 + 0.12, 0.055, 0); a.userData.mi = i + 0.6; a.userData.p0 = a.position.clone(); pipe.add(a); }
-    const tick = voxels_check(); tick.position.set((i - 1.5) * 0.24, 0.17, 0); tick.name = 'tick'; tick.userData.mi = i; tick.userData.p0 = tick.position.clone(); pipe.add(tick);
-  });
-  pipe.userData.light = new THREE.PointLight(0x9fe8ff, 0, 1.6, 2); scene.add(pipe.userData.light);
+  {
+    const PX = 0.0098, GAP = 0.235;                                       // icon pixel, centre-to-centre
+    PIPE_ORDER.forEach((n, i) => {
+      const m = pipeIcon(n, { px: PX }); m.position.x = (i - 1.5) * GAP; m.name = n; m.userData.mi = i; m.userData.kind = 'offer'; m.userData.p0 = m.position.clone(); pipe.add(m);
+      if (i < 3) { const a = pixelArrow({ px: PX, len: 12 }); a.position.set((i - 1.5) * GAP + GAP / 2, 0, 0); a.userData.mi = i + 0.6; a.userData.kind = 'offer'; a.userData.arrow = true; a.userData.p0 = a.position.clone(); pipe.add(a); }
+      const tick = checkMark({ px: PX * 0.9 }); tick.position.set((i - 1.5) * GAP, 0.15, 0); tick.name = 'tick'; tick.userData.mi = i; tick.userData.p0 = tick.position.clone(); pipe.add(tick);
+    });
+    const RX = 0.17;                                                       // review and approve either side of the centre
+    const rv = reviewIcon({ px: 0.0105 }); rv.position.set(-RX, 0, 0); rv.userData.kind = 'review'; rv.name = 'review'; pipe.add(rv);
+    const ap = approveIcon({ px: 0.0105 }); ap.position.set(RX, -0.004, 0); ap.userData.kind = 'approve'; ap.name = 'approve'; pipe.add(ap);
+    const bu = burst({ px: 0.0105 }); bu.position.copy(ap.position); bu.userData.kind = 'burst'; bu.name = 'burst'; pipe.add(bu);
+    const ar = pixelArrow({ px: 0.0105, len: 16 }); ar.position.set(0.004, 0, 0); ar.userData.kind = 'raArrow'; ar.userData.arrow = true; ar.name = 'review arrow'; pipe.add(ar);
+    // how much of approve's pen path is the ring (it draws first, then the tick strokes on)
+    const ring = ap.userData.parts.main.children[0].count, all = ring + ap.userData.parts.tick.children[0].count; ap.userData.ringF = ring / all;
+  }
+  pipe.userData.light = new THREE.PointLight(0xffeedd, 0, 1.6, 2); scene.add(pipe.userData.light);
 
   // REVIEW + APPROVE on the back of the lid (scene 4's note)
   const nc = document.createElement('canvas'); nc.width = nc.height = 256;
@@ -663,7 +677,6 @@ export async function setup(args) {
   phoneLight = new THREE.PointLight(0x9fb8ff, 0, 0.9, 2); phoneLight.position.copy(B(PHONE[0], PHONE[1], PHONE[2] + 0.06)); scene.add(phoneLight);
   greenLight = new THREE.PointLight(0x7dffb0, 0, 1.6, 2); greenLight.position.copy(B(1.10, 4.36, 1.02)); scene.add(greenLight);
 }
-function voxels_check() { return checkMark({ size: 0.012, glow: 3 }); }
 
 // ---------------------------------------------------------------- light per keyframe
 // round 13, the colour script (NOTES_R13_LOOK.md section 3; ref OpenKnight: low key, practicals paint the face, one
@@ -819,39 +832,48 @@ export function props(t, ctx) {
     const at = cl.path ? keyedP(cl.path, t) : cl.at;
     const p = B(...at);
     const yaw = cl.face ? Math.atan2(B(...cl.face).x - p.x, B(...cl.face).z - p.z) : 0;
-    claude.set({ pos: p, yaw, scale: cl.s || 1, mood: cl.mood, pose: cl.pose, t, build, glow: cl.glow ?? 1, lightK: (cl.lightK ?? 1) * lk });
-    if (cl.form === 'spark') {                                     // round 13: before the character, Claude is the spark
-      claude.group.visible = false;
-      spark.set({ pos: p.clone().add(new THREE.Vector3(0, 0.045 * (cl.s || 1), 0)), t, born: build, evo: cl.evo || 0, glow: cl.glow ?? 1, lightK: (cl.lightK ?? 1) * Math.max(lk, build), size: 0.07 * (cl.s || 1) });
-    } else spark.set({ born: 0 });
-  } else spark.set({ born: 0 });
+    claude.set({ pos: p, yaw, scale: cl.s || 1, mood: cl.mood, pose: cl.pose, t, build, glow: cl.glow ?? 1, lightK: (cl.lightK ?? 1) * lk, halo: cl.halo });
+  }
   if (atmoRef && atmoRef.beam) atmoRef.beam.uniforms.gain.value = zone ? 1 : (moodOf(s).beam ?? 1);   // the lamp's cone in the air
   if (atmoRef) {                                                   // round 13: the dust round Claude catches its light (magic in the air)
-    const u = atmoRef.dust.uniforms, sp = spark.group.visible, on = (claude.group.visible || sp) && !zone;
+    const u = atmoRef.dust.uniforms, on = claude.group.visible && !zone;
     u.orbK.value = on ? 1.6 * (cl?.glow ?? 1) : 0;
-    if (on) { (sp ? spark.halo : claude.halo).getWorldPosition(u.orbPos.value); u.orbCol.value.copy((sp ? spark : claude).light.color); }
+    if (on) { claude.halo.getWorldPosition(u.orbPos.value); u.orbCol.value.copy(claude.light.color); }
   }
 
-  // the modules: lit one by one over the desk in the void (V13), orbiting (V15), idle on the wall at dawn (V28)
-  const ISO_SPOTS = [[0.34, 4.40, 1.22], [1.12, 4.66, 1.36], [1.58, 4.64, 1.40], [1.98, 4.45, 1.18]];   // the calendar clear of the lamp, the clock under the letterbox
-  const WALL_SPOTS = [[0.40, 4.62, 1.56], [1.14, 4.66, 1.62], [1.62, 4.62, 1.52], [2.02, 4.55, 1.30]];
-  icons.forEach((m, i) => {
-    const bt = s.iconsBorn ? s.iconsBorn[i] : -1e9;
+  // the modules: lit one by one over the desk in the void (V13), orbiting (V15), idle on the wall at dawn (V28).
+  // Round 14: small white outline icons (R3) that draw themselves on as they pop up, each with a small life of its own
+  // (the pencil writes, the magnifier scans, today's date pulses). s.iconSet picks which designs (K49 adds the inbox)
+  const ISO_SPOTS = [[0.70, 4.12, 1.36], [0.96, 4.43, 1.44], [1.29, 4.67, 1.45], [1.66, 4.80, 1.35]];   // an arc over the desk (screen 0.33-0.75 across, measured on the K21 frame), each by where Claude presents it
+  const WALL_SPOTS = [[0.74, 4.66, 1.62], [1.10, 4.69, 1.68], [1.46, 4.69, 1.68], [1.82, 4.66, 1.60]];   // on the desk wall, over the monitor and laptop, clear of the lamp
+  const SET = s.iconSet || MODULE_ORDER;
+  for (const n in icons) icons[n].visible = false;
+  iconLights.forEach((l) => (l.intensity = 0));
+  SET.forEach((n, i) => {
+    const m = icons[n], bt = s.iconsBorn ? s.iconsBorn[i] : -1e9;
     const on = (s.icons || 0) > i && !s.black && t >= bt;
-    m.visible = on; iconLights[i].intensity = 0;
-    if (!on) return;
-    const bu = land((t - bt) / 0.45);
+    if (!on || !m) return;
+    m.visible = true;
+    const age = t - bt, pop = land(age / 0.32), draw = Math.min(1, age / 0.55);
     let p;
-    if (s.iconsOrbit) { const a = i / 4 * Math.PI * 2 + 0.6; p = B(1.04 + Math.cos(a) * 1.25, 3.95 + Math.sin(a) * 1.25, 1.75 + 0.25 * Math.sin(i * 2)); m.scale.setScalar(2.4); }
-    else if (s.iconsWall) { p = B(...WALL_SPOTS[i]); m.scale.setScalar(1.5); }
-    else { p = B(...ISO_SPOTS[i]); m.scale.setScalar(1.6); }
-    if (bu < 1) { const from = s.iconsWall || s.iconsBorn ? B(1.58, 4.46, 1.0) : p; const q = from.clone().lerp(p, bu); q.y += Math.sin(Math.min(1, bu) * Math.PI) * 0.06; p = q; m.scale.multiplyScalar(Math.max(0.05, Math.min(1, bu))); }
-    p.y += 0.006 * Math.sin(t * 2.2 + i * 1.9);                                         // idle bob
+    if (s.iconsOrbit) { const a = i / 4 * Math.PI * 2 + 0.6; p = B(1.04 + Math.cos(a) * 1.25, 3.95 + Math.sin(a) * 1.25, 1.75 + 0.25 * Math.sin(i * 2)); }
+    else if (s.iconsWall) p = B(...(s.iconSpots || WALL_SPOTS)[i]);
+    else p = B(...(s.iconSpots || ISO_SPOTS)[i]);
+    p.y -= (1 - Math.min(1, pop)) * 0.05;                                                 // it pops up into place
+    p.y += 0.004 * Math.sin(t * 2.2 + i * 1.9);                                         // idle bob
     m.position.copy(p); m.lookAt(camPos(t));
+    m.scale.setScalar((s.iconScale ?? 1) * (0.55 + 0.45 * Math.max(0, pop)));
     const newest = i === (s.icons || 0) - 1 && !s.iconsOrbit && !s.iconsIdle;
-    const lit = s.iconsIdle ? 0.32 : newest ? 1.6 : 1.0;
-    m.material.uniforms.uGlow.value = 2.2 * lit * (1 + 1.5 * Math.max(0, 1 - Math.min(1, bu) * 1.2));   // a flash as it lands
-    iconLights[i].position.copy(p); iconLights[i].intensity = (s.iconsIdle ? 0.04 : newest ? 0.35 : 0.18) * (s.iconsOrbit ? 3 : 1) * Math.min(1, Math.max(0, bu));
+    const k = (s.iconK ?? 1.0) * (s.iconsIdle ? (s.iconIdleK ?? 0.8) : newest ? 1.15 : 1) * (1 + 1.4 * Math.max(0, 1 - age / 0.45));   // a flash as it lands
+    setLine(m, { draw, k, t, hot: 1.6 });
+    m.userData.u.uColor.value.setRGB(...(s.iconTint || [1.0, 0.975, 0.94]));   // R3's white; a frame may cool it a hair to sit apart from a warm wall
+    // each one's small life
+    const P = m.userData.parts, px = m.userData.px;
+    if (P.pencil) P.pencil.position.copy(P.pencil.userData.p0).add(new THREE.Vector3(px * 0.6 * Math.sin(t * 7.0 + i), px * 0.35 * Math.abs(Math.sin(t * 14.0 + i)), 0));   // writing
+    if (P.write) layerK(m, 'write', 1 + 0.35 * Math.max(0, Math.sin(t * 3.0 + i)));
+    if (P.lens) P.lens.position.copy(P.lens.userData.p0).add(new THREE.Vector3(px * 1.2 * Math.cos(t * 1.6 + i), px * 0.9 * Math.sin(t * 1.6 + i), 0));   // scanning the page
+    if (P.day) layerK(m, 'day', 1.0 + 0.5 * (0.5 + 0.5 * Math.sin(t * 3.4 + i)));
+    iconLights[i].position.copy(p); iconLights[i].intensity = (s.iconLight ?? (s.iconsIdle ? 0.05 : newest ? 0.3 : 0.16)) * (s.iconsOrbit ? 3 : 1) * Math.min(1, Math.max(0, pop));
   });
 
   // envelopes
@@ -870,8 +892,10 @@ export function props(t, ctx) {
       if (t < t0 + i * per || tt > life) { e.visible = false; return; }
       const u = tt / life, w = (r(i, 4) - 0.5) * 0.18;
       p = B(1.02 - 0.5 * u + w * u, 4.46 + 0.06 * u + w * 0.3 * u, 0.96 + 0.42 * u - 0.08 * u * u);
-      e.position.copy(p); e.rotation.set(-0.25, 0.55 + (r(i, 7) - 0.5) * 0.25, (r(i, 8) - 0.5) * 0.18);
-      e.scale.setScalar(0.85 * sm(Math.min(1, u * 9)) * (1 - sm(Math.max(0, (u - 0.8) / 0.2))));
+      // round 14: white line envelopes, turned to the lens (a flat line icon edge-on would vanish), a little tilt each
+      e.position.copy(p); e.lookAt(camPos(t)); e.rotateZ((r(i, 8) - 0.5) * 0.3 + 0.12);
+      e.scale.setScalar(sm(Math.min(1, u * 9)) * (1 - sm(Math.max(0, (u - 0.8) / 0.2))));
+      setLine(e, { draw: 1, k: 0.9 * (1 + 0.8 * Math.max(0, 1 - u * 6)), t });
       return;
     }
     e.position.copy(p); e.rotation.set(r(i, 6) * 0.8 - 0.4, r(i, 7) * 6.28, r(i, 8) * 0.6 - 0.3);
@@ -895,7 +919,10 @@ export function props(t, ctx) {
     const p = B(1.05, 4.40, 0.98).lerp(B(...LIFE_AT[i]), Math.min(1, bu)); p.y += Math.sin(Math.min(1, bu) * Math.PI) * 0.15 + 0.03 * Math.sin(t * 2.1 + i * 1.7);
     g.scale.setScalar(Math.max(0.02, Math.min(1, bu) * sh));
     g.position.copy(p);
-    g.lookAt(camPos(t)); g.getObjectByName('sprite').rotation.y = 0.5 * Math.sin(t * 1.3 + i);
+    g.lookAt(camPos(t)); g.getObjectByName('sprite').rotation.y = 0.35 * Math.sin(t * 1.3 + i);
+    const age = t - bt;                                                              // round 14: white line power-ups draw on as they pop
+    setLine(g.getObjectByName('sprite'), { draw: Math.min(1, age / 0.4), k: 1.05 * (1 + 1.0 * Math.max(0, 1 - age / 0.4)), t, hot: 1.5 });
+    setLine(g.getObjectByName('label'), { draw: Math.min(1, Math.max(0, (age - 0.15) / 0.3)), k: 0.9, t, hot: 1.2 });
   });
 
   // Claude building (V07a): a dome of light woven round it, ring by ring (the top rings unfinished); one bright orb
@@ -941,27 +968,74 @@ export function props(t, ctx) {
     glow.geometry.dispose(); glow.geometry = new THREE.BufferGeometry().setFromPoints(P); glow.geometry.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
   }
 
-  // the pipeline: above the desk (the offer), or across the bottom of the frame between us and him (it works)
+  // the pipeline: above the desk (the offer), or across the bottom of the frame between us and him (it works).
+  // Round 14 (B1): K15 the four offer icons draw on one by one, dotted arrows marching between them; K16 they stutter
+  // and go out (pipe.off), REVIEW draws on (pipe.review: a page, an eye reading it line by line) and APPROVE (pipe.approve:
+  // a ring, then a tick stamped into it with a small burst); both hold through K17's zoom
   pipe.visible = !!s.pipe && !s.black; pipe.userData.light.intensity = 0;
   if (s.pipe) {
-    const front = s.pipe.front;
-    pipe.position.copy(front ? B(1.04, 4.56, 1.01) : B(1.05, 4.50, 1.28));
-    pipe.scale.setScalar(front ? 0.38 : 1.4);   // front: clear of the frame edges (K18)
+    const S = s.pipe, front = S.front, review = S.state === 'review';
+    pipe.position.copy(front ? B(1.04, 4.56, 1.052) : B(...(S.at || [1.05, 4.50, 1.30])));   // (front: the line icons sit on their centres, 4 cm up keeps K18's row in frame)
+    pipe.scale.setScalar(front ? 0.38 : (S.scale ?? 1));   // front: clear of the frame edges (K18)
     pipe.lookAt(camPos(t));
-    const BT = s.pipe.born, TK = s.pipe.ticks;
+    const BT = S.born, TK = S.ticks, K0 = S.bright ?? 0.85;
+    const off = review && S.off ? S.off : null;
+    // the stutter: a few hard on/off cuts, more off than on toward the end, then dark
+    // (each icon on its own stutter, so mid-flicker some are on, some off, some half gone)
+    const stut = (tt, sd) => { if (!off || tt < off[0]) return 1; if (tt >= off[1]) return 0; const u = (tt - off[0]) / (off[1] - off[0]), f = Math.floor(tt * 24);
+      const x = Math.sin(f * 12.9898 + Math.floor(sd) * 78.233) * 43758.5453, hsh = x - Math.floor(x); return hsh > 0.15 + 0.75 * u ? 1 : 0; };
     pipe.children.forEach((c) => {
-      const mi = c.userData.mi ?? 0, k = Math.floor(mi);
+      const kind = c.userData.kind, mi = c.userData.mi ?? 0, k = Math.floor(mi);
+      const set = (o) => (c.userData.arrow ? setArrow(c, o) : setLine(c, o));
       if (c.name === 'tick') {
-        const tt = TK ? TK[k] : -1e9; c.visible = s.pipe.state === 'done' && t >= tt;
-        c.scale.setScalar(c.visible ? Math.max(0.05, land((t - tt) / 0.3)) : 1); return;
+        const tt = TK ? TK[k] : -1e9; c.visible = S.state === 'done' && t >= tt;
+        c.scale.setScalar(c.visible ? Math.max(0.05, land((t - tt) / 0.3)) : 1); set({ draw: Math.min(1, (t - tt) / 0.3), k: K0, t }); return;
       }
-      const b0 = BT ? BT[k] + (mi - k > 0 ? 0.35 : 0) : -1e9, u = land((t - b0) / 0.4);
-      c.visible = t >= b0; c.scale.setScalar(Math.max(0.02, Math.min(1.03, u)));
-      if (c.userData.p0) { c.position.copy(c.userData.p0); c.position.y += (1 - Math.min(1, u)) * -0.12 + 0.006 * Math.sin(t * 2 + mi); }
+      if (kind === 'offer') {
+        const b0 = BT ? BT[k] + (mi - k > 0 ? 0.4 : 0) : -1e9, age = t - b0, st = stut(t, mi * 2.3 + 1);
+        c.visible = t >= b0 && st > 0 && S.state !== 'none';
+        if (!c.visible) return;
+        const u = land(age / 0.35);
+        c.scale.setScalar(Math.max(0.02, 0.7 + 0.3 * Math.min(1.03, u)));
+        if (c.userData.p0) { c.position.copy(c.userData.p0); c.position.y += (1 - Math.min(1, u)) * -0.04 + 0.004 * Math.sin(t * 2 + mi); }
+        const fl = off && t >= off[0] ? 0.15 + 0.6 * (t - off[0]) / (off[1] - off[0]) : 0;          // pixels drop out as it fails
+        set({ draw: Math.min(1, age / (c.userData.arrow ? 0.3 : 0.5)), k: K0 * (1 + 1.2 * Math.max(0, 1 - age / 0.4)) * (off && t >= off[0] ? 1.25 : 1), flick: fl, t, hot: 1.6 });
+        return;
+      }
+      // review / approve / their arrow / the burst: only in the review state
+      if (!review) { c.visible = false; return; }
+      if (kind === 'review') {
+        const age = t - S.review; c.visible = age >= 0; if (!c.visible) return;
+        set({ draw: Math.min(1, age / 0.7), k: K0 * (1 + 1.0 * Math.max(0, 1 - age / 0.5)), t, hot: 1.6 });
+        // the eye reads the page: a pass down the lines every 1.6 s (the line under the eye's gaze lights up), the
+        // pupil tracking along each line; it blinks now and then
+        const P = c.userData.parts, px = c.userData.px, rd = Math.max(0, age - 0.7), cyc = (rd % 1.6) / 1.6, line = Math.floor(cyc * 4), along = (cyc * 4) % 1;
+        ['l0', 'l1', 'l2', 'l3'].forEach((ln, j) => layerK(c, ln, rd > 0 && j === line ? 1.9 : j < line && rd > 0 ? 1.15 : 1.0));
+        if (P.pupil) P.pupil.position.copy(P.pupil.userData.p0).add(new THREE.Vector3(rd > 0 ? px * (-1.2 + 2.4 * along) : 0, rd > 0 ? px * (0.6 - 0.4 * line) : 0, 0));
+        const blink = rd > 0 && ((rd + 1.0) % 3.1) > 3.0;
+        if (P.eye) P.eye.scale.y = blink ? 0.25 : 1; if (P.pupil) P.pupil.visible = !blink;
+        return;
+      }
+      if (kind === 'raArrow') {
+        const age = t - (S.approve - 0.25); c.visible = age >= 0; if (!c.visible) return;
+        set({ draw: Math.min(1, age / 0.3), k: K0 * 0.85, t }); return;
+      }
+      if (kind === 'approve' || kind === 'burst') {
+        const age = t - S.approve; c.visible = age >= 0; if (!c.visible) { c.scale.setScalar(1); return; }
+        const RING = 0.4, TICK = 0.28, f = c.userData.ringF ?? 0.8, landT = RING + TICK;
+        if (kind === 'burst') {                                                            // the pop round the stamp
+          const a = age - landT; c.visible = a >= 0 && a < 0.42; if (!c.visible) return;
+          c.scale.setScalar(0.9 + 0.5 * sm(a / 0.42)); set({ draw: 1, k: K0 * 0.9 * (1 - sm(a / 0.42)), flick: sm(a / 0.42) * 0.7, t }); return;
+        }
+        const draw = age < RING ? f * age / RING : f + (1 - f) * Math.min(1, (age - RING) / TICK);
+        const a = age - landT, punch = a >= 0 ? 1 + 0.16 * Math.exp(-a * 9) * Math.cos(a * 22) : 1;   // the stamp lands
+        c.scale.setScalar(punch);
+        set({ draw, k: K0 * (1 + (a >= 0 ? 0.9 * Math.exp(-a * 6) : 0.25)), t, hot: 1.6 });
+        layerK(c, 'tick', 1.15);
+        return;
+      }
     });
-    pipe.userData.light.position.copy(pipe.position); pipe.userData.light.intensity = s.pipe.light ?? 0.3;
-    const pk = s.pipe.bright ?? 1;                                                    // the offer can outshine the dimmed room (HDR: the film bloom picks it up)
-    pipe.traverse((o) => { if (o.isMesh && o.material.uniforms && o.material.uniforms.uColor) o.material.uniforms.uColor.value.setScalar(pk); });
+    pipe.userData.light.position.copy(pipe.position); pipe.userData.light.intensity = S.light ?? 0.3;
   }
 
   if (note) note.visible = !!s.note;
@@ -1187,7 +1261,6 @@ function gazePoint(g, t, ctx) {
   }
   if (Array.isArray(g)) return B(...g);
   if (g === 'phone' && phone && phone.visible) return phone.getWorldPosition(new THREE.Vector3());
-  if (g === 'claude' && spark && spark.group.visible) return spark.group.getWorldPosition(new THREE.Vector3());
   if (g === 'claude' && claude && claude.group.visible) return claude.group.getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(0, 0.04, 0));
   if (g === 'cam' && ctx.camera) return ctx.camera.position.clone();
   if (g === 'monitor') return B(1.58, 4.46, 1.0);
