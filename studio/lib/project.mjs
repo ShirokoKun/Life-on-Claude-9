@@ -61,16 +61,51 @@ const NOTE_RE = /^- \[( |x)\] \*\*(\S+) @ ([\d.]+) s\*\* (.*?)(?: _\(([^)]*)\)_)
 export function readNotes(ROOT, scene) {
   const f = path.join(ROOT, scene.folder, 'NOTES.md');
   if (!fs.existsSync(f)) return [];
-  return fs.readFileSync(f, 'utf8').split('\n').map((l, i) => {
-    const m = NOTE_RE.exec(l); return m && { line: i, done: m[1] === 'x', shot: m[2], t: +m[3], text: m[4], when: m[5] || '' };
-  }).filter(Boolean);
+  const out = [];
+  fs.readFileSync(f, 'utf8').split('\n').forEach((l, i) => {
+    const m = NOTE_RE.exec(l);
+    if (m) { out.push({ line: i, done: m[1] === 'x', shot: m[2], t: +m[3], text: m[4], when: m[5] || '', refs: [] }); return; }
+    const r = REF_RE.exec(l), n = out[out.length - 1];              // a reference image listed right under the note above
+    if (r && n && n.line + n.refs.length + 1 === i) n.refs.push(path.posix.join(scene.folder, r[1]));
+  });
+  return out;
 }
-export function addNote(ROOT, scene, { shot, t, text }) {
+// Reference images for a note: saved per keyframe in <scene folder>/refs/<shot>/, listed as indented lines right under
+// the note ("  - ref: ![K12 ref 1](refs/K12/2026-10-16_104312_window.png)"), so NOTES.md shows them and Claude opens them.
+const REF_RE = /^\s+- ref: !\[[^\]]*\]\(([^)]+)\)\s*$/;
+const IMG_EXT = { 'image/png': '.png', 'image/jpeg': '.jpg', 'image/webp': '.webp', 'image/gif': '.gif' };
+export function saveRef(ROOT, scene, { shot, name, type, data }) {
+  const ext = IMG_EXT[type] || ((/\.(png|jpe?g|webp|gif)$/i.exec(name || '') || [])[0] || '').toLowerCase();
+  if (!ext) throw new Error('reference images must be PNG, JPEG, WebP or GIF');
+  const sh = String(shot || 'misc').replace(/[^\w.-]/g, '_');
+  const dir = path.join(ROOT, scene.folder, 'refs', sh);
+  fs.mkdirSync(dir, { recursive: true });
+  const stamp = new Date().toISOString().slice(0, 19).replace('T', '_').replace(/[-:]/g, '');
+  const base = String(name || 'ref').replace(/\.[^.]+$/, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'ref';
+  let file = `${stamp}_${base}${ext}`, k = 2;
+  while (fs.existsSync(path.join(dir, file))) file = `${stamp}_${base}-${k++}${ext}`;
+  fs.writeFileSync(path.join(dir, file), data);
+  return `refs/${sh}/${file}`;                                // relative to the scene folder, as written in NOTES.md
+}
+const refLine = (shot, rel, i) => `  - ref: ![${shot} ref ${i}](${rel})`;
+export function addNote(ROOT, scene, { shot, t, text, refs = [] }) {
   const f = path.join(ROOT, scene.folder, 'NOTES.md');
   fs.mkdirSync(path.dirname(f), { recursive: true });
   if (!fs.existsSync(f)) fs.writeFileSync(f, `# Notes: scene ${scene.number}, ${scene.title}\n\nLeft in the Studio while watching. Claude works through the open ones; tick a box when it's fixed.\n\n`);
   const when = new Date().toISOString().slice(0, 16).replace('T', ' ');
-  fs.appendFileSync(f, `- [ ] **${shot || '-'} @ ${(+t).toFixed(1)} s** ${String(text).replace(/\s+/g, ' ').trim()} _(${when})_\n`);
+  const body = String(text || '').replace(/\s+/g, ' ').trim() || '(see the reference images)';
+  let txt = fs.readFileSync(f, 'utf8'); if (txt && !txt.endsWith('\n')) txt += '\n';
+  txt += `- [ ] **${shot || '-'} @ ${(+t).toFixed(1)} s** ${body} _(${when})_\n` + refs.map((r, i) => refLine(shot || '-', r, i + 1) + '\n').join('');
+  fs.writeFileSync(f, txt);
+}
+// more reference images for a note already written (found by its line), listed after the ones it has
+export function addRefs(ROOT, scene, line, refs) {
+  const f = path.join(ROOT, scene.folder, 'NOTES.md');
+  const lines = fs.readFileSync(f, 'utf8').split('\n');
+  const m = NOTE_RE.exec(lines[line] || ''); if (!m) throw new Error('no note on that line');
+  let at = line + 1; while (REF_RE.test(lines[at] || '')) at++;
+  lines.splice(at, 0, ...refs.map((r, i) => refLine(m[2], r, at - line + i)));
+  fs.writeFileSync(f, lines.join('\n'));
 }
 export function toggleNote(ROOT, scene, line, done) {
   const f = path.join(ROOT, scene.folder, 'NOTES.md');

@@ -46,12 +46,16 @@ const sh = (cmd, args, opts = {}) => new Promise((res) => execFile(cmd, args, { 
   (err, stdout, stderr) => res({ ok: !err, out: String(stdout).trimEnd(), err: String(stderr || (err && err.message) || '').trim() })));
 const git = (...a) => sh('git', a);
 const inside = (rel) => { const p = path.resolve(ROOT, rel); if (p !== ROOT && !p.startsWith(ROOT + path.sep)) throw new Error('outside the project'); return p; };
+// raw bytes (a reference image), capped
+const readRaw = (req, max) => new Promise((res, rej) => { const parts = []; let n = 0;
+  req.on('data', (c) => { n += c.length; if (n > max) { rej(new Error(`too large (over ${Math.round(max / 1e6)} MB)`)); req.destroy(); } else parts.push(c); });
+  req.on('end', () => res(Buffer.concat(parts))); req.on('error', rej); });
 const readBody = (req) => new Promise((res, rej) => { let b = ''; req.on('data', (c) => { b += c; if (b.length > 1e6) req.destroy(); }); req.on('end', () => { try { res(b ? JSON.parse(b) : {}); } catch (e) { rej(e); } }); });
 const project = () => P.loadProject(ROOT);
 const sceneById = (id) => { const s = project().scenes.find((x) => x.id === id); if (!s) throw new Error('no scene ' + id); return s; };
 
 const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.mjs': 'text/javascript', '.css': 'text/css', '.json': 'application/json',
-  '.glb': 'model/gltf-binary', '.exr': 'application/octet-stream', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp',
+  '.glb': 'model/gltf-binary', '.exr': 'application/octet-stream', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp', '.gif': 'image/gif',
   '.svg': 'image/svg+xml', '.wav': 'audio/wav', '.mp3': 'audio/mpeg', '.mp4': 'video/mp4', '.md': 'text/plain; charset=utf-8', '.py': 'text/plain; charset=utf-8',
   '.txt': 'text/plain; charset=utf-8', '.log': 'text/plain; charset=utf-8', '.sh': 'text/plain; charset=utf-8', '.zip': 'application/zip' };
 
@@ -334,6 +338,7 @@ const routes = {
   'GET /api/activity': async () => activity,
   'POST /api/follow/check': async () => { await follow(true); return { ok: true }; },
   'POST /api/notes': async (b) => { P.addNote(ROOT, sceneById(b.scene), b); return P.readNotes(ROOT, sceneById(b.scene)); },
+  'POST /api/notes/refs': async (b) => { P.addRefs(ROOT, sceneById(b.scene), b.line, b.refs || []); return P.readNotes(ROOT, sceneById(b.scene)); },   // more reference images on a note
   'POST /api/notes/toggle': async (b) => { P.toggleNote(ROOT, sceneById(b.scene), b.line, b.done); return P.readNotes(ROOT, sceneById(b.scene)); },
   'POST /api/scenes': async (b) => P.createScene(ROOT, P.loadProject(ROOT), b),
   'POST /api/scenes/update': async (b) => {
@@ -355,6 +360,10 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(200, { 'Content-Type': 'text/event-stream', 'Cache-Control': 'no-cache', Connection: 'keep-alive' });
       res.write(`event: hello\ndata: ${JSON.stringify({ at: Date.now() })}\n\n`);
       clients.add(res); req.on('close', () => clients.delete(res)); return;
+    }
+    if (req.method === 'POST' && u.pathname === '/api/refs/upload') {   // a note's reference image (raw bytes): saved per keyframe, path back
+      const q = u.searchParams, data = await readRaw(req, 40e6);
+      return json(res, { path: P.saveRef(ROOT, sceneById(q.get('scene')), { shot: q.get('shot'), name: q.get('name'), type: req.headers['content-type'], data }) });
     }
     const h = routes[`${req.method} ${u.pathname}`];
     if (h) return json(res, await h(req.method === 'POST' ? await readBody(req) : {}, u.searchParams));

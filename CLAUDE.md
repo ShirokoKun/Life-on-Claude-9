@@ -9,6 +9,8 @@ An animated short rendered in a three.js engine (`engine/`), with light baked an
    - If the human points to an unzipped pack, install it for them: `into-repo/` into this repo; `into-workspace/` two folders up; `claude-memory/*.md` into this project's `~/.claude/projects/<folder>/memory/`. The fonts they install themselves in Font Book.
    - Rerun the check until everything says `ok`.
 1. Read the open notes in `scenes/*/NOTES.md`: lines `- [ ] **<shot> @ <t> s** <text>`. The human left them in the Studio's player at that exact moment.
+   - A note can carry **reference images**, listed on the indented lines right under it: `  - ref: ![K12 ref 1](refs/K12/<file>)` (the path is relative to the scene folder; every keyframe's images are in `<scene folder>/refs/<shot>/`).
+   - Open every reference image (Read tool) before working on its note, match it closely (style, texture, colour, light, pose), and check the result against it side by side before ticking the note.
 2. Fix them, then tick them: `- [x]`.
 3. `project.json` lists the scenes. A scene is `engine/scenes/<id>/scene.js` (the intro is `engine/src/shots.js`) plus `scenes/<nn-name>/`.
 

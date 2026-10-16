@@ -31,6 +31,26 @@ const ago = (ms) => { const s = (Date.now() - ms) / 1000; return s < 60 ? 'just 
 const clock = (ms) => new Date(ms).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 const size = (b) => b > 1e9 ? (b / 1e9).toFixed(1) + ' GB' : b > 1e6 ? (b / 1e6).toFixed(1) + ' MB' : b > 1e3 ? Math.round(b / 1e3) + ' kB' : b + ' B';
 const fileURL = (p) => '/files/' + p.split('/').map(encodeURIComponent).join('/');
+// reference images for notes: sent one by one as raw bytes, saved per keyframe in <scene>/refs/<shot>/ (NOTES.md lists them)
+const REF_TYPES = /^image\/(png|jpeg|webp|gif)$/;
+const imagesIn = (list) => [...(list || [])].map((x) => (x.kind === 'file' ? x.getAsFile() : x)).filter((f) => f && REF_TYPES.test(f.type));
+async function uploadRefs(sceneId, shot, files) {
+  const out = [];
+  for (const f of files) {
+    const q = new URLSearchParams({ scene: sceneId, shot: shot || '-', name: f.name || 'pasted.png' });
+    const r = await fetch(`/api/refs/upload?${q}`, { method: 'POST', headers: { 'Content-Type': f.type }, body: f });
+    const d = await r.json(); if (d.error) throw new Error(d.error); out.push(d.path);
+  }
+  return out;
+}
+const refThumbs = (paths, label) => h('div.refs', {}, paths.map((p) => h('a', { href: fileURL(p), target: '_blank', rel: 'noopener', title: p },
+  h('img', { src: fileURL(p), loading: 'lazy', alt: label || 'reference image' }))));
+// a drop zone: images dropped on el go to fn
+function dropImages(el, fn) {
+  el.addEventListener('dragover', (e) => { if ([...e.dataTransfer.items].some((i) => i.kind === 'file')) { e.preventDefault(); el.classList.add('dropping'); } });
+  el.addEventListener('dragleave', () => el.classList.remove('dropping'));
+  el.addEventListener('drop', (e) => { el.classList.remove('dropping'); const f = imagesIn(e.dataTransfer.files); if (f.length) { e.preventDefault(); fn(f); } });
+}
 let toastT;
 function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 4200); }
 const run = (fn) => async (...a) => { try { await fn(...a); } catch (e) { toast(e.message); } };
@@ -202,7 +222,7 @@ function hideEngine() {
 }
 
 function Player(s, body) {
-  let frame = engineFor(s.id);
+  let frame = engineFor(s.id), noteBox, lastShot = null;
   const screen = h('div.screen');
   const tcEl = h('span.tc', {}, '00:00:00'); const shotEl = h('div.shotInfo'); const loadEl = h('span.faint.mono', { style: { fontSize: '12px' } });
   const head = h('div.playhead'); const track = h('div.track');
@@ -229,10 +249,21 @@ function Player(s, body) {
       try { localStorage.setItem('previewQuality', previewQ); } catch { /* not remembered */ }
       frame = engineFor(s.id); engine.key = key; seekWhenReady(t);
     } }, PREVIEW_Q.map(([v, l]) => h('option', { value: v, selected: v === previewQ }, `Preview: ${l}`)));
-  const noteText = h('textarea', { placeholder: 'What should change here? e.g. "his right hand goes through his cheek"' });
+  const noteText = h('textarea', { placeholder: 'What should change here? e.g. "his right hand goes through his cheek". Paste or drop reference images too.' });
+  // reference images waiting to go with the note (paste, drop, or the button); they upload when the note is saved
+  const pending = [];
+  const pendEl = h('div.refs.pending');
+  const drawPending = () => pendEl.replaceChildren(...pending.map((p, i) => h('div.refThumb', {}, h('img', { src: p.url, alt: 'reference to attach' }),
+    h('button', { title: 'Remove', 'aria-label': 'Remove this image', onclick: () => { URL.revokeObjectURL(p.url); pending.splice(i, 1); drawPending(); } }, '×'))));
+  const addPending = (files) => { for (const f of files) pending.push({ file: f, url: URL.createObjectURL(f) }); drawPending(); };
+  const picker = h('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp,image/gif', multiple: true, hidden: true, onchange: (e) => { addPending(imagesIn(e.target.files)); e.target.value = ''; } });
+  noteText.addEventListener('paste', (e) => { const f = imagesIn(e.clipboardData?.items); if (f.length) { e.preventDefault(); addPending(f); } });
   const addNote = run(async () => {
-    const st = E()?.state(); if (!noteText.value.trim() || !st) return;
-    s.notes = await api('/api/notes', { scene: s.id, t: st.t, shot: st.shot, text: noteText.value }); noteText.value = ''; drawNotes(); toast(`Note saved to ${s.folder}/NOTES.md`);
+    const st = E()?.state(); if ((!noteText.value.trim() && !pending.length) || !st) return;
+    const refs = await uploadRefs(s.id, st.shot, pending.map((p) => p.file));
+    s.notes = await api('/api/notes', { scene: s.id, t: st.t, shot: st.shot, text: noteText.value, refs });
+    noteText.value = ''; pending.forEach((p) => URL.revokeObjectURL(p.url)); pending.length = 0; drawPending(); drawNotes(); lastShot = null;
+    toast(`Note saved to ${s.folder}/NOTES.md${refs.length ? ` with ${refs.length} reference image${refs.length > 1 ? 's' : ''} (refs/${st.shot}/)` : ''}`);
   });
   body.replaceChildren(h('div.playerWrap', {},
     h('div', {}, screen,
@@ -243,8 +274,10 @@ function Player(s, body) {
         h('button.btn.ghost', { onclick: () => frame.requestFullscreen?.() }, 'Fullscreen')),
       tl, h('div.ruler', {}, ...Array.from({ length: 7 }, (_, i) => h('span', {}, fmtT((s.duration * i) / 6)))),
       h('p.faint.row', { style: { fontSize: '12px' } }, h('span.grow', {}, h('span.kbd', {}, 'Space'), ' play · ', h('span.kbd', {}, '←'), h('span.kbd', {}, '→'), ' frame · ', h('span.kbd', {}, '['), h('span.kbd', {}, ']'), ' shot · ', h('span.kbd', {}, 'N'), ' note'), loadEl)),
-    h('div.card.shotInfo', {}, shotEl, h('div.noteBox', {}, h('h3', {}, 'Note at this moment'), noteText,
-      h('div.row', {}, h('button.btn.primary', { onclick: addNote }, 'Save note'), h('span.faint', { style: { fontSize: '12px' } }, 'Claude reads these from NOTES.md'))))));
+    h('div.card.shotInfo', {}, shotEl, noteBox = h('div.noteBox', {}, h('h3', {}, 'Note at this moment'), noteText, pendEl,
+      h('div.row', {}, h('button.btn.primary', { onclick: addNote }, 'Save note'), h('button.btn', { onclick: () => picker.click(), title: 'Attach reference images to this note (or paste / drop them here)' }, '＋ Reference image'), picker,
+        h('span.faint', { style: { fontSize: '12px' } }, 'Claude reads these from NOTES.md'))))));
+  dropImages(noteBox, addPending);
   // the iframe lives outside the page (so it survives navigation) and is laid over the screen box every frame
   const place = () => {
     const r = screen.getBoundingClientRect(), m = main.getBoundingClientRect();
@@ -252,7 +285,7 @@ function Player(s, body) {
     Object.assign(frame.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px',
       clipPath: `inset(${clip.map((v) => v + 'px').join(' ')} round 8px)`, visibility: 'visible' });
   };
-  let lastShot = null, raf;
+  let raf;
   const tick = () => {
     if (!document.fullscreenElement) place();
     const st = E()?.state?.();
@@ -267,7 +300,8 @@ function Player(s, body) {
           const vo = s.captions.filter(([a, b]) => a < x.t1 && b > x.t0).map((c) => c[2]).join(' ');
           shotEl.replaceChildren(h('div.eyebrow', {}, `Shot ${x.id} · ${fmtT(x.t0)}–${fmtT(x.t1)}`), h('h2', {}, x.name),
             h('div.lens', {}, x.dolly ? `dolly zoom · f/${x.f}` : `${x.mm[0]}${x.mm[1] !== x.mm[0] ? '→' + x.mm[1] : ''} mm · f/${x.f}`),
-            vo ? h('p.vo', {}, vo) : null, h('p.muted', { style: { margin: 0 } }, x.why));
+            vo ? h('p.vo', {}, vo) : null, h('p.muted', { style: { margin: 0 } }, x.why),
+            ...(() => { const r = s.notes.filter((n) => n.shot === x.id).flatMap((n) => n.refs || []); return r.length ? [h('div.eyebrow', { style: { marginTop: '10px' } }, `References for ${x.id} · ${r.length}`), refThumbs(r, `${x.id} reference`)] : []; })());
         }
       }
     } else { tcEl.textContent = `loading… ${Math.floor((performance.now() - engine.started) / 1000)} s`; loadEl.textContent = ''; }
@@ -313,12 +347,19 @@ function Board(s, body) {
 }
 
 function Notes(s, body) {
-  const draw = () => body.replaceChildren(h('div', { style: { marginTop: '18px' } },
+  // more reference images on a note: the button, or drop images on the note's row
+  const attach = run(async (n, files) => { if (!files.length) return; const refs = await uploadRefs(s.id, n.shot, files); s.notes = await api('/api/notes/refs', { scene: s.id, line: n.line, refs }); draw(); toast(`${refs.length} reference image${refs.length > 1 ? 's' : ''} added to ${n.shot}`); });
+  const refButton = (n) => { const inp = h('input', { type: 'file', accept: 'image/png,image/jpeg,image/webp,image/gif', multiple: true, hidden: true, onchange: (e) => { attach(n, imagesIn(e.target.files)); e.target.value = ''; } });
+    return h('span', {}, inp, h('button.btn.small', { title: 'Add reference images to this note (or drop them on the row)', onclick: () => inp.click() }, '＋ Image')); };
+  const draw0 = () => body.replaceChildren(h('div', { style: { marginTop: '18px' } },
     s.notes.length ? h('div.list', {}, s.notes.slice().reverse().map((n) => h('div', {},
       h('input', { type: 'checkbox', checked: n.done, 'aria-label': 'Done', onchange: run(async (e) => { s.notes = await api('/api/notes/toggle', { scene: s.id, line: n.line, done: e.target.checked }); draw(); }) }),
-      h('div.main', {}, h('div', { style: n.done ? { textDecoration: 'line-through', color: 'var(--faint)' } : {} }, n.text), h('div.meta', {}, `shot ${n.shot} · ${n.t} s · ${n.when}`)),
+      h('div.main', {}, h('div', { style: n.done ? { textDecoration: 'line-through', color: 'var(--faint)' } : {} }, n.text), h('div.meta', {}, `shot ${n.shot} · ${n.t} s · ${n.when}`),
+        n.refs?.length ? refThumbs(n.refs, `${n.shot} reference`) : null),
+      refButton(n),
       h('a.btn.small', { href: `#/scene/${s.id}/player`, onclick: () => setTimeout(() => $('iframe')?.contentWindow?.studio?.seek(n.t), 2500) }, 'Watch'))))
       : h('div.empty', {}, 'No notes yet. Leave them in the Player while you watch; they land in ', h('code', {}, `${s.folder}/NOTES.md`), ' where Claude picks them up.')));
+  const draw = () => { draw0(); const rows = body.querySelectorAll('.list > div'), ns = s.notes.slice().reverse(); rows.forEach((el, k) => ns[k] && dropImages(el, (f) => attach(ns[k], f))); };
   draw(); view.onProject = () => { const n = S.project.scenes.find((x) => x.id === s.id); if (n) { s = n; draw(); } };
 }
 
