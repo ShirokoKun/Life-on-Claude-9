@@ -3,6 +3,7 @@
 // Writes renders/<scene>/<take>/<id>.png and renders/<scene>/<take>/board.jpg (id, beat, VO time on each frame).
 // A shot's frame is taken at its middle (held frames: any time inside the shot is the same picture).
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import { spawnSync } from 'child_process';
 import { fileURLToPath } from 'url';
@@ -55,7 +56,7 @@ rows = json.load(open(sys.argv[1], encoding='utf8')); out = sys.argv[2]; d = sys
 w, h = 640, 360; lab = 44; cols = 4
 n = len(rows); R = (n + cols - 1) // cols
 sheet = Image.new('RGB', (w * cols, (h + lab) * R), (14, 14, 16))
-try: font = ImageFont.truetype('C:/Windows/Fonts/segoeui.ttf', 17); small = ImageFont.truetype('C:/Windows/Fonts/segoeui.ttf', 14)
+try: font = ImageFont.truetype(__import__('os').path.expanduser('~/Library/Fonts/segoeui.ttf') if __import__('sys').platform == 'darwin' else 'C:/Windows/Fonts/segoeui.ttf', 17); small = ImageFont.truetype(__import__('os').path.expanduser('~/Library/Fonts/segoeui.ttf') if __import__('sys').platform == 'darwin' else 'C:/Windows/Fonts/segoeui.ttf', 14)
 except Exception: font = small = ImageFont.load_default()
 dr = ImageDraw.Draw(sheet)
 for i, r in enumerate(rows):
@@ -68,7 +69,7 @@ sheet.save(out, quality=88)
 `;
 const pyFile = path.join(out, '_sheet.py');
 fs.writeFileSync(pyFile, py);
-const r = spawnSync('python', ['-I', pyFile, path.join(out, 'frames.json'), path.join(out, 'board.jpg'), out], { encoding: 'utf8' });
+const r = spawnSync(process.env.KF_PYTHON || (process.platform === 'win32' ? 'python' : fs.existsSync(path.join(os.homedir(), '.local/py/bin/python3')) ? path.join(os.homedir(), '.local/py/bin/python3') : 'python3'), ['-I', pyFile, path.join(out, 'frames.json'), path.join(out, 'board.jpg'), out], { encoding: 'utf8' });
 fs.rmSync(pyFile);
 if (r.status) console.log(r.stderr); else console.log('wrote', path.relative(ROOT, path.join(out, 'board.jpg')));
 if (errors.length) console.log(`${errors.length} page errors`);

@@ -33,7 +33,7 @@ export function createAtmosphere({ lamp, lampTarget, screen, count = 2200, cente
       lampPos: { value: lamp.clone() }, lampDir: { value: lampTarget.clone().sub(lamp).normalize() },
       screenPos: { value: screen.clone() }, gain: { value: 1.0 },
       orbPos: { value: new THREE.Vector3() }, orbCol: { value: new THREE.Color() }, orbK: { value: 0 } },   // a glowing thing the dust catches (kf1's Claude; 0 = off)
-    vertexShader: `attribute vec4 seed; uniform float time, cocK, focus, px, orbK; uniform vec3 lampPos, lampDir, screenPos, orbPos, orbCol;
+    vertexShader: `attribute vec4 seed; uniform float time, cocK, focus, px, orbK; uniform vec3 lampPos, lampDir, screenPos, orbPos, orbCol; uniform vec2 res;   // res: declared here too (round 11 used it undeclared, so the dust never compiled)
       varying float vI; varying float vSoft; varying float vDepth; varying vec3 vCol;
       void main() {
         vec3 p = position;

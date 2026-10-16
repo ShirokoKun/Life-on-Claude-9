@@ -120,16 +120,20 @@ export const SHOTS = [
   { id: 'K15', name: 'The offer', t0: 55.3, t1: 60.0, mm: [28, 28], f: 2.8,
     from: [1.28, 3.30, 1.42], to: [1.339, 3.311, 1.42], at0: [1.05, 4.55, 1.28], at1: [1.109, 4.561, 1.28], focus: [1.05, 4.50, 1.30], roll: [0, 0],
     lookK: [[55.3, 6, 12], [59.6, 8, -12]], dimIn: [1.0, 1.0], gaze: [[55.3, [0.70, 4.50, 1.30]], [59.5, [1.40, 4.50, 1.30]]], light: 'day', iv: ['s04', 24.9], s4: 19.5, glass: false, dim: 0.16, ev: -1.7, hide: ['Baked_DESK_8', 'Baked_DESK_9'], pipe: { born: [56.2, 57.0, 58.1, 59.2], state: 'offer', bright: 2.4, light: 0.08 }, beat: 'V10 b', board: 'r1c9 (MOTION GRAPHICS)', tr: 'the room dims (not to a void: about a sixth of its light) as the offer builds module by module in the air; the dim carries on into K18 and the V13 void',
-    cl: { at: [0.42, 4.30, 1.08], face: [1.28, 3.30, 1.42], s: 1.5, pose: 'present', glow: 2.2, lightK: 0.25, form: 'spark', evo: 0.3 },
-    why: 'V10 CLAUDE “I can write a script that sorts your inbox and drafts the replies for you.” The afternoon room dims and the offer assembles above the desk as pixel objects: inbox, sort, draft, you. Claude presents it like a salesman; Ivan reads it from his chair.' },
-  { id: 'K16', name: 'Want me to build one?', t0: 60.0, t1: 64.11, mm: [60, 60], f: 5.6,
-    from: [0.72, 4.06, 1.00], to: [0.745, 4.029, 1.0], at0: [1.02, 4.30, 0.80], at1: [1.045, 4.269, 0.8], focus: [1.00, 4.28, 0.80], mv: [60.0, 64.05], roll: [0, 0],
-    light: 'day', dim: 0.16, ev: -1.0, iv: ['s04', 25.95, 29.8], s4: 25.95, glass: false, beat: 'V10 c', board: 'r1c9', tr: 'cut: down to the keys',
-    why: 'V10 CLAUDE “You just review and approve. Want me to build one?” The first yes, in daylight: his fingers on y-e-s.' },
-  { id: 'K17', name: 'Review and approve', t0: 64.11, t1: 68.5, mm: [50, 50], f: 2.0,
-    from: [1.13, 4.86, 0.93], to: [1.129, 4.846, 0.931], at0: [1.10, 4.40, 0.97], at1: [1.1, 4.4, 0.97], focus: NOTE, roll: [0, 0],
-    evTo: [-7, 68.1, 0.4], light: '3am', iv: ['s04', 28.5], scr: 36.5, note: true, ev: 0.4, beat: 'V11 *', board: 'r1c9', tr: 'smash cut to 3 AM on the sub drop (64.11)',
-    why: 'V11 “That was the plan. Review and approve.” The sticky note on the back of the laptop, his blue face above it, not looking.' },
+    // round 14: no Claude in this keyframe (director: the offer alone, on camera)
+    why: 'V10 CLAUDE “I can write a script that sorts your inbox and drafts the replies for you.” The afternoon room dims and the offer assembles above the desk as white outline pixel icons: inbox, sort, draft, you. Ivan reads it from his chair.' },
+  // round 14 (B1): K15, K16 and K17 are ONE composition, no cuts. K16 holds K15's frame: the four offer icons flicker
+  // off and REVIEW and APPROVE come on in the same place; K17 zooms in on them (flow F5)
+  { id: 'K16', name: 'You just review and approve', t0: 60.0, t1: 64.11, mm: [28, 28], f: 2.8,
+    from: [1.339, 3.311, 1.42], to: [1.339, 3.311, 1.42], at0: [1.109, 4.561, 1.28], at1: [1.109, 4.561, 1.28], focus: [1.05, 4.50, 1.30], roll: [0, 0],
+    lookK: [[60.0, 8, -12], [64.11, 8, -4]], gaze: [[60.0, [1.40, 4.50, 1.30]], [61.2, [1.05, 4.50, 1.30]]], light: 'day', iv: ['s04', 24.9], s4: 23.5, glass: false, dim: 0.16, ev: -1.7, hide: ['Baked_DESK_8', 'Baked_DESK_9'],
+    pipe: { born: [56.2, 57.0, 58.1, 59.2], state: 'review', off: [60.0, 60.45], review: 60.55, approve: 61.35, bright: 2.4, light: 0.08 }, beat: 'V10 c', board: 'r1c9', tr: 'no cut: the same frame, the offer flickers off and review + approve come on',
+    why: 'V10 CLAUDE “You just review and approve. Want me to build one?” The same frame as K15: the four offer icons flicker out, and in their place REVIEW (a page looked over) and APPROVE (a tick stamped on it) light up as he reads.' },
+  { id: 'K17', name: 'Review and approve', t0: 64.11, t1: 68.5, mm: [28, 46], f: 2.8,
+    from: [1.339, 3.311, 1.42], to: [1.30, 3.47, 1.41], at0: [1.109, 4.561, 1.28], at1: [1.05, 4.50, 1.30], focus: [1.05, 4.50, 1.30], mv: [64.11, 68.5], roll: [0, 0],   // a zoom (28 -> 46 mm) with a little push; the lens stays clear of his head
+    lookK: [[64.11, 8, -4]], gaze: [1.05, 4.50, 1.30], light: 'day', iv: ['s04', 24.9], s4: 27.6, glass: false, dim: 0.16, ev: -1.7, hide: ['Baked_DESK_8', 'Baked_DESK_9'],
+    pipe: { born: [56.2, 57.0, 58.1, 59.2], state: 'review', off: [60.0, 60.45], review: 60.55, approve: 61.35, bright: 2.4, light: 0.08 }, beat: 'V11 *', board: 'r1c9', tr: 'no cut: a slow zoom in to the review and approve icons',
+    why: 'V11 “That was the plan. Review and approve.” Still the K15 frame, now closing in on the two icons over his head: that was all he was meant to do.' },
 
   { id: 'K18', name: 'Once the email system was working', t0: 68.5, t1: 71.2, mm: [40, 40], f: 2.8,
     from: [1.04, 4.98, 1.14], to: [1.04, 4.951, 1.138], at0: [1.04, 4.00, 1.06], at1: [1.04, 4.0, 1.06], focus: [1.04, 4.56, 1.01], roll: [0, 0],
@@ -145,9 +149,9 @@ export const SHOTS = [
     why: 'V12 “...what else was possible.” Both eyes through the glasses, close.' },
   { id: 'K21a', name: 'Calendar management', t0: 74.1, t1: 75.9, mm: [28, 28], f: 4.0,
     from: ISO_CAM, to: ISO_CAM, at0: ISO_AT, at1: ISO_AT, focus: [1.10, 4.10, 1.00], flow: 'F2', roll: [0, 0],
-    dimIn: [1.0, 1.7], iconsBorn: [74.35, 76.09, 77.83, 79.80], light: '4am_iso', iv: ['s03', 0.6, 2.4], scr: 76.0, icons: 1, beat: 'V13a', board: 'r2c5 (B r3c1; render ref Group 9)', tr: 'the room fades to black around the desk',
+    iconsBorn: [74.35, 76.09, 77.83, 79.80], light: '3am', zone: 'iso', iv: ['s03', 0.6, 2.4], scr: 76.0, icons: 1, beat: 'V13a', board: 'r2c5 (B r3c1; render ref Group 9)', tr: 'round 14: cut straight into the void (the room is gone from the first frame)',
     cl: { at: [0.62, 4.62, 1.38], face: ISO_CAM, s: 1.2, pose: 'cheer', born: 74.2 },
-    why: 'V13a “Calendar management.” (ping 74.35) High, from behind his right shoulder: the room is going dark around the desk, and the first module lights in the air above it.' },
+    why: 'V13a “Calendar management.” (ping 74.35) High, from behind his right shoulder: Ivan at his desk in a full void, and the first small white outline icon lights in the air above it.' },
   { id: 'K21b', name: 'Meeting scheduling', t0: 75.9, t1: 77.65, mm: [28, 28], f: 4.0,
     from: ISO_CAM, to: ISO_CAM, at0: ISO_AT, at1: ISO_AT, focus: [1.10, 4.10, 1.00], flow: 'F2', roll: [0, 0],
     iconsBorn: [74.35, 76.09, 77.83, 79.80], light: '3am', zone: 'iso', iv: ['s03', 2.4, 4.15], scr: 77.0, icons: 2, beat: 'V13b', board: 'r2c5', tr: 'the same frame: the room is gone',
@@ -163,10 +167,11 @@ export const SHOTS = [
     iconsBorn: [74.35, 76.09, 77.83, 79.80], light: '3am', zone: 'iso', iv: ['s03', 6.1, 8.3], scr: 80.5, icons: 4, beat: 'V13d', board: 'r2c5', tr: 'the same frame',
     cl: { at: [2.10, 4.40, 1.30], face: ISO_CAM, s: 1.2, pose: 'cheer', path: [[79.55, [1.66, 4.66, 1.48]], [80.05, [2.10, 4.40, 1.30]]], exit: 81.5 },
     why: 'V13d “Research summaries.” (ping 79.80) Four modules glowing over a desk floating in black.' },
-  { id: 'K22', name: 'A few hours of coding', t0: 81.8, t1: 85.2, mm: [28, 28], f: 4.0,
-    from: ISO_CAM, to: [2.45, 2.7, 2.3], at0: ISO_AT, at1: [1.18, 4.3, 1.02], focus: [1.10, 4.10, 1.00], roll: [0, 0],
-    ghostTicks: [82.07, 82.62, 83.72], light: '3am', zone: 'iso', iv: ['s03', 8.3, 11.7], ghosts: [['s04', 5.1, 8.5], ['s04', 10.4, 12.8]], scr: 82, icons: 4, iconsIdle: true, beat: 'V14a', board: 'r2c5', tr: 'the same frame: time-skip tick (82.07)',
-    why: 'V14a “Each one a few hours of coding.” The same void frame, hours stacked: three see-through Ivans at once, typing, slumped back, upright.' },
+  // round 14: no ghost Ivans; he types (the s03 typing take), close on his hands and the keys, still in the void
+  { id: 'K22', name: 'A few hours of coding', t0: 81.8, t1: 85.2, mm: [32, 32], f: 2.8,
+    from: [1.46, 3.94, 1.20], to: [1.43, 3.99, 1.17], at0: [1.05, 4.40, 0.88], at1: [1.05, 4.40, 0.88], focus: [1.05, 4.38, 0.87], roll: [0, 0],
+    light: '3am', zone: 'iso', iv: ['s03', 0.4, 5.6], scr: 82, icons: 4, iconsIdle: true, iconsBorn: [74.35, 76.09, 77.83, 79.80], beat: 'V14a', board: 'r2c5', tr: 'cut in: over his right shoulder onto his hands, the same void',
+    why: 'V14a “Each one a few hours of coding.” Over his shoulder in the void: his hands typing fast on the laptop, the code scrolling, the four small icons idle above.' },
   { id: 'K23', name: 'Another task gone', t0: 85.2, t1: 89.9, mm: [55, 55], f: 4.0,
     from: [0.90, 4.13, 1.40], to: [0.90, 4.13, 1.40], at0: 'lap:520,420', at1: 'lap:520,420', focus: [1.05, 4.46, 0.94], roll: [0, 0],
     light: '3am', iv: ['s03', 32.0, 33.3], scr: 87.5, beat: 'V14b', board: 'r2c5', tr: 'cut: back in the room, over his shoulder',
@@ -188,15 +193,13 @@ export const SHOTS = [
     from: [1.78, 4.12, 1.02], to: [1.78, 4.12, 1.02], at0: [1.02, 4.00, 1.45], at1: [1.02, 4.00, 1.45], focus: 'eyes', flow: 'F4', roll: [0, 0],
     light: 'void', iv: ['s03', 8.0], stand: true, look: 28, zone: 'dome', zopt: { crowd: true }, beat: 'V17 b', board: 'r2c8 (render ref Group 11)', tr: 'cut: round to his profile',
     why: 'V17 “than everyone around him,” Low profile, looking up into the rings; far off in the dark, grey people walk at normal speed.' },
-  { id: 'K28', name: 'Stepped through a door', t0: 102.3, t1: 104.4, mm: [24, 24], f: 2.0,
-    from: [1.48, 2.95, 1.00], to: [1.445, 4.154, 1.032], at0: [1.04, 18.0, 1.40], at1: [1.04, 18.0, 1.4], focus: [1.04, 3.85, 1.3], roll: [0, 0],
-    light: 'void', iv: ['s03', 8.0], stand: true, zone: 'door', beat: 'V17 c', board: 'r2c9 (experimental, kept)', tr: 'the rings straighten into a tunnel',
-    cl: { at: [1.55, 18.4, 0.0], face: [1.48, 2.95, 1.00], s: 6, mood: 'bright', pose: 'hold' },
-    why: 'V17 “like he’s stepped through a door” Behind his shoulder: a tunnel of light converging on a slot of white.' },
-  { id: 'K29', name: 'Others can’t even see', t0: 104.4, t1: 105.35, mm: [50, 50], f: 5.6,
-    from: [1.188, 4.252, 1.322], to: [1.188, 4.252, 1.322], at0: [1.07, 4.015, 1.375], at1: [1.07, 4.015, 1.375], focus: 'eyes', roll: [0, 0],
-    cutBlack: 105.15, light: 'void', iv: ['s03', 8.0], stand: true, look: 22, zone: 'iso', refl: { kind: 'prism', uv: true, flipV: true, tile: 1, k: 1.3, tint: 0.14, off: [0, 0] }, key: { at: [1.08, 4.50, 1.15], color: 0xff6a35, k: 0.6 }, imag: { k: 1, duo: 0.4, poster: 5, stip: 0.65 }, ev: -0.4, beat: 'V17 d', board: 'r2c9 (B r4c1: the eye)', tr: 'cut in to the eye; cut dead at the vacuum (105.15)',
-    why: 'V17 “that others can’t even see.” His eye through the glasses, the streaks of light reflected in the lenses. Then the vacuum cut.' },
+  // round 14 (B2): K28 is gone; K29 carries the whole of "like he's stepped through a door that others can't even see".
+  // An extreme close-up of his eye and glasses: the camera orbits from the right side of his face round to the front
+  // (arc about his head), while the reflected lines slide across the lenses left to right (refl.slide)
+  { id: 'K29', name: 'A door others can’t see', t0: 102.3, t1: 105.35, mm: [60, 60], f: 4.0,
+    from: [1.262, 4.150, 1.372], to: [1.07, 4.262, 1.372], at0: [1.07, 4.015, 1.375], at1: [1.07, 4.015, 1.375], focus: 'eyes', mv: [102.3, 105.15], arc: [1.07, 4.015], roll: [0, 0],
+    cutBlack: 105.15, light: 'void', iv: ['s03', 8.0], stand: true, look: 22, zone: 'iso', refl: { kind: 'lines', uv: true, flipV: true, tile: 1, k: 1.5, tint: 0.14, off: [0, 0], slide: [[102.3, -0.55], [105.15, 0.55]] }, key: { at: [1.08, 4.50, 1.15], color: 0xff6a35, k: 0.6 }, imag: { k: 1, duo: 0.4, poster: 5, stip: 0.65 }, ev: -0.4, beat: 'V17 c+d', board: 'r2c9 (B r4c1: the eye)', tr: 'cut in to the eye from the rings (K27); cut dead at the vacuum (105.15)',
+    why: 'V17 “like he’s stepped through a door that others can’t even see.” Extreme close on his eye through the glasses, the glowing lines reflected in the lenses sliding left to right as the camera comes round from the side of his face to the front. Then the vacuum cut.' },
 
   { id: 'K30', name: 'He’s barely slept', t0: 105.35, t1: 109.9, mm: [45, 45], f: 4.0,
     from: [1.62, 2.88, 1.42], to: [1.565, 2.856, 1.42], at0: [1.20, 3.84, 1.22], at1: [1.145, 3.816, 1.22], focus: [1.21, 3.82, 1.37], roll: [0, 0],
@@ -226,15 +229,13 @@ export const SHOTS = [
     light: 'void', iv: ['s03', 8.0], stand: true, yaw: -100, look: 0, zone: 'balcony', zopt: { spill: 3.0 }, hand: { side: 'L', to: 'mouth', prop: 'mug', sip: [[126.3, 0.3], [127.4, 1.0], [128.4, 1.0], [129.4, 0.6]] }, pix: false, pixable: true, amber: 0.35,
     beat: 'V21', board: 'r3c6 (C r2c2; render ref Group 8 bottom)', tr: 'cut: round behind his left shoulder (ref Group 8 bottom): ear, glasses arm, mug at the lips, the city low',
     why: 'V21 “But he’s close to something.” Behind his shoulder as he drinks, the city lights in bokeh beyond the rail.' },
-  { id: 'K36', name: 'One more module', t0: 129.4, t1: 133.2, mm: [60, 60], f: 5.6,
-    from: [1.30, 4.06, 1.12], to: [1.29, 4.07, 1.106], at0: [1.06, 4.30, 0.77], at1: [1.06, 4.3, 0.77], focus: [1.06, 4.30, 0.78], roll: [0, 0],
-    light: '3am', iv: ['s03', 0.4, 5.6, 1.25], scr: 142.95, beat: 'V22 (Ivan)', board: 'r3c6', tr: 'cut: back at the desk, the keys',
-    why: 'V22 IVAN “One more module. One more integration.” His fingers back on the keys, fast.' },
-  { id: 'K37', name: 'Then he’ll rest', t0: 133.2, t1: 136.9, mm: [28, 28], f: 4.0,
-    from: [2.40, 2.60, 1.30], to: [2.40, 2.60, 1.30], at0: [1.05, 4.10, 1.00], at1: [1.10, 1.00, 0.45], focus: [[133.2, [1.05, 4.10, 1.00]], [134.2, [1.05, 4.10, 1.00]], [136.4, [1.10, 1.00, 0.45]]], mv: [133.6, 136.6], roll: [0, 0],
-    mood: '3am_soft', light: '3am', iv: ['s03', 24.0], scr: 143, beat: 'V23', board: 'r3c6', tr: 'cut: reverse, the bed',
-    why: 'V23 “Then he’ll rest.” The bed in the lamp light, three metres behind him. He won’t go.' },
-
+  // round 14 (B3): K37 is gone; K36 runs to its end. Not the typing shot: close on his mouth at the mug, locked there,
+  // one gulp on "One more module" and one on "One more integration", then held through "Then he'll rest"
+  { id: 'K36', name: 'One more module', t0: 129.4, t1: 136.9, mm: [70, 85], f: 2.8,
+    from: [0.70, 4.13, 1.13], to: [0.78, 4.12, 1.13], at0: [1.05, 4.12, 1.11], at1: [1.05, 4.12, 1.11], focus: 'eyes', mv: [129.4, 136.9], roll: [0, 0],
+    light: '3am', iv: ['s03', 24.0], scr: 142.95, gaze: 'screen', hand: { side: 'R', to: 'mouth', prop: 'mug', sip: [[129.4, 1.0], [136.9, 1.0]], gulps: [130.1, 132.0] },
+    beat: 'V22 (Ivan) + V23', board: 'r3c6', tr: 'cut: back at the desk, close on his mouth at the mug',
+    why: 'V22 IVAN “One more module. One more integration.” V23 “Then he’ll rest.” Close in profile on his mouth, the mug held at his lips: a gulp on each line, the screen light on his face. He doesn’t put it down.' },
   { id: 'K38', name: 'It’s not all pleasant', t0: 136.9, t1: 140.0, mm: [38, 38], f: 4.0,
     from: [2.05, 3.10, 1.75], to: [2.02, 3.14, 1.73], at0: [1.15, 4.32, 0.98], at1: [1.15, 4.32, 0.98], focus: [1.10, 4.10, 1.00], roll: [0, 0],
     light: '4am', zone: 'iso', iv: ['s03', 10.0, 13.1], scr: 148, mugs: true, beat: 'V24 a', board: 'r3c7 (C r3c1; render ref Group 9)', tr: 'time-skip tick: the room falls to black (the K21 frame again)',
@@ -290,14 +291,12 @@ export const SHOTS = [
     from: [1.32, 4.75, 1.12], to: [1.309, 4.718, 1.122], at0: [1.05, 3.95, 1.16], at1: [1.05, 3.95, 1.16], focus: [1.06, 4.04, 1.21], roll: [0, 0],
     grade: { con: 0.25, sat: 1.05 }, lacedRamp: [182.9, 184.1], gaze: [1.06, 6.0, 1.3], light: 'sunrise', laced: true, iv: ['s03', 33.0, 36.8], scr: 210, cross: 1, beat: 'V29', board: 'r4c8 (C r4c4)', tr: 'cut: in front of him',
     why: 'V29 “He leans back in his chair, exhausted and wired.” Hands behind his head, the sun across him in the shape of the window bars.' },
-  { id: 'K51', name: 'Then he realizes', t0: 188.8, t1: 192.4, mm: [50, 50], f: 2.4,
-    from: [1.06, 4.60, 1.13], to: [1.06, 4.581, 1.133], at0: [1.05, 3.98, 1.22], at1: [1.05, 3.98, 1.22], focus: [1.06, 4.04, 1.21], roll: [0, 0],
-    grade: { con: 0.25, sat: 1.05 }, gaze: [1.06, 6.0, 1.3], light: 'sunrise', laced: true, iv: ['s03', 36.8], scr: 212, cross: 1, beat: 'V30a', board: 'r4c8', tr: 'cut in on the same axis',
-    why: 'V30a “Then he realizes...” Closer, the warm bars of light on his face.' },
-  { id: 'K52', name: 'What he’s supposed to do now', t0: 192.4, t1: 195.5, mm: [62, 62], f: 2.4,
-    from: [1.06, 4.56, 1.15], to: [1.06, 4.546, 1.151], at0: [1.05, 3.99, 1.21], at1: [1.05, 3.99, 1.21], focus: [1.06, 4.04, 1.21], roll: [0, 0],
-    grade: { con: 0.25, sat: 1.05 }, cutBlack: 195.52, gaze: [1.06, 6.0, 1.3], light: 'sunrise', laced: true, iv: ['s03', 36.8], scr: 215, cross: 1, beat: 'V30b *', board: 'r4c9', tr: 'cut in again: his face, nothing to do',
-    why: 'V30b “he doesn’t know what he’s supposed to do now.” Close on his face in the gold light, eyes on nothing. Then black (195.52).' },
+  // round 14 (B4): K51 and K52 are one shot: straight down onto his face as he looks up at the ceiling, one constant
+  // zoom from wide to very close across both lines (the ceiling is off, as in the top-downs)
+  { id: 'K51', name: 'Then he realizes... what now', t0: 188.8, t1: 195.5, mm: [24, 70], f: 2.8,
+    from: [1.05, 3.965, 2.55], to: [1.05, 3.958, 1.80], at0: [1.05, 3.95, 1.22], at1: [1.05, 3.95, 1.22], focus: 'eyes', mv: [188.8, 195.52], ease: 'lin', roll: [0, 0],   // a hair north of the face: the top of his head is up in frame
+    grade: { con: 0.25, sat: 1.05 }, cutBlack: 195.52, gaze: [1.05, 3.95, 2.7], look: 34, top: true, light: 'sunrise', laced: true, iv: ['s03', 36.8], scr: 212, cross: 1, beat: 'V30a + V30b *', board: 'r4c8 + r4c9', tr: 'cut: overhead, straight down on his face',
+    why: 'V30 “Then he realizes... he doesn’t know what he’s supposed to do now.” From directly above: his face turned up to the ceiling, hands behind his head, the sun across him; one slow constant zoom from the whole chair to his eyes. Then black (195.52).' },
   { id: 'K53', name: 'Black', t0: 195.5, t1: 201.64, mm: [85, 85], f: 2.0,
     from: [1.16, 4.50, 1.14], to: [1.16, 4.50, 1.14], at0: [1.05, 3.99, 1.21], at1: [1.05, 3.99, 1.21], focus: 'eyes', roll: [0, 0],
     light: 'sunrise', iv: null, black: true, beat: 'tail', board: '(end)', tr: 'cut to black on the vacuum (195.52)',
@@ -324,7 +323,8 @@ export const cameraAt = (t, pick) => {
   let tt = Math.min(w[1] - 1e-4, Math.max(w[0], t));
   if (s.ease) {                                   // ease 'in' (accelerate into a cut) or 'out' (leave a cut at speed): remap through smoothstep's inverse
     const u = (tt - w[0]) / (w[1] - w[0]), q = s.ease === 'in' ? u * u : 1 - (1 - u) * (1 - u);
-    tt = w[0] + (0.5 - Math.sin(Math.asin(1 - 2 * q) / 3)) * (w[1] - w[0]);
+    tt = w[0] + (s.ease === 'lin' ? Math.acos(1 - 2 * u) / Math.PI                // 'lin': undo cameraIn's cosine ease exactly (K51's constant zoom)
+      : 0.5 - Math.sin(Math.asin(1 - 2 * q) / 3)) * (w[1] - w[0]);
   }
   const c = cameraIn([s2], tt, pick);
   return { ...c, shot: s, u: (t - s.t0) / (s.t1 - s.t0) };

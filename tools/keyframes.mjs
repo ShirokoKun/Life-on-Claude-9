@@ -3,6 +3,7 @@
 // Reads <set>/keyframes.json; writes renders/<scene>/keyframes/<id>.png, keyframes_<stamp>.jpg (ours | reference,
 // one row per keyframe) and the numbers (tools/frame_stats.py) in keyframes_<stamp>.md.
 import fs from 'fs';
+import os from 'os';
 import path from 'path';
 import { spawnSync } from 'child_process';
 import { fileURLToPath } from 'url';
@@ -55,7 +56,7 @@ const res = spawnSync(ffmpeg, ['-y', '-loglevel', 'error', ...inputs, '-filter_c
   '-frames:v', '1', '-q:v', '3', sheet], { stdio: 'inherit' });
 if (res.status !== 0) process.exit(1);
 
-const stats = spawnSync('python', ['-I', path.join(ROOT, 'tools', 'frame_stats.py'), ...rows.flatMap((r) => [r.ours, r.ref])], { encoding: 'utf8' });
+const stats = spawnSync(process.env.KF_PYTHON || (process.platform === 'win32' ? 'python' : fs.existsSync(path.join(os.homedir(), '.local/py/bin/python3')) ? path.join(os.homedir(), '.local/py/bin/python3') : 'python3'), ['-I', path.join(ROOT, 'tools', 'frame_stats.py'), ...rows.flatMap((r) => [r.ours, r.ref])], { encoding: 'utf8' });
 const md = [`# Keyframes ${stamp}`, '', `Sheet: ${path.relative(ROOT, sheet)}`, '', '```', stats.stdout.trim(), '```', '',
   ...rows.map((r) => `- **${r.f.id} ${r.f.name}**: take from the reference: ${r.f.take}`)].join('\n');
 fs.writeFileSync(sheet.replace(/\.jpg$/, '.md'), md);

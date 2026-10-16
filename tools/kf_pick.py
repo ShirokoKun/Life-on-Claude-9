@@ -5,7 +5,7 @@ d, out, ids = sys.argv[1], sys.argv[2], sys.argv[3:]
 w, h, cols = 800, 450, 2
 R = (len(ids) + cols - 1) // cols
 sh = Image.new('RGB', (w * cols, h * R), (10, 10, 10)); dr = ImageDraw.Draw(sh)
-try: f = ImageFont.truetype('C:/Windows/Fonts/segoeui.ttf', 22)
+try: f = ImageFont.truetype(__import__('os').path.expanduser('~/Library/Fonts/segoeui.ttf') if __import__('sys').platform == 'darwin' else 'C:/Windows/Fonts/segoeui.ttf', 22)
 except Exception: f = ImageFont.load_default()
 for i, k in enumerate(ids):
     x, y = (i % cols) * w, (i // cols) * h
