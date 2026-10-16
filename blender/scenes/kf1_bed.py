@@ -73,8 +73,16 @@ def apply_mods(o):
 
 
 # ----------------------------------------------------------------------------------------------- mattress
+def ridged(v, k=1.0):
+    """1 at a crease line, 0 between: ridged noise (sharp folds, soft valleys), never a sine."""
+    return (1.0 - abs(noise.noise(v))) ** k
+
+
 def mattress():
-    """A dense rounded box; wrinkles and the seam are moved into the vertices (a displacement the camera reads)."""
+    """A soft mattress in a fitted sheet (R1): fully rounded top and bottom edges, sides that bulge, a crown that sags
+    a little in the middle, the sheet gathered into creases at the corners, slack folds down the sides, the elastic's
+    gathers along the bottom, a piped seam. Moved into the vertices of a dense even mesh (a displacement the camera
+    reads in daylight from the top-downs and from 3/4)."""
     bm = bmesh.new()
     bmesh.ops.create_cube(bm, size=1.0)
     for v in bm.verts:
@@ -85,47 +93,55 @@ def mattress():
     o = link(bpy.data.objects.new("Kf1_Mattress", me))
     o.location = (CX, CY, 0.0)
     bv = o.modifiers.new("Corners", "BEVEL")       # rounded plan corners
-    bv.width, bv.segments, bv.affect = 0.07, 8, "VERTICES"
+    bv.width, bv.segments, bv.affect = 0.10, 10, "VERTICES"
     o.modifiers.new("Tri", "TRIANGULATE")
     apply_mods(o)
-    bv = o.modifiers.new("Edge", "BEVEL")          # the soft cloth roll of the top and bottom edges
-    bv.width, bv.segments, bv.limit_method = 0.045, 8, "ANGLE"
+    bv = o.modifiers.new("Edge", "BEVEL")          # the soft roll of the top and bottom edges: nearly half the height
+    bv.width, bv.segments, bv.limit_method = 0.075, 12, "ANGLE"
     apply_mods(o)
     rm = o.modifiers.new("Remesh", "REMESH")       # even, dense quads for the displacement
-    rm.mode, rm.voxel_size, rm.use_smooth_shade = "VOXEL", 0.012, True
+    rm.mode, rm.voxel_size, rm.use_smooth_shade = "VOXEL", 0.010, True
     apply_mods(o)
-    rng = random.Random(5)
-    corners = [Vector((CX + sx * (MW / 2 - 0.05), CY + sy * (MD / 2 - 0.05), MH * 0.8)) for sx in (-1, 1) for sy in (-1, 1)]
+    sm = o.modifiers.new("Smooth", "SMOOTH")       # the voxel steps out of the round edges
+    sm.factor, sm.iterations = 0.6, 4
+    apply_mods(o)
+    corners = [Vector((CX + sx * (MW / 2 - 0.04), CY + sy * (MD / 2 - 0.04), MH * 0.8)) for sx in (-1, 1) for sy in (-1, 1)]
+    hw, hd = MW / 2, MD / 2
     me = o.data
-    me.calc_loop_triangles()
     mw = o.matrix_world
+    mi = mw.inverted().to_3x3()
     for v in me.vertices:
         p = mw @ v.co
         n = (mw.to_3x3() @ v.normal).normalized()
+        u, w = (p.x - CX) / hw, (p.y - CY) / hd
+        zt = min(1.0, max(0.0, p.z / MH))
+        side = abs(n.z) < 0.7
+        top = n.z >= 0.7
         d = 0.0
-        side = abs(n.z) < 0.6
-        top = n.z > 0.6
-        # the fitted sheet: wrinkles radiate from the four corners, along the sides and over the top edge
+        if side:                                    # the sides bulge: stuffing pushing the sheet out
+            d += 0.016 * math.sin(math.pi * zt) ** 0.8
+        if top:                                     # a crown, a little sag in the middle where he would lie
+            d += 0.010 * (1 - u * u) * (1 - w * w) - 0.006 * math.exp(-((u + 0.1) ** 2 + (w - 0.1) ** 2) / 0.25)
+        # the fitted sheet gathered at the corners: creases radiating from each corner, sharp ridges, soft valleys
         for c in corners:
             r = (Vector((p.x, p.y)) - Vector((c.x, c.y))).length
-            if r < 0.45:
+            if r < 0.55:
                 ang = math.atan2(p.y - c.y, p.x - c.x)
-                fall = (1 - r / 0.45) ** 1.6
-                d += 0.0045 * fall * math.sin(ang * 9 + r * 18 + rng.random() * 0.0)
-        if side:                                    # long, soft vertical folds where the sheet hangs slack
+                fall = (1 - r / 0.55) ** 1.5
+                d += 0.009 * fall * (ridged(Vector((ang * 2.4, r * 3.0, c.x + c.y)), 2.0) - 0.35)
+        if side:                                    # slack folds down the sides, the elastic's gathers at the bottom
             along = p.x if abs(n.y) > abs(n.x) else p.y
-            d += 0.0022 * math.sin(along * 23 + 1.3) * (0.5 + 0.5 * noise.noise(Vector((along * 3, p.z * 4, 0.7))))
-            d += 0.0012 * noise.noise(Vector((along * 14, p.z * 9, 2.0)))
-        if top:                                     # a shallow give across the top, faint crumple
-            d += 0.004 * noise.noise(Vector((p.x * 2.2, p.y * 2.2, 0.3))) - 0.002
-            d += 0.0012 * noise.noise(Vector((p.x * 9, p.y * 9, 4.1)))
-        # the piped seam: a small bead just under the top edge, a groove under it
-        hz = p.z - (MH - 0.05)
+            d += 0.0045 * (ridged(Vector((along * 5.5, zt * 1.2, 0.7)), 2.0) - 0.4) * (0.4 + 0.6 * zt)
+            d += 0.0030 * (ridged(Vector((along * 26.0, 0.3, 4.4)), 3.0) - 0.3) * max(0.0, 1 - zt / 0.28)
+        if top:                                     # soft long creases across the top (a sheet that has been slept on)
+            d += 0.0030 * (ridged(Vector((p.x * 2.6 + p.y * 1.1, p.y * 0.9, 0.3)), 3.0) - 0.25)
+            d += 0.0010 * noise.noise(Vector((p.x * 11, p.y * 11, 4.1)))
+        # the piped seam: a bead just under the top edge (and round the bottom), a groove under it
         if side:
-            d += 0.0035 * math.exp(-(hz / 0.006) ** 2) - 0.0018 * math.exp(-((hz + 0.012) / 0.007) ** 2)
-            hz2 = p.z - 0.05                        # and one round the bottom
-            d += 0.0025 * math.exp(-(hz2 / 0.006) ** 2)
-        v.co += o.matrix_world.inverted().to_3x3() @ (n * d)
+            hz = p.z - (MH - 0.035)
+            d += 0.0035 * math.exp(-(hz / 0.005) ** 2) - 0.0020 * math.exp(-((hz + 0.010) / 0.006) ** 2)
+            d += 0.0025 * math.exp(-((p.z - 0.035) / 0.005) ** 2)
+        v.co += mi @ (n * d)
     for p in me.polygons:
         p.use_smooth = True
     return o
@@ -224,7 +240,7 @@ def cloth_sim(o, colliders, frames, quality=8, mass=0.6, bend=2.0, pin=None):
 def duvet(colliders):
     """A cloth sheet laid over the lower two thirds and dropped: it hangs and folds on its own."""
     hw = MW / 2 + 0.17                               # hangs most of the way down the sides
-    v0, v1 = 0.88, Y1 + 0.16                         # from below the pillows to past the foot (it pools)
+    v0, v1 = 1.22, Y1 + 0.14                         # round 14 b: a blanket over the foot half (R1 shows the sheeted mattress), past the foot
     nu, nv = 110, 100
     bm = bmesh.new()
     rows = []
@@ -234,7 +250,7 @@ def duvet(colliders):
         row = []
         for i in range(nu + 1):
             x = CX - hw + 2 * hw * i / nu
-            z = MH + 0.07 + 0.012 * noise.noise(Vector((x * 2.5, y * 2.5, 0.4))) + 0.004 * math.sin(x * 11 + y * 3)   # unevenness seeds the folds
+            z = MH + 0.07 + 0.02 * noise.noise(Vector((x * 2.5, y * 2.5, 0.4))) + 0.006 * noise.noise(Vector((x * 7, y * 7, 2.2)))   # unevenness seeds the folds
             row.append(bm.verts.new((x, y, z)))
         rows.append(row)
     for j in range(nv):
@@ -244,7 +260,7 @@ def duvet(colliders):
     bm.to_mesh(me)
     bm.free()
     o = link(bpy.data.objects.new("Kf1_Duvet", me))
-    cloth_sim(o, colliders, frames=80, mass=0.5, bend=0.6)
+    cloth_sim(o, colliders, frames=80, mass=0.5, bend=0.35)
     # the hanging sides and foot: soft, irregular vertical folds that open toward the hem (the sim alone hangs them
     # as flat panels); not the old sine hem, a little flare at the bottom
     hx, hy = MW / 2, CY + MD / 2
@@ -261,9 +277,18 @@ def duvet(colliders):
             s = 1 if p.x > CX else -1
             n = noise.noise(Vector((p.y * 4.6, 5.3 * s, 0.9))) + 0.4 * noise.noise(Vector((p.y * 11.0, 1.3 * s, 3.1)))
             p.x += s * (amp * (0.6 + n) + 0.008 * drop ** 2)
-    if not FOLD:                                     # a made bed: one duvet, its thick edge, no turned-back layer
+    # a few organic creases across the top, where a duvet laid by hand settles: ridges along long diagonal lines
+    for v in o.data.vertices:
+        p = v.co
+        if p.z < MH + 0.01:
+            continue
+        cr = ridged(Vector((p.x * 2.1 + p.y * 1.4, p.y * 0.8 - p.x * 0.3, 1.9)), 3.0)
+        cr2 = ridged(Vector((p.x * 3.6 - p.y * 1.9, p.y * 1.2, 7.7)), 4.0)
+        p.z += 0.012 * cr + 0.007 * cr2 - 0.006
+    if not FOLD:                                     # a made bed: one duvet, its thick, rounded edge
         sol = o.modifiers.new("Thick", "SOLIDIFY")
-        sol.thickness, sol.offset = 0.03, 1
+        sol.thickness, sol.offset = 0.045, 1
+        sol.use_rim = True
         sub = o.modifiers.new("Sub", "SUBSURF")
         sub.levels = sub.render_levels = 1
         apply_mods(o)

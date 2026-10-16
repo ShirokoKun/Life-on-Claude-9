@@ -313,14 +313,23 @@ function meanOf(key) {
 // the bed's own lightmaps (lm_BED, one per baked time of day: blender/scenes/kf1_dawn_bake.py --bed), blended by
 // vlmW like roomlight blends the set's, read in the same terms (materials.js patchBaked: bounce only from the bake,
 // reflections fade where the room is dark)
-function vlmPatch(m) {
-  const U = { vlmK: { value: Math.PI }, vlmW: { value: 0 }, lmA: { value: null }, lmB: { value: null } };
+function vlmPatch(m, mottle = 0.2) {
+  const U = { vlmK: { value: Math.PI }, vlmW: { value: 0 }, lmA: { value: null }, lmB: { value: null }, mottle: { value: mottle } };
   m.userData.vlm = U;
   m.onBeforeCompile = (sh) => {
     Object.assign(sh.uniforms, U);
-    sh.vertexShader = 'attribute vec2 lmUv; varying vec2 vLmUv;\n' +
-      sh.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>\n  vLmUv = vec2(lmUv.x, ${LM_FLIP ? '1.0 - lmUv.y' : 'lmUv.y'});`);
-    sh.fragmentShader = 'uniform float vlmK, vlmW; uniform sampler2D lmA, lmB; varying vec2 vLmUv;\n' + sh.fragmentShader.replace('#include <lights_fragment_maps>', `#include <lights_fragment_maps>
+    sh.vertexShader = 'attribute vec2 lmUv; varying vec2 vLmUv; varying vec3 vWp;\n' +
+      sh.vertexShader.replace('#include <begin_vertex>', `#include <begin_vertex>\n  vLmUv = vec2(lmUv.x, ${LM_FLIP ? '1.0 - lmUv.y' : 'lmUv.y'});\n  vWp = (modelMatrix * vec4(transformed, 1.0)).xyz;`);
+    // the cloth's colour varies at the scales a camera across the room reads (dye, wear, the slub of the yarn): a
+    // weave texture alone is sub-pixel from the top-downs
+    sh.fragmentShader = `uniform float vlmK, vlmW, mottle; uniform sampler2D lmA, lmB; varying vec2 vLmUv; varying vec3 vWp;
+      float kh3(vec3 p) { return fract(sin(dot(p, vec3(127.1, 311.7, 74.7))) * 43758.5453); }
+      float kvn(vec3 p) { vec3 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+        return mix(mix(mix(kh3(i), kh3(i + vec3(1, 0, 0)), f.x), mix(kh3(i + vec3(0, 1, 0)), kh3(i + vec3(1, 1, 0)), f.x), f.y),
+                   mix(mix(kh3(i + vec3(0, 0, 1)), kh3(i + vec3(1, 0, 1)), f.x), mix(kh3(i + vec3(0, 1, 1)), kh3(i + vec3(1, 1, 1)), f.x), f.y), f.z); }
+` + sh.fragmentShader.replace('#include <color_fragment>', `#include <color_fragment>
+      { float mt = 0.5 * kvn(vWp * 2.3) + 0.3 * kvn(vWp * 7.5) + 0.2 * kvn(vWp * vec3(90.0, 9.0, 90.0));   // the last: slub along the weft
+        diffuseColor.rgb *= mix(1.0 - mottle, 1.0 + mottle, mt); }`).replace('#include <lights_fragment_maps>', `#include <lights_fragment_maps>
       { vec3 lmI = mix(texture2D(lmA, vLmUv).rgb, texture2D(lmB, vLmUv).rgb, vlmW);   // the two strongest times of day
         lmI = max(lmI, vec3(0.0));
         float lmLum = dot(lmI, vec3(0.2126, 0.7152, 0.0722));
@@ -332,7 +341,7 @@ function vlmPatch(m) {
   return m;
 }
 
-async function fabric({ key, rep, color, rough = 0.95, nrm = 0.8, sheen = 0.8, sheenCol, anis = 8 }) {
+async function fabric({ key, rep, color, rough = 0.95, nrm = 0.8, sheen = 0.8, sheenCol, anis = 8, mottle = 0.2 }) {
   const T = texSet(key, rep, anis);
   const mean = await meanOf(key);
   const target = new THREE.Color(color);                         // sRGB hex -> linear
@@ -340,7 +349,7 @@ async function fabric({ key, rep, color, rough = 0.95, nrm = 0.8, sheen = 0.8, s
     sheen, sheenRoughness: 0.55, sheenColor: new THREE.Color(sheenCol ?? color), envMapIntensity: 0.35, side: THREE.DoubleSide });
   m.color.setRGB(target.r / Math.max(mean[0], 0.02), target.g / Math.max(mean[1], 0.02), target.b / Math.max(mean[2], 0.02));
   m.normalScale.set(nrm, nrm);
-  return vlmPatch(m);
+  return vlmPatch(m, mottle);
 }
 
 // ------------------------------------------------------------------------------------------------- set-up
@@ -409,6 +418,22 @@ export async function createRoom(args, RL) {
     }
   }
 
+  // --- the window's muntins: one glazing bar down the middle of each sash (two-light sashes), so the sun through the
+  // window carries the bars onto the bed and the floor as the god rays already do (volume.js prints a muntin at each
+  // unit's centre); live-lit, they cast the live sun's shadow
+  {
+    const [y0, y1, sill, head] = data.room.window, uw = (y1 - y0) / 3, mid = (sill + head) / 2;
+    const mm = new THREE.MeshStandardMaterial({ color: new THREE.Color(0.62, 0.60, 0.56).convertSRGBToLinear(), roughness: 0.5, envMapIntensity: 0.6 });
+    for (let k = 0; k < 3; k++) {
+      const y = y0 + (k + 0.5) * uw;
+      for (const [x, z0, z1] of [[-0.14, sill + 0.08, mid + 0.02], [-0.20, mid - 0.02, head - 0.07]]) {
+        const bar = new THREE.Mesh(new THREE.BoxGeometry(0.03, z1 - z0, 0.024), mm);
+        bar.position.copy(B(x, y, (z0 + z1) / 2)); bar.castShadow = true; bar.receiveShadow = true; bar.name = 'Kf1_Muntin';
+        named.Baked_ARCH.add(bar);
+      }
+    }
+  }
+
   // --- the floor (R1: dark polished wood, the window in it)
   const floor = named.Baked_ARCH_3;
   if (floor) {
@@ -424,9 +449,9 @@ export async function createRoom(args, RL) {
       ...['3am', 'evening', 'day', 'dawn'].map((d) => loadEXR(`scenes/kf1/lighting/${d}/lightmaps/lm_BED.exr`))]);
     for (const t of lms) { t.flipY = false; t.colorSpace = THREE.LinearSRGBColorSpace; t.needsUpdate = true; }
     const [duvetM, sheetM, pillowM] = await Promise.all([
-      fabric({ key: 'fabric_weave', rep: 1 / 0.16, color: 0x161d33, nrm: 0.9, sheen: 0.9, sheenCol: 0x3c4a70, anis }),   // navy duvet, a canvas weave
-      fabric({ key: 'linen', rep: 1 / 0.14, color: 0x1b2440, nrm: 0.9, sheen: 0.8, sheenCol: 0x45547c, anis }),         // the fitted sheet, a lighter navy
-      fabric({ key: 'linen', rep: 1 / 0.12, color: 0xae9068, nrm: 0.8, sheen: 0.7, sheenCol: 0xe6cfa6, anis }),        // beige linen pillows (R1)
+      fabric({ key: 'fabric_weave', rep: 1 / 0.30, color: 0x161d33, nrm: 1.3, sheen: 0.9, sheenCol: 0x3c4a70, anis, mottle: 0.26 }),   // navy duvet, a canvas weave
+      fabric({ key: 'fabric_weave', rep: 1 / 0.24, color: 0x1b2440, nrm: 1.2, sheen: 0.8, sheenCol: 0x45547c, anis, mottle: 0.22 }),         // the fitted sheet, a lighter navy
+      fabric({ key: 'linen', rep: 1 / 0.16, color: 0xae9068, nrm: 1.0, sheen: 0.7, sheenCol: 0xe6cfa6, anis, mottle: 0.12 }),        // beige linen pillows (R1)
     ]);
     const bed = new THREE.Group(); bed.name = 'Kf1_Bed';
     const meshes = [];
@@ -685,7 +710,7 @@ export function roomFrame(t, s, ctx, o) {
   S.beam.castShadow = S.beam.intensity > 0;
   // god rays and the dust in them (day: the bake's sun; dawn: the live sun's direction)
   if (S.vol) {
-    const R = !zone && (light === 'day' || light === 'sunrise') ? (light === 'day' ? { dir: DAY_DIR, col: [1.0, 0.93, 0.80], k: 0.028, haze: 0.0004, dust: 1.4 } : { dir: DAWN_DIR, col: [1.0, 0.66, 0.38], k: 0.045, haze: 0.0006, dust: 7.0 }) : null;
+    const R = !zone && (light === 'day' || light === 'sunrise') ? (light === 'day' ? { dir: DAY_DIR, col: [1.0, 0.93, 0.80], k: 0.022, haze: 0.0, dust: 1.4 } : { dir: DAWN_DIR, col: [1.0, 0.66, 0.38], k: 0.045, haze: 0.0006, dust: 7.0 }) : null;
     const rk = R ? (s.rays ?? 1) * dim * +(Q.get('rays') ?? 1) : 0;
     S.vol.mesh.visible = rk > 0; S.motes.mesh.visible = rk > 0 && (s.dust ?? 1) > 0;
     if (R) {
