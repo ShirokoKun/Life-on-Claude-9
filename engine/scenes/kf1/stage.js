@@ -486,6 +486,7 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
   const lights = new THREE.InstancedMesh(new THREE.SphereGeometry(0.5, 7, 5), lightsMat, NL);    // round sources: round bokeh
   const LC = ['#ffb46b', '#ffd9a8', '#ff9a4d', '#ffe9c9', '#8fe0ff', '#ffc98a', '#5fd6c8'].map(hex);
   let n = 0;
+  const LP = new Float32Array(NL * 3), LS = new Float32Array(NL), LT = new Float32Array(NL * 2);
   // buildings at all distances (near ones big and few, far ones a dense fine band), windows jittered off the lattice
   // and some floors dark, so the lens makes the irregular clustered bokeh of the references, not a grid of discs
   for (let bI = 0; bI < 1000 && n < NL; bI++) {
@@ -504,7 +505,9 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
         const u = (c - cols / 2) * step + (rnd(n * 1.7) - 0.5) * step * 0.5, z = base + r * step + (rnd(n * 2.9) - 0.5) * 0.8;
         const d = (rnd(n * 3.3) - 0.5) * 6;                           // depth jitter
         const sc = sz * (0.6 + rnd(n * 4.1) * 0.8) * (0.6 + dist / 160);   // far windows bigger: they stay discs, not specks
-        m4.compose(B(cx + tx * u + Math.sin(az) * d, cy + ty * u + Math.cos(az) * d, z), q0, new THREE.Vector3(sc * 1.3, sc, sc * 1.3)); lights.setMatrixAt(n, m4);
+        const lp = B(cx + tx * u + Math.sin(az) * d, cy + ty * u + Math.cos(az) * d, z);
+        m4.compose(lp, q0, new THREE.Vector3(sc * 1.3, sc, sc * 1.3)); lights.setMatrixAt(n, m4);
+        LP[n * 3] = lp.x; LP[n * 3 + 1] = lp.y; LP[n * 3 + 2] = lp.z; LS[n] = sc; LT[n * 2] = tx; LT[n * 2 + 1] = -ty;   // (for the K34 trails)
         const ci = warm < 0.18 ? 4 + Math.floor(rnd(n) * 3) % 3 : Math.floor(rnd(bI * 3 + k * 50) * 4);
         lights.setColorAt(n, col.setRGB(...LC[ci % LC.length]).multiplyScalar(0.5 + rnd(n * 1.3) * 1.7));
         n++;
@@ -513,6 +516,31 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
   }
   for (let i = n; i < NL; i++) { m4.makeScale(0, 0, 0); lights.setMatrixAt(i, m4); lights.setColorAt(i, col.setRGB(0, 0, 0)); }
   lights.frustumCulled = false; lights.userData.glow = 0; balc.add(lights);   // round 13: the city stays creamy bokeh, out of the deep glow (it washed orange)
+  const NLIT = n, lightsK0 = lightsMat.uniforms.uColor.value.clone();
+  // round 14 (K34 "a thinness to his thoughts", ref R4 frame 3): the city's own lights become the trails. Each bokeh
+  // disc stretches along its tangent (sideways to our line of sight) from a circle into a long thin line and streams
+  // round behind him, all one way; k = 0 is the city as built, 1 the full trails
+  let trailK = -1;
+  const _tq = new THREE.Quaternion(), _ts = new THREE.Vector3(), _tp = new THREE.Vector3(), X1 = new THREE.Vector3(1, 0, 0);
+  function layTrails(k, age) {
+    if (k === 0 && trailK === 0) return;
+    trailK = k;
+    // about a third of the lights become the trails (thin, long, distinct); the rest shrink away, so the lines keep
+    // dark gaps between them through the lens blur (R4) instead of melting into one creamy slab
+    const run = k * k * (6 + age * 6);                                                       // metres travelled
+    for (let i = 0; i < NLIT; i++) {
+      const tx = LT[i * 2], tz = LT[i * 2 + 1], sc = LS[i], jit = 0.25 + 1.5 * Math.pow(rnd(i * 2.9), 1.3), trail = rnd(i * 7.7) < 0.03;
+      const S = trail ? 1 + 48 * Math.pow(k, 1.3) * jit : 1, thin = trail ? 1 - (0.45 + 0.45 * rnd(i * 3.3)) * k : 1 - 0.97 * k;
+      const go = trail ? run * (0.2 + 3.2 * rnd(i * 5.3)) - 18 * k * rnd(i * 6.1) : run * jit;   // trails spread out along their run (no stacks)
+      _tp.set(LP[i * 3] + tx * go, LP[i * 3 + 1] + (trail ? (rnd(i * 4.7) - 0.5) * 7 * k : 0), LP[i * 3 + 2] + tz * go);
+      _tq.setFromUnitVectors(X1, _ts.set(tx, 0, tz).normalize());
+      _ts.set(sc * 1.3 * S * (trail ? 1 : thin), sc * thin, sc * 1.3 * thin);
+      m4.compose(_tp, _tq, _ts); lights.setMatrixAt(i, m4);
+    }
+    lights.instanceMatrix.needsUpdate = true;
+    towers.visible = k < 0.12;                                                                  // the dark blocks would cut the trails into stacks
+    lightsMat.uniforms.uColor.value.copy(lightsK0).multiplyScalar(1 + 0.25 * k);   // fewer, longer: a touch brighter   // the lines overlap: hold the frame's light level
+  }
 
   // drowning (V09 "i'm drowning here", director ref: the man in his chair inside a storm of paper): the room is gone,
   // he sits in his chair in a dark void and hundreds of pages hang at every depth around him, glowing warm-white,
@@ -771,7 +799,9 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
     drown.visible = mode === 'drown';
     if (drown.visible && opts.head && opts.cam) layDrown(B(...opts.head), B(...opts.cam), t, opts.rise);
     sky.scale.setScalar(mode === 'balcony' ? 5.5 : 1);            // the far city is past the default 70 m sky (camera far = 400)
-    if (balc.visible) { balc.position.copy(B(F.x, F.y, 0)); balc.rotation.y = THREE.MathUtils.degToRad(opts.balconyYaw || 0); spill.intensity = opts.spill ?? 9; }
+    if (balc.visible) { balc.position.copy(B(F.x, F.y, 0)); balc.rotation.y = THREE.MathUtils.degToRad(opts.balconyYaw || 0); spill.intensity = opts.spill ?? 9;
+      const tr = opts.trails, k = tr ? Math.min(1, Math.max(0, (t - tr[0]) / (tr[1] - tr[0]))) : 0;
+      layTrails(k * k * (3 - 2 * k), tr ? Math.max(0, t - tr[0]) : 0); }
     rim.intensity = ['down', 'dome', 'door'].includes(mode) ? 26 : 0;
     rimCool.intensity = ['dome', 'door'].includes(mode) ? 14 : 0;
     rim.position.copy(B(F.x, F.y + 3.0, 3.2)); rim.target.position.copy(B(F.x, F.y, 1.3)); rim.target.updateMatrixWorld();
