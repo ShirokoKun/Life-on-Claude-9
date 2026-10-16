@@ -1117,9 +1117,9 @@ function handsBehindHead(root, w = 1) {
   const right = new THREE.Vector3().crossVectors(fwd, up).normalize();
   for (const side of ['L', 'R']) {
     const sg = side === 'L' ? -1 : 1, S = side === 'L' ? 'Left' : 'Right';
-    const tgt = hp.clone().addScaledVector(fwd, -0.10).addScaledVector(right, 0.055 * sg).addScaledVector(up, 0.035);
+    const tgt = hp.clone().addScaledVector(fwd, -0.09).addScaledVector(right, 0.075 * sg).addScaledVector(up, -0.02);   // round 13: at ear level (was above: the shoulders went past where the shirt deforms well)
     const cur = b[S + 'Hand'].getWorldPosition(new THREE.Vector3());
-    reach(root, side, cur.lerp(tgt, w), right.clone().multiplyScalar(sg).addScaledVector(up, 0.35).addScaledVector(fwd, 0.15).normalize());
+    reach(root, side, cur.lerp(tgt, w), right.clone().multiplyScalar(sg).addScaledVector(up, 0.08).addScaledVector(fwd, 0.45).normalize());   // elbows out and a little forward
     curlAnat(root, side, { Index: [20, 35, 20].map((d) => d * w), Middle: [22, 38, 22].map((d) => d * w), Ring: [24, 40, 22].map((d) => d * w), Pinky: [26, 42, 24].map((d) => d * w) }, [10 * w, 10 * w, 6 * w]);
   }
 }
