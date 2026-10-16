@@ -269,10 +269,12 @@ export const SHOTS = [
     from: [1.08, 4.58, 1.00], to: [1.081, 4.593, 0.997], at0: [1.05, 4.15, 1.10], at1: [1.05, 4.15, 1.1], focus: 'eyes', roll: [0, 0],
     flick: [162.2, 166.0], light: '4am', iv: ['s03', 30.75], scr: 177.6, look: 16, cyan: 0.3, amber: 0.45, ev: -1.1, beat: 'V26 b', board: 'r4c4', tr: 'cut on the pass chord: the screen flares',
     why: 'V26 “and the dread dissolves into a rush of pure satisfaction.” The screen flares and washes his face cyan-white, the room glowing amber behind him.' },
-  { id: 'K45', name: 'HE... built that', t0: 166.0, t1: 168.85, mm: [17, 17], f: 8.0,
-    from: [24.0, -24.0, 1.6], to: [24.0, -24.0, 1.6], at0: [16.0, 18.0, 15.0], at1: [16.0, 18.0, 16.5], focus: [1.04, 3.85, 1.0], roll: [0, 0],
-    light: 'void', iv: ['s03', 8.0], stand: true, look: 30, zone: 'monolith', beat: 'V27 a * (Ivan)', board: 'r4c5', tr: 'hard cut on “HE” (166.00): white',
-    why: 'V27 IVAN “HE... built that.” Low, against a pale sky: a dark tower of lit windows, Ivan tiny at its foot looking up at it.' },
+  // round 14: the machine is too big to see: set back 60 m and seen whole (all four edges in frame) from low on the
+  // pale ground, a 24 mm lens 20 m behind him; he stands tiny in the lower left, looking up at it. A slow push.
+  { id: 'K45', name: 'HE... built that', t0: 166.0, t1: 168.85, mm: [24, 24], f: 8.0,
+    from: [3.0, -20.0, 0.40], to: [3.15, -19.3, 0.42], at0: [41.0, 64.0, 20.0], at1: [41.0, 64.0, 20.25], focus: [1.04, 3.85, 1.0], roll: [0, 0],
+    light: 'void', iv: ['s03', 8.0], stand: true, look: 30, zone: 'monolith', zopt: { bldAt: [10, 60], fog: 0.0028 }, beat: 'V27 a * (Ivan)', board: 'r4c5', tr: 'hard cut on “HE” (166.00): white',
+    why: 'V27 IVAN “HE... built that.” Low on the pale ground: the whole machine, a dark block of lit windows spelling his modules, edge to edge in the frame; Ivan tiny in the corner, looking up at it.' },
   { id: 'K46', name: 'What HE told it to do', t0: 168.85, t1: 172.4, mm: [32, 32], f: 2.8,
     from: [1.04, 5.10, 3.50], to: [1.04, 4.62, 2.55], at0: [1.04, 3.88, 0.90], at1: [1.04, 3.88, 0.90], focus: [1.04, 3.95, 1.40], mv: [168.85, 171.94], dolly: 13.37, roll: [0, 0],
     cutBlack: 171.94, gaze: 'cam', light: 'void', iv: ['s03', 8.0], stand: true, look: 42, zone: 'monolith', zopt: { noBuilding: true }, beat: 'V27 b (Ivan)', board: 'r4c6', tr: 'cut on the drop (168.85): from above',
@@ -732,7 +734,7 @@ export function props(t, ctx) {
   const clips = (zone ? [SHELF_CUT] : []).concat(s.deskAway && t > s.deskAway[0] ? [DESK_SWEEP] : []);
   if (named.Baked_DESK) named.Baked_DESK.traverse((o) => { if (o.isMesh) for (const m of [].concat(o.material)) m.clippingPlanes = clips.length ? clips : null; });
   for (const n of ['Baked_ROOM', 'Laptop_Hinge', 'Laptop_Screen', 'Monitor_Screen', 'Water', 'Water_Glass']) if (named[n]) named[n].traverse((o) => { if (o.isMesh) for (const m of [].concat(o.material)) m.clippingPlanes = s.deskAway && t > s.deskAway[0] ? [DESK_SWEEP] : (n === 'Baked_ROOM' ? null : m.clippingPlanes); });
-  scene.fog.density = zone ? ({ balcony: 0.0, monolith: 0.006, drown: 0.16, tower: 0.035 }[zone] ?? 0.004) : 0.045;
+  scene.fog.density = zone ? (s.zopt?.fog ?? { balcony: 0.0, monolith: 0.006, drown: 0.16, tower: 0.035 }[zone] ?? 0.004) : 0.045;   // round 14: a shot may set its own haze (K45)
   scene.fog.color.set(zone === 'tower' ? 0x0a1a2c : zone === 'cheat' ? 0x0d0624 : zone === 'monolith' ? 0xd8dee3 : zone ? 0x02050a : 0x060a10);   // monolith: pale haze, the far end of the block fades
 
   // dim: the room sinks toward black around a lit desk (a transition state on the way into the zone)

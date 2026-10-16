@@ -313,7 +313,7 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
     return new THREE.CanvasTexture(c); })();
   const longShadow = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 3.6), new THREE.MeshBasicMaterial({ map: longTex, transparent: true, depthWrite: false }));
   longShadow.rotation.x = -Math.PI / 2; mono.add(longShadow);   // round 13: the white void gets depth (K46 from above)
-  const L = 84, H = 44.0, D = 16, LOB = 5.0, FL = 3.0, BAY = 3.2;
+  const L = 84, H = 44.0, D = 16, LOB = 5.0, FL = 3.0, BAY = 3.2;   // (round 14: panes 8 cm off the body: K45 sees it from 80 m, where 2 cm z-fought)
   bld.position.copy(B(C[0] - 4.99, C[1] + 0.08, 0));            // the near corner 4 m to his left, the facade 3 m behind him bld.rotation.y = THREE.MathUtils.degToRad(35);
   const dark = new THREE.MeshStandardMaterial({ color: 0x161b21, roughness: 0.62, metalness: 0.15 });
   const conc = new THREE.MeshStandardMaterial({ color: 0x2b3138, roughness: 0.8 });
@@ -353,7 +353,7 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
   floors.forEach((y, fi) => { for (let i = 0; i < nB; i++) {
     const k = rnd(i * 7.3 + fi * 31.1), x = (i + 0.5) * BAY;
     const ic = iconAt(i, fi);
-    m4.compose(new THREE.Vector3(x, y + FL / 2 + 0.1, 0.02), q0, new THREE.Vector3(BAY - 0.3, FL - 0.45, 1)); panes.setMatrixAt(np, m4);
+    m4.compose(new THREE.Vector3(x, y + FL / 2 + 0.1, 0.08), q0, new THREE.Vector3(BAY - 0.3, FL - 0.45, 1)); panes.setMatrixAt(np, m4);
     paneMeta[np] = { i, fi, kind: ic ? 'icon' : k < 0.15 ? 'lit' : 'glass' };
     if (ic) col.setRGB(...hex(ic)).multiplyScalar(2.2);
     else if (k < 0.12) col.setRGB(...WARM[Math.floor(rnd(k * 99) * 4)]).multiplyScalar(0.5 + rnd(i + fi * 3) * 0.4);
@@ -363,7 +363,7 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
   } });
   const paneBase = Float32Array.from(panes.instanceColor.array), nPanes = np;   // the facade as built (the lobby comes after)
   // the lobby: double height, all glass, lit warm, mullions every 1.6 m, a canopy over the door by his mark
-  m4.compose(new THREE.Vector3(L / 2, LOB / 2, 0.02), q0, new THREE.Vector3(L, LOB - 0.2, 1)); panes.setMatrixAt(np, m4); panes.setColorAt(np++, col.setRGB(1.0, 0.66, 0.38).multiplyScalar(0.3));
+  m4.compose(new THREE.Vector3(L / 2, LOB / 2, 0.08), q0, new THREE.Vector3(L, LOB - 0.2, 1)); panes.setMatrixAt(np, m4); panes.setColorAt(np++, col.setRGB(1.0, 0.66, 0.38).multiplyScalar(0.3));
   panes.count = np; bld.add(panes);
   // round 12: the facade comes alive. His icons light up row by row from the street (0.12 s a floor); a diagonal band
   // of light runs across the building every ~1.5 s, waking the dark rooms it passes; a few rooms switch on and off
@@ -389,15 +389,15 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
     panes.instanceColor.needsUpdate = true;
   }
   const mull = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), finM, Math.ceil(L / 1.6) + 1);
-  for (let i = 0; i * 1.6 <= L; i++) { m4.compose(new THREE.Vector3(i * 1.6, LOB / 2, 0.08), q0, new THREE.Vector3(0.08, LOB, 0.16)); mull.setMatrixAt(i, m4); }
+  for (let i = 0; i * 1.6 <= L; i++) { m4.compose(new THREE.Vector3(i * 1.6, LOB / 2, 0.14), q0, new THREE.Vector3(0.08, LOB, 0.16)); mull.setMatrixAt(i, m4); }
   bld.add(mull);
   lbox(5.0, 0.2, 1.8, 4.6, 3.6, 0.9, conc);                                           // the canopy
   // the side face (toward the camera on the left): blank but for a column of narrow slots
   for (let y = LOB + 1.0; y < H - 1; y += FL) {
     const sl = new THREE.Mesh(new THREE.PlaneGeometry(0.7, 2.2), new THREE.MeshBasicMaterial({ color: new THREE.Color(...(rnd(y) > 0.5 ? WARM[1] : [0.22, 0.24, 0.27])).multiplyScalar(rnd(y) > 0.5 ? 1.3 : 1) }));
-    sl.position.set(-0.02, y + 1.1, -D * 0.35); sl.rotation.y = -Math.PI / 2; bld.add(sl);
+    sl.position.set(-0.08, y + 1.1, -D * 0.35); sl.rotation.y = -Math.PI / 2; bld.add(sl);
   }
-  const ground = new THREE.Mesh(new THREE.PlaneGeometry(200, 200), new THREE.MeshStandardMaterial({ color: 0xc9cdd0, roughness: 0.95 }));
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(900, 900), new THREE.MeshStandardMaterial({ color: 0xc9cdd0, roughness: 0.95 }));
   ground.rotation.x = -Math.PI / 2; ground.position.copy(B(C[0], C[1], 0)); mono.add(ground);
   const sun = new THREE.DirectionalLight(0xfff4e8, 2.2); sun.position.copy(B(C[0] - 6, C[1] - 4, 10)); sun.target.position.copy(B(C[0], C[1], 0));
   mono.add(sun, sun.target);
@@ -791,6 +791,8 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
     mono.visible = mode === 'monolith';
     if (mono.visible) {
       bld.visible = !opts.noBuilding; footShadow.position.copy(B(F.x, F.y, 0.003)); animFacade(opts.age ?? 0);
+      // round 14 (K45): the machine can be set back from him (bldAt: [dx, dy] Blender metres) so the lens sees all of it
+      const ba = opts.bldAt || [0, 0]; bld.position.copy(B(C[0] - 4.99 + ba[0], C[1] + 0.08 + ba[1], 0));
       const away = B(F.x, F.y, 0).sub(sun.position).setY(0).normalize();               // away from the sun, along the ground
       longShadow.position.copy(B(F.x, F.y, 0.0025)).addScaledVector(away, 1.8);
       longShadow.rotation.z = Math.atan2(away.x, away.z) + Math.PI;
@@ -798,7 +800,7 @@ export function createStage(scene, { center = [1.04, 3.95] } = {}) {
     balc.visible = mode === 'balcony';
     drown.visible = mode === 'drown';
     if (drown.visible && opts.head && opts.cam) layDrown(B(...opts.head), B(...opts.cam), t, opts.rise);
-    sky.scale.setScalar(mode === 'balcony' ? 5.5 : 1);            // the far city is past the default 70 m sky (camera far = 400)
+    sky.scale.setScalar(mode === 'balcony' || mode === 'monolith' ? 5.5 : 1);   // the far city (and K45's machine, set back) is past the default 70 m sky (camera far = 400)
     if (balc.visible) { balc.position.copy(B(F.x, F.y, 0)); balc.rotation.y = THREE.MathUtils.degToRad(opts.balconyYaw || 0); spill.intensity = opts.spill ?? 9;
       const tr = opts.trails, k = tr ? Math.min(1, Math.max(0, (t - tr[0]) / (tr[1] - tr[0]))) : 0;
       layTrails(k * k * (3 - 2 * k), tr ? Math.max(0, t - tr[0]) : 0); }
