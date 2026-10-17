@@ -13,6 +13,7 @@ An animated short rendered in a three.js engine (`engine/`), with light baked an
    - Open every reference image (Read tool) before working on its note, match it closely (style, texture, colour, light, pose), and check the result against it side by side before ticking the note.
 2. Fix them, then tick them: `- [x]`.
 3. `project.json` lists the scenes. A scene is `engine/scenes/<id>/scene.js` (the intro is `engine/src/shots.js`) plus `scenes/<nn-name>/`.
+4. When the human brings new story material (storyboards, ideas, references, motion words such as "match cut" or "the room transforms around him"), follow `docs/DIRECTOR_GUIDE.md`: read it all, say it back as a beat table, ask only what changes the picture, then build keyframes.
 
 ## Locked (do not change without being asked)
 - **The render style:** the `LOOK` in `engine/src/post.js`, the lens, grain, letterbox, AgX grade and the post order.
