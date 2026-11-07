@@ -1,3 +1,4 @@
 - [Director taste](director_taste.md): AAA bar, muted/cool field + one hot accent, light+air, intention; refs in reference/taste/
 - [AI room tutorial method](tutorial_ai_room_method.md): the learned build pipeline (shell → hero object → assets → dress → shaders → light layers → atmosphere)
 - [Style studies](studies_systems.md): engine/studies/ PS1 + AAA scenes and their libs, kept apart from the locked film look
+- [Craft lessons: room + PS1 v2](craft_lessons_room_ps1.md): placement map, zone density, camera match, arch glass, leather, CC0 rigged character, p5.brush
