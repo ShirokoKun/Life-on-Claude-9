@@ -59,3 +59,23 @@ Realism comes from density with order, wear, motivated light, atmosphere and an 
 5. **Depth layers:** foreground cut-off, subject, receding background into fog or dark.
 6. **One living detail per shot:** smoke, rain ripples, flicker, drifting dust, passing lights.
 7. **Never "basic":** a scene must be interesting to look at as a still before it moves.
+
+## Rejection, 2026-11-07: the first studies (read before building anything)
+
+The director rejected "The Cistern" (and the WebGL-only approach): *"even nowhere near close to the quality of the tutorial…
+your scene does not look 3D… not properly readable, lighting unnecessarily too much, no textures, the background and the
+sides are not readable, I don't understand what is what, the ground looks weird, shiny, reflective… nothing is intentionally done."*
+
+What went wrong, and the rules from the Life on Claude Nine book that already said so:
+| Failure | Book rule |
+|---|---|
+| Built from procedural boxes and primitives | **A15**: open-licence assets before procedural builds (Poly Haven, CC0/CC-BY, free Blender scenes). Procedural reads "basic PS2" |
+| A WebGL rasteriser with no bounce light: flat, not 3D | The tutorial is **Blender + Cycles** path tracing: soft GI, contact shadows, real AO. Use the real tool for look-dev and stills |
+| Glow, fog and bloom everywhere; the subject unreadable | **A12**: readable first, then cinematic. **B4**: one motivated key, pools and falloff. Every glow is paired with a real light |
+| A mirror floor | **B13** / lighting rule 7: floors are matte by default; wet only where a story puts water (puddles), never a whole mirror |
+| Textures invisible (fog and darkness ate them) | Exposure measured: p5 < 0.05, p95 > 0.8, mid-tones carry the material; read the frame at 100 % |
+| Shapes that are not things ("what is what?") | **A5**: one world with a concept and details with intent ("a control room, not random boxes"). Every object must be nameable |
+
+Order for the next attempt: concept in one line → candidate assets (Poly Haven models, HDRI, textures) → grey clay in
+Blender at real scale → Cycles look test with materials (judge at 100 %) → light in layers → restrained atmosphere →
+side by side with the tutorial's final frame (`reference/taste/tutorial_ai_room_sheet_06.jpg`) before showing.

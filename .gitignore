@@ -30,3 +30,5 @@ deliver/*.srt
 # (the probe tools in tools/_probe*.mjs are tracked: the notes use them)
 .DS_Store
 .claude/worktrees/
+# Blender study assets fetched from Poly Haven (node tools/polyhaven.mjs <id>; see docs/STUDIES.md)
+blender/assets/alley/
