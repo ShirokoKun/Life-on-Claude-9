@@ -219,7 +219,7 @@ def waste_basket(loc, M):
     return o
 
 def storage_box(loc, rz, M, size=(0.42, 0.3, 0.18)):
-    b = K.cube('storage_box', size, (loc[0], loc[1], loc[2] + size[2] / 2), M['clear_plastic'], bev=0.01, rot=(0, 0, rz))
+    b = K.cube('storage_box', size, (loc[0], loc[1], loc[2] + size[2] / 2), K.mat_plain('box_plastic', (0.72, 0.76, 0.8), rough=0.45, transmission=0.0), bev=0.01, rot=(0, 0, rz))
     K.cube('storage_lid', (size[0] + 0.01, size[1] + 0.01, 0.02), (loc[0], loc[1], loc[2] + size[2] + 0.01), K.mat_plain('lid_blue', (0.25, 0.38, 0.55), rough=0.4), bev=0.006, rot=(0, 0, rz))
     for k in range(3):   # things inside
         K.cube('box_inside', (0.1, 0.08, 0.06), (loc[0] + R.uniform(-0.12, 0.12), loc[1] + R.uniform(-0.08, 0.08), loc[2] + 0.04), K.mat_plain(f'inside{k}', R.choice(BOOK_COLS), rough=0.5), bev=0.004, rot=(0, 0, R.uniform(0, 90)))

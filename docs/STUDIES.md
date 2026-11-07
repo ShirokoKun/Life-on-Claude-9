@@ -96,3 +96,34 @@ every frame.
 
 **Camera.** One slow push down the causeway (10 s) with operator breathing, a 2.39:1 letterbox, AgX, bloom on the HDR
 sources, split-tone (cool shadows, warm highlights), chromatic aberration at the edges, and grain.
+
+## The Room (`blender/scenes/tutorial_room.py`): the tutorial rebuild, in Blender + Cycles
+
+The director's order (2026-11-07): rebuild the tutorial's home office to its quality before going back to the PS1 scene.
+Built the tutorial's way (`docs/TUTORIAL_AI_ROOM_BUILD.md`):
+
+| Stage | Here |
+|---|---|
+| Room shell in metres | 3.6 × 3.3 × 2.4 m. Walls are built around the window holes; skirting; deep sills |
+| Windows | Aluminium frames, mullions and transoms. Wired frosted glass below, clear above, one frosted pane. Arch-viz glass: glass for camera and reflection rays, transparent for light rays, so daylight is direct light, not a caustic |
+| Hero system object | Venetian blinds, slat by slat: 25 mm curved slats at a 21 mm pitch, tilted 38°, plus the headrail, bottom rail, ladder strings, tilt wand, pull cords and tassels |
+| Direct modelling | L desk, beige pedestal, walnut cubbies and bookcase, side desk, wire rack, the leather executive chair, monitors, PC tower, keyboard (individual keys), laptop, architect and gooseneck lamps, mugs, bottles, books, paper piles, bags, cooler bag, stick vacuum, waste basket, cables, original toys (a red vinyl bear and a silver robot) |
+| Poly Haven (CC0) | Cardboard boxes, wall clock, notepads, stationery, tape, pliers, wristwatch, multimeter, circuit board, binder, cassette player, camera |
+| Materials | CC0 PBR sets from `engine/assets/tex` in metres; painted walls; leather with grain, coat and sat-in creases; every hard edge bevelled |
+| Light | `--light day` (default): the soft overcast final. `sun`: the tutorial's "sunlight added" stage. Window portals, haze volume, AgX Medium High Contrast |
+| Camera | `--cam wide` (square to the window wall from the door, 16 mm), `desk`, `chair`. `--anim N`: a handheld walk-in |
+
+```bash
+blender -b --factory-startup --python blender/scenes/tutorial_room.py -- out.png --res 1280x720 --samples 128 [--clay] [--light sun]
+blender -b --factory-startup --python blender/scenes/tutorial_room.py -- renders/studies/room/walkin --res 960x540 --samples 40 --anim 96
+```
+
+Assets: `node tools/polyhaven.mjs --res 2k cardboard_box_01 wall_clock office_notepads stationery_supplies medical_tape pliers digital_wrist_watch retro_multimeter circuit_board binder_notebook cassette_player Camera_01`.
+Time on this 4-core cloud CPU: about 50 s for a frame at 960×540 and 32 samples with haze.
+
+**Still short of the tutorial (honest gaps):**
+- Its 110 asset types are mostly photoreal generated models (Tripo, PBR). Ours are scripted, so the small props are simpler.
+- Its chair has real tufting and wrinkles; ours is a subdivided approximation.
+- Its frosted pane shows mottled detail.
+
+Closing these needs either Tripo (as in `WORKFLOW.md` §3.4) or more modelling passes, prop by prop.

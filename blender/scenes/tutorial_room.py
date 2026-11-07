@@ -22,7 +22,7 @@ OUT = argv[0] if argv and not argv[0].startswith('--') else '/tmp/room.png'
 opt = lambda k, d=None: argv[argv.index(k) + 1] if k in argv else d
 RES = tuple(map(int, opt('--res', '1280x720').split('x')))
 SAMPLES = int(opt('--samples', '64'))
-LIGHT = opt('--light', 'sun')
+LIGHT = opt('--light', 'day')            # day = the tutorial's final soft overcast; sun = its 'sunlight added' stage
 CAM = opt('--cam', 'wide')
 CLAY = '--clay' in argv
 
@@ -44,6 +44,7 @@ M = {
     'blind': K.mat_plain('blind_slat', (0.80, 0.80, 0.77), rough=0.38, coat=0.1, bump=0.08, bump_scale=60),
     'cord': K.mat_plain('cord', (0.85, 0.84, 0.8), rough=0.7),
     'glass': K.mat_glass('glass_clear', rough=0.02),
+    'frosted': K.mat_glass('glass_frosted', rough=0.35, tint=(0.9, 0.92, 0.92)),
     'wireglass': K.mat_wireglass('glass_wired'),
     'black_plastic': K.mat_plain('black_plastic', (0.025, 0.025, 0.027), rough=0.45, bump=0.05, bump_scale=400),
     'gloss_black': K.mat_plain('gloss_black', (0.015, 0.015, 0.017), rough=0.15, coat=0.4),
@@ -55,7 +56,7 @@ M = {
 if CLAY:
     clay = K.mat_plain('clay', (0.55, 0.55, 0.55), rough=0.6)
     for k in M:
-        if k not in ('glass', 'wireglass'): M[k] = clay
+        if k not in ('glass', 'wireglass', 'frosted'): M[k] = clay
 
 # ================================================================= shell
 K.cube('floor', (W, DEP, 0.04), (W / 2, DEP / 2, -0.02), M['floor'], bev=0)
@@ -111,7 +112,7 @@ def window(name, axis, coord, a0, a1, panes, blinds):
         p0, p1 = edges[i], edges[i + 1]; mid = (p0 + p1) / 2; w = p1 - p0 - 0.05
         put(f'{name}_transom{i}', w, 0.06, 0.04, mid, TRANSOM, M['alu'])
         put(f'{name}_lowglass{i}', w, 0.008, TRANSOM - WIN_Z0 - 0.06, mid, (WIN_Z0 + TRANSOM) / 2, M['wireglass'])
-        put(f'{name}_highglass{i}', w, 0.006, WIN_Z1 - TRANSOM - 0.06, mid, (TRANSOM + WIN_Z1) / 2, M['glass'])
+        put(f'{name}_highglass{i}', w, 0.006, WIN_Z1 - TRANSOM - 0.06, mid, (TRANSOM + WIN_Z1) / 2, M['frosted'] if (name == 'win_back' and i == 0) else M['glass'])
         if blinds[i] is not None:
             venetian(f'{name}_blind{i}', axis, coord - (0.09 if axis == 'y' else -0.09), p0 + 0.03, p1 - 0.03, WIN_Z1 - 0.02, blinds[i])
 
@@ -199,7 +200,7 @@ def cubbies(name, x0, x1, y0, y1, z0, z1, cols, rows, t=0.018):
         else: K.cube(name + '_div', (x1 - x0, t, z1 - z0), ((x0 + x1) / 2, y0 + t / 2 + (y1 - y0 - t) * i / cols, (z0 + z1) / 2), M['walnut'], bev=0.002)
     for j in range(1, rows):
         K.cube(name + '_shelf', (x1 - x0, y1 - y0, t), ((x0 + x1) / 2, (y0 + y1) / 2, z0 + (z1 - z0) * j / rows), M['walnut'], bev=0.002)
-cubbies('cubby_right', W - 0.42, W - 0.02, 0.35, 2.35, 0.04, 0.92, 4, 2)
+cubbies('cubby_right', W - 0.42, W - 0.02, 0.95, 2.35, 0.04, 0.92, 3, 2)
 # the walnut side desk on the left and the white wire rack standing on it, plastic boxes on top
 K.cube('side_desk_top', (0.6, 1.1, 0.03), (0.32, 2.55, DESK_Z - 0.015), M['walnut'], bev=0.004)
 K.cube('side_desk_panel', (0.6, 0.03, DESK_Z - 0.03), (0.32, 2.015, (DESK_Z - 0.03) / 2), M['walnut'], bev=0.003)
@@ -221,7 +222,11 @@ def exec_chair(loc, rz):
     def pillow(name, size, at, round_=0.4, rot=(0, 0, 0)):
         o = K.cube(name, size, at, M['leather'], bev=0, rot=rot)
         bv = o.modifiers.new('round', 'BEVEL'); bv.width = min(size) * round_; bv.segments = 3
-        K.subsurf(o, 2); o.parent = g; parts.append(o); return o
+        K.subsurf(o, 2); o.parent = g; parts.append(o)
+        o.modifiers['sub'].levels = 3; o.modifiers['sub'].render_levels = 3
+        d = o.modifiers.new('creases', 'DISPLACE'); t = bpy.data.textures.get('leather_creases') or bpy.data.textures.new('leather_creases', 'VORONOI')
+        t.noise_scale = 0.06; t.distance_metric = 'DISTANCE'; d.texture = t; d.strength = 0.006; d.mid_level = 0.5; d.texture_coords = 'OBJECT'
+        return o
     # seat: a thick cushion with a rolled front edge
     pillow('chair_seat', (0.52, 0.5, 0.13), (0, 0.0, 0.50))
     pillow('chair_seat_roll', (0.5, 0.12, 0.1), (0, -0.21, 0.52), round_=0.5)
@@ -249,7 +254,7 @@ def exec_chair(loc, rz):
         f = K.cube('chair_fork', (0.03, 0.03, 0.04), (ex, ey, 0.06), M['black_plastic'], bev=0.006); f.parent = g
     return g
 
-exec_chair((1.3, 1.7, 0), 28)
+exec_chair((0.74, 2.08, 0), 40)
 
 
 # ================================================================= dressing: big -> mid -> small, clustered where he works
@@ -329,6 +334,30 @@ P.paper_stack((1.05, 1.15, 0.0), 4, PM, rz=40)
 P.paper_bag((2.95, 2.95, DZ), 80, PM, h=0.24)
 P.mug('desk_mug2', (1.5, 2.9, DZ), PM, 'ceramic_white', tea=False)
 
+# density pass (the tutorial's level): the sill lined with mugs and bottles, a wall of binders, piles on every surface
+for k, x in enumerate((0.55, 0.72, 0.9, 1.6, 1.78, 2.05, 3.0, 3.18, 3.32)):
+    if k % 3 == 2: P.bottle(f'sill_bottle{k}', (x, 3.22, WIN_Z0), PM, 'white' if k % 2 else 'tea')
+    else: P.mug(f'sill_mug_x{k}', (x, 3.22, WIN_Z0), PM, 'ceramic_white' if k % 2 else 'ceramic_beige', tea=False)
+P.paper_stack((2.98, 3.0, DZ + 0.06), 18, PM, rz=-6, size=(0.3, 0.24))
+K.asset('cardboard_box_01', (2.55, 3.1, DZ), rz=90, scale=1.15)
+binder_mats = [K.mat_plain(f'binder{k}', c, rough=0.4) for k, c in enumerate(((0.85, 0.85, 0.83), (0.2, 0.3, 0.55), (0.85, 0.85, 0.83), (0.85, 0.85, 0.83)))]
+for k in range(9):   # white and blue lever-arch files in the right cubbies
+    K.cube('binder', (0.3, 0.06, 0.32), (W - 0.24, 1.42 + k * 0.065, 0.06 + 0.16), binder_mats[k % 4], bev=0.004)
+P.book_row(W - 0.38, 1.95, 0.49, 0.38, PM, axis='y', rz=0)
+P.book_stack((0.3, 2.0, DESK_Z), 5, PM, rz=12)
+P.paper_stack((0.3, 2.55, DESK_Z + 0.25), 6, PM, rz=0, size=(0.3, 0.22))
+P.book_stack((W - 0.3, 0.45, 0.0), 8, PM, rz=-20)
+P.paper_bag((1.95, 0.75, 0), -40, PM, h=0.3)
+K.cube('shoebox', (0.32, 0.2, 0.12), (2.35, 2.98, 0.06), PM['red_card'], bev=0.004, rot=(0, 0, 8))
+P.can((1.95, 2.95, DZ), PM); P.can((2.68, 2.55, DZ), PM)
+P.bottle('desk_bottle3', (2.35, 3.05, DZ), PM, 'white')
+K.asset('Camera_01', (0.98, 2.65, DZ + 0.06), rz=40)
+
+# the tall bookcase in the right foreground (walnut, five shelves, packed)
+cubbies('bookcase', W - 0.36, W - 0.02, 0.04, 0.9, 0.0, 1.85, 1, 5)
+for j in range(5):
+    P.book_row(W - 0.3, 0.07, 0.02 + 1.85 * j / 5, 0.8, PM, axis='y', rz=0)
+
 # ================================================================= ceiling, aircon, clock
 # the flush ceiling light: a dark drum with a white diffuser ring (as in the tutorial)
 K.cyl('ceil_lamp_rim', 0.26, 0.09, (1.8, 1.65, H - 0.045), M['black_plastic'], seg=48, bev=0.01)
@@ -363,7 +392,7 @@ if LIGHT in ('sun',):
 # ================================================================= air (haze: shows the light through the blinds)
 if '--novol' not in argv and LIGHT != 'night':
     v = bpy.data.materials.new('room_air'); v.use_nodes = True; vn = v.node_tree.nodes; vn.clear()
-    pv = vn.new('ShaderNodeVolumePrincipled'); pv.inputs['Density'].default_value = 0.022; pv.inputs['Anisotropy'].default_value = 0.6
+    pv = vn.new('ShaderNodeVolumePrincipled'); pv.inputs['Density'].default_value = 0.04; pv.inputs['Anisotropy'].default_value = 0.6
     vo = vn.new('ShaderNodeOutputMaterial'); v.node_tree.links.new(pv.outputs[0], vo.inputs['Volume'])
     air = K.cube('air', (W - 0.02, DEP - 0.02, H - 0.02), (W / 2, DEP / 2, H / 2), v, bev=0); air.visible_shadow = False
 
@@ -371,7 +400,7 @@ if '--novol' not in argv and LIGHT != 'night':
 cam = bpy.data.objects.new('cam', bpy.data.cameras.new('cam')); K.link(cam); sc.camera = cam
 cam.data.sensor_width = 36
 CAMS = {   # (location, look-at, lens mm)
-    'wide': ((0.95, 0.14, 1.6), (2.15, 3.2, 0.92), 17),
+    'wide': ((1.75, 0.07, 1.58), (1.9, 3.3, 1.0), 16),     # square to the window wall, from the door
     'desk': ((1.6, 1.55, 1.35), (2.2, 3.0, 0.8), 24),
     'chair': ((0.9, 0.9, 1.25), (1.6, 2.2, 0.6), 22),
 }
@@ -390,8 +419,22 @@ sc.render.resolution_x, sc.render.resolution_y = RES; sc.render.resolution_perce
 sc.view_settings.view_transform = 'AgX'
 try: sc.view_settings.look = 'AgX - Medium High Contrast'
 except TypeError: pass
-sc.view_settings.exposure = float(opt('--exposure', '0.0'))
+sc.view_settings.exposure = float(opt('--exposure', '0.45'))
 sc.render.image_settings.file_format = 'PNG'; sc.render.filepath = OUT
 if opt('--blend'): bpy.ops.wm.save_as_mainfile(filepath=opt('--blend'))
-bpy.ops.render.render(write_still=True)
+if opt('--anim'):
+    # a handheld walk-in like the tutorial's film: a slow push toward the desk with operator sway (24 fps)
+    n = int(opt('--anim')); sc.frame_start, sc.frame_end = 1, n; sc.render.fps = 24
+    p0, p1 = Vector(loc), Vector(loc) + Vector((-0.1, 0.55, -0.08)); a0, a1 = Vector(at), Vector(at) + Vector((-0.15, 0, -0.05))
+    for f in range(1, n + 1):
+        u = (f - 1) / max(1, n - 1); e = u * u * (3 - 2 * u)
+        sway = Vector((math.sin(f * 0.21) * 0.012 + math.sin(f * 0.53) * 0.004, math.sin(f * 0.17) * 0.006, math.sin(f * 0.29 + 1) * 0.008))
+        cam.location = p0.lerp(p1, e) + sway
+        cam.rotation_euler = (a0.lerp(a1, e) - cam.location).to_track_quat('-Z', 'Y').to_euler()
+        cam.rotation_euler.y += math.sin(f * 0.13) * 0.006
+        cam.keyframe_insert('location', frame=f); cam.keyframe_insert('rotation_euler', frame=f)
+    sc.render.filepath = OUT.rstrip('/') + '/f_'
+    bpy.ops.render.render(animation=True)
+else:
+    bpy.ops.render.render(write_still=True)
 print('WROTE', OUT)
