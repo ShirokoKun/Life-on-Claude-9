@@ -496,6 +496,7 @@ if opt('--film'):
     for fc in (cam.animation_data.action.fcurves if cam.animation_data and hasattr(cam.animation_data.action, 'fcurves') else []):
         for kp in fc.keyframe_points: kp.interpolation = 'CONSTANT'
     if opt('--range'): sc.frame_start, sc.frame_end = map(int, opt('--range').split('-'))
+    sc.frame_step = int(opt('--step', '1'))       # render every Nth frame; the encode interpolates motion back to 24 fps
     sc.render.filepath = OUT.rstrip('/') + '/f_'
     bpy.ops.render.render(animation=True)
 elif opt('--anim'):

@@ -127,3 +127,48 @@ Time on this 4-core cloud CPU: about 50 s for a frame at 960×540 and 32 samples
 - Its frosted pane shows mottled detail.
 
 Closing these needs either Tripo (as in `WORKFLOW.md` §3.4) or more modelling passes, prop by prop.
+
+## Last Train v2 (`engine/studies/ps1-subway-v2/`): the PS1 look, pushed toward the reference
+
+v1 is frozen as the approved look (`engine/studies/ps1-subway-v1/`, git tag `ps1-last-train-v1`). v2 follows the director's notes:
+clean, cinematic low poly; a better character with proper hands and posture; better environment and light; a small story loop;
+textures painted with p5.brush.
+
+**Noor v2** (`blender/characters/ps1_noor.py`, textures from `ps1_noor_textures.py`):
+- **Base:** a CC0 rigged base body (Quaternius Universal Base Characters, public domain; 65 bones, full fingers). It is
+  dressed and styled as our own character: a red quilted puffer with black cuffs, denim, white sneakers, and a bob cut
+  from the kit's long hair.
+- **Clothes:** cut from the body by bone weights. The puffer is inflated and smoothed so it hangs instead of hugging.
+- **Pose:** seated with IK on the arms and legs. The cigarette is held between index and middle finger, and the right
+  hand rests half-curled on the knee.
+- **The 12 s loop:**
+  - she holds the cigarette by her chest;
+  - she takes a drag (2–3.7 s) and exhales;
+  - she looks across the car (6–7.6 s);
+  - she lowers the cigarette to her knee and taps the ash (8–9.6 s);
+  - she brings it back up.
+  
+  A breath runs every 4 s. The constraints are baked into plain bone animation for glTF.
+- **In the engine:** `character_glb.js` gives the meshes PS1 materials (nearest-filtered, vertex snap), drives the
+  AnimationMixer from the harness clock, and samples the ember and mouth over the loop, so the smoke trails come from
+  where the cigarette was.
+
+**Painted graphics** (`engine/studies/painter/` + `tools/paint_textures.mjs`, p5.js 2.2.0 + p5.brush 2.2.3 in `engine/vendor/p5/`):
+- spray-and-marker graffiti tags, watercolour ad washes, a pen-and-marker route map and charcoal grime, all original
+  designs;
+- drawn into the PS1 textures at low resolution, so they keep their brush character under the pixel grid;
+- pixel-font lettering stays on top.
+
+**Camera and light:**
+- the camera is closer, so she fills the right third as in the reference;
+- the tube above her acts as a soft warm key on her face;
+- the draft pulls the smoke toward the window.
+
+```bash
+python3 blender/characters/ps1_noor_textures.py <Quaternius dir>
+blender -b --factory-startup --python blender/characters/ps1_noor.py -- <Quaternius dir> engine/studies/ps1-subway-v2/assets/noor.glb [--preview p.png --t 3.0]
+node tools/paint_textures.mjs
+node tools/study_render.mjs --study ps1-subway-v2 --film --w 1920 --h 1080 --mp4 renders/studies/ps1-subway-v2/last_train_v2_1080.mp4
+```
+The Quaternius pack: https://quaternius.itch.io/universal-base-characters (Standard, CC0; not committed). The built
+`noor.glb` and its textures are in the repo.

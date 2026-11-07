@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Painter · p5.brush textures</title>
+<style>html, body { margin: 0; background: #222; } canvas { display: block; }</style>
+<script src="../../vendor/p5/p5.min.js"></script>
+<script src="../../vendor/p5/p5.brush.js"></script>
+</head>
+<body>
+<script>
+// Paints the PS1 v2 set's graphics with natural brushes (p5.brush): spray-and-marker graffiti tags, watercolour ad
+// posters, a pen-drawn route map, grime. All designs are original. tools/paint_textures.mjs calls window.paint(name)
+// for each texture and saves the canvas as PNG (the PS1 renderer then shows them at low resolution, nearest-filtered).
+const SIZE = 512;
+function setup() {
+  createCanvas(SIZE, SIZE, WEBGL);
+  try { setAttributes({ preserveDrawingBuffer: true }); } catch (e) { console.log('attrs', e.message); } pixelDensity(1); noLoop();
+  brush.scaleBrushes(2.2);
+  window.__ready = true;
+}
+const P = (x, y) => [x - SIZE / 2, y - SIZE / 2];        // WEBGL: the origin is the centre
+function line2(a, b, c, d) { brush.line(...P(a, b), ...P(c, d)); }
+function poly(pts) { brush.polygon(pts.map(([x, y]) => P(x, y))); }
+function blob(cx, cy, r, n = 12, j = 0.2) {
+  const pts = []; for (let i = 0; i < n; i++) { const a = i / n * TWO_PI, rr = r * (1 + random(-j, j)); pts.push([cx + cos(a) * rr, cy + sin(a) * rr * 0.8]); } return pts;
+}
+// a graffiti tag: a fat sprayed outline, a marker fill, a few highlights and drips
+function tag(seed, fillCol, outCol, glyphs = 5) {
+  randomSeed(seed); noiseSeed(seed);
+  const strokes = [];
+  let x = 60;
+  for (let g = 0; g < glyphs; g++) {
+    const w = random(50, 80), y0 = random(170, 220), h = random(110, 170);
+    const pts = []; const n = floor(random(4, 7));
+    for (let i = 0; i < n; i++) pts.push([x + random(0, w), y0 + random(0, h)]);
+    strokes.push(pts); x += w * random(0.65, 0.85);
+  }
+  // outline: spray, thick
+  brush.set('spray', outCol, 6.5);
+  for (const pts of strokes) brush.spline(pts.map(([a, b]) => P(a, b)), 0.6);
+  // fill: marker, thinner, on top
+  brush.set('marker', fillCol, 3.2);
+  for (const pts of strokes) brush.spline(pts.map(([a, b]) => P(a + 2, b - 2)), 0.6);
+  // highlights and drips
+  brush.set('pen', '#ffffff', 1.2);
+  for (const pts of strokes) { const [a, b] = pts[0]; line2(a, b, a + 12, b - 6); }
+  brush.set('marker', fillCol, 1.2);
+  for (let k = 0; k < 5; k++) { const pts = random(strokes); const [a, b] = random(pts); line2(a, b, a + random(-2, 2), b + random(20, 60)); }
+}
+function poster(seed, bg, ink, accent) {
+  randomSeed(seed); noiseSeed(seed);
+  brush.noStroke(); brush.fillBleed(0.05);
+  for (let k = 0; k < 4; k++) { brush.fill(bg, 255); poly([[18, 18], [494, 18], [494, 494], [18, 494]]); }   // layered washes: a solid ground
+  brush.fillBleed(0.2); for (let k = 0; k < 3; k++) { brush.fill(accent, 255); poly(blob(256, 220, 120, 14, 0.2)); }
+  brush.noFill(); brush.set('rotring', ink, 1.6);
+  for (let k = 0; k < 4; k++) line2(70, 380 + k * 22, 70 + random(200, 360), 380 + k * 22);
+  brush.set('marker', ink, 3); line2(70, 330, 440, 330);
+  brush.set('2B', ink, 1.2); brush.hatch(9, 40); brush.rect(...P(330, 90), 120, 90); brush.noHatch();
+}
+function routeMap(seed) {
+  randomSeed(seed);
+  brush.noStroke(); brush.fillBleed(0.04); for (let k = 0; k < 3; k++) { brush.fill('#e6dcc0', 255); poly([[16, 16], [496, 16], [496, 496], [16, 496]]); }
+  const lines = [['#c8382b', [[40, 120], [160, 160], [260, 150], [380, 230], [470, 260]]], ['#2f7d4f', [[60, 440], [150, 330], [240, 260], [330, 200], [460, 90]]],
+                 ['#d5a020', [[30, 300], [180, 300], [280, 360], [470, 420]]], ['#2d4f9c', [[250, 30], [250, 200], [270, 330], [250, 480]]]];
+  for (const [col, pts] of lines) { brush.set('marker', col, 2.4); brush.spline(pts.map(([a, b]) => P(a, b)), 0.3); }
+  brush.set('pen', '#1e1e1e', 1.0);
+  for (const [, pts] of lines) for (const [a, b] of pts) { brush.noFill(); brush.circle(...P(a, b), 7); }
+  brush.set('HB', '#3a352c', 0.8); for (let k = 0; k < 18; k++) { const x = random(30, 470), y = random(30, 470); line2(x, y, x + random(20, 60), y); }
+}
+function grime(seed) {
+  randomSeed(seed); noiseSeed(seed);
+  brush.set('charcoal', '#2a2a22', 2.5);
+  for (let k = 0; k < 40; k++) { const x = random(0, SIZE), y = random(SIZE * 0.55, SIZE); line2(x, y, x + random(-40, 40), y + random(20, 120)); }
+  brush.noStroke(); brush.fill('#33332a', 60); brush.fillBleed(0.3);
+  for (let k = 0; k < 6; k++) poly(blob(random(SIZE), random(SIZE * 0.6, SIZE), random(40, 110), 12, 0.35));
+}
+const JOBS = {
+  tag_violet: () => tag(11, '#9b4fd6', '#1d0f2c'), tag_cream: () => tag(23, '#e9e2cf', '#22201c', 6), tag_teal: () => tag(37, '#2fa59a', '#0c2522', 4),
+  tag_pink: () => tag(41, '#e44a8a', '#3a0f22', 5),
+  poster_noodle: () => poster(5, '#d9c48a', '#5b1a12', '#b8342a'), poster_sleep: () => poster(6, '#1d3150', '#e8d9a8', '#4a6fa8'),
+  poster_lost: () => poster(7, '#b8342a', '#f3e6c8', '#e8a04a'), map: () => routeMap(3), grime: () => grime(9),
+};
+window.paint = (name) => { clear(); push(); JOBS[name](); pop(); return document.querySelector('canvas').toDataURL('image/png'); };
+window.jobs = Object.keys(JOBS);
+</script>
+</body>
+</html>

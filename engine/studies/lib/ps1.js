@@ -170,7 +170,7 @@ function painter(ctx, w, h) {
   let img = null;
   const grab = () => { if (!img) img = ctx.getImageData(0, 0, w, h); return img; };
   const P = {
-    w, h, hex,
+    w, h, hex, ctx,
     flush() { if (img) { ctx.putImageData(img, 0, 0); img = null; } },
     fill(c, x = 0, y = 0, ww = w, hh = h) { P.flush(); ctx.fillStyle = typeof c === 'string' ? c : `rgb(${hex(c)})`; ctx.fillRect(x, y, ww, hh); },
     // per-pixel colour function f(x, y, [r,g,b]) -> [r,g,b]
