@@ -14,17 +14,18 @@ def post(im, seed=0):
     h, w, _ = a.shape
     # bloom + haze: everything near clipping glows; a wide, faint veil (the milky light round the windows)
     lum = a @ np.array([0.2126, 0.7152, 0.0722], np.float32)
-    hi = np.clip((lum - 0.72) / 0.28, 0, 1)[..., None] * a
+    hi = np.clip((lum - 0.9) / 0.1, 0, 1)[..., None] * a        # only what really clips glows
     hi_im = Image.fromarray((hi * 255).astype(np.uint8))
     b1 = np.asarray(hi_im.filter(ImageFilter.GaussianBlur(w * 0.012))).astype(np.float32) / 255
     b2 = np.asarray(hi_im.filter(ImageFilter.GaussianBlur(w * 0.05))).astype(np.float32) / 255
-    a = a + b1 * 0.35 + b2 * 0.45
+    a = a + b1 * 0.16 + b2 * 0.12
     # lens softness: a touch of blur mixed back (the tutorial is softer than raw Cycles)
     soft = np.asarray(Image.fromarray(np.clip(a * 255, 0, 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(w / 1600))).astype(np.float32) / 255
-    a = a * 0.55 + soft * 0.45
+    a = a * 0.8 + soft * 0.2
     # tone: lift the blacks (never crushed), raise the mids, keep the clipped windows
     a = 0.022 + a * (1 - 0.022)
-    a = np.power(np.clip(a, 0, 1), 0.86)
+    a = np.power(np.clip(a, 0, None), 0.97)
+    a = np.where(a > 0.72, 0.72 + (a - 0.72) * 0.55, a)              # highlight shoulder: bright blinds keep their slats
     # grade: slight desaturation, cooler shadows, neutral-warm highlights
     l = (a @ np.array([0.2126, 0.7152, 0.0722], np.float32))[..., None]
     a = l + (a - l) * 0.86
@@ -37,7 +38,7 @@ def post(im, seed=0):
     # grain: fine, luminance-weighted, seeded by frame
     rng = np.random.default_rng(seed)
     g = rng.normal(0, 1, (h, w)).astype(np.float32)[..., None]
-    a = a + g * 0.018 * (0.4 + 0.6 * np.sqrt(np.clip(l, 0, 1)))
+    a = a + g * 0.008 * (0.4 + 0.6 * np.sqrt(np.clip(l, 0, 1)))
     return Image.fromarray(np.clip(a * 255 + 0.5, 0, 255).astype(np.uint8))
 
 if __name__ == '__main__':

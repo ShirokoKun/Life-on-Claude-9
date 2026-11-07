@@ -20,7 +20,7 @@ def _m():
         'ceramic_beige': K.mat_plain('ceramic_beige', (0.78, 0.74, 0.66), rough=0.18, coat=0.5),
         'ceramic_white': K.mat_plain('ceramic_white', (0.86, 0.86, 0.84), rough=0.15, coat=0.5),
         'tea': K.mat_plain('tea', (0.18, 0.08, 0.02), rough=0.02, coat=1.0),
-        'red_card': K.mat_plain('red_card', (0.55, 0.06, 0.04), rough=0.6, bump=0.05, bump_scale=200),
+        'red_card': K.mat_plain('red_card', (0.5, 0.11, 0.06), rough=0.55, bump=0.05, bump_scale=200),
         'kraft': K.mat_tex('kraft', 'cardboard', tile=0.4, tint=(1.0, 0.9, 0.78), rough_mul=0.3, rough_add=0.6, normal=0.6),
         'cork': K.mat_tex('cork', 'cork', tile=0.3, rough_mul=0.3, rough_add=0.6),
         'paper': K.mat_tex('paper', 'paper', tile=0.25, tint=(0.95, 0.94, 0.9), rough_mul=0.2, rough_add=0.7, normal=0.3),
@@ -72,7 +72,9 @@ def keyboard(loc, rz, M):
     ret = bmesh.ops.create_cube(bm, size=1.0)
     for v in ret['verts']: v.co = Vector((v.co.x * 0.11, v.co.y * 0.0165 - 0.05, v.co.z * 0.008 + 0.024))   # the space bar
     bm.to_mesh(me); bm.free()
-    keys = bpy.data.objects.new('kb_keys', me); K.link(keys); me.materials.append(M['key']); keys.parent = g
+    keys = bpy.data.objects.new('kb_keys', me); K.link(keys); keys.parent = g
+    km = K.mat_image('keycaps', os.path.join(ROOM_ASSETS, 'keyboard.png'), axes='xy', rough=0.55)
+    km.node_tree.nodes['Principled BSDF'].inputs['Specular IOR Level'].default_value = 0.3; me.materials.append(km)
     K.bevel(keys, 0.002, 2)
     return g
 
@@ -85,8 +87,9 @@ def mouse(loc, rz, M):
 def mug(name, loc, M, mat='ceramic_beige', tea=True):
     prof = [(0.0, 0.0), (0.038, 0.0), (0.04, 0.004), (0.041, 0.09), (0.043, 0.098), (0.039, 0.098), (0.036, 0.094), (0.036, 0.008), (0.0, 0.008)]
     o = K.lathe(name, prof, loc, M[mat]); K.subsurf(o, 1)
-    h = K.cube(name + '_handle', (0.012, 0.045, 0.06), (loc[0] + 0.048, loc[1], loc[2] + 0.05), M[mat], bev=0.0)
-    hb = h.modifiers.new('r', 'BEVEL'); hb.width = 0.006; hb.segments = 3
+    bpy.ops.mesh.primitive_torus_add(major_radius=0.024, minor_radius=0.0055, major_segments=24, minor_segments=10, location=(loc[0] + 0.044, loc[1], loc[2] + 0.052), rotation=(math.radians(90), 0, 0))
+    h = bpy.context.active_object; h.name = name + '_handle'; K.link(h); h.data.materials.append(M[mat]); h.scale = (0.85, 1.0, 1.15)
+    for p_ in h.data.polygons: p_.use_smooth = True
     if tea: K.cyl(name + '_tea', 0.0355, 0.002, (loc[0], loc[1], loc[2] + 0.07), M['tea'], seg=32, bev=0)
     return o
 
@@ -109,7 +112,12 @@ def can(loc, M):
     return K.cyl('can', 0.033, 0.122, (loc[0], loc[1], loc[2] + 0.061), M['can_red'], seg=32, bev=0.003)
 
 def red_box(loc, rz, M):
-    return K.cube('red_box', (0.12, 0.12, 0.09), (loc[0], loc[1], loc[2] + 0.045), M['red_card'], bev=0.003, rot=(0, 0, rz))
+    m = K.mat_image('box_tea', os.path.join(ROOM_ASSETS, 'box_tea.png'), axes='xz', rough=0.45)
+    return K.cube('tea_box', (0.11, 0.11, 0.11), (loc[0], loc[1], loc[2] + 0.055), m, bev=0.003, rot=(0, 0, rz))
+
+def med_box(loc, rz, M):
+    m = K.mat_image('box_med', os.path.join(ROOM_ASSETS, 'box_med.png'), axes='xz', rough=0.4)
+    return K.cube('med_box', (0.12, 0.07, 0.1), (loc[0], loc[1], loc[2] + 0.05), m, bev=0.002, rot=(0, 0, rz))
 
 def cork_board(loc, rz, M, size=(0.62, 0.46)):
     W_, H_ = size
@@ -118,7 +126,7 @@ def cork_board(loc, rz, M, size=(0.62, 0.46)):
               K.cube('cork_face', (W_ - 0.04, 0.026, H_ - 0.04), (0, -0.001, H_ / 2), M['cork'], bev=0)):
         o.parent = g
     for (x, z, w, h) in ((-0.1, H_ * 0.62, 0.17, 0.24), (0.11, H_ * 0.6, 0.15, 0.3), (-0.08, H_ * 0.22, 0.14, 0.12), (0.12, H_ * 0.2, 0.1, 0.1)):
-        p = K.cube('pinned', (w, 0.002, h), (x, -0.015, z), M['paper'], bev=0, rot=(0, R.uniform(-4, 4), 0)); p.parent = g
+        p = K.cube('pinned', (w, 0.002, h), (x, -0.015, z), K.mat_image('doc_pinned', os.path.join(ROOM_ASSETS, 'doc_drawing.png'), axes='xz', rough=0.75), bev=0, rot=(0, R.uniform(-4, 4), 0)); p.parent = g
         pin = K.cyl('pin', 0.004, 0.006, (x, -0.018, z + h / 2 - 0.015), M['can_red'], rot=(90, 0, 0), seg=12, bev=0); pin.parent = g
     return g
 
@@ -131,7 +139,7 @@ def book(name, size, loc, rz, color, M, rx=0):
     p = K.cube(name + '_pages', (w - 0.004, d - 0.002, h - 0.006), (0, -0.003, h / 2), K.mat_plain('pages', (0.86, 0.83, 0.74), rough=0.8, bump=0.1, bump_scale=900), bev=0.0005); p.parent = g
     return g
 
-BOOK_COLS = [(0.6, 0.12, 0.08), (0.08, 0.15, 0.35), (0.85, 0.8, 0.7), (0.12, 0.12, 0.12), (0.75, 0.55, 0.15), (0.2, 0.35, 0.25), (0.9, 0.9, 0.88), (0.45, 0.08, 0.1), (0.3, 0.3, 0.32)]
+BOOK_COLS = [(0.42, 0.14, 0.1), (0.12, 0.16, 0.26), (0.72, 0.68, 0.6), (0.1, 0.1, 0.1), (0.55, 0.43, 0.2), (0.2, 0.28, 0.22), (0.78, 0.77, 0.74), (0.32, 0.1, 0.1), (0.28, 0.28, 0.3), (0.5, 0.47, 0.42)]   # muted, real print colours
 def book_stack(loc, n, M, rz=0):
     z = loc[2]
     for k in range(n):
@@ -156,7 +164,7 @@ def paper_stack(loc, n, M, rz=0, size=(0.3, 0.22)):
     for k in range(n):
         th = R.choice((0.0015, 0.0015, 0.004, 0.006))
         K.cube('paper_sheet', (size[0] * R.uniform(0.9, 1.05), size[1] * R.uniform(0.9, 1.05), th), (loc[0] + R.uniform(-0.02, 0.02), loc[1] + R.uniform(-0.02, 0.02), z + th / 2),
-               M['paper'] if R.random() > 0.25 else K.mat_plain(f'mag{k % 3}', R.choice(BOOK_COLS), rough=0.35), bev=0.0, rot=(0, 0, rz + R.uniform(-9, 9)))
+               K.mat_image(f'doc_{k % 3}', os.path.join(ROOM_ASSETS, ('doc_notes.png', 'doc_invoice.png', 'doc_drawing.png')[k % 3]), axes='xy', rough=0.75) if R.random() > 0.3 else M['paper'], bev=0.0, rot=(0, 0, rz + R.uniform(-9, 9)))
         z += th
 
 # ---------------------------------------------------------------- lamps

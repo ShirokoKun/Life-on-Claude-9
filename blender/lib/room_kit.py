@@ -29,7 +29,7 @@ def _nodes(m):
     out = nt.nodes.new('ShaderNodeOutputMaterial'); bs = nt.nodes.new('ShaderNodeBsdfPrincipled')
     nt.links.new(bs.outputs[0], out.inputs[0]); return nt, bs, out
 
-def mat_plain(name, color, rough=0.5, metal=0.0, coat=0.0, spec=0.5, bump=None, bump_scale=40.0, transmission=0.0, ior=1.45, alpha=1.0):
+def mat_plain(name, color, rough=0.5, metal=0.0, coat=0.0, spec=0.38, bump=None, bump_scale=40.0, transmission=0.0, ior=1.45, alpha=1.0):
     """A solid material with optional micro-surface (noise bump): paint, plastics, powder coat, ceramic."""
     if name in D.materials: return D.materials[name]
     m = D.materials.new(name); nt, bs, out = _nodes(m)
@@ -249,7 +249,9 @@ def lamp(kind, name, loc, energy, color, rot=(0, 0, 0), size=0.1, spot=None, ble
     elif kind in ('POINT', 'SPOT'): l.shadow_soft_size = size
     elif kind == 'SUN': l.angle = math.radians(size)
     if kind == 'SPOT': l.spot_size = math.radians(spot or 70); l.spot_blend = blend
-    o = D.objects.new(name, l); o.location = loc; o.rotation_euler = Euler([math.radians(a) for a in rot]); link(o, c); return o
+    o = D.objects.new(name, l); o.location = loc; o.rotation_euler = Euler([math.radians(a) for a in rot]); link(o, c)
+    o.visible_camera = False      # the lens sees the window, never the light-panel that fakes it
+    return o
 
 
 def cushion(name, size, loc, mat, bulge=0.35, grooves=0, groove_axis='z', groove_depth=0.25, rot=(0, 0, 0), front='-y', c='set'):

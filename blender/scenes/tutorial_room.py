@@ -33,11 +33,11 @@ W, DEP, H = 3.6, 3.3, 2.4          # room width (x), depth (y), height (z)
 
 # ================================================================= materials
 M = {
-    'wall': K.mat_plain('wall_paint', (0.70, 0.68, 0.63), rough=0.85),
-    'ceiling': K.mat_plain('ceiling_paint', (0.78, 0.77, 0.74), rough=0.9),
+    'wall': K.mat_tex('wall_paint', None, folder=os.path.join(K.ROOT, 'blender', 'assets', 'room', 'tex', 'beige_wall_001'), tile=1.6, tint=(0.95, 0.93, 0.88), rough_mul=0.25, rough_add=0.72, normal=0.35),
+    'ceiling': K.mat_tex('ceiling_plaster', None, folder=os.path.join(K.ROOT, 'blender', 'assets', 'room', 'tex', 'grey_plaster_02'), tile=1.5, tint=(1.0, 0.98, 0.95), rough_mul=0.2, rough_add=0.78, normal=0.3),
     'floor': K.mat_tex('floor_laminate', 'oak_floor', tile=1.7, tint=(0.8, 0.6, 0.45), rough_mul=0.4, rough_add=0.22, normal=0.5),   # warm grey-brown laminate, not orange
     'walnut': K.mat_tex('walnut', 'walnut', tile=0.6, tint=(1.0, 0.85, 0.72), rough_mul=0.5, rough_add=0.35, normal=0.5),
-    'laminate': K.mat_plain('desk_laminate', (0.42, 0.42, 0.4), rough=0.42, bump=0.04, bump_scale=300),
+    'laminate': K.mat_plain('desk_laminate', (0.56, 0.56, 0.54), rough=0.5, spec=0.35, bump=0.012, bump_scale=60),   # satin: catches the window as a soft sheen, never a mirror
     'beige_metal': K.mat_plain('beige_metal', (0.56, 0.52, 0.44), rough=0.38, metal=0.0, coat=0.2, bump=0.03, bump_scale=200),
     'alu': K.mat_plain('aluminium', (0.72, 0.73, 0.74), rough=0.32, metal=1.0, bump=0.02, bump_scale=150),
     'alu_dark': K.mat_plain('alu_dark', (0.36, 0.37, 0.38), rough=0.4, metal=1.0),
@@ -272,8 +272,9 @@ P.monitor('mon_right', (1.98, 2.93, DZ), -8, True, PM, size=(0.55, 0.33))
 K.cube('webcam', (0.075, 0.03, 0.03), (1.985, 2.955, DZ + 0.37 + 0.02), PM['bp_satin'], bev=0.008)
 P.architect_lamp((1.12, 3.1, DZ), 25, PM)
 P.keyboard((1.83, 2.66, DZ), -6, PM)
-K.cyl('mousepad_round', 0.11, 0.003, (2.17, 2.62, DZ + 0.0015), PM['rubber'], seg=40, bev=0.001)
-K.cube('mouse', (0.06, 0.1, 0.035), (2.17, 2.62, DZ + 0.02), PM['bp_satin'], bev=0.0)
+K.cube('mousepad', (0.25, 0.21, 0.003), (2.18, 2.6, DZ + 0.0015), K.mat_tex('mousepad_cloth', 'fabric_weave', tile=0.08, tint=(0.32, 0.36, 0.42), rough_mul=0.2, rough_add=0.75, normal=0.4), bev=0.001, rot=(0, 0, -6))
+mo = K.cube('mouse', (0.062, 0.105, 0.036), (2.17, 2.62, DZ + 0.02), K.mat_plain('mouse_plastic', (0.018, 0.018, 0.02), rough=0.5, spec=0.32, bump=0.02, bump_scale=900), bev=0.0, rot=(0, 0, -8))
+mb = mo.modifiers.new('r', 'BEVEL'); mb.width = 0.022; mb.segments = 5; K.subsurf(mo, 2)
 # --- around the keyboard: the controller and a black mat on the left, bottles between the monitors, the red box,
 #     the beige mug, a glass of dark tea, a little calculator, tape rolls, pens and a spill of small junk on the right
 K.cube('desk_mat', (0.3, 0.2, 0.003), (1.4, 2.72, DZ + 0.0015), PM['rubber'], bev=0.001, rot=(0, 0, 8))
@@ -283,6 +284,7 @@ P.bottle('tea_bottle', (1.66, 2.92, DZ), PM, 'tea'); P.bottle('white_bottle', (1
 P.red_box((1.98, 2.73, DZ), 15, PM)
 P.mug('mug_main', (2.32, 2.6, DZ), PM)
 P.glass_cup((2.58, 2.72, DZ), PM)
+P.med_box((2.7, 2.6, DZ), -8, PM)
 K.cube('calculator', (0.09, 0.13, 0.02), (2.47, 2.62, DZ + 0.01), K.mat_plain('calc', (0.82, 0.83, 0.8), rough=0.4), bev=0.004, rot=(0, 0, -15))
 K.cube('calc_screen', (0.07, 0.035, 0.002), (2.465, 2.66, DZ + 0.021), K.mat_plain('lcd', (0.45, 0.55, 0.4), rough=0.2), bev=0, rot=(0, 0, -15))
 K.asset('medical_tape', (2.4, 2.86, DZ + 0.012), scale=1.6); K.asset('medical_tape', (2.68, 2.98, DZ + 0.012), scale=1.4)
@@ -290,9 +292,14 @@ K.asset('stationery_supplies', (2.62, 2.9, DZ + 0.07), rz=80)
 K.asset('circuit_board', (2.46, 3.02, DZ + 0.012), rz=20, scale=0.5)
 K.asset('pliers', (2.72, 2.72, DZ + 0.01), rz=60, rx=90)
 K.asset('digital_wrist_watch', (2.28, 2.84, DZ + 0.004), rz=20)
-for k in range(10):   # the junk spill: chargers, wrappers, small boxes
-    K.cube('junk', (P.R.uniform(0.03, 0.08), P.R.uniform(0.02, 0.06), P.R.uniform(0.008, 0.03)), (2.42 + P.R.uniform(0, 0.4), 2.75 + P.R.uniform(0, 0.3), DZ + 0.012),
-           K.mat_plain(f'junk{k % 5}', P.R.choice(P.BOOK_COLS), rough=0.4), bev=0.002, rot=(0, 0, P.R.uniform(0, 180)))
+# the small life on the desk: receipts, a stapler, a clipboard of notes, cables, folded wrappers
+rec = K.mat_image('receipt', os.path.join(P.ROOM_ASSETS, 'receipt.png'), axes='xy', rough=0.7)
+for (x, y, r_) in ((2.5, 2.9, 20), (2.62, 2.95, -35), (2.45, 3.0, 70)):
+    K.cube('receipt', (0.06, 0.14, 0.0006), (x, y, DZ + 0.004), rec, bev=0, rot=(0, 0, r_))
+K.asset('vintage_stapler', (2.82, 2.7, DZ), rz=-60, scale=0.9)
+K.asset('clipboard', (2.95, 2.3, DZ + 0.01), rz=100, rx=0)
+for k in range(4):
+    P.snack_packet((2.48 + k * 0.09, 2.8 + (k % 2) * 0.08, DZ + 0.01), k * 47, (1, 5, 3, 6)[k])
 # --- the back right of the desk: the cork board (portrait, drawings pinned) leaning on the window behind the right monitor,
 #     the tower with the two figures, a tall pile of magazines on a cardboard box, mugs along the sill, the gooseneck lamp
 P.cork_board((2.3, 3.14, DZ), 0, PM, size=(0.46, 0.62))
@@ -341,7 +348,7 @@ P.cooler_bag((0.55, 0.42, 0.42), 8, PM)   # on the sofa, with the rest of the pi
 P.waste_basket((2.18, 1.35, 0), PM)
 P.paper_bag((2.0, 1.0, 0), -20, PM, h=0.3)
 K.asset('cardboard_box_01', (1.0, 2.95, 0), rz=-5, scale=1.15); K.asset('cardboard_box_01', (1.62, 3.0, 0), rz=10, scale=1.2)
-prod = K.cube('product_box', (0.34, 0.22, 0.26), (1.95, 2.85, 0.13), K.mat_plain('product_blue', (0.08, 0.16, 0.38), rough=0.4), bev=0.004, rot=(0, 0, -4))
+prod = K.cube('product_box', (0.34, 0.22, 0.26), (1.95, 2.85, 0.13), K.mat_plain('product_blue', (0.12, 0.17, 0.27), rough=0.4), bev=0.004, rot=(0, 0, -4))
 K.cube('product_label', (0.2, 0.002, 0.06), (1.95, 2.739, 0.19), PM['label'], bev=0, rot=(0, 0, -4))
 K.cube('white_box', (0.28, 0.24, 0.3), (2.35, 2.95, 0.15), PM['label'], bev=0.006)
 P.book_stack((1.35, 2.7, 0.0), 6, PM, rz=30)
@@ -371,13 +378,13 @@ P.phone((2.42, 2.52, DZ), 18, PM)
 P.usb_stick((2.02, 2.52, DZ), -30, PM); P.usb_stick((2.56, 2.88, DZ), 60, PM)
 P.charger((1.5, 2.66, DZ + 0.003), 10, PM)
 P.cable_coil((2.88, 2.97, DZ), PM)
-P.sticky_notes((2.06, 2.56, DZ), 12); P.sticky_notes((2.7, 2.66, DZ), -20, (0.95, 0.55, 0.65), n=5)
+P.sticky_notes((2.06, 2.56, DZ), 12, (0.86, 0.79, 0.45)); P.sticky_notes((2.7, 2.66, DZ), -20, (0.84, 0.7, 0.66), n=5)
 P.scissors((2.75, 2.53, DZ + 0.002), 70, PM)
 P.bowl((2.97, 2.52, DZ), (0.32, 0.5, 0.28), PM)
 P.doc_tray((2.88, 2.25, DZ), 5, PM)
 # the return: folders, a mug, a packet, a notepad
 for k in range(3):
-    K.cube('clear_folder', (0.24, 0.32, 0.002), (2.5 + k * 0.01, 2.02 + k * 0.012, DZ + 0.001 + k * 0.002), K.mat_plain(f'cfolder{k}', ((0.55, 0.7, 0.85), (0.9, 0.6, 0.5), (0.85, 0.85, 0.6))[k], rough=0.3, transmission=0.0), bev=0.0005, rot=(0, 0, 8 + k * 6))
+    K.cube('clear_folder', (0.24, 0.32, 0.002), (2.5 + k * 0.01, 2.02 + k * 0.012, DZ + 0.001 + k * 0.002), K.mat_plain(f'cfolder{k}', ((0.62, 0.66, 0.68), (0.7, 0.6, 0.52), (0.72, 0.7, 0.6))[k], rough=0.3, transmission=0.0), bev=0.0005, rot=(0, 0, 8 + k * 6))
 P.mug('ret_mug', (2.42, 1.48, DZ), PM, 'ceramic_white')
 P.snack_packet((2.92, 1.42, DZ), -15, 1)
 # the left table and the wire rack: the scanner and router on the rack, a file holder and a bag on the table
@@ -452,6 +459,10 @@ if LIGHT != 'night':   # mottled: an overcast street seen through frosted glass 
 outside = K.cube('outside', (12, 0.05, 6), (W / 2, DEP + 3.5, 1.5), fog_m, bev=0)
 outside_l = K.cube('outside_l', (0.05, 12, 6), (-3.0, DEP / 2, 1.5), K.mat_emit('outside_fog_l', (0.82, 0.86, 0.9), 3.0 if LIGHT != 'night' else 0.0), bev=0)
 for o in (outside, outside_l): o.visible_shadow = False
+if LIGHT != 'night':
+    for k_, x_ in enumerate((0.8, 1.85, 2.9)):
+        K.lamp('AREA', f'window_key{k_}', (x_, DEP - 0.15, 1.55), float(opt('--key', '110')), (0.92, 0.96, 1.0), rot=(90, 0, 0), size=(1.0, 1.25))
+    K.lamp('AREA', 'window_key_left', (0.15, (LEFT_WIN[0] + LEFT_WIN[1]) / 2, 1.55), float(opt('--key', '110')) * 0.7, (0.92, 0.96, 1.0), rot=(0, 90, 0), size=(1.3, 1.25))
 if LIGHT in ('sun',):
     sun = K.lamp('SUN', 'sun', (0, 0, 10), 6.0, K.kelvin(5200), rot=(62, 0, 205), size=0.6)
 
@@ -483,30 +494,33 @@ cam.data.clip_start = 0.02
 # ================================================================= render
 sc.render.engine = 'CYCLES'; sc.cycles.device = 'CPU'; sc.cycles.samples = SAMPLES
 sc.cycles.use_denoising = True; sc.cycles.denoiser = 'OPENIMAGEDENOISE'
-sc.cycles.max_bounces = 8; sc.cycles.diffuse_bounces = 4; sc.cycles.glossy_bounces = 3; sc.cycles.transmission_bounces = 6
+sc.cycles.denoising_input_passes = 'RGB_ALBEDO_NORMAL'; sc.cycles.denoising_prefilter = 'ACCURATE'
+sc.cycles.use_adaptive_sampling = True; sc.cycles.adaptive_threshold = float(opt('--noise', '0.015')); sc.cycles.adaptive_min_samples = 16
+sc.render.use_persistent_data = True; sc.cycles.filter_width = 1.5
+sc.cycles.max_bounces = 6; sc.cycles.diffuse_bounces = 3; sc.cycles.glossy_bounces = 2; sc.cycles.transmission_bounces = 4
 sc.cycles.volume_bounces = 1; sc.cycles.sample_clamp_indirect = 6; sc.cycles.caustics_reflective = False; sc.cycles.caustics_refractive = False
 sc.cycles.volume_step_rate = 3.0; sc.cycles.use_light_tree = True
 sc.render.resolution_x, sc.render.resolution_y = RES; sc.render.resolution_percentage = 100
 sc.view_settings.view_transform = 'AgX'
 try: sc.view_settings.look = 'AgX - Medium High Contrast'
 except TypeError: pass
-sc.view_settings.exposure = float(opt('--exposure', '0.0'))
+sc.view_settings.exposure = float(opt('--exposure', '-0.7'))
 sc.render.image_settings.file_format = 'PNG'; sc.render.filepath = OUT
 if opt('--blend'): bpy.ops.wm.save_as_mainfile(filepath=opt('--blend'))
 if opt('--film'):
     # the tutorial's film language: a handheld wide push, a slow slide across the desk, a close drift past the toys
     # the tutorial's camera: ONE handheld walk-through on a wide lens, operated at walking pace, whip pans with motion blur.
     # waypoints: (time s, camera position, look-at point); Catmull-Rom between them, plus layered hand shake
-    WP = [(0.0, (1.05, 0.32, 1.58), (2.0, 3.3, 0.85)),      # in the doorway side, the room ahead
-          (2.6, (1.35, 1.05, 1.56), (1.95, 3.3, 0.8)),      # push in past the chair
-          (4.4, (1.62, 1.7, 1.72), (1.9, 2.72, 0.7)),       # rise and look down onto the desk: keyboard, mug, junk
-          (6.2, (1.95, 1.85, 1.62), (2.75, 3.05, 1.05)),    # pan right along the window to the tower and the toys
-          (7.0, (2.15, 1.75, 1.58), (3.6, 2.2, 1.25)),      # the side wall: calendar, poster
-          (7.6, (2.25, 1.55, 1.56), (3.6, 0.8, 1.15)),      # whip right: the bookcase
-          (8.6, (2.1, 1.35, 1.55), (2.95, 0.0, 1.2)),       # the door and its poster
-          (9.6, (1.75, 1.3, 1.5), (0.9, 0.3, 0.5)),         # down to the sofa buried in bags
-          (10.4, (1.6, 1.25, 1.55), (0.6, 2.5, 1.05)),      # whip back left: the rack and the left window
-          (12.0, (1.55, 1.05, 1.58), (1.9, 3.3, 0.85))]     # settle on the desk wide
+    # v2 (20 s, the tutorial's grammar): wide push -> low desk insert with a focus pull -> slide past the glass ->
+    # rise to the toys -> pan to the window -> side wall -> whip to the bookcase -> door -> sofa -> whip back -> settle.
+    # (time, camera, look-at, focus point or None = the look-at, f-stop)
+    WP = [(0.0, (1.1, 0.35, 1.58), (2.0, 3.3, 0.85), None, 8),            # the room from the door
+          (2.5, (1.42, 1.15, 1.48), (1.95, 3.3, 0.8), None, 8),            # push in past the chair
+          (4.6, (1.8, 2.0, 1.28), (2.15, 2.78, 0.74), (2.32, 2.6, 0.78), 3.5),   # high over the desk looking down: focus on the mug
+          (6.6, (2.2, 2.08, 1.2), (2.6, 2.85, 0.8), (2.58, 2.72, 0.8), 3.5),   # slide past the glass of tea
+          (8.4, (2.3, 2.3, 1.24), (2.78, 3.05, 1.12), (2.74, 2.95, 1.2), 3.2),    # rise to the toys on the tower
+          (10.0, (2.3, 2.25, 1.32), (2.4, 3.3, 1.25), None, 5)]          # lift to the blinds and the window light           # drift toward the window light
+    WP = [(t, c, l, fp if fp else l, fs) for (t, c, l, fp, fs) in WP]
     def cr(p0, p1, p2, p3, u):
         return 0.5 * ((2 * p1) + (-p0 + p2) * u + (2 * p0 - 5 * p1 + 4 * p2 - p3) * u * u + (-p0 + 3 * p1 - 3 * p2 + p3) * u ** 3)
     def along(t, k):
@@ -516,11 +530,17 @@ if opt('--film'):
                 P_ = [Vector(WP[max(0, j)][k]) for j in (i - 1, i, i + 1, min(i + 2, len(WP) - 1))]
                 return cr(*P_, u)
         return Vector(WP[-1][k])
-    n = int(12.0 * 24)
+    n = int(WP[-1][0] * 24)
     sc.frame_start = 1; sc.frame_end = n; sc.render.fps = 24
     sc.render.use_overwrite = False; sc.render.use_placeholder = True
     sc.render.use_motion_blur = True; sc.render.motion_blur_shutter = 0.5      # the whip pans smear like a real camera
-    cam.data.lens = 18; cam.data.dof.use_dof = False
+    cam.data.lens = 18; cam.data.dof.use_dof = True
+    focus = bpy.data.objects.new('focus', None); K.link(focus); cam.data.dof.focus_object = focus
+    def fstop(t):
+        for i in range(len(WP) - 1):
+            if WP[i][0] <= t <= WP[i + 1][0]:
+                u = (t - WP[i][0]) / (WP[i + 1][0] - WP[i][0]); u = u * u * (3 - 2 * u); return WP[i][4] + (WP[i + 1][4] - WP[i][4]) * u
+        return WP[-1][4]
     for f in range(1, n + 1):
         t = (f - 1) / 24
         shake = Vector((math.sin(t * 6.1) * 0.006 + math.sin(t * 13.7 + 1) * 0.003, math.sin(t * 5.3 + 2) * 0.005, math.sin(t * 7.9) * 0.007 + math.sin(t * 2.2) * 0.004))
@@ -528,6 +548,9 @@ if opt('--film'):
         look = along(t, 2) + Vector((math.sin(t * 3.1) * 0.02, 0, math.sin(t * 4.3 + 1) * 0.015))
         cam.rotation_euler = (look - cam.location).to_track_quat('-Z', 'Y').to_euler(); cam.rotation_euler.y += math.sin(t * 2.7) * 0.012
         cam.keyframe_insert('location', frame=f); cam.keyframe_insert('rotation_euler', frame=f)
+        focus.location = along(t, 3); focus.keyframe_insert('location', frame=f)
+        cam.data.dof.aperture_fstop = fstop(t); cam.data.dof.keyframe_insert('aperture_fstop', frame=f)
+        cam.data.lens = 18 + 6 * max(0.0, (8 - fstop(t)) / 5.2); cam.data.keyframe_insert('lens', frame=f)   # inserts go a touch longer
     if opt('--range'): sc.frame_start, sc.frame_end = map(int, opt('--range').split('-'))
     sc.frame_step = int(opt('--step', '1'))       # render every Nth frame; the encode interpolates motion back to 24 fps
     sc.render.filepath = OUT.rstrip('/') + '/f_'
