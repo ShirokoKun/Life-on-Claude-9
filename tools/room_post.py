@@ -28,7 +28,7 @@ def post(im, seed=0):
     a = np.where(a > 0.72, 0.72 + (a - 0.72) * 0.55, a)              # highlight shoulder: bright blinds keep their slats
     # grade: slight desaturation, cooler shadows, neutral-warm highlights
     l = (a @ np.array([0.2126, 0.7152, 0.0722], np.float32))[..., None]
-    a = l + (a - l) * 0.86
+    a = l + (a - l) * 0.8
     sh = np.clip(1 - l / 0.35, 0, 1)
     a = a + sh * np.array([-0.006, 0.0, 0.014], np.float32)
     # vignette

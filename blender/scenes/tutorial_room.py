@@ -33,8 +33,8 @@ W, DEP, H = 3.6, 3.3, 2.4          # room width (x), depth (y), height (z)
 
 # ================================================================= materials
 M = {
-    'wall': K.mat_tex('wall_paint', None, folder=os.path.join(K.ROOT, 'blender', 'assets', 'room', 'tex', 'beige_wall_001'), tile=1.6, tint=(0.95, 0.93, 0.88), rough_mul=0.25, rough_add=0.72, normal=0.35),
-    'ceiling': K.mat_tex('ceiling_plaster', None, folder=os.path.join(K.ROOT, 'blender', 'assets', 'room', 'tex', 'grey_plaster_02'), tile=1.5, tint=(1.0, 0.98, 0.95), rough_mul=0.2, rough_add=0.78, normal=0.3),
+    'wall': K.mat_tex('wall_paint', None, folder=os.path.join(K.ROOT, 'blender', 'assets', 'room', 'tex', 'beige_wall_001'), tile=1.6, tint=(0.66, 0.68, 0.64), rough_mul=0.25, rough_add=0.72, normal=0.35),   # the tutorial's dim grey-green paint
+    'ceiling': K.mat_tex('ceiling_plaster', None, folder=os.path.join(K.ROOT, 'blender', 'assets', 'room', 'tex', 'grey_plaster_02'), tile=1.5, tint=(0.7, 0.71, 0.69), rough_mul=0.2, rough_add=0.78, normal=0.3),
     'floor': K.mat_tex('floor_laminate', 'oak_floor', tile=1.7, tint=(0.8, 0.6, 0.45), rough_mul=0.4, rough_add=0.22, normal=0.5),   # warm grey-brown laminate, not orange
     'walnut': K.mat_tex('walnut', 'walnut', tile=0.6, tint=(1.0, 0.85, 0.72), rough_mul=0.5, rough_add=0.35, normal=0.5),
     'laminate': K.mat_plain('desk_laminate', (0.56, 0.56, 0.54), rough=0.5, spec=0.35, bump=0.012, bump_scale=60),   # satin: catches the window as a soft sheen, never a mirror
@@ -504,7 +504,7 @@ sc.render.resolution_x, sc.render.resolution_y = RES; sc.render.resolution_perce
 sc.view_settings.view_transform = 'AgX'
 try: sc.view_settings.look = 'AgX - Medium High Contrast'
 except TypeError: pass
-sc.view_settings.exposure = float(opt('--exposure', '-0.7'))
+sc.view_settings.exposure = float(opt('--exposure', '-0.95'))
 sc.render.image_settings.file_format = 'PNG'; sc.render.filepath = OUT
 if opt('--blend'): bpy.ops.wm.save_as_mainfile(filepath=opt('--blend'))
 if opt('--film'):
