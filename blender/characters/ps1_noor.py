@@ -17,7 +17,7 @@ QD, OUT = argv[0], argv[1]
 opt = lambda k, d=None: argv[argv.index(k) + 1] if k in argv else d
 PREVIEW = opt('--preview'); TPREV = float(opt('--t', '3.0'))
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.abspath(os.path.join(HERE, '..', '..'))
-TEXOUT = os.path.join(ROOT, 'engine', 'studies', 'ps1-subway-v2', 'assets')
+TEXOUT = os.path.join(ROOT, 'engine', 'studies', 'ps1-subway-v3', 'assets')
 os.makedirs(TEXOUT, exist_ok=True)
 FPS, LOOP = 24, 12.0
 
@@ -68,6 +68,10 @@ def region(v, co):
     if top.startswith(('thigh', 'calf')) or top == 'pelvis' or (top == 'spine_01' and z < 0.99): return 'denim'
     # the jacket: black yoke over the shoulders and black cuffs; open at the front over a black top
     if top.startswith('lowerarm') and abs(x) > 0.57: return 'jacket_black'
+    # v3 colour blocks: a black yoke over the shoulders and upper chest, a black band down each outer sleeve, a black hem band
+    if z > 1.33 and top.startswith(('spine_03', 'clavicle', 'neck')): return 'jacket_black'
+    if top.startswith('upperarm') and z > 1.395: return 'jacket_black'
+    if top.startswith(('spine_01', 'pelvis')) and 0.99 < z < 1.05: return 'jacket_black'
     return 'jacket_red'
 REG = ['skin', 'jacket_red', 'jacket_black', 'top', 'denim', 'shoe']
 me.materials.clear()
@@ -106,7 +110,17 @@ def decimate(o, ratio):
     md = o.modifiers.new('dec', 'DECIMATE'); md.ratio = ratio
     while o.modifiers[0] != md: bpy.ops.object.modifier_move_up(modifier='dec')
     bpy.ops.object.modifier_apply(modifier='dec')
-# body kept at full resolution (12.8k tris): clean clothing borders; the PS1 look comes from the renderer
+# v3: faceted low poly like the reference - planar dissolve (keeps material + UV borders), then triangulate
+def planar(o, deg):
+    bpy.context.view_layer.objects.active = o
+    md = o.modifiers.new('planar', 'DECIMATE'); md.decimate_type = 'DISSOLVE'; md.angle_limit = math.radians(deg); md.delimit = {'MATERIAL', 'UV'}
+    while o.modifiers[0] != md: bpy.ops.object.modifier_move_up(modifier='planar')
+    bpy.ops.object.modifier_apply(modifier='planar')
+    t = o.modifiers.new('tri', 'TRIANGULATE'); bpy.ops.object.modifier_move_up(modifier='tri') if o.modifiers[0] != t else None
+    while o.modifiers[0] != t: bpy.ops.object.modifier_move_up(modifier='tri')
+    bpy.ops.object.modifier_apply(modifier='tri')
+    o.data.calc_loop_triangles(); print('FACETED', o.name, len(o.data.loop_triangles), 'tris')
+planar(body, 7)
 hb_head_z = (arm.matrix_world @ arm.data.bones['Head'].head_local).z
 bm = bmesh.new(); bm.from_mesh(hair.data)
 mw = hair.matrix_world
@@ -130,22 +144,22 @@ def ik(bone, target, pole, chain=2, pole_angle=0):
 SEAT_DROP = 0.46
 PB['pelvis'].location = (0, 0, 0)
 arm.location = (0, 0, -SEAT_DROP)
-FOOT_L, FOOT_R = empty('foot_l_t', (0.16, -0.52, 0.06 - 0.0)), empty('foot_r_t', (-0.13, -0.47, 0.06))
+FOOT_L, FOOT_R = empty('foot_l_t', (0.21, -0.5, 0.06)), empty('foot_r_t', (-0.2, -0.47, 0.06))   # feet flat, apart (the reference's open, tired sit)
 KNEE_L, KNEE_R = empty('knee_l_p', (0.2, -1.5, 0.5)), empty('knee_r_p', (-0.2, -1.5, 0.5))
 # the thighs come forward: with the pelvis down, the IK has to fold the legs; we pre-bend the thighs so it chooses the seat
-HAND_L, HAND_R = empty('hand_l_t', (0.0, 0.0, 0.0)), empty('hand_r_t', (-0.16, -0.4, 0.52))
+HAND_L, HAND_R = empty('hand_l_t', (0.0, 0.0, 0.0)), empty('hand_r_t', (-0.07, -0.47, 0.41))   # right forearm on the thigh, the hand hanging between the knees
 ELB_L, ELB_R = empty('elbow_l_p', (0.45, -0.15, 0.25)), empty('elbow_r_p', (-0.7, 0.3, 0.3))
 ik('calf_l', FOOT_L, KNEE_L, pole_angle=-90); ik('calf_r', FOOT_R, KNEE_R, pole_angle=-90)
 ik('lowerarm_l', HAND_L, ELB_L, pole_angle=-90); ik('lowerarm_r', HAND_R, ELB_R, pole_angle=180)
 for b in PB: b.rotation_mode = 'XYZ'
 PB['thigh_l'].rotation_euler = (math.radians(-85), 0, math.radians(4)); PB['thigh_r'].rotation_euler = (math.radians(-85), 0, math.radians(-4))
-PB['spine_01'].rotation_euler = (math.radians(8), 0, 0); PB['spine_02'].rotation_euler = (math.radians(4), 0, 0)
+PB['spine_01'].rotation_euler = (math.radians(1), 0, 0); PB['spine_02'].rotation_euler = (math.radians(-3), 0, 0)   # upright, a little forward
 
 # fingers: the left hand holds the cigarette between index and middle; the right rests half-curled on the knee
 def curl(side, finger, a1, a2, a3, spread=0):
     PB[f'{finger}_01_{side}'].rotation_euler = (math.radians(a1), 0, math.radians(spread))
     PB[f'{finger}_02_{side}'].rotation_euler = (math.radians(a2), 0, 0); PB[f'{finger}_03_{side}'].rotation_euler = (math.radians(a3), 0, 0)
-for f_, a in (('index', (8, 10, 6)), ('middle', (10, 12, 8)), ('ring', (55, 70, 40)), ('pinky', (60, 75, 45))): curl('l', f_, *a)
+for f_, a in (('index', (30, 35, 18)), ('middle', (32, 38, 20)), ('ring', (60, 75, 45)), ('pinky', (65, 80, 50))): curl('l', f_, *a)
 PB['index_01_l'].rotation_euler.z = math.radians(-6); PB['middle_01_l'].rotation_euler.z = math.radians(5)
 PB['thumb_02_l'].rotation_euler = (math.radians(20), 0, math.radians(15))
 for f_, a in (('index', (25, 30, 20)), ('middle', (30, 35, 22)), ('ring', (35, 40, 25)), ('pinky', (40, 45, 28))): curl('r', f_, *a)
@@ -153,7 +167,7 @@ for f_, a in (('index', (25, 30, 20)), ('middle', (30, 35, 22)), ('ring', (35, 4
 # ---------------------------------------------------------------- the 12 s story loop (keyed IK targets + head + breathing)
 def key(obj, path, frame): obj.keyframe_insert(path, frame=frame)
 MOUTH = Vector((0.03, -0.11, 1.5 - SEAT_DROP + 0.0))
-REST = Vector((0.15, -0.26, 1.3 - SEAT_DROP))
+REST = Vector((0.27, -0.2, 1.38 - SEAT_DROP))   # v3: held up beside the shoulder, the smoke rises clear of her face
 DRAG = Vector((0.05, -0.19, 1.5 - SEAT_DROP))
 KNEE = Vector((0.2, -0.42, 0.62 - SEAT_DROP + 0.1))
 HL = [(0, REST), (1.8, REST), (2.6, DRAG), (3.7, DRAG), (4.5, REST), (7.2, REST), (8.0, KNEE), (8.55, KNEE), (8.65, KNEE + Vector((0, 0, -0.025))), (8.8, KNEE), (9.6, KNEE), (10.6, REST), (12.0, REST)]
@@ -170,9 +184,71 @@ bpy.ops.object.mode_set(mode='OBJECT')
 cig = bpy.data.objects.new('cigarette', bpy.data.meshes.new('cig')); sc.collection.objects.link(cig)
 bm = bmesh.new(); bmesh.ops.create_cone(bm, cap_ends=True, segments=6, radius1=0.0045, radius2=0.0045, depth=0.08); bm.to_mesh(cig.data); bm.free()
 cm = bpy.data.materials.new('noor_cig'); cm.use_nodes = True; cm.node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value = (0.92, 0.9, 0.85, 1); cig.data.materials.append(cm)
-cig.parent = arm; cig.parent_type = 'BONE'; cig.parent_bone = 'index_02_l'
-cig.matrix_parent_inverse = Matrix.Identity(4); cig.location = (0.012, 0.0, -0.01); cig.rotation_euler = (0, math.radians(90), 0)
+# RULE 1: the cigarette sits between the index and middle fingers at the first joint, its axis along the palm normal,
+# the filter on the palm side (toward the lips at a drag), the ember out past the back of the hand
+AB = arm.data.bones; MW = arm.matrix_world
+hd = lambda n: MW @ AB[n].head_local
+palm_n = (hd('index_01_l') - hd('pinky_01_l')).cross(hd('middle_02_l') - hd('hand_l')).normalized()
+if palm_n.z > 0: palm_n = -palm_n                 # in the T-pose the palm faces down
+axis = -palm_n                                     # filter (palm side) -> ember (back of the hand)
+grip = (hd('index_03_l') + hd('middle_03_l')) / 2      # pinched near the fingertips, so the hand stays below the nose
+centre = grip + axis * 0.012                       # the fingers pinch it near the filter end
+cig.matrix_world = Matrix.Translation(centre) @ axis.to_track_quat('Z', 'Y').to_matrix().to_4x4()
+bone = AB['middle_01_l']
+cig.parent = arm; cig.parent_type = 'BONE'; cig.parent_bone = 'middle_01_l'
+cig.matrix_parent_inverse = (MW @ bone.matrix_local @ Matrix.Translation((0, bone.length, 0))).inverted()
 ember = bpy.data.objects.new('ember', None); sc.collection.objects.link(ember); ember.parent = cig; ember.location = (0, 0, 0.04)
+
+# RULE 2: at the drag the filter end meets the lips: iterate the hand target until it does
+head_vg = body.vertex_groups['Head'].index
+fwd = min((v for v in body.data.vertices if any(g.group == head_vg and g.weight > 0.6 for g in v.groups)), key=lambda v: (MW @ v.co).y)
+nose = MW @ fwd.co
+lips_rest = nose + Vector((0, 0.012, -0.045))
+hb = arm.data.bones['Head']; head_rest = MW @ hb.matrix_local
+lips_in_head = head_rest.inverted() @ lips_rest                     # the lips, carried by the head bone
+def lips_now():
+    return arm.matrix_world @ arm.pose.bones['Head'].matrix @ lips_in_head
+def filter_now():
+    return cig.matrix_world @ Vector((0, 0, -0.04))
+drag_frames = [1 + round(t * FPS) for t, p in HL if p is DRAG]
+# RULE 4: at the drag the palm faces her face and the cigarette points OUT of the mouth (forward, a little to her left):
+# search the wrist's twist and bend for the best alignment, then key it (rest frames keep a relaxed wrist)
+fwd_local = head_rest.inverted().to_3x3() @ Vector((0, -1, 0))
+PB['hand_l'].rotation_mode = 'XYZ'
+for t_, r_ in ((0, (0, 0, 0)), (1.8, (0, 0, 0)), (4.5, (0, 0, 0)), (12.0, (0, 0, 0))):
+    PB['hand_l'].rotation_euler = r_; PB['hand_l'].keyframe_insert('rotation_euler', frame=1 + round(t_ * FPS))
+for f in drag_frames:
+    sc.frame_set(f); bpy.context.view_layer.update()
+    best = None
+    for tw in range(-180, 180, 15):
+        for bx in range(-45, 50, 15):
+            for bz in (-30, -15, 0, 15, 30):
+                PB['hand_l'].rotation_euler = (math.radians(bx), math.radians(tw), math.radians(bz)); bpy.context.view_layer.update()
+                Hm = arm.matrix_world @ arm.pose.bones['Head'].matrix
+                want = (Hm.to_3x3() @ fwd_local).normalized() * 0.85 + Vector((0.35, 0, -0.1))
+                ax = (cig.matrix_world.to_3x3() @ Vector((0, 0, 1))).normalized()
+                score = ax.dot(want.normalized())
+                if best is None or score > best[0]: best = (score, (bx, tw, bz))
+    PB['hand_l'].rotation_euler = tuple(math.radians(a) for a in best[1]); PB['hand_l'].keyframe_insert('rotation_euler', frame=f)
+    print('WRIST at', f, best[1], 'alignment', round(best[0], 3))
+for f in drag_frames:
+    for it in range(6):
+        sc.frame_set(f); bpy.context.view_layer.update()
+        d = lips_now() + Vector((0, -0.004, 0)) - filter_now()
+        if d.length < 0.004: break
+        HAND_L.location = HAND_L.location + d; HAND_L.keyframe_insert('location', frame=f)
+    print('DRAG frame', f, 'filter-to-lips', round((lips_now() - filter_now()).length, 4))
+# RULE 3: no finger joint inside the head (an ellipsoid round the skull, the face a little in front)
+viol = 0
+fingers = [b.name for b in arm.pose.bones if b.name.endswith('_l') and any(k in b.name for k in ('index', 'middle', 'ring', 'pinky', 'thumb', 'hand'))]
+for f in range(1, int(LOOP * FPS) + 1, 2):
+    sc.frame_set(f); bpy.context.view_layer.update()
+    Hm = arm.matrix_world @ arm.pose.bones['Head'].matrix
+    for n in fingers:
+        q = Hm.inverted() @ (arm.matrix_world @ arm.pose.bones[n].head)   # head-bone space: y up the bone
+        e = (q.x / 0.075) ** 2 + ((q.y - 0.07) / 0.115) ** 2 + (q.z / 0.095) ** 2
+        if e < 1.0: viol += 1
+print('FINGERS INSIDE HEAD (joint samples):', viol)
 
 if PREVIEW:
     sc.frame_set(1 + round(TPREV * FPS))

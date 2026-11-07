@@ -2,12 +2,17 @@
 import os, sys, math
 QD = sys.argv[1]
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
-TEXOUT = os.path.join(ROOT, 'engine', 'studies', 'ps1-subway-v2', 'assets'); os.makedirs(TEXOUT, exist_ok=True)
+TEXOUT = os.path.join(ROOT, 'engine', 'studies', 'ps1-subway-v3', 'assets'); os.makedirs(TEXOUT, exist_ok=True)
 from PIL import Image, ImageDraw, ImageFilter
 import random
 R = random.Random(4)
 def save(im, name): p = os.path.join(TEXOUT, name); im.save(p); return p
 def jacket_tex(base, line):
+    im = Image.new('RGB', (64, 64), base); d = ImageDraw.Draw(im)
+    # v3: flat colour; the colour blocks come from body regions, not the UV layout
+    for y in range(0, 64, 16): d.line([0, y, 64, y], fill=tuple(int(c * 0.82) for c in base))
+    return im
+def _old_jacket_tex(base, line):
     im = Image.new('RGB', (64, 64), base); d = ImageDraw.Draw(im)
     for y in range(0, 64, 8):
         for x in range(64):
@@ -48,7 +53,7 @@ def hair_tex():
     for y in range(14, 20): d.line([0, y, 32, y], fill=(104, 72, 50))   # the PS1 'angel ring' highlight
     return im
 T = {
-    'jacket_red': save(jacket_tex((181, 36, 27), (124, 20, 15)), 'noor_jacket_red.png'),
+    'jacket_red': save(jacket_tex((178, 30, 26), (28, 22, 24)), 'noor_jacket_red.png'),
     'jacket_black': save(jacket_tex((26, 26, 28), (10, 10, 10)), 'noor_jacket_black.png'),
     'denim': save(denim_tex(), 'noor_denim.png'), 'shoe': save(shoe_tex(), 'noor_shoe.png'),
     'top': save(top_tex(), 'noor_top.png'), 'skin': save(skin_tex(), 'noor_skin.png'), 'hair': save(hair_tex(), 'noor_hair.png'),

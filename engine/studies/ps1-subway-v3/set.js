@@ -220,6 +220,30 @@ function tunnelTex() {   // 8 m of tunnel wall, scrolled past the windows
   }, { repeat: [1, 1] });
 }
 
+
+// v3: the outside. The line runs elevated between tunnels: a night city in three parallax layers behind the glass
+function cityTex(layer) {
+  const w = 256, h = 96, r = rng(100 + layer);
+  return paint(w, h, (ctx, P) => {
+    P.each(() => [0, 0, 0, 0]);
+    if (layer === 0) {   // the far sky glow and skyline
+      P.each((x, y) => { const k = y / h; return [30 + 70 * k * k, 36 + 52 * k * k, 62 + 40 * k * k, 255]; });   // the city's glow low on the sky
+      for (let x = 0; x < w;) { const bw = 6 + Math.floor(r() * 14), bh = 18 + Math.floor(r() * 46); P.rect(x, h - bh, bw, bh, '#0e1220');
+        for (let yy = h - bh + 3; yy < h - 2; yy += 4) for (let xx = x + 1; xx < x + bw - 1; xx += 3) if (r() > 0.55) P.px(xx, yy, r() > 0.3 ? '#ffd38a' : '#b8dcff', 255);
+        x += bw + Math.floor(r() * 3); }
+      P.rect(150, 22, 2, 30, '#0e1220'); P.px(150, 21, '#ff3b2a');   // a radio mast with its red light
+    } else if (layer === 1) {   // mid blocks, closer, bigger windows
+      for (let x = 0; x < w;) { const bw = 20 + Math.floor(r() * 30), bh = 40 + Math.floor(r() * 50); P.rect(x, h - bh, bw, bh, '#1b1f2a');
+        for (let yy = h - bh + 4; yy < h - 3; yy += 7) for (let xx = x + 3; xx < x + bw - 4; xx += 6) if (r() > 0.45) P.rect(xx, yy, 3, 3, r() > 0.25 ? '#ffd08a' : '#8fc4f0', 255);
+        if (r() > 0.6) { const sx = x + 4, sy = h - bh + 6; P.rect(sx, sy, 12, 5, r() > 0.5 ? '#d23b4a' : '#2fb3a0'); }   // a shop sign
+        x += bw + 6 + Math.floor(r() * 20); }
+    } else {   // near: the viaduct's catenary posts, close and dark
+      for (let x = 10; x < w; x += 64) { P.rect(x, 0, 4, h, '#07080a'); P.rect(x - 10, 14, 24, 3, '#07080a'); }
+      P.rect(0, 16, w, 1, '#1a1c20');
+    }
+  }, { repeat: [1, 1] });
+}
+
 function diffuserTex() {
   return paint(8, 32, (ctx, P) => {
     P.each((x, y) => { const k = 1 - Math.abs(x - 3.5) / 5; const r = y % 4 === 0 ? 0.86 : 1; return [255 * r * (0.88 + 0.12 * k), 246 * r * (0.88 + 0.12 * k), 222 * r * (0.86 + 0.14 * k)]; });
@@ -254,6 +278,7 @@ export function buildSet(scene, paintings = {}) {
     housing: ps1Material({ color: '#9a9884' }),
     glass: ps1Unlit({ map: glassTex(), transparent: true, depthWrite: false }),
     tunnel: ps1Material({ map: tunnelTex() }),
+    city: [0, 1, 2].map((k) => ps1Unlit({ map: cityTex(k), transparent: true, alphaTest: 0.5, fog: false })),
     sign: ps1Unlit({ map: signTex() }),
     black: ps1Unlit({ color: '#050605' }),
   };
@@ -348,6 +373,10 @@ export function buildSet(scene, paintings = {}) {
       // the glass + tunnel behind this section
       const tun = add(quad(len + 2, 3.2), M.tunnel, (s0 + s1) / 2, 1.2, zW - 0.9, 0, sg);
       dyn.tunnels.push(tun);
+      [[2, 9.0, 6.0], [1, 4.0, 3.6], [0, 30.0, 9.0]].forEach(([k, d, hh]) => {   // near posts, mid blocks, far skyline
+        const c = add(quad(len + 6, hh), M.city[k], (s0 + s1) / 2, k === 2 ? 1.6 : 0.3 + hh / 2 - (k === 0 ? 2.2 : 0.8), zW - d, 0, sg);
+        c.renderOrder = -1; dyn.city = dyn.city || []; dyn.city.push(c);
+      });
     }
 
     // door bays: frames, two leaves with windows, a threshold, the sign above
@@ -384,6 +413,12 @@ export function lampX(i, t) {   // the x of tunnel lamp i at time t (repeats alo
 export function updateSet(set, t) {
   const { dyn, M } = set;
   M.tunnel.map.offset.x = (t * SPEED) / 8;
+  // the line leaves the tunnel for an elevated stretch (3-9.5 s of the loop): the wall slides off, the city scrolls by
+  const open = Math.min(1, Math.max(0, (t - 2.6) / 0.4)) * (1 - Math.min(1, Math.max(0, (t - 9.4) / 0.4)));
+  for (const tn of dyn.tunnels) tn.visible = open < 0.5;
+  for (const l of dyn.lamps) l.visible = open < 0.5;
+  M.city.forEach((m, k) => { m.map.offset.x = (t * SPEED) / ([30, 14, 3][k]); });
+  set.open = open;
   for (const l of dyn.lamps) l.position.x = lampX(l.userData.i, t);
   const f = Math.sin(t * 37) * Math.sin(t * 11.3) > 0.35 || (t % 3.7) < 0.08 ? 0.35 : 1;
   M.diffFlicker.color.setScalar(f);

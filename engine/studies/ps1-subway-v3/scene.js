@@ -12,12 +12,12 @@ import { loadNoor, LOOP } from './character_glb.js';
 const Q = new URLSearchParams(location.search);
 const RES = (Q.get('res') || '640x360').split('x').map(Number);
 const ps = createPS1Renderer({ width: RES[0], height: RES[1], container: document.getElementById('stage'),
-  grade: { lift: [0.035, 0.045, 0.04], gain: [1.0, 0.985, 0.95], sat: 1.04, contrast: 1.08 } });
+  grade: { lift: [0.03, 0.04, 0.045], gain: [0.96, 1.0, 1.02], sat: 0.98, contrast: 1.1 } });
 PS1.affine.value = +(Q.get('affine') || 0.15);
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color('#0b0d0a');
-scene.fog = new THREE.Fog('#262a22', 6, 22);
+scene.fog = new THREE.Fog('#1e2424', 7, 24);
 const camera = new THREE.PerspectiveCamera(39, RES[0] / RES[1], 0.05, 60);
 
 // ------------------------------------------------------------------ set + character
@@ -32,6 +32,19 @@ ch.root.add(noor.root);
 ch.root.position.set(SEAT.x, 0.02, -W + 0.3);    // the GLB's origin is the armature root, already dropped to seat height
 ch.root.rotation.y = 0.12;            // turned a touch toward the lens
 scene.add(ch.root);
+// v3: the other passengers (same pipeline, original designs), each in their own small loop
+const PASS = [   // [file, x, wall side (-1 far, +1 near), turn, time offset]
+  ['reader', -4.9, -1, 0.0, 3.1],     // down the car on her side, reading
+  ['commuter', -7.3, -1, 0.0, 6.4],   // further down, head over his phone
+  ['sleeper', -9.4, -1, 0.0, 0],      // at the far end, asleep against the partition
+];
+const passengers = [];
+for (const [name, x, side, turn, off] of PASS) {
+  const p = await loadNoor(`./assets/${name}.glb`);
+  const g = new THREE.Group(); g.add(p.root);
+  g.position.set(x, 0.02, side * (W - 0.3)); g.rotation.y = (side > 0 ? Math.PI : 0) + turn; scene.add(g);
+  passengers.push({ p, off, g, x, side });
+}
 
 // painted contact shadows (PS1 had no shadow maps; blobs + painted grime did the job)
 const blobTex = paint(32, 32, (c, P) => P.each((x, y) => { const d = Math.hypot(x - 15.5, y - 15.5) / 16; return [0, 0, 0, Math.max(0, 1 - d) ** 1.3 * 255]; }), { wrap: false });
@@ -41,6 +54,9 @@ const blob = (w, d, x, y, z, a = 0.6, ry = 0) => {
 };
 blob(0.5, 0.5, SEAT.x, 0.478, SEAT.z + 0.05, 0.7);                // where she sits
 blob(0.55, 0.42, SEAT.x + 0.02, 0.003, SEAT.z + 0.52, 0.55);      // under her feet
+for (const { x, side } of PASS.map(([n, x, side]) => ({ x, side }))) {   // contact shadows under every passenger
+  blob(0.5, 0.5, x, 0.478, side * (W - 0.235) - side * 0.05, 0.7); blob(0.55, 0.42, x, 0.003, side * (W - 0.235) - side * 0.52, 0.55);
+}
 const behind = new THREE.Mesh(new THREE.PlaneGeometry(0.55, 0.75), ps1Unlit({ map: blobTex, transparent: true, opacity: 0.45, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 }));
 behind.position.set(SEAT.x, 0.82, -W + 0.06); behind.rotation.x = -0.12; scene.add(behind);   // her shadow on the seat back
 
@@ -59,14 +75,16 @@ const news = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.012, 0.3), ps1Material
 news.position.set(-6.1, 0.483, -W + 0.27); news.rotation.y = 0.2; scene.add(news);
 
 // ------------------------------------------------------------------ light (warm tubes overhead, a cool night in the shadows)
-scene.add(new THREE.HemisphereLight('#d9d8c4', '#525548', 3.0));
+const hemi = new THREE.HemisphereLight('#d6dcd6', '#4a5250', 3.0); scene.add(hemi);
+const cityFill = new THREE.DirectionalLight('#8fb0e0', 0); cityFill.position.set(-1, 1.2, -4); scene.add(cityFill);      // through the far windows
+const cityFillNear = new THREE.DirectionalLight('#9a8fd0', 0); cityFillNear.position.set(-1, 1.0, 4); scene.add(cityFillNear);
 const tubes = [];
 for (const x of [2.6, -0.4, -3.4, -6.85, -10.2, -13.6]) {
-  const l = new THREE.PointLight('#fff3e0', 4.6, 8.5, 1.25); l.position.set(x, 1.85, 0); scene.add(l); tubes.push(l);
+  const l = new THREE.PointLight('#f2f7f6', 4.8, 8.5, 1.25); l.position.set(x, 1.85, 0); scene.add(l); tubes.push(l);
 }
 const flash = new THREE.PointLight('#ffbf6e', 0, 2.6, 1.6); scene.add(flash);
 // v2: the tube right above her reads as her key: a soft warm pool on the face and shoulders
-const faceKey = new THREE.PointLight('#fff1d8', 1.6, 2.2, 1.4); faceKey.position.set(SEAT.x + 0.35, 1.95, -0.55); scene.add(faceKey);         // tunnel lamps sweeping her back
+const faceKey = new THREE.PointLight('#f4f6f2', 1.8, 2.2, 1.4); faceKey.position.set(SEAT.x + 0.35, 1.95, -0.55); scene.add(faceKey);         // tunnel lamps sweeping her back
 const endGlow = new THREE.PointLight('#ffd79a', 1.2, 3.5, 1.5); endGlow.position.set(-15.0, 1.5, 0); scene.add(endGlow);
 
 // ------------------------------------------------------------------ smoke (dithered pixels; screen-door alpha like the hardware did)
@@ -93,6 +111,7 @@ const smokeMat = new THREE.ShaderMaterial({
 });
 const smoke = new THREE.Points(smokeGeo, smokeMat); smoke.frustumCulled = false; scene.add(smoke);
 
+const ember = new THREE.Mesh(new THREE.BoxGeometry(0.011, 0.011, 0.011), ps1Unlit({ color: '#ff6a1c' })); scene.add(ember);
 const _w = new THREE.Vector3();
 const toWorld = (v) => _w.copy(v).applyMatrix4(ch.root.matrixWorld);
 function updateSmoke(t) {
@@ -104,7 +123,7 @@ function updateSmoke(t) {
     const a = (t % 0.06) + i * 0.06, tb = t - a, J = { dragK: noor.dragK(tb) };
     const o = toWorld(noor.ember(tb)), s = hash2(Math.round(tb * 16.7), 0, 3);
     const curl = Math.sin(a * 2.4 + s * 6) * 0.03 * a + Math.sin(a * 5.1 + tb) * 0.008;
-    pos.setXYZ(k, o.x + curl + a * 0.09 + a * a * 0.02, o.y + a * 0.1 + a * a * 0.012, o.z + Math.cos(a * 1.9 + s * 5) * 0.022 * a - a * 0.06);   // v2: a stronger draft toward the window   // the draft pulls it toward the window
+    pos.setXYZ(k, o.x + curl * 0.6 + a * 0.012, o.y + a * 0.13 + a * a * 0.01, o.z - a * 0.03);   // v3: rises and curls, drifts back toward the window
     sz.setX(k, 0.011 + a * 0.02);
     al.setX(k, 0.8 * Math.min(1, a * 5) * Math.max(0, 1 - a / 2.8) * (1 - J.dragK * 0.7 * Math.max(0, 1 - a)));
   }
@@ -144,6 +163,12 @@ function update(t) {
   flash.position.set(bx, 1.5, -W - 0.35);
   flash.intensity = 2.2 * Math.max(0, 1 - best / 1.8);
   noor.setTime(t);
+  ember.position.copy(toWorld(noor.ember(t))); const dk = noor.dragK(t); ember.material.color.setRGB(1, 0.35 + 0.35 * dk, 0.08 + 0.1 * dk);
+  for (const { p, off } of passengers) p.setTime(t + off);
+  // the elevated stretch: cool city light through the windows, the warm tubes a little lower against it
+  const open = set.open || 0;
+  cityFill.intensity = 1.4 * open; cityFillNear.intensity = 0.9 * open;
+  hemi.color.set('#d6dcd6').lerp(new THREE.Color('#b9c6d6'), open * 0.5);
   updateSmoke(t);
   updateCamera(t);
 }

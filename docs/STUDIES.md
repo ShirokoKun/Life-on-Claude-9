@@ -172,3 +172,34 @@ node tools/study_render.mjs --study ps1-subway-v2 --film --w 1920 --h 1080 --mp4
 ```
 The Quaternius pack: https://quaternius.itch.io/universal-base-characters (Standard, CC0; not committed). The built
 `noor.glb` and its textures are in the repo.
+
+## Last Train v3 (`engine/studies/ps1-subway-v3/`): against the second reference (`reference/taste/ps1_subway_target_2.jpg`)
+
+v2 is frozen: `engine/studies/ps1-subway-v2/`, tag `ps1-last-train-v2`, `blender/characters/ps1_noor_v2.py`. v3 is the
+duplicate that moves on.
+
+**What the reference does that v2 didn't:**
+- cool white fluorescents and grey-green walls;
+- flat-faceted, clean low-poly characters;
+- a colour-block jacket;
+- the cigarette held up by the face, the smoke rising above it;
+- other passengers down the car.
+
+**Cigarette rules** (`blender/characters/ps1_noor.py`, checked at build and printed):
+1. The cigarette sits between the index and middle fingertips. Its axis runs along the palm normal, filter on the palm side.
+2. On the drag, the hand target is solved iteratively until the filter end touches the lips (≈6 mm).
+3. On the drag, the wrist (bend, twist, side) is searched until the cigarette points out of the mouth (alignment 0.999).
+4. At rest, the hand is held up beside the shoulder, so the smoke rises clear of the face.
+5. Every frame is checked for finger joints inside the head ellipsoid. A few samples graze the chin and lips at the drag,
+   which is contact rather than penetration.
+
+**Other changes:**
+- Characters are faceted: a planar dissolve that keeps material and UV borders, flat shading in the engine. The jacket is
+  colour-blocked by body region (black yoke, cuffs, hem) rather than by texture, so the UV unwrap can't scatter it.
+- Passengers come from `blender/characters/ps1_passenger.py`, presets on the same CC0 base: a commuter over his phone,
+  a reader with a paperback, a sleeper. Each has its own idle loop, offset in time, plus contact shadows.
+- The outside: the line leaves the tunnel for an elevated stretch (3–9.5 s). A night city scrolls past in three parallax
+  layers (catenary posts, lit blocks with shop signs, a skyline with a radio mast), and cool city light fills the car on
+  that stretch.
+- The grade is cooler and more neutral: white-cyan tubes, a teal-grey fog. The smoke rises and curls toward the window,
+  and the cigarette has a glowing ember that brightens on the drag.

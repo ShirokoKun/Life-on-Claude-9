@@ -19,3 +19,8 @@ PS1 v2 (engine/studies/ps1-subway-v2):
 - Pose with IK targets + finger FK in Blender; check with --preview renders (body and --headcam); bake to GLB; drive AnimationMixer from the harness clock; precompute ember/mouth paths for smoke trails.
 - Blender's Python has no PIL: paint textures with system python first.
 - p5.brush 2.2.3 + p5 2.2.0 vendored in engine/vendor/p5; paint in a fresh page per texture (it keeps buffers); setAttributes after createCanvas.
+PS1 v3 (2026-11-07, director's notes "cigarette goes inside the face", "add outside background", "other models proper"):
+- Hand-to-mouth actions need RULES checked in the build: filter-to-lips distance solved, wrist searched for alignment, finger-in-head test; rest pose keeps the hand beside the shoulder so smoke clears the face.
+- Colour-block clothing by body region (bone weights + height), never by a pattern on an automatic UV unwrap (it scatters into camo).
+- Faceted PS1-cinematic look = planar dissolve (delimit MATERIAL+UV) + flatShading.
+- Always keep the approved version frozen (copy + tag) and improve a duplicate.

@@ -17,7 +17,7 @@ export async function loadNoor(url) {
     const src = o.material, map = src.map || null;
     if (map) { map.magFilter = THREE.NearestFilter; map.minFilter = THREE.NearestFilter; map.generateMipmaps = false; map.needsUpdate = true; }
     const hair = /hair|brow/i.test(o.name) || /hair|brow/i.test(src.name || '');
-    o.material = ps1Material({ map, color: map ? 0xffffff : src.color, side: hair ? THREE.DoubleSide : THREE.FrontSide, alphaTest: hair ? 0.4 : 0 });
+    o.material = ps1Material({ map, color: map ? 0xffffff : src.color, side: hair ? THREE.DoubleSide : THREE.FrontSide, alphaTest: hair ? 0.4 : 0, flatShading: !/eye/i.test(o.name) });
     o.frustumCulled = false;
   });
   const mixer = new THREE.AnimationMixer(root);
