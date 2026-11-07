@@ -24,3 +24,8 @@ PS1 v3 (2026-11-07, director's notes "cigarette goes inside the face", "add outs
 - Colour-block clothing by body region (bone weights + height), never by a pattern on an automatic UV unwrap (it scatters into camo).
 - Faceted PS1-cinematic look = planar dissolve (delimit MATERIAL+UV) + flatShading.
 - Always keep the approved version frozen (copy + tag) and improve a duplicate.
+Room v3 (2026-11-07, director: "check the plan before rendering, don't waste render time"):
+- WORKFLOW: refine -> audit (tutorial_room.py --audit: overlap list + ortho plan + iso) -> 720p review stills (48 spp, ~2 min) -> only then the long render. Review at 720p, not 1440p (1440p = 20 min/still).
+- Audit catches: chair through desks, door blocked by bookcase, clutter in the walkway, props inside props, doubled ceiling fixtures, assets facing the wall (Poly Haven wall_clock needs rz=-90 on an x-max wall). Exclude cables from bbox overlap tests.
+- Look: dim grey-green walls, exposure -0.95, bloom only on clipped pixels + highlight shoulder (else windows wash to white), area lights hidden from camera, muted prop colours, dielectric spec ~0.35, satin desk.
+- Cost on 4 CPU cores: 1280x720, 40 spp adaptive 0.04, motion blur, DOF = ~78 s/frame; real 24 fps beats every-2nd-frame interpolation.
