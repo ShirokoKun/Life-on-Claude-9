@@ -57,3 +57,48 @@ better subjects.
 8. Alternate lighting (another time of day or mood) on the same geometry.
 9. Camera: one motivated move per shot, real focal lengths, handheld life.
 10. Contact sheet against the references before anything is called done.
+
+## 5. The final film, studied closely (2026-11-07): what to copy
+
+**Camera.** One handheld walk-through, not separate locked shots:
+- A wide lens, about 18 mm, operated at walking pace.
+- It starts in the doorway with the dark door jamb as a foreground frame, pushes in past the chair, then rises to look
+  steeply down at the desk.
+- It pans along the window to the toys on the tower, then whip-pans right past the sunlit side wall to the bookshelves,
+  the door with its poster, and the sofa buried in bags and boxes. It comes back to the desk.
+- The shake is constant. Every fast pan smears with heavy motion blur. The night pass repeats the route.
+
+**Light.** The exposure is set for the room, so the windows and blinds clip to white and bloom into a milky haze. The
+room falls off fast from the window: the floor and corners go nearly black. There's no visible sun stripe in the main
+take. The night pass:
+- the desk lamp is the key, a warm cone on the keyboard;
+- the monitor gives a cool glow;
+- the window is dark blue with blurred city lights and rain on the glass.
+
+**Shadows.** Very soft and large. The contact darkness is deep under the desk, inside the shelves, behind the chair and
+under every object, and no edge is hard.
+
+**Materials.**
+- The desk laminate has a satin sheen that catches the window and is the brightest surface after the glass.
+- The black leather is glossy, with sharp highlights along every crease and roll.
+- Ceramic mugs glint, and the monitors are satin black.
+- The walls are matte warm grey, the cardboard and paper rough, the books and labels printed.
+- Every surface carries scuffs and dust.
+
+**Mood and grade.** Desaturated and slightly cool; lifted blacks (film), grain, a soft vignette, lens softness.
+
+**Measured** (`tools/look_metrics.py`):
+
+| | Tutorial | Our raw Cycles before the fix |
+|---|---|---|
+| Black share | 0 % | 18 % |
+| Median luminance | 0.06–0.07 | 0.026 |
+| Sharpness | 0.8–9.7 | 17 |
+| Highlight area | 4–10 % | — |
+
+**Applied in our rebuild:**
+- `blender/scenes/tutorial_room.py --film` is the walk-through (waypoints, Catmull-Rom, layered shake, Cycles motion blur).
+- The back of the room exists now: the door with its poster and the sofa corner.
+- The haze thickens toward the windows.
+- `tools/room_post.py` is the lens and grade: lifted blacks, window bloom and haze, softness, cool desaturation,
+  vignette, grain.
