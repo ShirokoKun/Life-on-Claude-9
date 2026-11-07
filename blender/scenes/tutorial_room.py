@@ -35,7 +35,7 @@ W, DEP, H = 3.6, 3.3, 2.4          # room width (x), depth (y), height (z)
 M = {
     'wall': K.mat_plain('wall_paint', (0.70, 0.68, 0.63), rough=0.85),
     'ceiling': K.mat_plain('ceiling_paint', (0.78, 0.77, 0.74), rough=0.9),
-    'floor': K.mat_tex('floor_laminate', 'oak_floor', tile=1.7, tint=(1.25, 0.88, 0.6), rough_mul=0.4, rough_add=0.25, normal=0.5),
+    'floor': K.mat_tex('floor_laminate', 'oak_floor', tile=1.7, tint=(0.8, 0.6, 0.45), rough_mul=0.4, rough_add=0.22, normal=0.5),   # warm grey-brown laminate, not orange
     'walnut': K.mat_tex('walnut', 'walnut', tile=0.6, tint=(1.0, 0.85, 0.72), rough_mul=0.5, rough_add=0.35, normal=0.5),
     'laminate': K.mat_plain('desk_laminate', (0.42, 0.42, 0.4), rough=0.42, bump=0.04, bump_scale=300),
     'beige_metal': K.mat_plain('beige_metal', (0.56, 0.52, 0.44), rough=0.38, metal=0.0, coat=0.2, bump=0.03, bump_scale=200),
@@ -61,7 +61,7 @@ if CLAY:
 # ================================================================= shell
 K.cube('floor', (W, DEP, 0.04), (W / 2, DEP / 2, -0.02), M['floor'], bev=0)
 K.cube('ceiling', (W, DEP, 0.04), (W / 2, DEP / 2, H + 0.02), M['ceiling'], bev=0)
-fw_ = K.cube('wall_front', (W, 0.12, H), (W / 2, -0.06, H / 2), M['wall'], bev=0); fw_.visible_camera = False   # a set wall: lights the room, the lens sees through it
+fw_ = K.cube('wall_front', (W, 0.12, H), (W / 2, -0.06, H / 2), M['wall'], bev=0); fw_.visible_camera = '--wall-off' not in argv   # the walk-through turns to see it (the door); --wall-off for the long wide
 K.cube('wall_right', (0.12, DEP, H), (W + 0.06, DEP / 2, H / 2), M['wall'], bev=0)
 for side, x in (('L', -0.06),):
     pass
@@ -337,7 +337,7 @@ P.paper_bag((0.62, 2.05, 0), 20, PM)
 # --- floor: the vacuum against the left wall, the navy cooler bag, books and boxes under the desk (a blue product box),
 #     the white wire basket with crumpled paper and a kraft bag by the pedestal, cables and a power strip
 P.stick_vacuum((0.1, 1.15, 0), 90, PM)
-P.cooler_bag((0.45, 0.85, 0), 12, PM)
+P.cooler_bag((0.55, 0.42, 0.42), 8, PM)   # on the sofa, with the rest of the pile
 P.waste_basket((2.18, 1.35, 0), PM)
 P.paper_bag((2.0, 1.0, 0), -20, PM, h=0.3)
 K.asset('cardboard_box_01', (1.0, 2.95, 0), rz=-5, scale=1.15); K.asset('cardboard_box_01', (1.62, 3.0, 0), rz=10, scale=1.2)
@@ -399,6 +399,25 @@ P.wall_print('calendar', os.path.join(P.ROOM_ASSETS, 'calendar.png'), (W - 0.006
 P.wall_print('poster', os.path.join(P.ROOM_ASSETS, 'poster.png'), (W - 0.006, 2.15, 1.6), (0.36, 0.48), rz=-90, frame=True, M=PM)
 P.wall_print('city_print', os.path.join(P.ROOM_ASSETS, 'print_city.png'), (0.006, 0.95, 1.55), (0.4, 0.3), rz=90, frame=True, M=PM)
 
+# ================================================================= the back of the room (the walk-through turns to it): the door, the sofa corner
+door_wood = K.mat_tex('door_wood', 'walnut', tile=0.9, tint=(0.55, 0.38, 0.28), rough_mul=0.4, rough_add=0.35)
+K.cube('door_frame_l', (0.06, 0.1, 2.12), (2.5, 0.03, 1.06), door_wood, bev=0.004); K.cube('door_frame_r', (0.06, 0.1, 2.12), (3.42, 0.03, 1.06), door_wood, bev=0.004)
+K.cube('door_frame_t', (0.98, 0.1, 0.06), (2.96, 0.03, 2.12), door_wood, bev=0.004)
+K.cube('door_leaf', (0.86, 0.045, 2.06), (2.96, 0.03, 1.04), door_wood, bev=0.003)
+K.cyl('door_handle', 0.009, 0.12, (3.28, 0.075, 1.0), PM['chrome'], rot=(0, 90, 0), seg=12)
+K.cube('door_plate', (0.05, 0.008, 0.16), (3.3, 0.055, 1.0), PM['chrome'], bev=0.002)
+P.wall_print('door_poster', os.path.join(P.ROOM_ASSETS, 'print_city.png'), (2.96, 0.06, 1.45), (0.32, 0.44), rz=180, frame=False)
+K.cube('light_switch', (0.07, 0.012, 0.11), (2.3, 0.008, 1.2), PM['ivory'], bev=0.003)
+# the sofa against the front wall, buried in the overflow: bags, boxes, a blue cooler, clothes, books on the floor round it
+K.asset('Sofa_01', (0.95, 0.42, 0.0), rz=180, mat=K.mat_tex('sofa_leather', 'leather', tile=0.4, tint=(0.16, 0.1, 0.07), rough_mul=0.35, rough_add=0.25))
+K.asset('cardboard_box_01', (1.35, 0.4, 0.42), rz=20, scale=1.1); K.asset('cardboard_box_01', (1.45, 0.75, 0.0), rz=-10, scale=1.2)
+P.paper_bag((0.45, 0.85, 0), 60, PM, h=0.32)
+for k in range(3):
+    c = K.cube('clothes', (0.4, 0.3, 0.14), (0.95 + k * 0.12, 0.45 + k * 0.03, 0.52 + k * 0.05), K.mat_tex(f'cloth{k}', 'fabric_weave', tile=0.15, tint=((0.55, 0.6, 0.62), (0.2, 0.3, 0.45), (0.75, 0.72, 0.65))[k]), bev=0.0, rot=(0, 0, 25 * k))
+    bv = c.modifiers.new('r', 'BEVEL'); bv.width = 0.05; bv.segments = 3; K.subsurf(c, 2)
+    d = c.modifiers.new('fold', 'DISPLACE'); t = bpy.data.textures.get('folds') or bpy.data.textures.new('folds', 'CLOUDS'); t.noise_scale = 0.08; d.texture = t; d.strength = 0.04
+P.book_stack((1.75, 0.35, 0.0), 9, PM, rz=12); P.book_stack((0.15, 0.45, 0.0), 6, PM, rz=-20)
+
 # ================================================================= ceiling, aircon, clock
 # the flush ceiling light: a dark drum with a white diffuser ring (as in the tutorial)
 K.cyl('ceil_lamp_rim', 0.26, 0.09, (1.8, 1.65, H - 0.045), M['black_plastic'], seg=48, bev=0.01)
@@ -439,7 +458,12 @@ if LIGHT in ('sun',):
 # ================================================================= air (haze: shows the light through the blinds)
 if '--novol' not in argv and LIGHT != 'night':
     v = bpy.data.materials.new('room_air'); v.use_nodes = True; vn = v.node_tree.nodes; vn.clear()
-    pv = vn.new('ShaderNodeVolumePrincipled'); pv.inputs['Density'].default_value = 0.04; pv.inputs['Anisotropy'].default_value = 0.6
+    pv = vn.new('ShaderNodeVolumePrincipled'); pv.inputs['Anisotropy'].default_value = 0.6
+    # the air thickens toward the windows (the tutorial's milky light at the glass), thin over the room
+    tco = vn.new('ShaderNodeTexCoord'); sxyz = vn.new('ShaderNodeSeparateXYZ'); v.node_tree.links.new(tco.outputs['Object'], sxyz.inputs[0])
+    dmr = vn.new('ShaderNodeMapRange'); dmr.inputs['From Min'].default_value = 0.2; dmr.inputs['From Max'].default_value = DEP / 2
+    dmr.inputs['To Min'].default_value = 0.018; dmr.inputs['To Max'].default_value = 0.045; dmr.interpolation_type = 'SMOOTHSTEP'
+    v.node_tree.links.new(sxyz.outputs['Y'], dmr.inputs['Value']); v.node_tree.links.new(dmr.outputs['Result'], pv.inputs['Density'])
     vo = vn.new('ShaderNodeOutputMaterial'); v.node_tree.links.new(pv.outputs[0], vo.inputs['Volume'])
     air = K.cube('air', (W - 0.02, DEP - 0.02, H - 0.02), (W / 2, DEP / 2, H / 2), v, bev=0); air.visible_shadow = False
 
@@ -466,35 +490,44 @@ sc.render.resolution_x, sc.render.resolution_y = RES; sc.render.resolution_perce
 sc.view_settings.view_transform = 'AgX'
 try: sc.view_settings.look = 'AgX - Medium High Contrast'
 except TypeError: pass
-sc.view_settings.exposure = float(opt('--exposure', '0.1'))
+sc.view_settings.exposure = float(opt('--exposure', '0.0'))
 sc.render.image_settings.file_format = 'PNG'; sc.render.filepath = OUT
 if opt('--blend'): bpy.ops.wm.save_as_mainfile(filepath=opt('--blend'))
 if opt('--film'):
     # the tutorial's film language: a handheld wide push, a slow slide across the desk, a close drift past the toys
-    SHOTS = [   # (frames, cam from, cam to, look from, look to, lens, f-stop or None, focus point)
-        (96, (1.74, 0.5, 1.56), (1.62, 1.0, 1.5), (1.74, 3.3, 0.62), (1.8, 3.3, 0.68), 16, None, None),
-        (72, (1.78, 2.28, 1.0), (2.12, 2.33, 0.98), (2.0, 2.95, 0.84), (2.38, 2.95, 0.86), 28, 2.8, (2.2, 2.7, 0.78)),
-        (72, (2.2, 2.3, 1.22), (2.34, 2.36, 1.16), (2.72, 3.05, 1.08), (2.76, 3.05, 1.06), 24, 4.0, (2.6, 2.98, 1.0)),
-    ]
-    sc.frame_start = 1; sc.frame_end = sum(sh[0] for sh in SHOTS); sc.render.fps = 24
-    sc.render.use_overwrite = False; sc.render.use_placeholder = True        # resumable: rerun to fill the gaps
-    focus = bpy.data.objects.new('focus', None); K.link(focus); cam.data.dof.focus_object = focus
-    f = 1
-    for (n, c0, c1, l0, l1, lens, fstop, fp) in SHOTS:
-        for i in range(n):
-            u = i / max(1, n - 1); e = u * u * (3 - 2 * u) * 0.6 + u * 0.4
-            sway = Vector((math.sin(f * 0.21) * 0.01 + math.sin(f * 0.53) * 0.003, math.sin(f * 0.17) * 0.005, math.sin(f * 0.29 + 1) * 0.007))
-            cam.location = Vector(c0).lerp(Vector(c1), e) + sway * (1.0 if lens < 20 else 0.4)
-            look = Vector(l0).lerp(Vector(l1), e)
-            cam.rotation_euler = (look - cam.location).to_track_quat('-Z', 'Y').to_euler(); cam.rotation_euler.y += math.sin(f * 0.13) * 0.004
-            cam.data.lens = lens; cam.data.dof.use_dof = fstop is not None
-            if fstop: cam.data.dof.aperture_fstop = fstop; focus.location = fp
-            for path in ('location', 'rotation_euler'): cam.keyframe_insert(path, frame=f)
-            cam.data.keyframe_insert('lens', frame=f); cam.data.dof.keyframe_insert('use_dof', frame=f); cam.data.dof.keyframe_insert('aperture_fstop', frame=f)
-            focus.keyframe_insert('location', frame=f)
-            f += 1
-    for fc in (cam.animation_data.action.fcurves if cam.animation_data and hasattr(cam.animation_data.action, 'fcurves') else []):
-        for kp in fc.keyframe_points: kp.interpolation = 'CONSTANT'
+    # the tutorial's camera: ONE handheld walk-through on a wide lens, operated at walking pace, whip pans with motion blur.
+    # waypoints: (time s, camera position, look-at point); Catmull-Rom between them, plus layered hand shake
+    WP = [(0.0, (1.05, 0.32, 1.58), (2.0, 3.3, 0.85)),      # in the doorway side, the room ahead
+          (2.6, (1.35, 1.05, 1.56), (1.95, 3.3, 0.8)),      # push in past the chair
+          (4.4, (1.62, 1.7, 1.72), (1.9, 2.72, 0.7)),       # rise and look down onto the desk: keyboard, mug, junk
+          (6.2, (1.95, 1.85, 1.62), (2.75, 3.05, 1.05)),    # pan right along the window to the tower and the toys
+          (7.0, (2.15, 1.75, 1.58), (3.6, 2.2, 1.25)),      # the side wall: calendar, poster
+          (7.6, (2.25, 1.55, 1.56), (3.6, 0.8, 1.15)),      # whip right: the bookcase
+          (8.6, (2.1, 1.35, 1.55), (2.95, 0.0, 1.2)),       # the door and its poster
+          (9.6, (1.75, 1.3, 1.5), (0.9, 0.3, 0.5)),         # down to the sofa buried in bags
+          (10.4, (1.6, 1.25, 1.55), (0.6, 2.5, 1.05)),      # whip back left: the rack and the left window
+          (12.0, (1.55, 1.05, 1.58), (1.9, 3.3, 0.85))]     # settle on the desk wide
+    def cr(p0, p1, p2, p3, u):
+        return 0.5 * ((2 * p1) + (-p0 + p2) * u + (2 * p0 - 5 * p1 + 4 * p2 - p3) * u * u + (-p0 + 3 * p1 - 3 * p2 + p3) * u ** 3)
+    def along(t, k):
+        for i in range(len(WP) - 1):
+            if WP[i][0] <= t <= WP[i + 1][0]:
+                u = (t - WP[i][0]) / (WP[i + 1][0] - WP[i][0]); u = u * u * (3 - 2 * u) * 0.5 + u * 0.5
+                P_ = [Vector(WP[max(0, j)][k]) for j in (i - 1, i, i + 1, min(i + 2, len(WP) - 1))]
+                return cr(*P_, u)
+        return Vector(WP[-1][k])
+    n = int(12.0 * 24)
+    sc.frame_start = 1; sc.frame_end = n; sc.render.fps = 24
+    sc.render.use_overwrite = False; sc.render.use_placeholder = True
+    sc.render.use_motion_blur = True; sc.render.motion_blur_shutter = 0.5      # the whip pans smear like a real camera
+    cam.data.lens = 18; cam.data.dof.use_dof = False
+    for f in range(1, n + 1):
+        t = (f - 1) / 24
+        shake = Vector((math.sin(t * 6.1) * 0.006 + math.sin(t * 13.7 + 1) * 0.003, math.sin(t * 5.3 + 2) * 0.005, math.sin(t * 7.9) * 0.007 + math.sin(t * 2.2) * 0.004))
+        cam.location = along(t, 1) + shake
+        look = along(t, 2) + Vector((math.sin(t * 3.1) * 0.02, 0, math.sin(t * 4.3 + 1) * 0.015))
+        cam.rotation_euler = (look - cam.location).to_track_quat('-Z', 'Y').to_euler(); cam.rotation_euler.y += math.sin(t * 2.7) * 0.012
+        cam.keyframe_insert('location', frame=f); cam.keyframe_insert('rotation_euler', frame=f)
     if opt('--range'): sc.frame_start, sc.frame_end = map(int, opt('--range').split('-'))
     sc.frame_step = int(opt('--step', '1'))       # render every Nth frame; the encode interpolates motion back to 24 fps
     sc.render.filepath = OUT.rstrip('/') + '/f_'
