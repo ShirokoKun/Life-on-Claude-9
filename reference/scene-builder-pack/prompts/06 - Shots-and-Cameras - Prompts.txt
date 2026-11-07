@@ -1,0 +1,21 @@
+PROMPT: SHOT DESIGN
+
+Build separate editable shot versions from the same room and lighting. Preserve world scale and lighting continuity. Do not treat every shot's local source frame range as the next portion of one continuous animation. Use the included SHOT-INDEX.csv to locate the supplied scenes.
+
+01 OPENING: A gentle handheld walk into the room with an initially readable normal bedroom, then vortex formation. Small human motion, not random violent shake. The vortex effect must begin with its appearance, not on the first frame. Retain a little lead-in and time for the viewer to see the room.
+
+02 HEEL PICKUP: Low shoe view. The lifting shoe's heel rises before the toe releases the floor, producing a natural tilt and transition into the current. Laces remain connected and loose, clear of the shoe and floor. The other shoe stays grounded unless deliberately animated.
+
+03 CAUGHT IN THE CURRENT: Wider readable view of airborne objects circulating. Maintain clear silhouettes and varied depth. Use this view to judge the transparency and chromatic glass streams later in Fusion.
+
+04 INSIDE THE STORM: Immersive upward-looking view inside the swirling particles and props. Keep foreground objects readable and avoid filling the frame with opaque glow.
+
+05 OVERHEAD: Top-down composition looking into the vortex. Place the chair more centrally in the vortex for this shot only. Do not propagate that staging change into all other shots. Keep floor papers, rug, and bed as spatial landmarks.
+
+06 TIME STOP: Soccer ball hero, with the white graphic plastic cup and tabletop half-pipe. Begin with subtle left-to-right rotation; smoothly ease into very slow residual motion. Keep the final object pose stable without snapping. All aura and particles remain present, nearly hovering. Use shared scene illumination rather than a harsh spotlight on the ball.
+
+07 LANDING: Objects fall, and the handheld camera reacts slightly late by tilting downward to follow impacts. Leave a beat to settle. Use a modestly wider lens so the soccer ball does not get cut off. Hide the edge-of-set door AND all its hardware, including both knobs, rather than just removing the door slab.
+
+CLEAN WALKTHROUGH: Separate day/night room study with no tornado. Use the supplied moving camera or pause it for a static room study. These are separate completed clean-camera setups, not guaranteed to have identical prop staging to every later tornado version.
+
+Deliver single-frame previews first when changing framing. Review framing with stills before rendering an animation.

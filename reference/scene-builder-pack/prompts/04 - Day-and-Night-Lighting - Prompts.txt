@@ -1,0 +1,13 @@
+PROMPT: DAYLIGHT
+
+Light the bedroom primarily from the windows with soft daylight and controlled direct sun. Keep the windows bright but preserve readable blinds. The bed should receive soft ambient/bounced illumination, comparable in character to the television area, rather than a strong direct beam. Place a physical flag outside the relevant window or control the direct source so its footprint misses the bed. Do not solve this by globally darkening the scene or painting the bedding black.
+
+Allow a deliberate patch of sunlight across part of the floor and papers. Keep the room's wood warm and the daylight fairly neutral. Retain shadow detail, texture contrast, and believable falloff. Add only subtle atmosphere so light has depth without making the entire image milky. Use the same view transform and exposure when comparing shots. Keep the exterior photograph disabled for the clean-window version. Evaluate a wide room render before close-ups.
+
+For the floating soccer-ball shot use the shared scene lighting; avoid a harsh dedicated beam blowing out the hero object. Preserve shape and seams through soft reflected light. Do not independently relight every shot until continuity is broken.
+
+PROMPT: NIGHT VARIATION
+
+Duplicate the scene and retain geometry, animation, and camera timing. Establish cooler subdued window ambience and motivated practical/screen light. Preserve enough separation to read the room and airborne objects without making the room uniformly blue or black. Let green vortex emission and irregular lightning pulses affect nearby surfaces. Keep pulses brief and varied, with a readable dark baseline. Compare matching frames of all seven cameras for exposure continuity.
+
+Deliver daylight and night files separately. Test preview exposure before raising samples. Higher samples reduce noise; they do not repair poor lighting or clipping.

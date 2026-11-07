@@ -1,0 +1,17 @@
+BEDROOM VORTEX - STUDENT PROMPT WORKBOOK
+
+These prompts walk through the scene-building workflow and design decisions. A single prompt cannot reproduce the supplied scene exactly: generation is variable, and cleanup, lighting, animation, and compositing require iteration.
+
+Use the prompts in numerical order. Save a version after each stage. Start with one prop and a simple gray room, then build complexity. A tool that can only generate an image cannot build an editable Blender scene; use a Blender-capable assistant or implement the instructions manually.
+
+Inputs you supply: your own original artwork or the included generated prop studies; desired room dimensions; output folder; available software.
+
+Suggested checkpoints:
+1. One usable prop at real scale.
+2. Gray room with correct layout and camera.
+3. Day/night lighting stills.
+4. Wide vortex test with motion but no finished lighting.
+5. Individual shot animation previews.
+6. Final rendering and optional Fusion refraction.
+
+Keep the Blender shots at their supplied 24 fps while studying them. They have different source frame ranges and may overlap: they are shot setups, not one contiguous edit timeline. To show every frame in a 25 fps edit, interpret 24 fps footage as 25 fps, producing a 4.1667% speed increase and a duration of 24/25 of the original. Do not also apply another speed increase. If exact duration matters, make a deliberate retiming/interpolation choice or render animation evaluated at 25 fps.

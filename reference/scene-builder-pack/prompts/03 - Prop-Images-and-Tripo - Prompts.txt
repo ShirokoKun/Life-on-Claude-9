@@ -1,0 +1,19 @@
+PROMPT: GENERATE ONE PROP REFERENCE
+
+Create a photoreal studio product image of [PROP], isolated on a plain white or light-gray seamless background. Entire object visible with generous margins, front three-quarter view, normal-lens proportions, diffuse neutral light, minimal contact shadow. Show coherent construction and separated components. No room, hands, labels, watermark, dramatic lighting, motion blur, or cropped edges. Use original generic design and no recognizable branding. This image is an input for image-to-3D reconstruction.
+
+Prop descriptions to insert:
+- Beige CRT computer monitor: bulky late-1990s plastic housing, gently curved glass screen, thick bezel, small buttons, tilt base, ventilation slots; subtle yellowing and fingertip wear. Screen blank or a simple original desktop graphic without personal information.
+- Computer tower: beige rectangular desktop tower with drive bays, power button, narrow ventilation openings, coherent case seams, subtle edge wear.
+- Oak desk: simple rectangular top, left drawer pedestal, open knee space, modest brass pulls, smooth satin varnish with fine quiet grain, ordinary manufactured proportions.
+- Office chair: worn fabric seat and back, central adjustable support and five-wheel base, realistic joints and compression.
+- Soccer ball: classic black and off-white stitched panels, approximately 22 cm, inflated but worn, seams and light abrasions, no logo.
+- Plastic cup: white tapered disposable cup with an original teal and violet abstract 1990s graphic, thin rolled rim, no brand or borrowed artwork.
+- Fingerboard half-pipe: small tabletop wooden ramp with two curved transitions and flat center, coherent ply construction, no logos.
+- Sneakers: simple canvas high-tops, rubber sole, tongue, eyelets, tied laces with loose ends; no brand. Make a separate clean lace rig later if the reconstruction is fused.
+
+PROMPT: CONVERT AND CLEAN THE PROP
+
+Use an image-to-3D service such as Tripo to reconstruct the supplied original/generated prop image. Request textured geometry and PBR materials at a quality suitable for close shots. Export GLB or another Blender-compatible format. Do not assume the generation produces production-ready topology, correct dimensions, or separate laces.
+
+In Blender inspect silhouette from all sides, repair major holes and fused components, remove background fragments, and correct normals. Set real dimensions and ground contact. Preserve the original in a hidden backup collection while working. Review UVs and texture channels: base color in color space, roughness/normal/metallic as data; inspect the export's channel packing instead of guessing. Avoid exaggerated normal maps. Replace visibly broken handles, wires, or laces with clean modeled parts.

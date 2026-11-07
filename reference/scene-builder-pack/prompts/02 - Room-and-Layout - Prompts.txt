@@ -1,0 +1,11 @@
+PROMPT: BUILD THE BEDROOM
+
+Build an editable, believable late-1990s teenage bedroom in Blender using metric scale. Target a compact room approximately 4 by 4 meters with a normal-height ceiling; treat these as reconstruction starting dimensions, not measurements of the supplied files. Make the room shell, floor, windows, furniture, small props, cameras, and lights separately selectable. Use meaningful collection names.
+
+Viewed from the doorway: bed along the left wall; desk and beige CRT computer below two rear windows with horizontal blinds; a worn rolling office chair on a patterned rug in front of the desk; television and media stand to the right; dresser, stereo, backpack, and laundry hamper toward the right wall. Keep the hamper lid only partly open. Put loose magazines, papers, an open book, shoes, and a classic soccer ball on the floor. Use fictional poster graphics and original labels. Do not include a soda can. Leave space between objects for believable movement.
+
+Build large shapes first and render a wide gray-material still. Establish scale through a 0.75 m desk height, approximately 0.45 m chair seat, and 0.22 m soccer ball. Ground every static object; avoid floating feet and intersections. Preserve irregular spacing and slight wear without making everything broken or filthy.
+
+Materials: gently worn satin oak furniture; slightly yellowed plastic computer; rough plaster; worn wood floor; soft plaid bedding; faded fabric chair and rug. Grain should lie beneath the furniture finish, not look like deep carved ridges. Use modest normal strength and physically sensible roughness. Keep texture scale consistent.
+
+Add detail only after camera and lighting work: wires, pencils, notebooks, cup, trophy, magazines, skateboard equipment, varied posters, and subtle fabric wrinkles. The final composition should feel lived in and readable, not uniformly cluttered. Make window exterior imagery optional and separately controllable. For the clean daylight variation, use bright diffuse exterior light without a photographic neighborhood or tree background.

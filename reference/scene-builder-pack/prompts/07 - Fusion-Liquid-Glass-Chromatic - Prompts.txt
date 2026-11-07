@@ -1,0 +1,22 @@
+PROMPT: LOCALIZED LIQUID-GLASS VORTEX STREAMS
+
+Apply a transparent liquid-glass refraction effect to a rendered tornado shot in DaVinci Resolve/Fusion. The effect should read as narrow clear streams winding around the tornado. They refract the image behind them and produce visible but controlled prism-colored edges. Preserve the underlying image outside the streams. Avoid full-frame RGB separation, duplicate shoes, smeared faces, or a uniform rainbow outline on every object.
+
+Build an editable node graph from MediaIn to MediaOut. Start with two elongated ribbon masks. Distort the masks with slowly evolving broad Fast Noise, then animate their position and angle so they travel around the visible vortex. Keep their edges softly feathered but readable. Use the resulting field to displace the source image. Use three related displacement branches for red, green, and blue with slightly different refraction strengths, then recombine each branch's matching channel into one RGB result. Preserve alpha. Verify a neutral/zero mask returns the original pixels exactly; if necessary explicitly merge the refracted result over the untouched source using the ribbon mask.
+
+Starting values from the approved look, in Fusion's normalized controls (not pixel distances):
+- Two masks: width roughly 0.70 and 0.46, height 0.045, soft edge 0.025.
+- Broad noise: unlocked X/Y scale about 1.8 / 3.0, detail 1, contrast 1.2.
+- Slowly evolving field: seethe grows about 0.027 per 24 fps frame, with different phase offsets for each ribbon; gently translate the field.
+- Mask breakup displacement: X about 0.018, Y about 0.035.
+- Image refraction: X about 0.008, Y about 0.012.
+- Relative RGB displacement multipliers: red 1.182, green 1.000, blue 0.818.
+- Animate ribbon angle and center with low-frequency smooth motion rather than jitter. These are visual starting points; adjust for lens, framing, and effect node implementation.
+
+Begin with moderate refraction, then increase chromatic separation only at the stream boundaries. The scene's dominant green comes from the tornado lighting; the chromatic effect should remain prism-like rather than a solid green overlay. Do not use global channel translations to fake it.
+
+Timing: opening effect fades in only as the vortex forms; other active-vortex shots can begin with the streams already present. The landing effect fades away with the vortex. For the time-stop shot, slow the stream animation with the other effects instead of letting it run at full speed. Use shot-relative time so trimmed clips do not change the onset accidentally. Re-time animation expressions if working at 25 fps rather than 24 fps.
+
+Review at 100% on a shoe, ball seam, window blind, and chair edge. Keep stream-local distortion while avoiding widely separated object copies. Show a short A/B preview before rendering the entire cut.
+
+Build this effect in Fusion after rendering the Blender scene, using masks, noise, displacement, channel recombination, and merges.

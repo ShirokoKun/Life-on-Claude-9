@@ -1,0 +1,11 @@
+PROMPT: VALIDATE AND RENDER
+
+Open one supplied Blender file in Blender 4.5 or a compatible newer version. Start in solid view to reduce GPU memory pressure. Verify the active camera, source frame range, and 24 fps setting. Save your own working copy. Select a compute device available on your computer; the release does not assume a particular GPU.
+
+Preview at 50% of 1920x1080 with 32-64 samples and denoising. Inspect a start, middle, and end frame before animation. The files default to economical preview settings; these are not the original final-quality settings.
+
+For final daylight opening and landing, use 1920x1080 at 100%, Cycles 1024 samples and denoising. The other shots were typically evaluated at 512 samples with denoising. Higher samples reduce noise but do not fix motion blur, depth of field, overexposure, or missing texture detail. Compare denoised and raw output at the same frame before making quality conclusions.
+
+Render a PNG or OpenEXR sequence into a shot-specific folder, then encode an editing copy. Keep the image sequence so interrupted jobs can resume. Confirm frame count, first/last frame, and playback before delivery. Source ranges can overlap between shots; never concatenate files by source frame number alone.
+
+For clay studies, duplicate the file or use a separate view layer/material override. Keep camera, timing, and object visibility matched to the beauty version. Use 16:9 output. A clean before/after can use a quick left-to-right wipe or a fixed diagonal half split with no burned-in labels. Compensate for any 24-to-25 fps conform consistently on both sides.

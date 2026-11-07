@@ -1,0 +1,13 @@
+OPTIONAL PROMPT: TRANSLATE THE ENVIRONMENT TO UNREAL
+
+This is an extension exercise, not an included Unreal project and not a one-click conversion of the Blender animation.
+
+Export a clean copy of the room and selected props from Blender using an appropriate interchange format. Preserve real scale, applied transforms where safe, UVs, normals, material slots, and useful pivots. Keep geometry grouped by function. Import a small prop first to verify unit conversion before the whole room.
+
+Rebuild materials in Unreal using the source textures and correct channel/color-space interpretation. Blender procedural shaders and volume setups do not automatically transfer. Match daytime window light and shaded-bed treatment before adding VFX. Build night as a separate lighting setup with matched camera exposure.
+
+Use Sequencer for cameras and keyframed hero-object motion. Rebuild the vortex particles with Niagara and coordinated controls for lift, orbit, brightness, time dilation, and release. Transfer baked transforms for hero objects only when the interchange supports them reliably. Treat smoke and cloth as separate cache/export problems; validate format and playback support in the installed engine version.
+
+
+
+Deliver a small test level and a short preview before attempting a full matching sequence. Record engine version and plugins used. Do not claim Blender procedural effects or simulations have transferred unless playback has actually been verified.

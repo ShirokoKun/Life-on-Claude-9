@@ -571,7 +571,13 @@ if opt('--film'):
           (4.6, (1.8, 2.0, 1.28), (2.15, 2.78, 0.74), (2.32, 2.6, 0.78), 3.5),   # high over the desk looking down: focus on the mug
           (6.6, (2.2, 2.08, 1.2), (2.6, 2.85, 0.8), (2.58, 2.72, 0.8), 3.5),   # slide past the glass of tea
           (8.4, (2.3, 2.3, 1.24), (2.78, 3.05, 1.12), (2.74, 2.95, 1.2), 3.2),    # rise to the toys on the tower
-          (10.0, (2.3, 2.25, 1.32), (2.4, 3.3, 1.25), None, 5)]          # lift to the blinds and the window light           # drift toward the window light
+          (10.0, (2.3, 2.25, 1.32), (2.4, 3.3, 1.25), None, 5),           # lift to the blinds and the window light
+          (11.6, (2.25, 2.0, 1.5), (3.6, 2.6, 1.6), None, 8),              # the side wall: clock, calendar, poster
+          (13.0, (2.2, 1.8, 1.5), (3.6, 0.8, 1.15), None, 8),              # the bookcase
+          (14.4, (2.05, 1.6, 1.52), (2.24, 0.0, 1.2), None, 8),            # the door and its poster
+          (16.0, (1.8, 1.5, 1.5), (0.9, 0.4, 0.55), None, 8),              # down to the sofa buried in boxes
+          (17.6, (1.65, 1.4, 1.55), (0.4, 2.6, 1.2), None, 8),             # whip back: the rack and the left window
+          (20.0, (1.6, 1.05, 1.6), (1.9, 3.3, 0.85), None, 8)]             # settle on the room
     WP = [(t, c, l, fp if fp else l, fs) for (t, c, l, fp, fs) in WP]
     def cr(p0, p1, p2, p3, u):
         return 0.5 * ((2 * p1) + (-p0 + p2) * u + (2 * p0 - 5 * p1 + 4 * p2 - p3) * u * u + (-p0 + 3 * p1 - 3 * p2 + p3) * u ** 3)

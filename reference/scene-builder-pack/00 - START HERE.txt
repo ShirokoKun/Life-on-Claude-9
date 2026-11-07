@@ -1,0 +1,15 @@
+PICK WHAT YOU WANT
+
+01 - Install the Skill
+Want AI to help you build your own scene? Start here.
+Install the skill in Claude or Codex (OpenAI's coding app).
+
+02 - Download the Scene
+Want the finished room? Download the Blender file.
+There is an Unreal version too. You only need the one you use.
+
+03 - Copy the Prompts
+Want to try a prompt? Open the master prompt, copy it, and paste it into your AI chat.
+More prompts and example pictures are inside.
+
+You do not need to download everything. Pick one and have fun.

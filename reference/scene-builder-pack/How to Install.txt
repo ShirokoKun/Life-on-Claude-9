@@ -1,0 +1,19 @@
+INSTALL THE SKILL
+
+Download AI Scene Builder - Install This.zip.
+
+CLAUDE
+Go to Customize > Skills and upload the ZIP.
+Enable code execution if asked.
+
+CODEX (OPENAI)
+Unzip it. Ask Codex to install the ai-scene-builder folder as a skill.
+
+Then say:
+"Use AI Scene Builder to help me build a bedroom. Start with one preview image."
+
+You will need Blender installed to build the scene.
+For hands-on Blender control, use a local agent such as Claude Code or Codex.
+The ZIP includes full setup instructions if you need them.
+
+Using a regular ChatGPT chat? Open the Copy the Prompts folder instead.

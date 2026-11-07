@@ -1,0 +1,4 @@
+interface:
+  display_name: "AI Scene Builder"
+  short_description: "Build editable Blender scenes in reviewed stages"
+  default_prompt: "Use $ai-scene-builder to build a nostalgic bedroom, starting with a blockout and one preview still."
