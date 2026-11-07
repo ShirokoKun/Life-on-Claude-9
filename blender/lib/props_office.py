@@ -87,7 +87,7 @@ def mouse(loc, rz, M):
 def mug(name, loc, M, mat='ceramic_beige', tea=True):
     prof = [(0.0, 0.0), (0.038, 0.0), (0.04, 0.004), (0.041, 0.09), (0.043, 0.098), (0.039, 0.098), (0.036, 0.094), (0.036, 0.008), (0.0, 0.008)]
     o = K.lathe(name, prof, loc, M[mat]); K.subsurf(o, 1)
-    bpy.ops.mesh.primitive_torus_add(major_radius=0.024, minor_radius=0.0055, major_segments=24, minor_segments=10, location=(loc[0] + 0.044, loc[1], loc[2] + 0.052), rotation=(math.radians(90), 0, 0))
+    bpy.ops.mesh.primitive_torus_add(major_radius=0.024, minor_radius=0.0055, major_segments=24, minor_segments=10, location=(loc[0] + 0.052, loc[1], loc[2] + 0.052), rotation=(math.radians(90), 0, 0))
     h = bpy.context.active_object; h.name = name + '_handle'; K.link(h); h.data.materials.append(M[mat]); h.scale = (0.85, 1.0, 1.15)
     for p_ in h.data.polygons: p_.use_smooth = True
     if tea: K.cyl(name + '_tea', 0.0355, 0.002, (loc[0], loc[1], loc[2] + 0.07), M['tea'], seg=32, bev=0)
@@ -318,14 +318,14 @@ def snack_packet(loc, rz, row):
     """A crinkled foil snack packet lying flat."""
     o = K.cube('packet', (0.13, 0.19, 0.025), (loc[0], loc[1], loc[2] + 0.012), label_mat(row, True), bev=0, rot=(0, 0, rz))
     b = o.modifiers.new('r', 'BEVEL'); b.width = 0.011; b.segments = 3; K.subsurf(o, 2)
-    d = o.modifiers.new('crinkle', 'DISPLACE'); t = bpy.data.textures.get('crinkle') or bpy.data.textures.new('crinkle', 'CLOUDS'); t.noise_scale = 0.015; d.texture = t; d.strength = 0.004
+    d = o.modifiers.new('crinkle', 'DISPLACE'); t = bpy.data.textures.get('crinkle') or bpy.data.textures.new('crinkle', 'CLOUDS'); t.noise_scale = 0.015; d.texture = t; d.strength = 0.0015
     return o
 
 def small_box(loc, rz, row, size=(0.1, 0.07, 0.12)):
     return K.cube('small_box', size, (loc[0], loc[1], loc[2] + size[2] / 2), label_mat(row), bev=0.002, rot=(0, 0, rz))
 
 def pen_cup(loc, M):
-    K.lathe('pen_cup', [(0, 0), (0.036, 0), (0.038, 0.1), (0.035, 0.1), (0.033, 0.004), (0, 0.004)], loc, M['gunmetal'])
+    K.lathe('pen_cup', [(0, 0), (0.036, 0), (0.038, 0.1), (0.035, 0.1), (0.033, 0.004), (0, 0.004)], loc, K.mat_plain('pen_cup_mesh', (0.12, 0.12, 0.13), rough=0.6, metal=0.4))
     for k in range(7):
         a = k * 0.9; tilt = R.uniform(6, 16)
         p = K.cyl('pen', 0.0045, 0.15, (loc[0] + math.cos(a) * 0.012, loc[1] + math.sin(a) * 0.012, loc[2] + 0.08), K.mat_plain(f'pen{k % 4}', ((0.1, 0.2, 0.6), (0.7, 0.1, 0.1), (0.05, 0.05, 0.05), (0.85, 0.85, 0.8))[k % 4], rough=0.35), seg=8, rot=(tilt * math.sin(a), tilt * math.cos(a), 0))
