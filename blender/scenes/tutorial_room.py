@@ -33,8 +33,8 @@ W, DEP, H = 3.6, 3.3, 2.4          # room width (x), depth (y), height (z)
 
 # ================================================================= materials
 M = {
-    'wall': K.mat_plain('wall_paint', (0.70, 0.68, 0.63), rough=0.85, bump=0.015, bump_scale=8),
-    'ceiling': K.mat_plain('ceiling_paint', (0.78, 0.77, 0.74), rough=0.9, bump=0.01, bump_scale=10),
+    'wall': K.mat_plain('wall_paint', (0.70, 0.68, 0.63), rough=0.85),
+    'ceiling': K.mat_plain('ceiling_paint', (0.78, 0.77, 0.74), rough=0.9),
     'floor': K.mat_tex('floor_laminate', 'oak_floor', tile=1.7, tint=(1.25, 0.88, 0.6), rough_mul=0.4, rough_add=0.25, normal=0.5),
     'walnut': K.mat_tex('walnut', 'walnut', tile=0.6, tint=(1.0, 0.85, 0.72), rough_mul=0.5, rough_add=0.35, normal=0.5),
     'laminate': K.mat_plain('desk_laminate', (0.42, 0.42, 0.4), rough=0.42, bump=0.04, bump_scale=300),
@@ -61,7 +61,7 @@ if CLAY:
 # ================================================================= shell
 K.cube('floor', (W, DEP, 0.04), (W / 2, DEP / 2, -0.02), M['floor'], bev=0)
 K.cube('ceiling', (W, DEP, 0.04), (W / 2, DEP / 2, H + 0.02), M['ceiling'], bev=0)
-K.cube('wall_front', (W, 0.12, H), (W / 2, -0.06, H / 2), M['wall'], bev=0)
+fw_ = K.cube('wall_front', (W, 0.12, H), (W / 2, -0.06, H / 2), M['wall'], bev=0); fw_.visible_camera = False   # a set wall: lights the room, the lens sees through it
 K.cube('wall_right', (0.12, DEP, H), (W + 0.06, DEP / 2, H / 2), M['wall'], bev=0)
 for side, x in (('L', -0.06),):
     pass
@@ -190,28 +190,28 @@ for k, (z, hgt) in enumerate(((0.56, 0.12), (0.39, 0.2), (0.16, 0.22))):
 for (cx, cy) in ((PX - 0.17, PY - 0.22), (PX + 0.17, PY - 0.22), (PX - 0.17, PY + 0.22), (PX + 0.17, PY + 0.22)):
     K.cyl('ped_caster', 0.02, 0.025, (cx, cy, 0.02), M['black_plastic'], rot=(0, 90, 0), seg=16)
 # the long walnut cubby unit along the right wall (open boxes, books and files in them)
-def cubbies(name, x0, x1, y0, y1, z0, z1, cols, rows, t=0.018):
-    K.cube(name + '_top', (x1 - x0, y1 - y0, t), ((x0 + x1) / 2, (y0 + y1) / 2, z1 - t / 2), M['walnut'], bev=0.002)
-    K.cube(name + '_bot', (x1 - x0, y1 - y0, t), ((x0 + x1) / 2, (y0 + y1) / 2, z0 + t / 2), M['walnut'], bev=0.002)
-    K.cube(name + '_back', (x1 - x0, 0.006, z1 - z0), ((x0 + x1) / 2, y1 - 0.003, (z0 + z1) / 2), M['walnut'], bev=0) if y1 - y0 < 0.6 else None
+def cubbies(name, x0, x1, y0, y1, z0, z1, cols, rows, t=0.018, mat=None):
+    MW = mat or M['walnut']
+    K.cube(name + '_top', (x1 - x0, y1 - y0, t), ((x0 + x1) / 2, (y0 + y1) / 2, z1 - t / 2), MW, bev=0.002)
+    K.cube(name + '_bot', (x1 - x0, y1 - y0, t), ((x0 + x1) / 2, (y0 + y1) / 2, z0 + t / 2), MW, bev=0.002)
+    K.cube(name + '_back', (x1 - x0, 0.006, z1 - z0), ((x0 + x1) / 2, y1 - 0.003, (z0 + z1) / 2), MW, bev=0) if y1 - y0 < 0.6 else None
     along_x = (x1 - x0) > (y1 - y0)
     for i in range(cols + 1):
-        if along_x: K.cube(name + '_div', (t, y1 - y0, z1 - z0), (x0 + t / 2 + (x1 - x0 - t) * i / cols, (y0 + y1) / 2, (z0 + z1) / 2), M['walnut'], bev=0.002)
-        else: K.cube(name + '_div', (x1 - x0, t, z1 - z0), ((x0 + x1) / 2, y0 + t / 2 + (y1 - y0 - t) * i / cols, (z0 + z1) / 2), M['walnut'], bev=0.002)
+        if along_x: K.cube(name + '_div', (t, y1 - y0, z1 - z0), (x0 + t / 2 + (x1 - x0 - t) * i / cols, (y0 + y1) / 2, (z0 + z1) / 2), MW, bev=0.002)
+        else: K.cube(name + '_div', (x1 - x0, t, z1 - z0), ((x0 + x1) / 2, y0 + t / 2 + (y1 - y0 - t) * i / cols, (z0 + z1) / 2), MW, bev=0.002)
     for j in range(1, rows):
-        K.cube(name + '_shelf', (x1 - x0, y1 - y0, t), ((x0 + x1) / 2, (y0 + y1) / 2, z0 + (z1 - z0) * j / rows), M['walnut'], bev=0.002)
-cubbies('cubby_right', W - 0.42, W - 0.02, 0.95, 2.35, 0.04, 0.92, 3, 2)
+        K.cube(name + '_shelf', (x1 - x0, y1 - y0, t), ((x0 + x1) / 2, (y0 + y1) / 2, z0 + (z1 - z0) * j / rows), MW, bev=0.002)
 # the walnut side desk on the left and the white wire rack standing on it, plastic boxes on top
 K.cube('side_desk_top', (0.6, 1.1, 0.03), (0.32, 2.55, DESK_Z - 0.015), M['walnut'], bev=0.004)
 K.cube('side_desk_panel', (0.6, 0.03, DESK_Z - 0.03), (0.32, 2.015, (DESK_Z - 0.03) / 2), M['walnut'], bev=0.003)
 K.cube('side_desk_drawers', (0.55, 0.45, DESK_Z - 0.06), (0.32, 3.0, (DESK_Z - 0.06) / 2 + 0.02), M['walnut'], bev=0.004)
 wire = K.mat_plain('wire_white', (0.85, 0.85, 0.83), rough=0.35, coat=0.3)
-for (rx, ry) in ((0.06, 2.2), (0.56, 2.2), (0.06, 2.62), (0.56, 2.62)):
+for (rx, ry) in ((0.06, 2.55), (0.56, 2.55), (0.06, 2.97), (0.56, 2.97)):
     K.cyl('rack_post', 0.008, 1.0, (rx, ry, DESK_Z + 0.5), wire, seg=10)
 for z in (DESK_Z + 0.25, DESK_Z + 0.62, DESK_Z + 0.98):
     for k in range(9):
-        K.cyl('rack_wire', 0.0025, 0.5, (0.06 + 0.5 * k / 8, 2.41, z), wire, rot=(90, 0, 0), seg=6, bev=0)
-    for yy in (2.2, 2.62):
+        K.cyl('rack_wire', 0.0025, 0.42, (0.06 + 0.5 * k / 8, 2.76, z), wire, rot=(90, 0, 0), seg=6, bev=0)
+    for yy in (2.55, 2.97):
         K.cyl('rack_rim', 0.004, 0.5, (0.31, yy, z), wire, rot=(0, 90, 0), seg=8, bev=0)
 
 # ================================================================= the black leather executive chair (modelled; subdivided)
@@ -219,7 +219,7 @@ def exec_chair(loc, rz):
     import bmesh
     g = bpy.data.objects.new('chair', None); K.link(g); g.location = loc; g.rotation_euler = Euler((0, 0, math.radians(rz)))
     parts = []
-    def pillow(name, size, at, round_=0.4, rot=(0, 0, 0)):
+    def pillow(name, size, at, round_=0.5, rot=(0, 0, 0)):
         o = K.cube(name, size, at, M['leather'], bev=0, rot=rot)
         bv = o.modifiers.new('round', 'BEVEL'); bv.width = min(size) * round_; bv.segments = 3
         K.subsurf(o, 2); o.parent = g; parts.append(o)
@@ -227,21 +227,23 @@ def exec_chair(loc, rz):
         d = o.modifiers.new('creases', 'DISPLACE'); t = bpy.data.textures.get('leather_creases') or bpy.data.textures.new('leather_creases', 'VORONOI')
         t.noise_scale = 0.06; t.distance_metric = 'DISTANCE'; d.texture = t; d.strength = 0.006; d.mid_level = 0.5; d.texture_coords = 'OBJECT'
         return o
-    # seat: a thick cushion with a rolled front edge
-    pillow('chair_seat', (0.52, 0.5, 0.13), (0, 0.0, 0.50))
-    pillow('chair_seat_roll', (0.5, 0.12, 0.1), (0, -0.21, 0.52), round_=0.5)
-    # back: a tall shell with four stacked rolls (the tufted executive look) and a head roll
-    pillow('chair_back_shell', (0.54, 0.12, 0.74), (0, 0.27, 0.98), rot=(-10, 0, 0))
-    for k in range(4):
-        pillow(f'chair_back_roll{k}', (0.46, 0.1, 0.17), (0, 0.205 - 0.03 * (k / 3), 0.73 + 0.165 * k), round_=0.5, rot=(-10, 0, 0))
-    pillow('chair_head', (0.5, 0.13, 0.17), (0, 0.33, 1.38), round_=0.5, rot=(-12, 0, 0))
-    for sd in (-1, 1):   # the thick side bolsters that wrap the back
-        pillow('chair_bolster', (0.08, 0.15, 0.7), (sd * 0.26, 0.24, 0.98), round_=0.5, rot=(-10, 0, sd * 8))
-    # padded arms: loops from the seat's back corners forward and down
-    for s in (-1, 1):   # padded arms: a soft pad on a leather-wrapped loop down to the seat
-        pillow('chair_arm_pad', (0.085, 0.36, 0.06), (s * 0.3, -0.02, 0.69), round_=0.5)
-        pillow('chair_arm_front', (0.07, 0.07, 0.2), (s * 0.3, -0.17, 0.6), round_=0.5)
-        pillow('chair_arm_back', (0.07, 0.07, 0.2), (s * 0.3, 0.14, 0.6), round_=0.5)
+    def cush(name, size, at, **kw):
+        o = K.cushion(name, size, at, M['leather'], **kw); o.parent = g; parts.append(o); return o
+    # seat: a thick puffed cushion with pleats running front to back, and a rolled front lip
+    cush('chair_seat', (0.54, 0.52, 0.15), (0, 0.0, 0.5), bulge=0.45, grooves=3, front='+z', groove_depth=0.35)
+    cush('chair_seat_roll', (0.52, 0.13, 0.12), (0, -0.23, 0.52), bulge=0.5)
+    # back: a padded shell, four tufted horizontal rolls, an integrated head roll, thick side bolsters
+    cush('chair_back_shell', (0.56, 0.12, 0.78), (0, 0.29, 0.98), bulge=0.3, rot=(-10, 0, 0))
+    for k in range(3):
+        cush(f'chair_back_roll{k}', (0.48, 0.15, 0.2), (0, 0.2 - 0.02 * k, 0.74 + 0.19 * k), bulge=0.55, grooves=2, groove_axis='x', groove_depth=0.3, rot=(-10, 0, 0))
+    cush('chair_head', (0.5, 0.16, 0.2), (0, 0.31, 1.33), bulge=0.6, rot=(-12, 0, 0))
+    for sd in (-1, 1):
+        cush('chair_bolster', (0.1, 0.17, 0.74), (sd * 0.27, 0.25, 0.98), bulge=0.5, rot=(-10, 0, sd * 10))
+    # padded arms: a fat padded rest on a padded loop down to the seat
+    for sd in (-1, 1):
+        cush('chair_arm_pad', (0.1, 0.38, 0.08), (sd * 0.31, -0.03, 0.68), bulge=0.6, front='+z')
+        cush('chair_arm_front', (0.085, 0.09, 0.2), (sd * 0.31, -0.18, 0.58), bulge=0.5)
+        cush('chair_arm_back', (0.085, 0.09, 0.18), (sd * 0.31, 0.14, 0.6), bulge=0.5)
     # mechanism, gas lift, five-star base with casters
     m1 = K.cube('chair_mech', (0.26, 0.24, 0.05), (0, 0.02, 0.41), M['black_plastic'], bev=0.006); m1.parent = g
     gl = K.cyl('chair_gas', 0.025, 0.24, (0, 0.02, 0.28), M['chrome'], seg=24); gl.parent = g
@@ -254,109 +256,148 @@ def exec_chair(loc, rz):
         f = K.cube('chair_fork', (0.03, 0.03, 0.04), (ex, ey, 0.06), M['black_plastic'], bev=0.006); f.parent = g
     return g
 
-exec_chair((0.74, 2.08, 0), 40)
+exec_chair((0.84, 2.12, 0), 38)
 
 
-# ================================================================= dressing: big -> mid -> small, clustered where he works
+# ================================================================= dressing (placement map from the tutorial's final frames, t=0-12 s and 104-167 s)
 PM = P._m()
 if CLAY:
     for k in PM:
         if k not in ('screen_on',) and 'glass' not in k and 'clear' not in k: PM[k] = M['laminate']
 DZ = DESK_Z
-# the workstation, centre of the main desk: two monitors (left one off), webcam, keyboard, mouse
-P.monitor('mon_left', (1.32, 2.98, DZ), 8, False, PM)
-P.monitor('mon_right', (1.98, 2.96, DZ), -6, True, PM, size=(0.56, 0.33))
-K.cube('webcam', (0.08, 0.03, 0.03), (1.98, 2.985, DZ + 0.37 + 0.02), PM['bp_satin'], bev=0.008)
-P.keyboard((1.7, 2.66, DZ), -2, PM)
-P.mouse((2.1, 2.66, DZ), -8, PM)
-# the desk lamp (black, arm) at the back left of the desk
-P.architect_lamp((0.98, 3.0, DZ), 20, PM)
-# the tower at the right end with the two figures on top; the cork board leaning on the window behind
-P.pc_tower((2.78, 2.86, DZ), -4, PM)
-P.red_bear_toy((2.74, 2.86, DZ + 0.44), -25, PM)
-P.robot_figure((2.84, 2.95, DZ + 0.44), -10, PM)
-P.cork_board((2.32, 3.12, DZ), 0, PM)
-# the working clutter in front of the screens: mug, glass of tea, bottles, a red box, a can, tape, pens, junk
-P.mug('mug_main', (2.27, 2.58, DZ), PM)
-P.glass_cup((2.5, 2.74, DZ), PM)
-P.bottle('tea_bottle', (1.62, 2.93, DZ), PM, 'tea'); P.bottle('white_bottle', (1.75, 2.95, DZ), PM, 'white')
-P.red_box((2.2, 2.86, DZ), 12, PM)
-P.can((1.15, 2.78, DZ), PM)
-K.asset('medical_tape', (2.42, 2.9, DZ + 0.012), scale=1.6); K.asset('medical_tape', (2.47, 2.95, DZ + 0.012), scale=1.4)
-K.asset('stationery_supplies', (2.6, 2.95, DZ + 0.07), rz=80)
-K.asset('circuit_board', (2.48, 3.02, DZ + 0.012), rz=20, scale=0.6)
-K.asset('retro_multimeter', (2.95, 2.62, DZ), rz=-30, scale=0.8)
-K.asset('pliers', (2.62, 2.66, DZ + 0.01), rz=60, rx=90)
-K.asset('digital_wrist_watch', (2.38, 2.66, DZ + 0.004), rz=20)
-P.paper_stack((2.95, 2.95, DZ), 14, PM, rz=4)
-# the return: the open laptop, a notepad, papers
-P.laptop((2.6, 1.8, DZ), 205, PM)
-K.asset('office_notepads', (2.55, 2.2, DZ + 0.001), rz=95, scale=0.45)
-P.paper_stack((2.85, 1.45, DZ), 6, PM, rz=30, size=(0.28, 0.21))
-# the window sill: mugs, a stack of magazines
-P.mug('sill_mug1', (3.12, 3.22, WIN_Z0), PM, 'ceramic_white', tea=False); P.mug('sill_mug2', (3.26, 3.2, WIN_Z0), PM, 'ceramic_beige', tea=False)
-P.paper_stack((0.5, 3.2, WIN_Z0), 10, PM, rz=0, size=(0.22, 0.16))
-# the gooseneck lamp on the right cubby unit, books and binders inside the cubbies
-P.gooseneck_lamp((W - 0.22, 2.1, 0.92), 160, PM)
-P.book_row(W - 0.38, 0.4, 0.06, 0.45, PM, axis='y', rz=0)
-P.book_row(W - 0.38, 0.9, 0.06, 0.4, PM, axis='y', rz=0)
-P.book_row(W - 0.38, 1.4, 0.49, 0.42, PM, axis='y', rz=0)
-K.asset('binder_notebook', (W - 0.25, 1.95, 0.08), rz=90, rx=90)
-P.book_stack((W - 0.22, 1.0, 0.92), 6, PM, rz=90)
-# the left: books stacked high on the side desk, the wire rack with storage boxes, a tissue box
-P.book_stack((0.3, 2.85, DESK_Z), 12, PM, rz=5)
-P.book_stack((0.32, 2.4, DESK_Z), 7, PM, rz=-6)
-P.storage_box((0.31, 2.41, DESK_Z + 0.99), 0, PM)
-P.storage_box((0.31, 2.41, DESK_Z + 0.63), 0, PM, size=(0.42, 0.3, 0.14))
-K.cube('tissue_box', (0.24, 0.12, 0.09), (0.3, 2.42, DESK_Z + 0.25 + 0.045), K.mat_plain('tissue', (0.62, 0.72, 0.85), rough=0.6), bev=0.004)
-K.asset('cassette_player', (0.45, 2.4, DESK_Z + 0.25 + 0.12), rz=90)
-# the floor: cooler bag and vacuum at the left, paper bags, the waste basket by the pedestal, boxes under the desk, cables
-P.cooler_bag((0.35, 0.75, 0), 15, PM)
-P.stick_vacuum((0.1, 1.3, 0), 90, PM)
-P.paper_bag((0.62, 1.6, 0), 20, PM); P.paper_bag((3.05, 0.6, 0), -15, PM, h=0.28)
-P.waste_basket((2.12, 1.15, 0), PM)
-K.asset('cardboard_box_01', (1.55, 3.0, 0), rz=10, scale=1.3); K.asset('cardboard_box_01', (0.95, 2.95, 0), rz=-5, scale=1.1)
-K.cube('white_box', (0.28, 0.24, 0.3), (2.0, 2.85, 0.15), PM['label'], bev=0.006)
-P.cable('cable_pc', [(2.75, 3.05, DZ), (2.7, 3.12, 0.5), (2.5, 3.1, 0.02), (2.0, 3.0, 0.01), (1.6, 2.9, 0.01)], PM)
-P.cable('cable_lap', [(2.7, 1.9, DZ), (2.95, 1.95, 0.5), (3.0, 1.3, 0.02), (2.6, 0.9, 0.01), (2.2, 0.8, 0.01)], PM)
-K.cube('power_strip', (0.32, 0.06, 0.04), (1.75, 2.85, 0.02), PM['ivory'], bev=0.006, rot=(0, 0, 15))
-
-# more life (the tutorial's density): the left end of the desk, under the desk, the floor by the chair
-P.book_stack((0.92, 2.72, DZ), 9, PM, rz=-3)
-K.cube('tissue_box2', (0.24, 0.12, 0.09), (1.08, 3.02, DZ + 0.045), K.mat_plain('tissue2', (0.85, 0.82, 0.78), rough=0.6), bev=0.004)
-P.paper_stack((1.35, 2.62, DZ), 5, PM, rz=-12, size=(0.25, 0.32))
-K.cube('game_pad', (0.15, 0.1, 0.05), (1.12, 2.62, DZ + 0.025), PM['bp_satin'], bev=0.02, rot=(0, 0, 25))
-K.cube('headphones_band', (0.17, 0.04, 0.02), (2.95, 2.4, DZ + 0.01), PM['bp'], bev=0.008, rot=(0, 0, -30))
-for (x, y, rz_, sc_) in ((1.25, 2.95, 20, 1.0), (2.45, 3.0, -10, 0.9), (0.6, 1.95, 35, 1.2)):
-    K.asset('cardboard_box_01', (x, y, 0.0 if y < 2.9 else 0.0), rz=rz_, scale=sc_)
-P.book_stack((1.75, 2.55, 0.0), 6, PM, rz=30)
-P.paper_stack((1.05, 1.15, 0.0), 4, PM, rz=40)
-P.paper_bag((2.95, 2.95, DZ), 80, PM, h=0.24)
-P.mug('desk_mug2', (1.5, 2.9, DZ), PM, 'ceramic_white', tea=False)
-
-# density pass (the tutorial's level): the sill lined with mugs and bottles, a wall of binders, piles on every surface
-for k, x in enumerate((0.55, 0.72, 0.9, 1.6, 1.78, 2.05, 3.0, 3.18, 3.32)):
-    if k % 3 == 2: P.bottle(f'sill_bottle{k}', (x, 3.22, WIN_Z0), PM, 'white' if k % 2 else 'tea')
-    else: P.mug(f'sill_mug_x{k}', (x, 3.22, WIN_Z0), PM, 'ceramic_white' if k % 2 else 'ceramic_beige', tea=False)
-P.paper_stack((2.98, 3.0, DZ + 0.06), 18, PM, rz=-6, size=(0.3, 0.24))
-K.asset('cardboard_box_01', (2.55, 3.1, DZ), rz=90, scale=1.15)
-binder_mats = [K.mat_plain(f'binder{k}', c, rough=0.4) for k, c in enumerate(((0.85, 0.85, 0.83), (0.2, 0.3, 0.55), (0.85, 0.85, 0.83), (0.85, 0.85, 0.83)))]
-for k in range(9):   # white and blue lever-arch files in the right cubbies
-    K.cube('binder', (0.3, 0.06, 0.32), (W - 0.24, 1.42 + k * 0.065, 0.06 + 0.16), binder_mats[k % 4], bev=0.004)
-P.book_row(W - 0.38, 1.95, 0.49, 0.38, PM, axis='y', rz=0)
-P.book_stack((0.3, 2.0, DESK_Z), 5, PM, rz=12)
-P.paper_stack((0.3, 2.55, DESK_Z + 0.25), 6, PM, rz=0, size=(0.3, 0.22))
-P.book_stack((W - 0.3, 0.45, 0.0), 8, PM, rz=-20)
-P.paper_bag((1.95, 0.75, 0), -40, PM, h=0.3)
-K.cube('shoebox', (0.32, 0.2, 0.12), (2.35, 2.98, 0.06), PM['red_card'], bev=0.004, rot=(0, 0, 8))
-P.can((1.95, 2.95, DZ), PM); P.can((2.68, 2.55, DZ), PM)
-P.bottle('desk_bottle3', (2.35, 3.05, DZ), PM, 'white')
-K.asset('Camera_01', (0.98, 2.65, DZ + 0.06), rz=40)
-
-# the tall bookcase in the right foreground (walnut, five shelves, packed)
-cubbies('bookcase', W - 0.36, W - 0.02, 0.04, 0.9, 0.0, 1.85, 1, 5)
+# --- the workstation (main desk, centre-left): left monitor off, right monitor on with the webcam, the black dome lamp
+#     rising behind the left monitor with its head over it, keyboard + round mousepad + mouse in front of the right monitor
+P.monitor('mon_left', (1.38, 2.97, DZ), 10, True, PM, size=(0.58, 0.34), screen=PM['screen_code'])
+P.monitor('mon_right', (1.98, 2.93, DZ), -8, True, PM, size=(0.55, 0.33))
+K.cube('webcam', (0.075, 0.03, 0.03), (1.985, 2.955, DZ + 0.37 + 0.02), PM['bp_satin'], bev=0.008)
+P.architect_lamp((1.12, 3.1, DZ), 25, PM)
+P.keyboard((1.83, 2.66, DZ), -6, PM)
+K.cyl('mousepad_round', 0.11, 0.003, (2.17, 2.62, DZ + 0.0015), PM['rubber'], seg=40, bev=0.001)
+K.cube('mouse', (0.06, 0.1, 0.035), (2.17, 2.62, DZ + 0.02), PM['bp_satin'], bev=0.0)
+# --- around the keyboard: the controller and a black mat on the left, bottles between the monitors, the red box,
+#     the beige mug, a glass of dark tea, a little calculator, tape rolls, pens and a spill of small junk on the right
+K.cube('desk_mat', (0.3, 0.2, 0.003), (1.4, 2.72, DZ + 0.0015), PM['rubber'], bev=0.001, rot=(0, 0, 8))
+ctrl = K.cube('controller', (0.15, 0.095, 0.045), (1.18, 2.78, DZ + 0.022), K.mat_plain('pad_white', (0.8, 0.82, 0.85), rough=0.35), bev=0.0, rot=(0, 0, 20))
+cb = ctrl.modifiers.new('r', 'BEVEL'); cb.width = 0.02; cb.segments = 4; K.subsurf(ctrl, 1)
+P.bottle('tea_bottle', (1.66, 2.92, DZ), PM, 'tea'); P.bottle('white_bottle', (1.76, 2.95, DZ), PM, 'white'); P.bottle('white_bottle2', (1.6, 3.02, DZ), PM, 'white')
+P.red_box((1.98, 2.73, DZ), 15, PM)
+P.mug('mug_main', (2.32, 2.6, DZ), PM)
+P.glass_cup((2.58, 2.72, DZ), PM)
+K.cube('calculator', (0.09, 0.13, 0.02), (2.47, 2.62, DZ + 0.01), K.mat_plain('calc', (0.82, 0.83, 0.8), rough=0.4), bev=0.004, rot=(0, 0, -15))
+K.cube('calc_screen', (0.07, 0.035, 0.002), (2.465, 2.66, DZ + 0.021), K.mat_plain('lcd', (0.45, 0.55, 0.4), rough=0.2), bev=0, rot=(0, 0, -15))
+K.asset('medical_tape', (2.4, 2.86, DZ + 0.012), scale=1.6); K.asset('medical_tape', (2.68, 2.98, DZ + 0.012), scale=1.4)
+K.asset('stationery_supplies', (2.62, 2.9, DZ + 0.07), rz=80)
+K.asset('circuit_board', (2.46, 3.02, DZ + 0.012), rz=20, scale=0.5)
+K.asset('pliers', (2.72, 2.72, DZ + 0.01), rz=60, rx=90)
+K.asset('digital_wrist_watch', (2.28, 2.84, DZ + 0.004), rz=20)
+for k in range(10):   # the junk spill: chargers, wrappers, small boxes
+    K.cube('junk', (P.R.uniform(0.03, 0.08), P.R.uniform(0.02, 0.06), P.R.uniform(0.008, 0.03)), (2.42 + P.R.uniform(0, 0.4), 2.75 + P.R.uniform(0, 0.3), DZ + 0.012),
+           K.mat_plain(f'junk{k % 5}', P.R.choice(P.BOOK_COLS), rough=0.4), bev=0.002, rot=(0, 0, P.R.uniform(0, 180)))
+# --- the back right of the desk: the cork board (portrait, drawings pinned) leaning on the window behind the right monitor,
+#     the tower with the two figures, a tall pile of magazines on a cardboard box, mugs along the sill, the gooseneck lamp
+P.cork_board((2.3, 3.14, DZ), 0, PM, size=(0.46, 0.62))
+P.pc_tower((2.78, 2.96, DZ), -4, PM)
+P.red_bear_toy((2.74, 2.95, DZ + 0.44), -25, PM)
+P.robot_figure((2.85, 3.03, DZ + 0.44), -10, PM)
+K.asset('cardboard_box_01', (3.12, 3.02, WIN_Z0 - 0.01), rz=90, scale=1.2)
+P.paper_stack((3.12, 3.02, WIN_Z0 + 0.33), 26, PM, rz=-4, size=(0.3, 0.23))
+for k, x in enumerate((3.32, 3.42)):
+    P.mug(f'sill_mug{k}', (x, 3.23, WIN_Z0), PM, 'ceramic_white' if k else 'ceramic_beige', tea=False)
+P.gooseneck_lamp((3.42, 3.1, WIN_Z0), 220, PM)
+for k, x in enumerate((0.42, 0.55, 0.68, 2.55)):    # more mugs and bottles along the sill (left of the tower: behind the monitors)
+    (P.bottle if k % 2 else P.mug)(f'sill_x{k}', (x, 3.23, WIN_Z0), PM, *(('white',) if k % 2 else ('ceramic_beige', False)))
+# --- the return (front, centre-right): the black laptop open toward the chair, papers; the beige pedestal under it
+P.laptop((2.66, 1.68, DZ), 160, PM, mat=PM['gunmetal'])
+P.paper_stack((2.85, 2.15, DZ), 6, PM, rz=30, size=(0.28, 0.21))
+K.asset('office_notepads', (2.5, 2.2, DZ + 0.001), rz=95, scale=0.4)
+# --- right of the return: a dark metal cabinet of binders, then the light-wood bookcase in the right foreground
+dark_metal = K.mat_plain('dark_metal', (0.08, 0.08, 0.085), rough=0.45, metal=0.6)
+cubbies('binder_cab', W - 0.46, W - 0.02, 1.5, 2.42, 0.0, 0.78, 2, 2, mat=dark_metal)
+binder_mats = [K.mat_plain(f'binder{k}', c, rough=0.4) for k, c in enumerate(((0.85, 0.85, 0.83), (0.2, 0.3, 0.55), (0.85, 0.85, 0.83), (0.12, 0.12, 0.13)))]
+for k in range(12):
+    K.cube('binder', (0.28, 0.06, 0.32), (W - 0.25, 1.55 + k * 0.07, 0.03 + 0.16), binder_mats[k % 4], bev=0.004)
+light_wood = K.mat_tex('bookcase_wood', 'light_wood', tile=0.8, tint=(1.0, 0.82, 0.6), rough_mul=0.4, rough_add=0.35)
+cubbies('bookcase', W - 0.36, W - 0.02, 0.06, 1.42, 0.0, 1.9, 2, 5, mat=light_wood)
 for j in range(5):
-    P.book_row(W - 0.3, 0.07, 0.02 + 1.85 * j / 5, 0.8, PM, axis='y', rz=0)
+    for half in (0, 1):
+        P.book_row(W - 0.3, 0.09 + half * 0.68, 0.02 + 1.9 * j / 5, 0.6, PM, axis='y', rz=0)
+# --- the left: the low walnut cabinet under the left window with the white wire rack on it, storage boxes with blue lids
+#     on top, a tall stack of books with a tissue box on top, a kraft bag, the cassette player
+P.storage_box((0.31, 2.76, DESK_Z + 0.99), 0, PM, size=(0.38, 0.3, 0.17))
+P.storage_box((0.31, 2.76, DESK_Z + 1.18), 0, PM, size=(0.36, 0.28, 0.14))
+K.asset('cassette_player', (0.42, 2.76, DESK_Z + 0.62 + 0.12), rz=90)
+P.book_stack((0.33, 2.25, DESK_Z), 14, PM, rz=5)
+P.book_stack((0.4, 1.78, 0.0), 11, PM, rz=-12)
+P.book_stack((0.45, 1.35, 0.0), 7, PM, rz=20)
+K.cube('tissue_box', (0.24, 0.12, 0.09), (0.33, 2.25, DESK_Z + 0.42), K.mat_plain('tissue', (0.62, 0.72, 0.85), rough=0.6), bev=0.004)
+P.book_stack((0.85, 2.85, DZ), 10, PM, rz=-3)
+P.paper_bag((0.62, 2.05, 0), 20, PM)
+# --- the leather chair: in front of the left monitor, turned toward the lens
+# (placed by exec_chair below)
+# --- floor: the vacuum against the left wall, the navy cooler bag, books and boxes under the desk (a blue product box),
+#     the white wire basket with crumpled paper and a kraft bag by the pedestal, cables and a power strip
+P.stick_vacuum((0.1, 1.15, 0), 90, PM)
+P.cooler_bag((0.45, 0.85, 0), 12, PM)
+P.waste_basket((2.18, 1.35, 0), PM)
+P.paper_bag((2.0, 1.0, 0), -20, PM, h=0.3)
+K.asset('cardboard_box_01', (1.0, 2.95, 0), rz=-5, scale=1.15); K.asset('cardboard_box_01', (1.62, 3.0, 0), rz=10, scale=1.2)
+prod = K.cube('product_box', (0.34, 0.22, 0.26), (1.95, 2.85, 0.13), K.mat_plain('product_blue', (0.08, 0.16, 0.38), rough=0.4), bev=0.004, rot=(0, 0, -4))
+K.cube('product_label', (0.2, 0.002, 0.06), (1.95, 2.739, 0.19), PM['label'], bev=0, rot=(0, 0, -4))
+K.cube('white_box', (0.28, 0.24, 0.3), (2.35, 2.95, 0.15), PM['label'], bev=0.006)
+P.book_stack((1.35, 2.7, 0.0), 6, PM, rz=30)
+P.cable('cable_pc', [(2.75, 3.05, DZ), (2.7, 3.12, 0.5), (2.5, 3.1, 0.02), (2.0, 3.0, 0.01), (1.6, 2.9, 0.01)], PM)
+P.cable('cable_lap', [(2.7, 1.8, DZ), (2.95, 1.85, 0.5), (3.0, 1.3, 0.02), (2.6, 0.9, 0.01), (2.2, 0.8, 0.01)], PM)
+K.cube('power_strip', (0.32, 0.06, 0.04), (1.75, 2.85, 0.02), PM['ivory'], bev=0.006, rot=(0, 0, 15))
+# --- the ceiling pendant: a dark industrial shade near the ceiling
+K.cyl('pendant_rod', 0.006, 0.18, (1.7, 1.45, H - 0.09), PM['bp'], seg=8, bev=0)
+pend = K.lathe('pendant_shade', [(0.0, 0.0), (0.05, 0.0), (0.12, -0.05), (0.2, -0.13), (0.198, -0.134), (0.118, -0.054), (0.0, -0.004)], (1.7, 1.45, H - 0.18), PM['bp_satin'])
+K.cyl('pendant_bulb', 0.04, 0.05, (1.7, 1.45, H - 0.27), K.mat_plain('bulb_off', (0.9, 0.9, 0.88), rough=0.2, transmission=0.6), seg=16, bev=0)
+
+# ================================================================= density pass 2 (zone by zone against the tutorial's frames)
+RND = P.R
+# desk, behind the monitors: the white drawer unit, file holders at both ends, a pen cup
+P.desk_drawers((1.69, 3.12, DZ), 0, PM, scale=0.78)
+P.file_holder((0.97, 3.02, DZ), 6, PM, color=(0.2, 0.3, 0.55)); P.file_holder((1.06, 3.02, DZ), 6, PM)
+P.file_holder((2.55, 3.07, DZ), -4, PM, color=(0.12, 0.12, 0.13))
+P.pen_cup((1.22, 2.98, DZ), PM)
+# desk, the working surface: papers under the keyboard, snack packets, small boxes, a phone, a USB stick, a charger and
+# its cable, a coiled cable, sticky notes, scissors, a green bowl, a document tray at the corner
+P.paper_stack((1.86, 2.62, DZ), 5, PM, rz=-8, size=(0.3, 0.21))
+for (x, y, rz_, row) in ((2.64, 2.56, 25, 0), (2.8, 2.78, -40, 4), (1.52, 2.57, 70, 2), (2.95, 2.62, 10, 5)):
+    P.snack_packet((x, y, DZ), rz_, row)
+for (x, y, rz_, row, sz) in ((2.9, 2.83, 15, 7, (0.09, 0.07, 0.11)), (2.47, 3.08, -10, 3, (0.12, 0.08, 0.08)), (1.04, 2.63, 30, 1, (0.08, 0.06, 0.05)), (2.2, 3.02, 5, 6, (0.07, 0.05, 0.1))):
+    P.small_box((x, y, DZ), rz_, row, size=sz)
+P.phone((2.42, 2.52, DZ), 18, PM)
+P.usb_stick((2.02, 2.52, DZ), -30, PM); P.usb_stick((2.56, 2.88, DZ), 60, PM)
+P.charger((1.5, 2.66, DZ + 0.003), 10, PM)
+P.cable_coil((2.88, 2.97, DZ), PM)
+P.sticky_notes((2.06, 2.56, DZ), 12); P.sticky_notes((2.7, 2.66, DZ), -20, (0.95, 0.55, 0.65), n=5)
+P.scissors((2.75, 2.53, DZ + 0.002), 70, PM)
+P.bowl((2.97, 2.52, DZ), (0.32, 0.5, 0.28), PM)
+P.doc_tray((2.88, 2.25, DZ), 5, PM)
+# the return: folders, a mug, a packet, a notepad
+for k in range(3):
+    K.cube('clear_folder', (0.24, 0.32, 0.002), (2.5 + k * 0.01, 2.02 + k * 0.012, DZ + 0.001 + k * 0.002), K.mat_plain(f'cfolder{k}', ((0.55, 0.7, 0.85), (0.9, 0.6, 0.5), (0.85, 0.85, 0.6))[k], rough=0.3, transmission=0.0), bev=0.0005, rot=(0, 0, 8 + k * 6))
+P.mug('ret_mug', (2.42, 1.48, DZ), PM, 'ceramic_white')
+P.snack_packet((2.92, 1.42, DZ), -15, 1)
+# the left table and the wire rack: the scanner and router on the rack, a file holder and a bag on the table
+P.scanner((0.31, 2.76, DESK_Z + 0.25 + 0.005), 0, PM)
+P.router((0.2, 2.8, DESK_Z + 0.62 + 0.004), 0, PM)
+P.file_holder((0.5, 2.95, DESK_Z), 90, PM)
+P.small_box((0.5, 2.5, DESK_Z), 10, 2, size=(0.14, 0.1, 0.18))
+# under the desk: a second product box, a magazine box, a paper bag, a shoebox of cables
+K.cube('product_box2', (0.3, 0.2, 0.22), (2.68, 2.92, 0.11), P.label_mat(3), bev=0.003, rot=(0, 0, 6))
+P.file_holder((1.25, 3.0, 0.0), 0, PM, color=(0.85, 0.85, 0.83))
+P.paper_bag((0.98, 2.62, 0), 70, PM, h=0.26)
+P.small_box((2.95, 2.62, 0), -20, 5, size=(0.25, 0.18, 0.15))
+# floor: papers that slid off, a plastic bottle on its side
+P.paper_stack((1.55, 1.35, 0.0), 3, PM, rz=55)
+P.paper_stack((2.0, 2.2, 0.0), 2, PM, rz=-20)
+b_ = P.bottle('floor_bottle', (1.8, 1.7, 0.033), PM, 'white'); b_.rotation_euler = (math.radians(90), 0, math.radians(30))
+# walls: a calendar and a poster on the right wall above the binders, a framed print on the left wall
+P.wall_print('calendar', os.path.join(P.ROOM_ASSETS, 'calendar.png'), (W - 0.006, 3.0, 1.45), (0.3, 0.42), rz=-90, frame=False)
+P.wall_print('poster', os.path.join(P.ROOM_ASSETS, 'poster.png'), (W - 0.006, 2.15, 1.6), (0.36, 0.48), rz=-90, frame=True, M=PM)
+P.wall_print('city_print', os.path.join(P.ROOM_ASSETS, 'print_city.png'), (0.006, 0.95, 1.55), (0.4, 0.3), rz=90, frame=True, M=PM)
 
 # ================================================================= ceiling, aircon, clock
 # the flush ceiling light: a dark drum with a white diffuser ring (as in the tutorial)
@@ -365,7 +406,7 @@ K.cyl('ceil_lamp_diffuser', 0.2, 0.012, (1.8, 1.65, H - 0.093), K.mat_emit('ceil
 K.cyl('ceil_lamp_center', 0.07, 0.016, (1.8, 1.65, H - 0.1), M['black_plastic'], seg=32, bev=0.004)
 K.cube('aircon', (0.82, 0.24, 0.28), (0.13, 2.25, 2.2), M['white_plastic'], bev=0.04, seg=4, rot=(0, 0, 90))
 K.cube('aircon_vent', (0.7, 0.02, 0.05), (0.25, 2.25, 2.1), M['black_plastic'], bev=0.005, rot=(0, 0, 90))
-K.asset('wall_clock', (W - 0.03, 2.75, 1.95), rz=90)
+K.asset('wall_clock', (W - 0.03, 2.75, 2.02), rz=90)
 
 # ================================================================= light
 w = bpy.data.worlds.new('sky'); sc.world = w; w.use_nodes = True
@@ -383,8 +424,14 @@ for (n, loc, rot, size) in (('portal_back', ((BACK_WIN[0] + BACK_WIN[1]) / 2, DE
     try: p.data.cycles.is_portal = True
     except Exception: pass
 # the outside: a pale overcast field behind the glass (the tutorial's windows read as bright fog)
-outside = K.cube('outside', (12, 0.05, 6), (W / 2, DEP + 3.5, 1.5), K.mat_emit('outside_fog', (0.82, 0.86, 0.9), 2.2 if LIGHT != 'night' else 0.0), bev=0)
-outside_l = K.cube('outside_l', (0.05, 12, 6), (-3.0, DEP / 2, 1.5), K.mat_emit('outside_fog_l', (0.82, 0.86, 0.9), 1.6 if LIGHT != 'night' else 0.0), bev=0)
+fog_m = K.mat_emit('outside_fog', (0.82, 0.86, 0.9), 3.6 if LIGHT != 'night' else 0.0)
+if LIGHT != 'night':   # mottled: an overcast street seen through frosted glass is never a flat white
+    fn = fog_m.node_tree.nodes; em = [n for n in fn if n.type == 'EMISSION'][0]
+    nz = fn.new('ShaderNodeTexNoise'); nz.inputs['Scale'].default_value = 1.2; nz.inputs['Detail'].default_value = 4
+    rp = fn.new('ShaderNodeValToRGB'); rp.color_ramp.elements[0].color = (0.32, 0.34, 0.36, 1); rp.color_ramp.elements[1].color = (0.95, 0.97, 1.0, 1)
+    fog_m.node_tree.links.new(nz.outputs['Fac'], rp.inputs[0]); fog_m.node_tree.links.new(rp.outputs[0], em.inputs[0])
+outside = K.cube('outside', (12, 0.05, 6), (W / 2, DEP + 3.5, 1.5), fog_m, bev=0)
+outside_l = K.cube('outside_l', (0.05, 12, 6), (-3.0, DEP / 2, 1.5), K.mat_emit('outside_fog_l', (0.82, 0.86, 0.9), 3.0 if LIGHT != 'night' else 0.0), bev=0)
 for o in (outside, outside_l): o.visible_shadow = False
 if LIGHT in ('sun',):
     sun = K.lamp('SUN', 'sun', (0, 0, 10), 6.0, K.kelvin(5200), rot=(62, 0, 205), size=0.6)
@@ -400,9 +447,9 @@ if '--novol' not in argv and LIGHT != 'night':
 cam = bpy.data.objects.new('cam', bpy.data.cameras.new('cam')); K.link(cam); sc.camera = cam
 cam.data.sensor_width = 36
 CAMS = {   # (location, look-at, lens mm)
-    'wide': ((1.75, 0.07, 1.58), (1.9, 3.3, 1.0), 16),     # square to the window wall, from the door
+    'wide': ((1.74, 0.5, 1.56), (1.74, 3.3, 0.62), 16),     # square to the window wall, from the door
     'desk': ((1.6, 1.55, 1.35), (2.2, 3.0, 0.8), 24),
-    'chair': ((0.9, 0.9, 1.25), (1.6, 2.2, 0.6), 22),
+    'chair': ((1.55, 1.05, 1.15), (0.84, 2.12, 0.72), 28),
 }
 loc, at, lens = CAMS[CAM]
 cam.location = loc; cam.data.lens = lens
@@ -419,10 +466,39 @@ sc.render.resolution_x, sc.render.resolution_y = RES; sc.render.resolution_perce
 sc.view_settings.view_transform = 'AgX'
 try: sc.view_settings.look = 'AgX - Medium High Contrast'
 except TypeError: pass
-sc.view_settings.exposure = float(opt('--exposure', '0.45'))
+sc.view_settings.exposure = float(opt('--exposure', '0.1'))
 sc.render.image_settings.file_format = 'PNG'; sc.render.filepath = OUT
 if opt('--blend'): bpy.ops.wm.save_as_mainfile(filepath=opt('--blend'))
-if opt('--anim'):
+if opt('--film'):
+    # the tutorial's film language: a handheld wide push, a slow slide across the desk, a close drift past the toys
+    SHOTS = [   # (frames, cam from, cam to, look from, look to, lens, f-stop or None, focus point)
+        (96, (1.74, 0.5, 1.56), (1.62, 1.0, 1.5), (1.74, 3.3, 0.62), (1.8, 3.3, 0.68), 16, None, None),
+        (72, (1.78, 2.28, 1.0), (2.12, 2.33, 0.98), (2.0, 2.95, 0.84), (2.38, 2.95, 0.86), 28, 2.8, (2.2, 2.7, 0.78)),
+        (72, (2.2, 2.3, 1.22), (2.34, 2.36, 1.16), (2.72, 3.05, 1.08), (2.76, 3.05, 1.06), 24, 4.0, (2.6, 2.98, 1.0)),
+    ]
+    sc.frame_start = 1; sc.frame_end = sum(sh[0] for sh in SHOTS); sc.render.fps = 24
+    sc.render.use_overwrite = False; sc.render.use_placeholder = True        # resumable: rerun to fill the gaps
+    focus = bpy.data.objects.new('focus', None); K.link(focus); cam.data.dof.focus_object = focus
+    f = 1
+    for (n, c0, c1, l0, l1, lens, fstop, fp) in SHOTS:
+        for i in range(n):
+            u = i / max(1, n - 1); e = u * u * (3 - 2 * u) * 0.6 + u * 0.4
+            sway = Vector((math.sin(f * 0.21) * 0.01 + math.sin(f * 0.53) * 0.003, math.sin(f * 0.17) * 0.005, math.sin(f * 0.29 + 1) * 0.007))
+            cam.location = Vector(c0).lerp(Vector(c1), e) + sway * (1.0 if lens < 20 else 0.4)
+            look = Vector(l0).lerp(Vector(l1), e)
+            cam.rotation_euler = (look - cam.location).to_track_quat('-Z', 'Y').to_euler(); cam.rotation_euler.y += math.sin(f * 0.13) * 0.004
+            cam.data.lens = lens; cam.data.dof.use_dof = fstop is not None
+            if fstop: cam.data.dof.aperture_fstop = fstop; focus.location = fp
+            for path in ('location', 'rotation_euler'): cam.keyframe_insert(path, frame=f)
+            cam.data.keyframe_insert('lens', frame=f); cam.data.dof.keyframe_insert('use_dof', frame=f); cam.data.dof.keyframe_insert('aperture_fstop', frame=f)
+            focus.keyframe_insert('location', frame=f)
+            f += 1
+    for fc in (cam.animation_data.action.fcurves if cam.animation_data and hasattr(cam.animation_data.action, 'fcurves') else []):
+        for kp in fc.keyframe_points: kp.interpolation = 'CONSTANT'
+    if opt('--range'): sc.frame_start, sc.frame_end = map(int, opt('--range').split('-'))
+    sc.render.filepath = OUT.rstrip('/') + '/f_'
+    bpy.ops.render.render(animation=True)
+elif opt('--anim'):
     # a handheld walk-in like the tutorial's film: a slow push toward the desk with operator sway (24 fps)
     n = int(opt('--anim')); sc.frame_start, sc.frame_end = 1, n; sc.render.fps = 24
     p0, p1 = Vector(loc), Vector(loc) + Vector((-0.1, 0.55, -0.08)); a0, a1 = Vector(at), Vector(at) + Vector((-0.15, 0, -0.05))

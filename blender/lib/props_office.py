@@ -13,7 +13,8 @@ def _m():
         'bp': K.mat_plain('black_plastic', (0.025, 0.025, 0.027), rough=0.45, bump=0.05, bump_scale=400),
         'bp_satin': K.mat_plain('black_satin', (0.03, 0.03, 0.032), rough=0.32, coat=0.2),
         'screen_off': K.mat_plain('screen_off', (0.008, 0.008, 0.01), rough=0.08, coat=0.8, spec=0.6),
-        'screen_on': K.mat_image_emit('screen_ui', os.path.join(ROOM_ASSETS, 'screen_ui.png'), 1.4),
+        'screen_on': K.mat_image_emit('screen_ui', os.path.join(ROOM_ASSETS, 'screen_ui.png'), 2.2),
+        'screen_code': K.mat_image_emit('screen_code', os.path.join(ROOM_ASSETS, 'screen_code.png'), 2.0),
         'key': K.mat_plain('keycap', (0.035, 0.035, 0.038), rough=0.55, bump=0.05, bump_scale=600),
         'silver': K.mat_plain('silver_alu', (0.62, 0.63, 0.64), rough=0.3, metal=1.0, bump=0.02, bump_scale=300),
         'ceramic_beige': K.mat_plain('ceramic_beige', (0.78, 0.74, 0.66), rough=0.18, coat=0.5),
@@ -36,12 +37,12 @@ def _m():
     }
 
 # ---------------------------------------------------------------- the workstation
-def monitor(name, loc, rz, on, M, size=(0.6, 0.36)):
+def monitor(name, loc, rz, on, M, size=(0.6, 0.36), screen=None):
     g = bpy.data.objects.new(name, None); K.link(g); g.location = loc; g.rotation_euler = Euler((0, 0, math.radians(rz)))
     w, h = size; zc = 0.13 + h / 2 + 0.03
     for o in (K.cube(name + '_bezel', (w, 0.022, h), (0, 0, zc), M['bp_satin'], bev=0.004),
               K.cube(name + '_back', (w * 0.6, 0.04, h * 0.6), (0, 0.03, zc), M['bp'], bev=0.01),
-              K.cube(name + '_screen', (w - 0.016, 0.002, h - 0.022), (0, -0.0115, zc + 0.003), M['screen_on'] if on else M['screen_off'], bev=0),
+              K.cube(name + '_screen', (w - 0.016, 0.002, h - 0.022), (0, -0.0115, zc + 0.003), (screen or M['screen_on']) if on else M['screen_off'], bev=0),
               K.cube(name + '_neck', (0.05, 0.03, zc - 0.02), (0, 0.06, (zc - 0.02) / 2), M['bp'], bev=0.006),
               K.cube(name + '_foot', (0.24, 0.19, 0.012), (0, 0.04, 0.006), M['bp'], bev=0.004)):
         o.parent = g
@@ -110,12 +111,13 @@ def can(loc, M):
 def red_box(loc, rz, M):
     return K.cube('red_box', (0.12, 0.12, 0.09), (loc[0], loc[1], loc[2] + 0.045), M['red_card'], bev=0.003, rot=(0, 0, rz))
 
-def cork_board(loc, rz, M):
+def cork_board(loc, rz, M, size=(0.62, 0.46)):
+    W_, H_ = size
     g = bpy.data.objects.new('cork_board', None); K.link(g); g.location = loc; g.rotation_euler = Euler((math.radians(-8), 0, math.radians(rz)))
-    for o in (K.cube('cork_frame', (0.62, 0.025, 0.46), (0, 0, 0.23), K.mat_tex('frame_wood', 'light_wood', tile=0.4), bev=0.003),
-              K.cube('cork_face', (0.58, 0.026, 0.42), (0, -0.001, 0.23), M['cork'], bev=0)):
+    for o in (K.cube('cork_frame', (W_, 0.025, H_), (0, 0, H_ / 2), K.mat_tex('frame_wood', 'light_wood', tile=0.4), bev=0.003),
+              K.cube('cork_face', (W_ - 0.04, 0.026, H_ - 0.04), (0, -0.001, H_ / 2), M['cork'], bev=0)):
         o.parent = g
-    for (x, z, w, h) in ((-0.17, 0.3, 0.16, 0.2), (0.05, 0.27, 0.18, 0.24), (0.2, 0.33, 0.1, 0.12), (-0.05, 0.1, 0.12, 0.08)):
+    for (x, z, w, h) in ((-0.1, H_ * 0.62, 0.17, 0.24), (0.11, H_ * 0.6, 0.15, 0.3), (-0.08, H_ * 0.22, 0.14, 0.12), (0.12, H_ * 0.2, 0.1, 0.1)):
         p = K.cube('pinned', (w, 0.002, h), (x, -0.015, z), M['paper'], bev=0, rot=(0, R.uniform(-4, 4), 0)); p.parent = g
         pin = K.cyl('pin', 0.004, 0.006, (x, -0.018, z + h / 2 - 0.015), M['can_red'], rot=(90, 0, 0), seg=12, bev=0); pin.parent = g
     return g
@@ -266,15 +268,16 @@ def robot_figure(loc, rz, M):
     for p in P: p.parent = g
     return g
 
-def laptop(loc, rz, M, open_deg=112):
+def laptop(loc, rz, M, open_deg=112, mat=None):
+    body_mat = mat or M['silver']
     """A modern silver laptop, lid open, screen off (a black mirror catching the window)."""
     g = bpy.data.objects.new('laptop', None); K.link(g); g.location = loc; g.rotation_euler = Euler((0, 0, math.radians(rz)))
-    P_ = [K.cube('lap_base', (0.33, 0.23, 0.016), (0, 0, 0.008), M['silver'], bev=0.004, seg=3),
+    P_ = [K.cube('lap_base', (0.34, 0.24, 0.02), (0, 0, 0.01), body_mat, bev=0.004, seg=3),
           K.cube('lap_keys', (0.28, 0.1, 0.002), (0, 0.035, 0.0165), M['key'], bev=0),
           K.cube('lap_pad', (0.11, 0.065, 0.001), (0, -0.065, 0.0162), K.mat_plain('pad', (0.5, 0.51, 0.52), rough=0.25, metal=0.8), bev=0)]
     lid = bpy.data.objects.new('lap_lid', None); K.link(lid); lid.parent = g; lid.location = (0, 0.115, 0.016)
     lid.rotation_euler = Euler((math.radians(-(180 - open_deg)), 0, 0)) if False else Euler((math.radians(open_deg - 90 - 90 + 90), 0, 0))
-    a = K.cube('lap_lid_shell', (0.33, 0.006, 0.22), (0, 0, 0.11), M['silver'], bev=0.003); a.parent = lid
+    a = K.cube('lap_lid_shell', (0.34, 0.008, 0.23), (0, 0, 0.115), body_mat, bev=0.003); a.parent = lid
     b = K.cube('lap_screen', (0.3, 0.001, 0.19), (0, -0.0035, 0.115), M['screen_off'], bev=0); b.parent = lid
     lid.rotation_euler = Euler((math.radians(-(open_deg - 90)), 0, 0))
     for p in P_: p.parent = g
@@ -293,4 +296,99 @@ def architect_lamp(loc, rz, M):
     rod('al_spring', (0.02, 0.012, 0.1), (0.05, 0.02, 0.32), 0.006, M['chrome'])
     shade = K.lathe('al_shade', [(0.0, 0.0), (0.025, 0.0), (0.04, -0.03), (0.075, -0.1), (0.085, -0.16), (0.083, -0.161), (0.072, -0.1), (0.037, -0.03), (0.0, -0.004)], j3, M['bp_satin'], rot=(-35, 0, 0))
     shade.parent = g; K.subsurf(shade, 1)
+    return g
+
+
+# ---------------------------------------------------------------- the density kit: the small things that make a desk lived on
+LABELS = os.path.join(ROOM_ASSETS, 'labels.png')
+def label_mat(row, glossy=False):
+    m = K.mat_image(f'label_{row}_{int(glossy)}', LABELS, axes='xz', rough=0.25 if glossy else 0.5, rows=(row, 8))
+    if glossy: m.node_tree.nodes['Principled BSDF'].inputs['Metallic'].default_value = 0.35
+    return m
+
+def snack_packet(loc, rz, row):
+    """A crinkled foil snack packet lying flat."""
+    o = K.cube('packet', (0.13, 0.19, 0.025), (loc[0], loc[1], loc[2] + 0.012), label_mat(row, True), bev=0, rot=(0, 0, rz))
+    b = o.modifiers.new('r', 'BEVEL'); b.width = 0.011; b.segments = 3; K.subsurf(o, 2)
+    d = o.modifiers.new('crinkle', 'DISPLACE'); t = bpy.data.textures.get('crinkle') or bpy.data.textures.new('crinkle', 'CLOUDS'); t.noise_scale = 0.015; d.texture = t; d.strength = 0.004
+    return o
+
+def small_box(loc, rz, row, size=(0.1, 0.07, 0.12)):
+    return K.cube('small_box', size, (loc[0], loc[1], loc[2] + size[2] / 2), label_mat(row), bev=0.002, rot=(0, 0, rz))
+
+def pen_cup(loc, M):
+    K.lathe('pen_cup', [(0, 0), (0.036, 0), (0.038, 0.1), (0.035, 0.1), (0.033, 0.004), (0, 0.004)], loc, M['gunmetal'])
+    for k in range(7):
+        a = k * 0.9; tilt = R.uniform(6, 16)
+        p = K.cyl('pen', 0.0045, 0.15, (loc[0] + math.cos(a) * 0.012, loc[1] + math.sin(a) * 0.012, loc[2] + 0.08), K.mat_plain(f'pen{k % 4}', ((0.1, 0.2, 0.6), (0.7, 0.1, 0.1), (0.05, 0.05, 0.05), (0.85, 0.85, 0.8))[k % 4], rough=0.35), seg=8, rot=(tilt * math.sin(a), tilt * math.cos(a), 0))
+
+def sticky_notes(loc, rz, color=(0.95, 0.85, 0.3), n=8):
+    return K.cube('sticky', (0.076, 0.076, 0.0008 * n), (loc[0], loc[1], loc[2] + 0.0004 * n), K.mat_plain(f'sticky_{color}', color, rough=0.7), bev=0.0005, rot=(0, 0, rz))
+
+def phone(loc, rz, M):
+    o = K.cube('phone', (0.075, 0.155, 0.008), (loc[0], loc[1], loc[2] + 0.004), M['screen_off'], bev=0.006, rot=(0, 0, rz)); return o
+
+def usb_stick(loc, rz, M):
+    K.cube('usb', (0.018, 0.055, 0.008), (loc[0], loc[1], loc[2] + 0.004), M['bp_satin'], bev=0.002, rot=(0, 0, rz))
+    K.cube('usb_plug', (0.012, 0.012, 0.0045), (loc[0] + 0.03 * math.sin(math.radians(-rz)), loc[1] + 0.03 * math.cos(math.radians(rz)), loc[2] + 0.004), M['silver'], bev=0.0005, rot=(0, 0, rz))
+
+def cable_coil(loc, M, r=0.07):
+    t = K.cyl('coil_base', r, 0.001, loc, M['bp'], seg=8, bev=0); t.hide_render = True
+    for k in range(3):
+        bpy.ops.mesh.primitive_torus_add(major_radius=r - k * 0.006, minor_radius=0.0028, major_segments=36, minor_segments=6, location=(loc[0] + k * 0.004, loc[1], loc[2] + 0.003 + k * 0.004))
+        o = bpy.context.active_object; K.link(o); o.data.materials.append(M['bp'])
+
+def charger(loc, rz, M):
+    K.cube('charger', (0.045, 0.045, 0.028), (loc[0], loc[1], loc[2] + 0.014), M['ceramic_white'], bev=0.006, rot=(0, 0, rz))
+    cable(f'charger_cable', [(loc[0], loc[1], loc[2] + 0.01), (loc[0] + 0.08, loc[1] + 0.05, loc[2] + 0.003), (loc[0] + 0.15, loc[1] - 0.02, loc[2] + 0.003), (loc[0] + 0.2, loc[1] + 0.06, loc[2] + 0.003)], M, r=0.0018)
+
+def scissors(loc, rz, M):
+    K.cube('scissor_blade', (0.012, 0.1, 0.003), (loc[0], loc[1], loc[2] + 0.002), M['chrome'], bev=0.001, rot=(0, 0, rz + 8))
+    K.cube('scissor_blade', (0.012, 0.1, 0.003), (loc[0], loc[1], loc[2] + 0.005), M['chrome'], bev=0.001, rot=(0, 0, rz - 8))
+    K.cube('scissor_handle', (0.05, 0.035, 0.007), (loc[0] - 0.06 * math.sin(math.radians(-rz)), loc[1] - 0.06 * math.cos(math.radians(rz)), loc[2] + 0.004), M['can_red'], bev=0.006, rot=(0, 0, rz))
+
+def bowl(loc, color, M):
+    return K.lathe('bowl', [(0, 0), (0.035, 0), (0.06, 0.05), (0.057, 0.052), (0.032, 0.006), (0, 0.006)], loc, K.mat_plain(f'bowl_{color}', color, rough=0.2, coat=0.6))
+
+def file_holder(loc, rz, M, color=(0.85, 0.85, 0.83)):
+    """A magazine file holder, files and folders standing in it."""
+    g = bpy.data.objects.new('file_holder', None); K.link(g); g.location = loc; g.rotation_euler = Euler((0, 0, math.radians(rz)))
+    m = K.mat_plain(f'holder_{color}', color, rough=0.45)
+    for o in (K.cube('fh_l', (0.003, 0.25, 0.3), (-0.04, 0, 0.15), m, bev=0.001), K.cube('fh_r', (0.003, 0.25, 0.3), (0.04, 0, 0.15), m, bev=0.001),
+              K.cube('fh_b', (0.083, 0.003, 0.3), (0, 0.124, 0.15), m, bev=0.001), K.cube('fh_base', (0.083, 0.25, 0.003), (0, 0, 0.0015), m, bev=0.001)):
+        o.parent = g
+    for k in range(5):
+        f = K.cube('folder', (0.006, 0.23, R.uniform(0.22, 0.29)), (-0.03 + k * 0.015, 0.005, 0.13), K.mat_plain(f'folder{k % 4}', ((0.9, 0.85, 0.5), (0.3, 0.5, 0.75), (0.9, 0.9, 0.88), (0.75, 0.3, 0.3))[k % 4], rough=0.55), bev=0.0005, rot=(R.uniform(-4, 4), 0, 0))
+        f.parent = g
+    return g
+
+def doc_tray(loc, rz, M, levels=2):
+    for k in range(levels):
+        z = loc[2] + k * 0.07
+        K.cube('tray', (0.26, 0.34, 0.006), (loc[0], loc[1], z + 0.003), M['bp'], bev=0.002, rot=(0, 0, rz))
+        for sd in (-1, 1): K.cube('tray_side', (0.004, 0.34, 0.05), (loc[0] + sd * 0.128, loc[1], z + 0.025), M['bp'], bev=0.001, rot=(0, 0, rz))
+        paper_stack((loc[0], loc[1], z + 0.006), R.randint(4, 12), M, rz=rz, size=(0.22, 0.3))
+
+def desk_drawers(loc, rz, M, scale=1.0):
+    """A small white plastic drawer unit (4 drawers) that lives behind the monitors."""
+    sc_ = scale
+    K.cube('dd_body', (0.27 * sc_, 0.34 * sc_, 0.3 * sc_), (loc[0], loc[1], loc[2] + 0.15 * sc_), M['ceramic_white'], bev=0.005, rot=(0, 0, rz))
+    for k in range(4):
+        K.cube('dd_drawer', (0.25 * sc_, 0.004, 0.065 * sc_), (loc[0], loc[1] - 0.171 * sc_, loc[2] + (0.04 + k * 0.072) * sc_), K.mat_plain('dd_front', (0.88, 0.88, 0.86), rough=0.3), bev=0.002, rot=(0, 0, rz))
+        K.cube('dd_pull', (0.06 * sc_, 0.008, 0.01), (loc[0], loc[1] - 0.176 * sc_, loc[2] + (0.055 + k * 0.072) * sc_), M['ceramic_white'], bev=0.003, rot=(0, 0, rz))
+
+def scanner(loc, rz, M):
+    K.cube('scanner', (0.46, 0.3, 0.07), (loc[0], loc[1], loc[2] + 0.035), M['ceramic_white'], bev=0.012, rot=(0, 0, rz))
+    K.cube('scanner_lid_line', (0.44, 0.28, 0.002), (loc[0], loc[1], loc[2] + 0.071), K.mat_plain('scan_grey', (0.55, 0.56, 0.57), rough=0.4), bev=0, rot=(0, 0, rz))
+
+def router(loc, rz, M):
+    K.cube('router', (0.22, 0.14, 0.035), (loc[0], loc[1], loc[2] + 0.018), M['bp_satin'], bev=0.008, rot=(0, 0, rz))
+    for sd in (-1, 1): K.cyl('antenna', 0.005, 0.16, (loc[0] + sd * 0.08, loc[1] + 0.06, loc[2] + 0.11), M['bp'], seg=8, rot=(sd * 10, 0, 0))
+
+def wall_print(name, path, loc, size, rz=0, frame=True, M=None):
+    """A poster / framed print / calendar on a wall (facing -y before rotation)."""
+    g = bpy.data.objects.new(name, None); K.link(g); g.location = loc; g.rotation_euler = Euler((0, 0, math.radians(rz)))
+    img = K.cube(name + '_img', (size[0], 0.004, size[1]), (0, -0.006 if frame else 0, 0), K.mat_image(name + '_mat', path, axes='xz', rough=0.4), bev=0); img.parent = g
+    if frame:
+        f = K.cube(name + '_frame', (size[0] + 0.04, 0.02, size[1] + 0.04), (0, 0.004, 0), M['bp_satin'] if M else None, bev=0.003); f.parent = g
     return g

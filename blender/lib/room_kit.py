@@ -81,11 +81,33 @@ def mat_emit(name, color, strength):
     e = N.new('ShaderNodeEmission'); e.inputs[0].default_value = (*color, 1); e.inputs[1].default_value = strength
     o = N.new('ShaderNodeOutputMaterial'); m.node_tree.links.new(e.outputs[0], o.inputs[0]); return m
 
+def gen_uv(nt, axes='xz', flip_u=False):
+    """UVs for a flat box without a UV map: the object's generated coordinates on two axes (0..1 over its bounds)."""
+    N = nt.nodes; tc = N.new('ShaderNodeTexCoord'); sep = N.new('ShaderNodeSeparateXYZ'); nt.links.new(tc.outputs['Generated'], sep.inputs[0])
+    cmb = N.new('ShaderNodeCombineXYZ'); a, b = axes.upper()
+    if flip_u:
+        inv = N.new('ShaderNodeMath'); inv.operation = 'SUBTRACT'; inv.inputs[0].default_value = 1.0
+        nt.links.new(sep.outputs[a], inv.inputs[1]); nt.links.new(inv.outputs[0], cmb.inputs['X'])
+    else: nt.links.new(sep.outputs[a], cmb.inputs['X'])
+    nt.links.new(sep.outputs[b], cmb.inputs['Y']); return cmb.outputs[0]
+
+def mat_image(name, path, axes='xz', rough=0.5, rows=None, flip_u=False):
+    """A printed surface (poster, calendar, label). rows=(i, n): use row i of an n-row label sheet."""
+    if name in D.materials: return D.materials[name]
+    m = D.materials.new(name); nt, bs, out = _nodes(m); N = nt.nodes
+    uv = gen_uv(nt, axes, flip_u)
+    if rows:
+        mp = N.new('ShaderNodeMapping'); mp.inputs['Scale'].default_value = (1, 1 / rows[1], 1); mp.inputs['Location'].default_value = (0, 1 - (rows[0] + 1) / rows[1], 0)
+        nt.links.new(uv, mp.inputs[0]); uv = mp.outputs[0]
+    t = N.new('ShaderNodeTexImage'); t.image = D.images.load(path, check_existing=True); nt.links.new(uv, t.inputs[0])
+    nt.links.new(t.outputs[0], bs.inputs['Base Color']); bs.inputs['Roughness'].default_value = rough
+    return m
+
 def mat_image_emit(name, path, strength=1.0):
     """A screen: an image as emission (+ a faint glossy glass on top)."""
     if name in D.materials: return D.materials[name]
     m = D.materials.new(name); m.use_nodes = True; nt = m.node_tree; N = nt.nodes; N.clear()
-    t = N.new('ShaderNodeTexImage'); t.image = D.images.load(path, check_existing=True)
+    t = N.new('ShaderNodeTexImage'); t.image = D.images.load(path, check_existing=True); nt.links.new(gen_uv(nt, 'xz'), t.inputs[0])
     e = N.new('ShaderNodeEmission'); e.inputs[1].default_value = strength; nt.links.new(t.outputs[0], e.inputs[0])
     g = N.new('ShaderNodeBsdfGlossy'); g.inputs['Roughness'].default_value = 0.08
     lw = N.new('ShaderNodeLayerWeight'); lw.inputs['Blend'].default_value = 0.08
@@ -124,9 +146,9 @@ def mat_wireglass(name):
 def mat_leather(name='leather_black'):
     """Black leather: low roughness, the CC0 leather grain, plus large soft creases where it's been sat in."""
     if name in D.materials: return D.materials[name]
-    m = mat_tex(name, 'leather', tile=0.35, tint=(0.05, 0.05, 0.055), rough_mul=0.45, rough_add=0.18, normal=0.9)
+    m = mat_tex(name, 'leather', tile=0.35, tint=(0.1, 0.095, 0.09), rough_mul=0.25, rough_add=0.06, normal=0.9)
     nt = m.node_tree; N = nt.nodes; L = nt.links; bs = N['Principled BSDF']
-    bs.inputs['Coat Weight'].default_value = 0.15; bs.inputs['Coat Roughness'].default_value = 0.35
+    bs.inputs['Coat Weight'].default_value = 0.45; bs.inputs['Coat Roughness'].default_value = 0.18
     # creases: stretched noise -> bump, added to the grain normal
     nz = N.new('ShaderNodeTexNoise'); nz.inputs['Scale'].default_value = 6; nz.inputs['Detail'].default_value = 3; nz.inputs['Distortion'].default_value = 2.5
     tc = N.new('ShaderNodeTexCoord'); L.new(tc.outputs['Object'], nz.inputs['Vector'])
@@ -228,3 +250,32 @@ def lamp(kind, name, loc, energy, color, rot=(0, 0, 0), size=0.1, spot=None, ble
     elif kind == 'SUN': l.angle = math.radians(size)
     if kind == 'SPOT': l.spot_size = math.radians(spot or 70); l.spot_blend = blend
     o = D.objects.new(name, l); o.location = loc; o.rotation_euler = Euler([math.radians(a) for a in rot]); link(o, c); return o
+
+
+def cushion(name, size, loc, mat, bulge=0.35, grooves=0, groove_axis='z', groove_depth=0.25, rot=(0, 0, 0), front='-y', c='set'):
+    """A leather cushion: a subdivided box whose front puffs out (more in the middle) and is pulled in along stitched
+    grooves (the tufted channels of an executive chair). bulge and groove_depth are fractions of the cushion depth."""
+    import bmesh
+    me = D.meshes.new(name); bm = bmesh.new(); bmesh.ops.create_cube(bm, size=2.0)
+    bmesh.ops.subdivide_edges(bm, edges=bm.edges[:], cuts=10, use_grid_fill=True)
+    sx, sy, sz = size[0] / 2, size[1] / 2, size[2] / 2
+    for v in bm.verts:
+        x, y, z = v.co   # -1..1
+        # round the box into a pillow
+        k = (1 - x * x) * (1 - z * z) if front in ('-y', '+y') else (1 - x * x) * (1 - y * y)
+        if front in ('-y', '+y'):
+            fy = (y * (1 + bulge * k))
+            if grooves:
+                g = abs(math.cos(((z if groove_axis == 'z' else x) + 1) * math.pi * grooves / 2)) ** 6   # 1 on a groove line
+                fy *= 1 - groove_depth * g * (1 - x * x if groove_axis == 'z' else 1 - z * z) * (1 if y < 0 else 0.4)
+            v.co = (x * sx * (1 - 0.06 * abs(y)), fy * sy, z * sz * (1 - 0.06 * abs(y)))
+        else:   # front = +z (a seat): the top puffs, grooves run front to back
+            fz = z * (1 + bulge * k)
+            if grooves:
+                g = abs(math.cos((x + 1) * math.pi * grooves / 2)) ** 6
+                fz *= 1 - groove_depth * g * (1 - y * y) * (1 if z > 0 else 0.3)
+            v.co = (x * sx * (1 - 0.08 * abs(z)), y * sy * (1 - 0.08 * abs(z)), fz * sz)
+    bm.to_mesh(me); bm.free()
+    o = D.objects.new(name, me); o.location = loc; o.rotation_euler = Euler([math.radians(a) for a in rot]); link(o, c)
+    me.materials.append(mat); subsurf(o, 2)
+    return o
