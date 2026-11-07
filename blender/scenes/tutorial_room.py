@@ -481,15 +481,66 @@ if '--novol' not in argv and LIGHT != 'night':
 # ================================================================= camera
 cam = bpy.data.objects.new('cam', bpy.data.cameras.new('cam')); K.link(cam); sc.camera = cam
 cam.data.sensor_width = 36
-CAMS = {   # (location, look-at, lens mm)
-    'wide': ((1.74, 0.5, 1.56), (1.74, 3.3, 0.62), 16),     # square to the window wall, from the door
-    'desk': ((1.6, 1.55, 1.35), (2.2, 3.0, 0.8), 24),
-    'chair': ((1.55, 1.05, 1.15), (0.84, 2.12, 0.72), 28),
+CAMS = {   # (location, look-at, lens mm, focus point or None, f-stop or None)
+    'wide': ((1.74, 0.5, 1.56), (1.74, 3.3, 0.62), 16, None, None),                       # square to the window wall, from the door
+    'desk': ((1.6, 1.55, 1.35), (2.2, 3.0, 0.8), 24, None, None),
+    'chair': ((1.55, 1.05, 1.15), (0.84, 2.12, 0.72), 28, None, None),
+    # the stills set (2560x1440)
+    'still_room': ((1.1, 0.35, 1.58), (2.0, 3.3, 0.85), 18, (1.9, 2.8, 0.9), 8),         # the room from the doorway
+    'still_desk': ((1.8, 2.0, 1.28), (2.15, 2.78, 0.74), 24, (2.32, 2.6, 0.78), 3.5),     # high over the desk, the mug sharp
+    'still_mug': ((2.05, 2.28, 0.98), (2.42, 2.72, 0.78), 35, (2.32, 2.6, 0.8), 2.0),     # low on the desk: mug, glass, tissue box
+    'still_toys': ((2.3, 2.3, 1.24), (2.78, 3.05, 1.12), 40, (2.74, 2.95, 1.2), 2.4),     # the toys on the tower against the blinds
+    'still_chair': ((2.2, 2.42, 1.22), (0.75, 1.92, 0.72), 22, (0.84, 2.12, 0.8), 4),      # the leather chair from the desk side, the rack, the left window
+    'still_corner': ((2.0, 1.9, 1.5), (3.3, 0.3, 1.0), 20, (3.3, 0.8, 1.0), 6),          # the bookcase, the door, the sofa pile
 }
-loc, at, lens = CAMS[CAM]
+loc, at, lens, fp, fs = CAMS[CAM]
 cam.location = loc; cam.data.lens = lens
 d = Vector(at) - Vector(loc); cam.rotation_euler = d.to_track_quat('-Z', 'Y').to_euler()
+if fs:
+    cam.data.dof.use_dof = True; cam.data.dof.focus_distance = (Vector(fp) - Vector(loc)).length; cam.data.dof.aperture_fstop = fs
 cam.data.clip_start = 0.02
+
+# ================================================================= audit (--audit OUT_DIR): overlaps + an architectural plan, no film render
+if '--audit' in argv:
+    import mathutils
+    adir = opt('--audit'); os.makedirs(adir, exist_ok=True)
+    dg = bpy.context.evaluated_depsgraph_get()
+    SKIP = ('wall', 'floor', 'ceiling', 'skirt', 'outside', 'air', 'sill', 'win_', 'portal', 'mass')
+    boxes = []
+    for o in coll('set').all_objects:
+        if o.type not in ('MESH', 'CURVE') or o.name.startswith(SKIP): continue
+        e = o.evaluated_get(dg); bb = [e.matrix_world @ mathutils.Vector(c) for c in e.bound_box]
+        mn = mathutils.Vector(map(min, *bb)); mx = mathutils.Vector(map(max, *bb))
+        top = o
+        while top.parent: top = top.parent
+        boxes.append((o.name, top.name, mn, mx))
+    hits = []
+    for i in range(len(boxes)):
+        for j in range(i + 1, len(boxes)):
+            a, b = boxes[i], boxes[j]
+            if a[1] == b[1] or a[0].split('_')[0] == b[0].split('_')[0]: continue      # parts of one object
+            ov = [min(a[3][k], b[3][k]) - max(a[2][k], b[2][k]) for k in range(3)]
+            if min(ov) > 0.015: hits.append((ov[0] * ov[1] * ov[2], a[0], b[0], [round(v, 3) for v in ov]))
+    hits.sort(reverse=True)
+    with open(os.path.join(adir, 'overlaps.txt'), 'w') as fh:
+        for h in hits[:80]: fh.write(f"{h[1]:<28} x {h[2]:<28} overlap(m) {h[3]}\n")
+    print('OVERLAPS', len(hits))
+    # the plan: orthographic, straight down, ceiling and lamps hidden, flat even light
+    for o in sc.objects:
+        if o.name.startswith(('ceiling', 'ceil_lamp', 'pendant', 'aircon', 'air')): o.hide_render = True
+    cam.data.type = 'ORTHO'; cam.data.ortho_scale = max(W, DEP) + 0.6; cam.data.dof.use_dof = False
+    cam.location = (W / 2, DEP / 2, 6.0); cam.rotation_euler = (0, 0, 0)
+    sun = K.lamp('SUN', 'plan_sun', (0, 0, 10), 3.0, (1, 1, 1), rot=(0, 0, 0), size=8)
+    sc.render.engine = 'CYCLES'; sc.cycles.samples = 12; sc.cycles.use_denoising = True
+    sc.render.resolution_x = sc.render.resolution_y = 1400; sc.view_settings.exposure = 0
+    sc.render.filepath = os.path.join(adir, 'plan.png'); bpy.ops.render.render(write_still=True)
+    # an isometric of the whole room from above the door corner, front walls hidden
+    for o in sc.objects:
+        if o.name.startswith(('wall_front', 'wall_right')): o.hide_render = True
+    cam.data.ortho_scale = 6.2; cam.location = (W + 3.2, -3.2, 4.6)
+    cam.rotation_euler = (Vector((W / 2, DEP / 2, 0.6)) - cam.location).to_track_quat('-Z', 'Y').to_euler()
+    sc.render.filepath = os.path.join(adir, 'iso.png'); bpy.ops.render.render(write_still=True)
+    raise SystemExit(0)
 
 # ================================================================= render
 sc.render.engine = 'CYCLES'; sc.cycles.device = 'CPU'; sc.cycles.samples = SAMPLES
