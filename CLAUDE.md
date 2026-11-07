@@ -15,6 +15,10 @@ An animated short rendered in a three.js engine (`engine/`), with light baked an
 3. `project.json` lists the scenes. A scene is `engine/scenes/<id>/scene.js` (the intro is `engine/src/shots.js`) plus `scenes/<nn-name>/`.
 4. When the human brings new story material (storyboards, ideas, references, motion words such as "match cut" or "the room transforms around him"), follow `docs/DIRECTOR_GUIDE.md`: read it all, say it back as a beat table, ask only what changes the picture, then build keyframes.
 
+## The director's taste and the style studies
+- Before designing any new frame, read `docs/TASTE_BASELINE.md` (references in `reference/taste/`) and the method in `docs/TUTORIAL_AI_ROOM_BUILD.md`. The bar is an AAA-game frame, never a basic scene.
+- Style studies (PS1 "Last Train", AAA "The Cistern") live in `engine/studies/`, with their own renderers and reusable libraries. See `docs/STUDIES.md`. They never touch the film's locked look.
+
 ## Locked (do not change without being asked)
 - **The render style:** the `LOOK` in `engine/src/post.js`, the lens, grain, letterbox, AgX grade and the post order.
 - **Ivan:** his model, rig and materials, and the acting system (`blender/characters/acting.py`); performances are added, never rewritten.

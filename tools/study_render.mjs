@@ -30,10 +30,12 @@ const port = server.address().port;
 
 const { page, close } = await openPage({ gpu: A.includes('--gpu'), w: W, h: H });
 page.on('console', (m) => { if (m.type() === 'error' || m.type() === 'warning') console.log(`[page ${m.type()}]`, m.text().slice(0, 300)); });
-page.on('pageerror', (e) => console.log('[page error]', e.message));
+page.on('pageerror', (e) => { console.log('[page error]', e.message); if (!pageReady) { console.log('the study failed to load'); process.exit(1); } });
+let pageReady = false;
 const q = opt('query', '');
 await page.goto(`http://localhost:${port}/studies/${study}/index.html?render=1${q ? '&' + q : ''}`);
 await page.waitForFunction(() => window.__ready === true, null, { timeout: 600000 });
+pageReady = true;
 const duration = await page.evaluate(() => window.__duration);
 
 let times;
