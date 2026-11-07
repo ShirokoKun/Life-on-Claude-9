@@ -12,12 +12,12 @@ import { loadNoor, LOOP } from './character_glb.js';
 const Q = new URLSearchParams(location.search);
 const RES = (Q.get('res') || '640x360').split('x').map(Number);
 const ps = createPS1Renderer({ width: RES[0], height: RES[1], container: document.getElementById('stage'),
-  grade: { lift: [0.03, 0.04, 0.045], gain: [0.96, 1.0, 1.02], sat: 0.98, contrast: 1.1 } });
+  grade: { lift: [0.035, 0.045, 0.04], gain: [1.0, 0.985, 0.95], sat: 1.04, contrast: 1.08 } });
 PS1.affine.value = +(Q.get('affine') || 0.15);
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color('#0b0d0a');
-scene.fog = new THREE.Fog('#1e2424', 7, 24);
+scene.fog = new THREE.Fog('#262a22', 6, 22);
 const camera = new THREE.PerspectiveCamera(39, RES[0] / RES[1], 0.05, 60);
 
 // ------------------------------------------------------------------ set + character
@@ -75,16 +75,16 @@ const news = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.012, 0.3), ps1Material
 news.position.set(-6.1, 0.483, -W + 0.27); news.rotation.y = 0.2; scene.add(news);
 
 // ------------------------------------------------------------------ light (warm tubes overhead, a cool night in the shadows)
-const hemi = new THREE.HemisphereLight('#d6dcd6', '#4a5250', 3.0); scene.add(hemi);
+const hemi = new THREE.HemisphereLight('#d9d8c4', '#525548', 3.0); scene.add(hemi);
 const cityFill = new THREE.DirectionalLight('#8fb0e0', 0); cityFill.position.set(-1, 1.2, -4); scene.add(cityFill);      // through the far windows
 const cityFillNear = new THREE.DirectionalLight('#9a8fd0', 0); cityFillNear.position.set(-1, 1.0, 4); scene.add(cityFillNear);
 const tubes = [];
 for (const x of [2.6, -0.4, -3.4, -6.85, -10.2, -13.6]) {
-  const l = new THREE.PointLight('#f2f7f6', 4.8, 8.5, 1.25); l.position.set(x, 1.85, 0); scene.add(l); tubes.push(l);
+  const l = new THREE.PointLight('#fff3e0', 4.6, 8.5, 1.25); l.position.set(x, 1.85, 0); scene.add(l); tubes.push(l);
 }
 const flash = new THREE.PointLight('#ffbf6e', 0, 2.6, 1.6); scene.add(flash);
 // v2: the tube right above her reads as her key: a soft warm pool on the face and shoulders
-const faceKey = new THREE.PointLight('#f4f6f2', 1.8, 2.2, 1.4); faceKey.position.set(SEAT.x + 0.35, 1.95, -0.55); scene.add(faceKey);         // tunnel lamps sweeping her back
+const faceKey = new THREE.PointLight('#fff1d8', 1.6, 2.2, 1.4); faceKey.position.set(SEAT.x + 0.35, 1.95, -0.55); scene.add(faceKey);         // tunnel lamps sweeping her back
 const endGlow = new THREE.PointLight('#ffd79a', 1.2, 3.5, 1.5); endGlow.position.set(-15.0, 1.5, 0); scene.add(endGlow);
 
 // ------------------------------------------------------------------ smoke (dithered pixels; screen-door alpha like the hardware did)
@@ -141,8 +141,27 @@ function updateSmoke(t) {
 }
 
 // ------------------------------------------------------------------ camera: fixed, eye level across the aisle, with the train's sway
-const CAM = { pos: new THREE.Vector3(0.22, 1.1, 0.55), at: new THREE.Vector3(-2.4, 0.95, -1.15) };   // v2: closer, she fills the right third like the reference
-if (Q.has('cam')) { const c = Q.get('cam').split(',').map(Number); CAM.pos.set(c[0], c[1], c[2]); CAM.at.set(c[3], c[4], c[5]); if (c[6]) camera.fov = c[6]; }
+// v3 composition: the camera stands at seated-passenger eye height across the aisle; the aim is SOLVED so her eyes sit
+// on the upper-right thirds intersection (NDC +1/3, +1/3) and the car recedes along the left third
+const THIRD = new THREE.Vector2(+(Q.get('tx') ? +Q.get('tx') : 1 / 3), +(Q.get('ty') ? +Q.get('ty') : 1 / 3));
+const CAMPOS = new THREE.Vector3(...(Q.get('cpos') || '0.7,1.05,0.7').split(',').map(Number));
+camera.fov = +(Q.get('fov') || 38);
+noor.setTime(0); ch.root.updateMatrixWorld(true);
+const EYES = toWorld(noor.mouth(0).add(new THREE.Vector3(0, 0.08, -0.05))).clone();   // between the eyes, from the sampled head
+const CAM = { pos: CAMPOS, at: EYES.clone() };
+{
+  const c = camera.clone(); c.position.copy(CAMPOS); c.aspect = RES[0] / RES[1]; c.updateProjectionMatrix();
+  const at = EYES.clone(), right = new THREE.Vector3(), up = new THREE.Vector3();
+  for (let i = 0; i < 40; i++) {
+    c.lookAt(at); c.updateMatrixWorld(true);
+    const p = EYES.clone().project(c), ex = p.x - THIRD.x, ey = p.y - THIRD.y;
+    if (Math.abs(ex) + Math.abs(ey) < 1e-4) break;
+    right.setFromMatrixColumn(c.matrixWorld, 0); up.setFromMatrixColumn(c.matrixWorld, 1);
+    const d = at.distanceTo(CAMPOS) * Math.tan(THREE.MathUtils.degToRad(c.fov / 2));
+    at.addScaledVector(right, ex * d * c.aspect * 0.9).addScaledVector(up, ey * d * 0.9);
+  }
+  CAM.at.copy(at);
+}
 function updateCamera(t) {
   const w = (2 * Math.PI) / LOOP;
   const sway = Math.sin(t * w * 3) * 0.006 + Math.sin(t * w * 7 + 1) * 0.002;   // periods divide the loop: seamless
@@ -167,8 +186,8 @@ function update(t) {
   for (const { p, off } of passengers) p.setTime(t + off);
   // the elevated stretch: cool city light through the windows, the warm tubes a little lower against it
   const open = set.open || 0;
-  cityFill.intensity = 1.4 * open; cityFillNear.intensity = 0.9 * open;
-  hemi.color.set('#d6dcd6').lerp(new THREE.Color('#b9c6d6'), open * 0.5);
+  cityFill.intensity = 0.7 * open; cityFillNear.intensity = 0.45 * open;
+  hemi.color.set('#d9d8c4').lerp(new THREE.Color('#c4c6cc'), open * 0.25);
   updateSmoke(t);
   updateCamera(t);
 }
