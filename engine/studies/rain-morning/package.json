@@ -1,0 +1,27 @@
+{
+  "name": "room-at-dawn",
+  "version": "1.0.0",
+  "description": "A photoreal bedroom at dawn, built entirely from code in three.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "shot": "node tools/shot.mjs",
+    "bake": "node tools/shot.mjs --bake 256",
+    "film": "node tools/film.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "n8ao": "^2.0.1",
+    "three": "^0.187.0",
+    "three-mesh-bvh": "^0.9.18"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^25.17.0",
+    "vite": "^8.3.8"
+  },
+  "private": true,
+  "type": "module"
+}

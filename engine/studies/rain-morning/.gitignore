@@ -1,0 +1,5 @@
+node_modules/
+shots/
+out/
+# the dawn bake is a copy of reference/external/room-at-dawn/public/bake/gi.bin until this study has its own
+public/bake/gi.bin
