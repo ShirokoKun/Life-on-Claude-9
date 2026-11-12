@@ -223,7 +223,7 @@ void main(){
     if (throughWall && t > tc && p.y < rimY && length(p.xz) < 0.0432) continue;
     float d = steam(p); if (d < 0.002) continue;
     float sigma = d * uDensity;
-    vec3 Ls = uSunCol * sunShadow(p, 1.0) * phase + skyRad(-uWinN) * 0.06;
+    vec3 Ls = uSunCol * sunShadow(p, 1.0) * phase + vec3(0.30, 0.27, 0.24) * 0.05;
     #ifdef DBG_STEAM
     Ls = vec3(0.5);
     #endif
