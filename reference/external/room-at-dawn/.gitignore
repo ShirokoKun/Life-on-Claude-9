@@ -1,0 +1,9 @@
+node_modules/
+dist/
+refs/
+shots/
+out/
+audio_src/
+*.log
+.claude/
+public/bake/tmp_*.bin
