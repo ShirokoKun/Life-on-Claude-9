@@ -178,7 +178,9 @@ if (isMainThread) {
         const c = dx * nx + dy * ny + dz * nz, cl = -(dx * sr * Math.cos(ph) + dy * sr * Math.sin(ph) + dz * z);
         if (c > 0 && cl > 0 && !(trace(ox, oy, oz, dx, dy, dz) && hit.distance < dist - 1e-3)) {
           const g = c * cl * 4 * Math.PI * R * R / t2 * INV_PI, LL = Wd.lamp.L;
-          L[0] += tr * LL[0] * g; L[1] += tg * LL[1] * g; L[2] += tb * LL[2] * g;
+          // firefly clamp: a bounce point a few cm from the bulb (inside the shade) would otherwise add rare huge values
+          const cap = d === 0 ? 1e9 : 0.6;
+          L[0] += Math.min(cap, tr * LL[0] * g); L[1] += Math.min(cap, tg * LL[1] * g); L[2] += Math.min(cap, tb * LL[2] * g);
         }
       }
       // the sun, only after the first bounce (the renderer draws direct sun itself)

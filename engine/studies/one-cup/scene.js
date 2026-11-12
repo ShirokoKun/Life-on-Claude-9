@@ -286,7 +286,7 @@ void main(){
   float edge = 1.5 / vSize;
   float disc = smoothstep(1.0, 1.0 - edge * 2.0, r) * (0.82 + 0.18 * smoothstep(0.55, 0.95, r));   // a slightly brighter rim, like a real lens
   float area = max(1.0, vSize * vSize * 0.785);
-  vec3 c = vC * disc / area * 60.0;
+  vec3 c = vC * disc / area * (uDust > 0.5 ? 60.0 : 3500.0);
   if (uDust > 0.5) c *= uSunCol * sunShadow(vW, 1.0) * 0.6;
   gl_FragColor = vec4(c, 1.0);
 }`;

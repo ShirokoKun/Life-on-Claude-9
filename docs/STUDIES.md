@@ -243,3 +243,30 @@ draught, so the stripes breathe; the camera makes one slow push-in (50 mm, f/2.2
   Forward-only scattering made it invisible in side light. Skipping empty samples cheaply halved its cost.
 - **Long accumulations need the page to stay responsive:** finish and yield after each sub-frame, and give the
   screenshot no timeout.
+
+## One Cup (`engine/studies/one-cup/`): five worlds, one frame, match cuts
+
+**The idea (the director's):** the cup stays; the world around it changes, cut on the same frame, faster and
+faster. One cup, one day: dawn through the blind (the approved First Light look) → rain, late morning → the room
+(the tutorial room's desk corner: grey-green wall, bright venetian blind, the monitor) → golden hour through a
+mullioned window → night, a desk lamp and the city out of focus. Cuts at 3.0, 5.0, 6.4, 7.5 s, then night holds and
+fades (10 s). The coffee is a little lower and the steam a little weaker each time. The void/float ending was
+built and cut at the director's request.
+
+**How:** `worlds.js` describes each world as data (set, lights, coffee level, steam); `tools/bake_one_cup.mjs --world`
+bakes it (window portal + rectangles + a sphere lamp + sun bounce); `scene.js` renders the cut with one camera move
+across all worlds (a 50 mm push, f/2), live sun and lamp highlights, rain on the glass, CoC-sized city bokeh, sunlit
+dust, and the grade adds **halation**: a thin red-orange bleed hugging bright edges (film's red layer catching light
+scattered back from the base), separate from the wider glow. `tools/one_cup_finish.sh` cuts a recorded ambience per
+world and lands a real cup-on-table sound on every cut.
+
+**Lessons:**
+- **Worker threads do not inherit the command line.** Every world was silently baked with dawn's geometry and lights
+  until the world name went in through `workerData`. Check a bake by printing average light per part.
+- **A surface a few cm from a small bright light makes fireflies** (the lampshade's inside). Clamp bounce
+  contributions from it; direct light stays unclamped.
+- **Backlit interiors need the rest of the room:** a back wall with a window behind the cup leaves the cup's front
+  black unless the walls behind the camera and the ceiling exist to bounce the light. A simple shell fixed it, with
+  real light, no fake fill.
+- **Keep background elements inside the frame:** check where the frame's top edge meets the back wall before placing
+  the window, the monitor or the city.

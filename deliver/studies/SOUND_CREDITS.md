@@ -27,3 +27,17 @@ We use a 10 s excerpt with fades.
 |---|---|---|---|
 | "Dawnchorus-uk.ogg", dawn chorus in Shipton Gorge, West Dorset, UK | Silas S. Brown | Public domain | https://commons.wikimedia.org/wiki/File:Dawnchorus-uk.ogg |
 | "Rustling leaves" | Gravity Sound | CC BY 4.0 | https://commons.wikimedia.org/wiki/File:Rustling_leaves_(Gravity_Sound).wav |
+
+## One Cup (`deliver/studies/one-cup/`)
+
+Each world has its own recorded ambience, cut hard with the picture; every cut lands on a real cup being set down.
+All Red Library recordings are CC0 (https://creativecommons.org/publicdomain/zero/1.0/), from archive.org.
+
+| World / use | Recording | Source |
+|---|---|---|
+| Dawn | room-at-dawn's ambience: dawn chorus (Silas S. Brown, public domain) + "Rustling leaves" (Gravity Sound, CC BY 4.0) | see First Light above |
+| Rain | R23-33 Raining from Inside | https://archive.org/details/Red_Library_Nature_Rain |
+| The room | R10-03 Noisy Room Tone, with R19-52 Distant Urban Traffic low | https://archive.org/details/Red_Library_Ambience_2 |
+| Golden hour | R04-34 Bird Songs | https://archive.org/details/Red_Library_Animals_Birds |
+| Night | R19-52 Distant Urban Traffic + R10-03 room tone | https://archive.org/details/Red_Library_Ambience_2 |
+| The cuts | R19-11 Set Cup Down on Table (four separate takes) | https://archive.org/details/Red_Library_Foley_Props_2 |

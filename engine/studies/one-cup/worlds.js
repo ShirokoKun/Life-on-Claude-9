@@ -127,7 +127,7 @@ function dawn() {
 function rain() {
   const o = [-0.95, 0.30, 0.03, 0.86], bw = backWall(ZW, o);
   return {
-    id: 'rain', label: 'Rain, late morning', level: 0.68, steam: 300, exposure: 0.62,
+    id: 'rain', label: 'Rain, late morning', level: 0.68, steam: 300, exposure: 0.78,
     sun: null,
     window: { ...bw.portal, mask: 'rain', sky: { horizon: [0.80, 0.85, 0.90], zenith: [0.60, 0.68, 0.80], k: 1.7 }, visible: true },
     rects: [{ center: v3(0.9, 0.35, 0.5), n: N(-1, -0.1, -0.5), u: N(0.5, 0, -1), v: Y.clone(), w: 1.0, h: 0.8, L: [0.10, 0.11, 0.12] }],
@@ -145,7 +145,7 @@ function room() {
   const B = { pitch: 0.026, depth: 0.025, thick: 0.002, tilt: 0.35 };
   const scr = { center: v3(0.34, 0.235, -0.425), n: Z.clone(), u: X.clone(), v: Y.clone(), w: 0.50, h: 0.29, L: [0.42, 0.55, 0.78] };
   return {
-    id: 'room', label: 'The room, afternoon', level: 0.5, steam: 200, exposure: 0.72,
+    id: 'room', label: 'The room, afternoon', level: 0.5, steam: 200, exposure: 0.95,
     sun: null,
     window: { ...bw.portal, mask: 'blind', sky: { horizon: [0.92, 0.93, 0.92], zenith: [0.78, 0.82, 0.90], k: 2.2 }, visible: true },
     blind: B,
@@ -187,8 +187,8 @@ function night() {
   return {
     id: 'night', label: 'Night, the lamp and the city', level: 0.12, steam: 0, exposure: 0.95,
     sun: null,
-    window: { ...bw.portal, mask: 'none', sky: { horizon: [0.30, 0.13, 0.40], zenith: [0.06, 0.10, 0.28], k: 0.55 }, visible: true },
-    lamp: { p: lampP, r: 0.02, L: [1.0 * 520, 0.64 * 520, 0.33 * 520] },
+    window: { ...bw.portal, mask: 'none', sky: { horizon: [0.30, 0.13, 0.40], zenith: [0.06, 0.10, 0.28], k: 0.32 }, visible: true },
+    lamp: { p: lampP, r: 0.02, L: [1.0 * 1300, 0.62 * 1300, 0.30 * 1300] },
     rects: [],
     bokeh: true,
     parts: [
