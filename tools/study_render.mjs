@@ -51,7 +51,7 @@ for (const [f, t] of times) {
   const file = A.includes('--film') ? path.join(out, `f_${String(f).padStart(5, '0')}.png`) : path.join(out, `t${t.toFixed(2)}.png`);
   if (A.includes('--film') && fs.existsSync(file)) continue;
   await page.evaluate((tt) => window.renderAt(tt), t);
-  await page.screenshot({ path: file + '.tmp.png' });
+  await page.screenshot({ path: file + '.tmp.png', timeout: 0 });
   fs.renameSync(file + '.tmp.png', file);
   if (f % 24 === 0 || !A.includes('--film')) console.log(path.relative(ROOT, file), `${((Date.now() - t0) / 1000).toFixed(0)} s`);
 }

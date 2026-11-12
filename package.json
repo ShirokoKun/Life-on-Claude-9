@@ -19,5 +19,9 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "devDependencies": {
+    "three": "^0.170.0",
+    "three-mesh-bvh": "^0.8.3"
   }
 }

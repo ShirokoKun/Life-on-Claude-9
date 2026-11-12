@@ -16,3 +16,14 @@ a browser). Nothing was synthesised.
 PS1 mix: three loops (36 s) over one continuous bed. On each elevated stretch (3–9.5 s of the loop) the tunnel rumble
 and clacks drop and the city fades in. The inhale sits on each drag (2.25 s), the exhale at 4.0 s and the ash tap at
 8.6 s. Limiter at 0.9.
+
+## First Light (`deliver/studies/void-cup/`)
+
+The ambience is room-at-dawn's mix (`reference/external/room-at-dawn/public/audio/ambience.m4a`): two field
+recordings, trimmed, level-matched and band-limited by its author to sound as if heard through a closed window.
+We use a 10 s excerpt with fades.
+
+| Recording | Author | Licence | Source |
+|---|---|---|---|
+| "Dawnchorus-uk.ogg", dawn chorus in Shipton Gorge, West Dorset, UK | Silas S. Brown | Public domain | https://commons.wikimedia.org/wiki/File:Dawnchorus-uk.ogg |
+| "Rustling leaves" | Gravity Sound | CC BY 4.0 | https://commons.wikimedia.org/wiki/File:Rustling_leaves_(Gravity_Sound).wav |

@@ -203,3 +203,43 @@ duplicate that moves on.
   that stretch.
 - The grade is cooler and more neutral: white-cyan tubes, a teal-grey fog. The smoke rises and curls toward the window,
   and the cigarette has a glowing ember that brightens on the drag.
+
+## First Light (`engine/studies/void-cup/`): room-at-dawn's method, applied by us to one object
+
+**Why it exists:** the director asked for proof that the room-at-dawn lessons were learned, not just read: one
+very simple, realistic subject in a black void, rendered with their method in our own code.
+
+**The frame:** a speckled stoneware cup of black coffee on a walnut table. Low dawn sun from the left comes through
+an off-screen Venetian blind, so stripes wrap the cup, the saucer and the table, and slice the steam. Everything
+outside the beam of light falls away to black. **The idle loop:** steam curls up; the blind sways in a faint
+draught, so the stripes breathe; the camera makes one slow push-in (50 mm, f/2.2, keyed focus).
+
+**How it is made (method after room-at-dawn, code ours):**
+| Piece | File | What it does |
+|---|---|---|
+| Shared set | `geo.js` | Lathed cup and saucer (Chaikin-rounded profiles, ≤1.6 mm edges), swept handle, coffee with a meniscus, a graded table grid (4.5 mm cells near the cup). The bake and the renderer both import it, so vertices match one to one |
+| Light bake | `tools/bake_void_cup.mjs` | CPU path tracer (three-mesh-bvh, 4 worker threads). Per vertex: sky through the window opening (portal NEE + cosine sampling, MIS), a dim sunlit wall off-screen right (NEE), sun bounce. Stores irradiance/π plus "how much of the window this point sees" (reflection occlusion). Neighbour denoise and seam weld. 109k vertices |
+| Live sun | `scene.js` | Direct sun is **not** baked: a 2048² shadow map of the real slat geometry is re-rendered every sub-frame, with the sun jittered inside its disc (0.0055 rad), so stripe edges get true penumbrae and can sway |
+| Reflections | `scene.js` (`windowEnv`) | One GGX importance sample per pixel per sub-frame against an analytic window: dawn sky cut by the exact slat profile (solved in closed form), plus the soft wall on the right |
+| Steam | `scene.js` (`steam`) | 30-step ray march through a box above the cup: thin sheets from the ridge of warped noise, lit by the same shadow map (so the blind stripes cut through it), two-lobe phase function. The cup wall hides it analytically |
+| Accumulation | `scene.js` (`renderFrame`) | N sub-frames per frame on R2 low-discrepancy sequences: pixel jitter (anti-aliasing), thin-lens aperture with a sheared projection (depth of field), time across a 180° shutter (motion blur), sun disc (soft shadows), GGX and steam random numbers |
+| Grade | `scene.js` (`FINAL_FS`) | room-at-dawn's Uchimura filmic curve, luminance/per-channel blend, saturated highlights rolled to white; tonal tints, vignette in light, small quarter-res bloom, grain |
+| Finish | `tools/void_cup_finish.sh` | 24 fps H.264 plus the recorded dawn ambience |
+
+**Debug switches** (URL query): `spp=`, `dbg=1` (flat grey albedo, to read the light alone), `dbgsteam=1`
+(flat-lit steam, to read its shape), `nosteam=1`, `steam=<density>`, `exp=<exposure>`.
+
+**Lessons (they cost a render each, keep them):**
+- **Check triangle winding against the normals before the first render.** The lathes were wound inside out, the
+  renderer culled the outer wall, and the cup rendered black. Now a one-liner compares `computeVertexNormals()`
+  with the authored normals for every part.
+- **A grazing sun needs slope-scaled shadow bias**, or the table gets long acne bands. Treat points outside the
+  shadow map as unlit (the wall around the window blocks them) or a bright strip leaks in at the edge.
+- **Debug the light on flat grey first** (`dbg=1`): it showed backlighting, acne and the leak in one picture.
+- **Side light, not backlight, for a light-coloured subject on a dark void.** Then give the shadow side a motivated
+  bounce (the sunlit wall off-screen) so the form reads. Don't add fill from nowhere.
+- **Grain parallel to the stripes.** Wood grain crossing the blind stripes made plaid.
+- **Steam:** it reads as filaments only when the density is the ridge of warped noise, not a threshold of it.
+  Forward-only scattering made it invisible in side light. Skipping empty samples cheaply halved its cost.
+- **Long accumulations need the page to stay responsive:** finish and yield after each sub-frame, and give the
+  screenshot no timeout.
